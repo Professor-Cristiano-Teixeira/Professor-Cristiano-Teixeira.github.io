@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 • MVC + Entrega 2 • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c;
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d;
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+    body{ background: var(--bg-soft); }
+
+    /* Navbar vermelha */
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    /* Botões cinza */
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+
+    .card{ border:0; box-shadow: var(--card-shadow); }
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+
+    .small-muted{ color:#6b7280; }
+
+    /* Offcanvas */
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    /* Quiz */
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    /* Checklist */
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    /* Acessibilidade */
+    a:focus, button:focus, input:focus, select:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background: #fff; border: 1px solid rgba(15,23,42,.08); border-left: 6px solid var(--brand-red); border-radius: 14px; padding: 1rem; }
+    .pill{ display:inline-block; padding:.15rem .5rem; border-radius:999px; font-size:.85rem; border:1px solid rgba(15,23,42,.12); background:#fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html"><i class="bi bi-journal-code me-2"></i>PP-DS-NOVA</a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#entrega"><i class="bi bi-box-seam me-1"></i>Entrega 2</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 07</a>
+        <a class="btn btn-gray" href="capitulo08.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 08 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 09</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#entrega" data-bs-dismiss="offcanvas"><i class="bi bi-box-seam me-1"></i>Entrega 2</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <!-- 2º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB2">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB2" aria-expanded="true" aria-controls="cB2">
+              <span class="badge badge-bim me-2">2º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB2" class="accordion-collapse collapse show" aria-labelledby="hB2" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo05.html">Cap. 05 — Herança e sobrescrita</a></li>
+                <li><a class="nav-link px-0" href="capitulo06.html">Cap. 06 — Polimorfismo</a></li>
+                <li><a class="nav-link px-0" href="capitulo07.html">Cap. 07 — Abstratas e interfaces</a></li>
+                <li><a class="nav-link px-0" href="capitulo08.html"><strong>Cap. 08</strong> — MVC + Entrega 2</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3º Bimestre (atalho) -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB3" aria-expanded="false" aria-controls="cB3">
+              <span class="badge badge-bim me-2">3º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB3" class="accordion-collapse collapse" aria-labelledby="hB3" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo09.html">Cap. 09 — GUI: formulários e layout</a></li>
+                <li><a class="nav-link px-0" href="capitulo10.html">Cap. 10 — Controles de tela</a></li>
+                <li><a class="nav-link px-0" href="capitulo11.html">Cap. 11 — Painéis, abas, menus</a></li>
+                <li><a class="nav-link px-0" href="capitulo12.html">Cap. 12 — GUI + MVC + Entrega 3</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0"><i class="bi bi-info-circle me-1"></i>Mantenha os arquivos na mesma pasta para os links funcionarem.</p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Header card -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">2º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 08 (100 min/semana)</span>
+              <span class="text-secondary">•</span>
+              <span class="badge text-bg-warning"><i class="bi bi-box-seam me-1"></i>Entrega 2</span>
+            </div>
+            <h1 class="h3 mb-2">MVC (adaptado ao Windows Forms) + Entrega 2</h1>
+            <p class="mb-0 text-secondary">
+              Neste capítulo, você vai organizar o projeto com um <strong>padrão MVC adaptado ao Windows Forms</strong>.
+              A ideia é separar responsabilidades: <strong>Model</strong> (regras/dados), <strong>View</strong> (telas) e <strong>Controller</strong> (orquestração).
+              Ao final, você fará a <strong>Entrega 2</strong>, integrando Produtos + Venda Simples + Relatórios, usando o padrão.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#entrega"><i class="bi bi-box-seam me-1"></i>Entrega 2</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objetivos / Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Explicar o papel de <strong>Model, View e Controller</strong>.</li>
+              <li>Aplicar MVC em WinForms (sem frameworks): o Controller recebe entradas da View e chama Services/Models.</li>
+              <li>Criar controllers reais: <code>ProdutoController</code> e <code>VendaController</code>.</li>
+              <li>Criar <strong>ViewModels</strong> simples para o DataGridView e para ComboBox (evitar vazamento de detalhes).</li>
+              <li>Concluir a <strong>Entrega 2</strong> com critérios claros e evidências.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Capítulos 05–07 concluídos (herança, polimorfismo, abstratas/interfaces)</li>
+              <li>Projeto organizado por pastas: Models/Data/Services/Views/Utils</li>
+              <li><code>FrmMenu</code>, <code>FrmProdutos</code> e <code>FrmVendaSimples</code> funcionando</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Importante</div>
+              <div class="small text-secondary">MVC aqui é “adaptado”: WinForms não é MVC nativo. Vamos aplicar o princípio de separação de responsabilidades.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — MVC e refatoração guiada</div>
+              <ol class="mb-0 small">
+                <li>O que é MVC e como aplicar em WinForms</li>
+                <li>Criar pasta <code>Controllers</code> e <code>ViewModels</code></li>
+                <li>ProdutoController: listar, cadastrar por tipo, manter preço/estoque, etiqueta</li>
+                <li>VendaController: simular venda e gerar cupom</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — Integração + Entrega 2</div>
+              <ol class="mb-0 small">
+                <li>Refatorar Views para dependerem de Controllers (não do Service direto)</li>
+                <li>Relatório (estoque baixo e/ou resumo por tipo)</li>
+                <li>Checklist e evidências da entrega</li>
+                <li>Questionário + fechamento do bimestre</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (MVC em poucas palavras)</h2>
+
+        <h3 class="h5 mt-4">1.1 O que é MVC?</h3>
+        <p>
+          <strong>MVC</strong> é um padrão de organização de software que separa responsabilidades:
+          <span class="pill"><strong>Model</strong></span> (dados + regras),
+          <span class="pill"><strong>View</strong></span> (interface) e
+          <span class="pill"><strong>Controller</strong></span> (coordena ações).
+        </p>
+        <p>
+          Em WinForms, a tela (Form) normalmente mistura tudo. O objetivo do MVC aqui é reduzir essa mistura:
+          a View deve só capturar entradas e exibir saídas; o Controller decide o que fazer; e o Model/Service concentra regras.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 Como fica no nosso projeto?</h3>
+        <ul>
+          <li><strong>Models</strong>: <code>Produto</code> (abstrato), <code>Lanche</code>, <code>Bebida</code>, interfaces.</li>
+          <li><strong>Data</strong>: <code>ProdutoRepository</code> (memória) — no futuro vira DAO.</li>
+          <li><strong>Services</strong>: <code>ProdutoService</code> (regras e validações).</li>
+          <li><strong>Controllers</strong>: camada nova, orquestra o que a View pede e prepara dados para a View.</li>
+          <li><strong>ViewModels</strong>: objetos simples para exibição (grid/combobox), evitando “vazar” classe completa na tela.</li>
+          <li><strong>Views</strong>: Forms (Menu, Produtos, Venda, Relatórios) — apenas UI.</li>
+        </ul>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-check2-circle me-1"></i>Sinal de que você está aplicando MVC corretamente</div>
+          <div class="small">Se a View ficou menor e sem regra de negócio (sem validações complexas), e a lógica migrou para Controller/Service.</div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (MVC aplicado)</h2>
+        <p class="text-secondary mb-4">
+          Vamos criar Controllers e ViewModels e refatorar as Views para dependerem deles.
+          Você vai perceber que o Form fica mais simples e o projeto fica pronto para crescer.
+        </p>
+
+        <!-- Step 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Antes de começar</h3>
+          <ol>
+            <li>Abra a solução <code>LanchoneteApp</code>.</li>
+            <li>Garanta que o Cap. 07 foi aplicado (Produto abstrato + interfaces + cadastro por tipo).</li>
+            <li>Crie um backup (ou commit).</li>
+          </ol>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar as pastas <code>Controllers</code> e <code>ViewModels</code></h3>
+          <ol>
+            <li>No projeto, crie as pastas: <code>Controllers</code> e <code>ViewModels</code>.</li>
+            <li>Vamos colocar nelas classes pequenas e focadas.</li>
+          </ol>
+        </div>
+
+        <!-- Step 2: ViewModels -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Criar ViewModels para grid e combo</h3>
+          <p>
+            O DataGridView e o ComboBox não precisam conhecer toda a classe do Model.
+            Vamos criar ViewModels simples para exibição.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>ViewModels/ProdutoListItemVM.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.ViewModels
+{
+    public class ProdutoListItemVM
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = "";
+        public decimal Preco { get; set; }
+        public int Estoque { get; set; }
+        public string Tipo { get; set; } = "";
+        public string Detalhes { get; set; } = "";
+    }
+}
+</code></pre>
+
+          <div class="code-caption mb-2">Arquivo: <code>ViewModels/ProdutoComboItemVM.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.ViewModels
+{
+    public class ProdutoComboItemVM
+    {
+        public int Id { get; set; }
+        public string Texto { get; set; } = "";
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>ViewModel é “modelo para a view”: contém apenas o necessário para mostrar na tela.</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Controllers -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Criar <code>ProdutoController</code></h3>
+          <p>
+            O controller vai expor métodos que a View precisa: listar para grid, listar para combo,
+            criar por tipo, alterar preço, ajustar estoque e gerar etiqueta.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Controllers/ProdutoController.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Collections.Generic;
+using System.Linq;
+using LanchoneteApp.Data;
+using LanchoneteApp.Models;
+using LanchoneteApp.Services;
+using LanchoneteApp.ViewModels;
+
+namespace LanchoneteApp.Controllers
+{
+    public class ProdutoController
+    {
+        private readonly ProdutoRepository _repo;
+        private readonly ProdutoService _service;
+
+        public ProdutoController(ProdutoRepository repo)
+        {
+            _repo = repo;
+            _service = new ProdutoService(_repo);
+        }
+
+        public List&lt;ProdutoListItemVM&gt; ListarParaGrid()
+        {
+            return _repo.GetAll().Select(p =&gt; new ProdutoListItemVM
+            {
+                Id = p.Id,
+                Nome = p.Nome,
+                Preco = p.Preco,
+                Estoque = p.Estoque,
+                Tipo = p.Tipo,
+                Detalhes = p.Detalhes
+            }).ToList();
+        }
+
+        public List&lt;ProdutoComboItemVM&gt; ListarParaCombo()
+        {
+            return _repo.GetAll().Select(p =&gt; new ProdutoComboItemVM
+            {
+                Id = p.Id,
+                Texto = $"{p.Nome} ({p.Tipo})"
+            }).ToList();
+        }
+
+        public void CadastrarPorTipo(string tipo, string? id, string nome, string preco, string estoque, string? tamanho, string? volume, bool alcoolica)
+        {
+            _service.CriarProdutoPorTipo(tipo, id, nome, preco, estoque, tamanho, volume, alcoolica);
+        }
+
+        public void AlterarPreco(int id, string novoPreco) =&gt; _service.AlterarPreco(id, novoPreco);
+        public void ReporEstoque(int id, string qtd) =&gt; _service.ReporEstoque(id, qtd);
+        public void BaixarEstoque(int id, string qtd) =&gt; _service.BaixarEstoque(id, qtd);
+
+        public string Etiqueta(int id)
+        {
+            var p = _repo.FindById(id) ?? throw new InvalidOperationException("Produto não encontrado.");
+            return p.Etiqueta();
+        }
+
+        public object EstoqueBaixo(int limite = 3) =&gt; _service.EstoqueBaixo(limite);
+    }
+}
+</code></pre>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold mb-1"><i class="bi bi-diagram-3 me-1"></i>Observe</div>
+            <div class="small">A View chama o Controller. O Controller chama o Service/Repo e devolve ViewModels prontos para exibir.</div>
+          </div>
+        </div>
+
+        <!-- Step 4: VendaController -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Criar <code>VendaController</code> (simulação + cupom)</h3>
+          <p>
+            Vamos encapsular a lógica da venda simples no controller.
+            Ele vai calcular total e também gerar um “cupom” com etiqueta + quantidade + desconto.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Controllers/VendaController.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Globalization;
+using LanchoneteApp.Data;
+using LanchoneteApp.Services;
+
+namespace LanchoneteApp.Controllers
+{
+    public class VendaController
+    {
+        private readonly ProdutoRepository _repo;
+        private readonly ProdutoService _service;
+
+        public VendaController(ProdutoRepository repo)
+        {
+            _repo = repo;
+            _service = new ProdutoService(_repo);
+        }
+
+        public decimal CalcularTotal(int produtoId, string qtdTexto, string? descontoTexto)
+        {
+            return _service.SimularVenda(produtoId, qtdTexto, descontoTexto);
+        }
+
+        public string GerarCupom(int produtoId, string qtdTexto, string? descontoTexto)
+        {
+            // reaproveita o cálculo
+            decimal total = CalcularTotal(produtoId, qtdTexto, descontoTexto);
+
+            int qtd = int.TryParse(qtdTexto, out var q) ? q : 0;
+
+            decimal desconto = 0;
+            if (!string.IsNullOrWhiteSpace(descontoTexto))
+            {
+                var cultura = new CultureInfo("pt-BR");
+                decimal.TryParse(descontoTexto, NumberStyles.Any, cultura, out desconto);
+            }
+
+            var p = _repo.FindById(produtoId) ?? throw new InvalidOperationException("Produto não encontrado.");
+
+            return $"CUPOM\n" +
+                   $"--------------------------\n" +
+                   $"{p.Etiqueta()}\n" +
+                   $"Qtd: {qtd}\n" +
+                   $"Desconto: {desconto}%\n" +
+                   $"TOTAL: {total:C}\n" +
+                   $"--------------------------";
+        }
+    }
+}
+</code></pre>
+        </div>
+
+        <!-- Step 5: Refatorar FrmProdutos -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — Refatorar <code>FrmProdutos</code> para usar o Controller</h3>
+          <p>
+            Agora a View não deve usar Service diretamente. Ela recebe um repository compartilhado (como antes),
+            cria o Controller e usa apenas métodos do Controller.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmProdutos.cs</code> (estrutura-base com controller)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Windows.Forms;
+using LanchoneteApp.Controllers;
+using LanchoneteApp.Data;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmProdutos : Form
+    {
+        private readonly ProdutoController _controller;
+
+        public FrmProdutos(ProdutoRepository repo)
+        {
+            InitializeComponent();
+            _controller = new ProdutoController(repo);
+
+            dgvProdutos.AutoGenerateColumns = true;
+            dgvProdutos.ReadOnly = true;
+            dgvProdutos.AllowUserToAddRows = false;
+
+            cboTipo.Items.Clear();
+            cboTipo.Items.AddRange(new object[] { "Lanche", "Bebida" });
+            cboTipo.SelectedIndex = 0;
+
+            AtualizarGrid();
+        }
+
+        private int IdSelecionado()
+        {
+            if (dgvProdutos.CurrentRow?.DataBoundItem is dynamic row)
+                return (int)row.Id;
+            throw new InvalidOperationException("Selecione um item no grid.");
+        }
+
+        private void AtualizarGrid()
+        {
+            dgvProdutos.DataSource = null;
+            dgvProdutos.DataSource = _controller.ListarParaGrid();
+        }
+
+        private void btnAdicionar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _controller.CadastrarPorTipo(
+                    cboTipo.SelectedItem?.ToString() ?? "",
+                    txtId.Text,
+                    txtNome.Text,
+                    txtPreco.Text,
+                    txtEstoque.Text,
+                    txtTamanho.Text,
+                    txtVolume.Text,
+                    chkAlcoolica.Checked
+                );
+
+                AtualizarGrid();
+                txtId.Clear(); txtNome.Clear(); txtPreco.Clear(); txtEstoque.Clear();
+                txtTamanho.Clear(); txtVolume.Clear(); chkAlcoolica.Checked = false;
+                txtNome.Focus();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnAlterarPreco_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _controller.AlterarPreco(IdSelecionado(), txtNovoPreco.Text);
+                AtualizarGrid();
+                txtNovoPreco.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnRepor_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _controller.ReporEstoque(IdSelecionado(), txtQtdEstoque.Text);
+                AtualizarGrid();
+                txtQtdEstoque.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnBaixar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _controller.BaixarEstoque(IdSelecionado(), txtQtdEstoque.Text);
+                AtualizarGrid();
+                txtQtdEstoque.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnEtiqueta_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MessageBox.Show(_controller.Etiqueta(IdSelecionado()), "Etiqueta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Nota</div>
+            <div class="small">Como o grid agora recebe ViewModel, o <code>DataBoundItem</code> não é mais <code>Produto</code>. Por isso pegamos o Id e pedimos tudo ao controller.</div>
+          </div>
+        </div>
+
+        <!-- Step 6: Refatorar FrmVendaSimples -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 6 — Refatorar <code>FrmVendaSimples</code> para usar Controller + ViewModel no Combo</h3>
+          <p>
+            A tela de venda não deve acessar o repositório diretamente.
+            Ela usa <code>ProdutoController</code> para carregar o combo e <code>VendaController</code> para calcular/cupom.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmVendaSimples.cs</code> (ideia base)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Linq;
+using System.Windows.Forms;
+using LanchoneteApp.Controllers;
+using LanchoneteApp.Data;
+using LanchoneteApp.ViewModels;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmVendaSimples : Form
+    {
+        private readonly ProdutoController _produtoController;
+        private readonly VendaController _vendaController;
+
+        public FrmVendaSimples(ProdutoRepository repo)
+        {
+            InitializeComponent();
+            _produtoController = new ProdutoController(repo);
+            _vendaController = new VendaController(repo);
+
+            CarregarProdutos();
+            lblResultado.Text = "Total: R$ 0,00";
+        }
+
+        private void CarregarProdutos()
+        {
+            var lista = _produtoController.ListarParaCombo();
+            cboProduto.DataSource = lista;
+            cboProduto.DisplayMember = "Texto";
+            cboProduto.ValueMember = "Id";
+        }
+
+        private int IdSelecionado() =&gt; (int)(cboProduto.SelectedValue ?? 0);
+
+        private void btnCalcular_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int id = IdSelecionado();
+                decimal total = _vendaController.CalcularTotal(id, txtQtd.Text, txtDesconto.Text);
+                lblResultado.Text = $"Total: {total:C}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnCupom_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int id = IdSelecionado();
+                string cupom = _vendaController.GerarCupom(id, txtQtd.Text, txtDesconto.Text);
+                MessageBox.Show(cupom, "Cupom", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Crie o botão <code>btnCupom</code> no Designer (Text: “Gerar Cupom”).</div>
+          </div>
+        </div>
+
+        <!-- Step 7: Menu -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 7 — Conferir <code>FrmMenu</code> (injeção simples do Repository)</h3>
+          <p>
+            O <code>FrmMenu</code> continua sendo o ponto de entrada que mantém um repositório compartilhado.
+            Isso garante consistência entre telas.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmMenu.cs</code> (lembrete do padrão)</div>
+          <pre class="language-csharp"><code class="language-csharp">private readonly ProdutoRepository _repo = new();
+
+public FrmMenu()
+{
+    InitializeComponent();
+    _repo.SeedBasico();
+}
+
+private void menuProdutos_Click(object sender, EventArgs e)
+{
+    new FrmProdutos(_repo).ShowDialog();
+}
+
+private void menuVendaSimples_Click(object sender, EventArgs e)
+{
+    new FrmVendaSimples(_repo).ShowDialog();
+}
+</code></pre>
+
+          <div class="alert alert-success border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+            <div class="small">Views chamam Controllers; Controllers chamam Services/Repo; Models guardam regras. Você aplicou MVC “na prática”.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Entrega 2 -->
+    <div class="card mb-4" id="entrega">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+          <h2 class="h4 section-title mb-0">3) Entrega 2 (Bimestre 2) — MVC + Produtos + Vendas</h2>
+          <span class="badge text-bg-warning"><i class="bi bi-box-seam me-1"></i>Avaliação</span>
+        </div>
+
+        <p class="text-secondary">
+          Esta entrega integra: <strong>herança</strong>, <strong>polimorfismo</strong>, <strong>abstratas/interfaces</strong> e
+          <strong>MVC</strong> (adaptado ao WinForms). O foco é <strong>organização</strong> + <strong>funcionalidade</strong>.
+        </p>
+
+        <h3 class="h6 section-title mb-2">Requisitos mínimos (checklist do professor)</h3>
+        <ul>
+          <li><strong>Estrutura</strong>: pastas <code>Models</code>, <code>Data</code>, <code>Services</code>, <code>Controllers</code>, <code>ViewModels</code>, <code>Views</code>, <code>Utils</code>.</li>
+          <li><strong>Model robusto</strong>: <code>Produto</code> <em>abstrato</em>, com <code>Lanche</code> e <code>Bebida</code>, interfaces <code>IEtiquetavel</code> e <code>IPrecificavel</code>.</li>
+          <li><strong>Controllers</strong> funcionando: <code>ProdutoController</code> e <code>VendaController</code>.</li>
+          <li><strong>Views refatoradas</strong>: <code>FrmProdutos</code> e <code>FrmVendaSimples</code> usam Controllers (não usam Service diretamente).</li>
+          <li><strong>Venda simples</strong>: calcular total + gerar cupom.</li>
+          <li><strong>Relatório</strong>: estoque baixo (ou resumo por tipo) acessível via menu.</li>
+          <li><strong>Repositório compartilhado</strong> entre telas via <code>FrmMenu</code>.</li>
+        </ul>
+
+        <h3 class="h6 section-title mb-2">O que entregar</h3>
+        <ol>
+          <li><strong>.zip</strong> da solução completa.</li>
+          <li><strong>README.txt</strong> com:
+            <ul>
+              <li>Nome, turma, data</li>
+              <li>Arquitetura (pastas) e fluxo MVC (1 parágrafo)</li>
+              <li>Prints/vídeo: produtos, venda, cupom e relatório</li>
+            </ul>
+          </li>
+          <li><strong>Evidências</strong> (prints ou vídeo curto):
+            <ul>
+              <li>Cadastro de Lanche e Bebida</li>
+              <li>Venda simples com cálculo diferente por tipo</li>
+              <li>Botão Cupom</li>
+              <li>Relatório (estoque baixo)</li>
+              <li>Uma validação de erro (ex.: desconto inválido, volume vazio)</li>
+            </ul>
+          </li>
+        </ol>
+
+        <div class="alert alert-warning border" role="alert">
+          <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Erros comuns</div>
+          <div class="small">
+            <ul class="mb-0">
+              <li>Form com validação complexa (deveria estar no Service/Controller)</li>
+              <li>Controller acessando UI diretamente (controller não deve conhecer controles)</li>
+              <li>Mais de uma lista de produtos (quebra consistência)</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="h6 section-title mb-2">Bônus (opcional)</h3>
+        <ul class="mb-0">
+          <li>Implementar <code>Combo</code> (Cap. 07) e incluir no cadastro por tipo.</li>
+          <li>Adicionar um relatório “Resumo por tipo” (total de lanches/bebidas em estoque).</li>
+          <li>Adicionar filtro por nome no grid (controller retorna lista filtrada).</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Atividades extras -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Atividades práticas (opcionais)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Controller de relatório</div>
+              <ul class="small mb-0">
+                <li>Crie <code>RelatorioController</code> com método <code>EstoqueBaixo(limite)</code>.</li>
+                <li>A View do relatório deve chamar o controller (não service direto).</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — ViewModel de cupom</div>
+              <ul class="small mb-0">
+                <li>Crie <code>CupomVM</code> (texto + total + data/hora).</li>
+                <li>VendaController retorna o VM e a View só exibe.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — Testes manuais (roteiro)</div>
+              <ul class="small mb-0">
+                <li>Crie um arquivo <code>TESTES.txt</code> com 8 casos (4 sucesso + 4 erro).</li>
+                <li>Inclua passos e resultado esperado.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">5) Pesquisas complementares</h2>
+        <ul class="mb-0">
+          <li>Qual a diferença entre MVC e MVP em aplicações desktop?</li>
+          <li>O que é ViewModel e como ele se relaciona com MVVM?</li>
+          <li>Por que separar camadas ajuda a testar e manter o sistema?</li>
+          <li>O que é injeção de dependência (DI) e como o <code>FrmMenu</code> faz uma versão “manual” disso?</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — Qual é o papel do Controller no MVC?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Guardar dados no banco.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) Orquestrar ações: receber entradas da View e chamar Model/Service.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) Desenhar a interface.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) Substituir o repositório.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Gerar HTML automaticamente.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — Em MVC, onde devem ficar as regras de negócio (validações e cálculos)?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) No Form (View), para ficar mais rápido.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) No Model/Service (e orquestradas pelo Controller).</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) No arquivo HTML da apostila.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) Somente no banco de dados.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) No Program.cs.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Por que usamos ViewModels no DataGridView/ComboBox?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Para substituir herança.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) Para exibir só o necessário na View e evitar acoplamento com o Model.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Para impedir polimorfismo.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Porque o C# exige.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) Para conectar no MySQL automaticamente.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — Em nosso projeto, qual é a forma correta de compartilhar dados entre telas?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Cada tela cria sua própria lista.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) O <code>FrmMenu</code> mantém um repositório único e passa para as telas.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Colocar tudo em variáveis globais static em qualquer classe.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) Guardar tudo no HTML.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) Criar um novo banco para cada tela.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Qual é uma vantagem prática de aplicar MVC no WinForms?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) O projeto deixa de precisar de classes.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) Facilita manutenção: UI menor, regras centralizadas e evolução mais segura.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) Faz o MySQL aparecer automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) Impede o uso de herança.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) Substitui a necessidade de testes.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">7) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Criei as pastas <code>Controllers</code> e <code>ViewModels</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Criei <code>ProdutoListItemVM</code> e <code>ProdutoComboItemVM</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Implementei <code>ProdutoController</code> para listar/cadastrar/manter/etiqueta.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Implementei <code>VendaController</code> com total e cupom.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Refatorei <code>FrmProdutos</code> para usar Controller (sem Service direto).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Refatorei <code>FrmVendaSimples</code> para usar Controllers e ViewModel no combo.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Garanti repositório único compartilhado via <code>FrmMenu</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Implementei o relatório exigido (estoque baixo ou resumo por tipo).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Preparei o pacote da <strong>Entrega 2</strong> com README + evidências.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck10"><label class="form-check-label" for="ck10">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Fechamento do 2º Bimestre</div>
+          <div class="small">Você terminou o bimestre com arquitetura mais profissional. No Capítulo 09 entraremos em GUI com mais profundidade (layout e formulários).</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 07</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 09</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 08</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap08-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'B', q4:'B', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap08-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>

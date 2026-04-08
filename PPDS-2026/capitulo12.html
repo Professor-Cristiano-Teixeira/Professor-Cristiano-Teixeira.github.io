@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 12 • GUI + MVC + Entrega 3 • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c;
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d;
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+    body{ background: var(--bg-soft); }
+
+    /* Navbar vermelha */
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    /* Botões cinza */
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+    .card{ border:0; box-shadow: var(--card-shadow); }
+
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+
+    .small-muted{ color:#6b7280; }
+
+    /* Offcanvas */
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    a:focus, button:focus, input:focus, select:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background:#fff; border:1px solid rgba(15,23,42,.08); border-left:6px solid var(--brand-red); border-radius:14px; padding:1rem; }
+    .pill{ display:inline-block; padding:.15rem .55rem; border-radius:999px; font-size:.85rem; border:1px solid rgba(15,23,42,.12); background:#fff; }
+
+    .rubrica li{ margin-bottom:.35rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html"><i class="bi bi-journal-code me-2"></i>PP-DS-NOVA</a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#entrega"><i class="bi bi-box-seam me-1"></i>Entrega 3</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 11</a>
+        <a class="btn btn-gray" href="capitulo12.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 12 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 13</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#entrega" data-bs-dismiss="offcanvas"><i class="bi bi-box-seam me-1"></i>Entrega 3</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB3">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB3" aria-expanded="true" aria-controls="cB3">
+              <span class="badge badge-bim me-2">3º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB3" class="accordion-collapse collapse show" aria-labelledby="hB3" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo09.html">Cap. 09 — GUI: formulários e layout</a></li>
+                <li><a class="nav-link px-0" href="capitulo10.html">Cap. 10 — Controles de tela</a></li>
+                <li><a class="nav-link px-0" href="capitulo11.html">Cap. 11 — Painéis, abas, menus</a></li>
+                <li><a class="nav-link px-0" href="capitulo12.html"><strong>Cap. 12</strong> — GUI + MVC + Entrega 3</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB4" aria-expanded="false" aria-controls="cB4">
+              <span class="badge badge-bim me-2">4º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB4" class="accordion-collapse collapse" aria-labelledby="hB4" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo13.html">Cap. 13 — Conexão MySQL</a></li>
+                <li><a class="nav-link px-0" href="capitulo14.html">Cap. 14 — DAO e CRUD</a></li>
+                <li><a class="nav-link px-0" href="capitulo15.html">Cap. 15 — Parâmetros e SQL Injection</a></li>
+                <li><a class="nav-link px-0" href="capitulo16.html">Cap. 16 — Integração final + Entrega 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0"><i class="bi bi-info-circle me-1"></i>Abra os arquivos HTML na mesma pasta para manter a navegação funcionando.</p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Header -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">3º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 12 (100 min/semana)</span>
+              <span class="text-secondary">•</span>
+              <span class="badge text-bg-warning"><i class="bi bi-box-seam me-1"></i>Entrega 3</span>
+            </div>
+            <h1 class="h3 mb-2">GUI + MVC (integração final do 3º bimestre) + Entrega 3</h1>
+            <p class="mb-0 text-secondary">
+              Você já construiu uma base forte: POO, MVC, layout, controles, menus e abas.
+              Agora vamos <strong>integrar tudo</strong> em um sistema coerente: Dashboard com módulos, regras no Service/Controller,
+              UI com feedback, relatórios e exportação. Ao final, você entregará a <strong>Entrega 3</strong>.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#entrega"><i class="bi bi-box-seam me-1"></i>Entrega 3</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Objetivos / Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Consolidar a arquitetura: <strong>Views → Controllers → Services → Repository</strong>.</li>
+              <li>Implementar um <strong>Dashboard</strong> único com abas e navegação completa.</li>
+              <li>Adicionar <strong>relatórios</strong> (estoque baixo + resumo por tipo) com ViewModels.</li>
+              <li>Adicionar <strong>exportação CSV</strong> (SaveFileDialog) sem quebrar MVC.</li>
+              <li>Adicionar <strong>impressão/preview</strong> simples de cupom (PrintPreviewDialog).</li>
+              <li>Finalizar o 3º bimestre com a <strong>Entrega 3</strong> (critérios claros e evidências).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Cap. 08 aplicado (Controllers e ViewModels)</li>
+              <li>Cap. 11 aplicado (Dashboard + abas + Menu/Tool/Status)</li>
+              <li>Cap. 10 aplicado (grid com BindingSource + filtro + AutoComplete)</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Observação</div>
+              <div class="small text-secondary">Esta entrega fecha o 3º bimestre: foque em integração e qualidade do software (UX + arquitetura + evidências).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — Relatórios + Exportação</div>
+              <ol class="mb-0 small">
+                <li>Criar ViewModels de relatório</li>
+                <li>Relatório 1: estoque baixo</li>
+                <li>Relatório 2: resumo por tipo</li>
+                <li>Exportar CSV (SaveFileDialog)</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — Cupom impresso + Entrega</div>
+              <ol class="mb-0 small">
+                <li>PrintPreviewDialog para cupom</li>
+                <li>Amarrar ações no Dashboard (menus/toolbar)</li>
+                <li>Checklist final + evidências</li>
+                <li>Questionário e revisão</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (fechando a arquitetura)</h2>
+
+        <h3 class="h5 mt-4">1.1 Integração: quando “arquitetura” vira produto</h3>
+        <p>
+          Até aqui você aprendeu conceitos e implementou partes. Nesta etapa, o foco é <strong>produto pronto</strong>:
+          telas consistentes, navegação clara, regras centralizadas e relatórios úteis.
+          A arquitetura (MVC) serve para diminuir o acoplamento: a View não faz regra de negócio e não sabe detalhes do repositório.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 Relatórios e ViewModels</h3>
+        <p>
+          Um relatório é, na prática, uma transformação de dados do Model em informação para o usuário.
+          Por isso, é perfeito para <strong>ViewModels</strong>. Você evita expor classes internas e cria colunas prontas para o grid.
+        </p>
+
+        <h3 class="h5 mt-4">1.3 Exportação e impressão (responsabilidades)</h3>
+        <ul>
+          <li>Controller prepara os dados (texto CSV, texto do cupom).</li>
+          <li>View escolhe onde salvar/como imprimir (diálogo e UI).</li>
+          <li>Service continua com regras e validações.</li>
+        </ul>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-check2-circle me-1"></i>Checklist mental</div>
+          <div class="small">Se você consegue trocar a UI (Form) sem mexer em regras e dados, você aplicou MVC de verdade.</div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (implementação final)</h2>
+        <p class="text-secondary mb-4">A seguir, implementações práticas para fechar a Entrega 3 com qualidade.</p>
+
+        <!-- Step 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Antes de começar</h3>
+          <ol>
+            <li>Confira que o projeto abre no <code>FrmDashboard</code> (Cap. 11).</li>
+            <li>Garanta que o repositório é compartilhado nas abas (Produtos e Venda veem os mesmos dados).</li>
+            <li>Faça backup/commit.</li>
+          </ol>
+        </div>
+
+        <!-- Step 1: ViewModels de relatório -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar ViewModels de relatório</h3>
+          <p>Crie a pasta <code>ViewModels</code> (se já não existir) e adicione os VMs abaixo.</p>
+
+          <div class="code-caption mb-2">Arquivo: <code>ViewModels/EstoqueBaixoVM.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.ViewModels
+{
+    public class EstoqueBaixoVM
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = "";
+        public string Tipo { get; set; } = "";
+        public int Estoque { get; set; }
+        public string Detalhes { get; set; } = "";
+    }
+}
+</code></pre>
+
+          <div class="code-caption mb-2">Arquivo: <code>ViewModels/ResumoTipoVM.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.ViewModels
+{
+    public class ResumoTipoVM
+    {
+        public string Tipo { get; set; } = "";
+        public int QuantidadeItens { get; set; }
+        public int EstoqueTotal { get; set; }
+        public decimal ValorEstoque { get; set; }
+    }
+}
+</code></pre>
+        </div>
+
+        <!-- Step 2: Controller de Relatórios -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Criar <code>RelatorioController</code></h3>
+          <p>
+            Vamos centralizar relatórios em um controller próprio.
+            Ele usa o repositório e retorna ViewModels para a View.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Controllers/RelatorioController.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Collections.Generic;
+using System.Linq;
+using LanchoneteApp.Data;
+using LanchoneteApp.ViewModels;
+
+namespace LanchoneteApp.Controllers
+{
+    public class RelatorioController
+    {
+        private readonly ProdutoRepository _repo;
+
+        public RelatorioController(ProdutoRepository repo)
+        {
+            _repo = repo;
+        }
+
+        public List&lt;EstoqueBaixoVM&gt; EstoqueBaixo(int limite = 3)
+        {
+            return _repo.GetAll()
+                .Where(p =&gt; p.Estoque &lt;= limite)
+                .Select(p =&gt; new EstoqueBaixoVM
+                {
+                    Id = p.Id,
+                    Nome = p.Nome,
+                    Tipo = p.Tipo,
+                    Estoque = p.Estoque,
+                    Detalhes = p.Detalhes
+                })
+                .OrderBy(p =&gt; p.Estoque)
+                .ThenBy(p =&gt; p.Nome)
+                .ToList();
+        }
+
+        public List&lt;ResumoTipoVM&gt; ResumoPorTipo()
+        {
+            return _repo.GetAll()
+                .GroupBy(p =&gt; p.Tipo)
+                .Select(g =&gt; new ResumoTipoVM
+                {
+                    Tipo = g.Key,
+                    QuantidadeItens = g.Count(),
+                    EstoqueTotal = g.Sum(x =&gt; x.Estoque),
+                    ValorEstoque = g.Sum(x =&gt; x.Preco * x.Estoque)
+                })
+                .OrderBy(x =&gt; x.Tipo)
+                .ToList();
+        }
+
+        public string ExportarCsvEstoqueBaixo(int limite = 3)
+        {
+            var lista = EstoqueBaixo(limite);
+            var linhas = new List&lt;string&gt; { "Id;Nome;Tipo;Estoque;Detalhes" };
+            linhas.AddRange(lista.Select(x =&gt; $"{x.Id};{x.Nome};{x.Tipo};{x.Estoque};{x.Detalhes}"));
+            return string.Join(Environment.NewLine, linhas);
+        }
+
+        public string ExportarCsvResumoPorTipo()
+        {
+            var lista = ResumoPorTipo();
+            var linhas = new List&lt;string&gt; { "Tipo;QuantidadeItens;EstoqueTotal;ValorEstoque" };
+            linhas.AddRange(lista.Select(x =&gt; $"{x.Tipo};{x.QuantidadeItens};{x.EstoqueTotal};{x.ValorEstoque}"));
+            return string.Join(Environment.NewLine, linhas);
+        }
+    }
+}
+</code></pre>
+        </div>
+
+        <!-- Step 3: Form Relatórios com abas internas -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Criar a View de relatórios (<code>FrmRelatorios</code>)</h3>
+          <p>
+            Crie um Form <code>FrmRelatorios</code> com um <strong>TabControl</strong> interno com duas abas:
+            <span class="pill">Estoque Baixo</span> e <span class="pill">Resumo por Tipo</span>.
+            Em cada aba, coloque um DataGridView e botões Exportar.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmRelatorios.cs</code> (ideia base com controller + BindingSource)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.IO;
+using System.Windows.Forms;
+using LanchoneteApp.Controllers;
+using LanchoneteApp.Data;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmRelatorios : Form
+    {
+        private readonly RelatorioController _controller;
+        private readonly BindingSource _bsBaixo = new();
+        private readonly BindingSource _bsResumo = new();
+
+        public FrmRelatorios(ProdutoRepository repo)
+        {
+            InitializeComponent();
+            _controller = new RelatorioController(repo);
+
+            dgvBaixo.DataSource = _bsBaixo;
+            dgvResumo.DataSource = _bsResumo;
+
+            Atualizar();
+        }
+
+        private void Atualizar()
+        {
+            _bsBaixo.DataSource = _controller.EstoqueBaixo(3);
+            _bsResumo.DataSource = _controller.ResumoPorTipo();
+            _bsBaixo.ResetBindings(false);
+            _bsResumo.ResetBindings(false);
+        }
+
+        private void btnExportarBaixo_Click(object sender, EventArgs e)
+        {
+            string csv = _controller.ExportarCsvEstoqueBaixo(3);
+            SalvarCsv(csv, "estoque_baixo.csv");
+        }
+
+        private void btnExportarResumo_Click(object sender, EventArgs e)
+        {
+            string csv = _controller.ExportarCsvResumoPorTipo();
+            SalvarCsv(csv, "resumo_por_tipo.csv");
+        }
+
+        private void SalvarCsv(string conteudo, string nomePadrao)
+        {
+            using var dlg = new SaveFileDialog();
+            dlg.Filter = "CSV|*.csv";
+            dlg.FileName = nomePadrao;
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                File.WriteAllText(dlg.FileName, conteudo);
+                MessageBox.Show("Arquivo salvo!", "Exportação", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>No Dashboard (Cap. 11), substitua a aba Relatórios para carregar <code>FrmRelatorios</code> no lugar de um relatório único.</div>
+          </div>
+        </div>
+
+        <!-- Step 4: Integrar no Dashboard -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Integrar o <code>FrmRelatorios</code> no Dashboard</h3>
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmDashboard.cs</code> (Load atualizado)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void FrmDashboard_Load(object sender, EventArgs e)
+{
+    _repo.SeedBasico();
+
+    AbrirFormNaAba(new FrmProdutos(_repo), tabProdutos);
+    AbrirFormNaAba(new FrmVendaSimples(_repo), tabVenda);
+    AbrirFormNaAba(new FrmRelatorios(_repo), tabRelatorios);
+}
+</code></pre>
+        </div>
+
+        <!-- Step 5: Impressão do cupom (PrintPreview) -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — PrintPreview do cupom (Venda Simples)</h3>
+          <p>
+            Objetivo: permitir pré-visualizar o cupom e imprimir (opcional). Use <code>PrintDocument</code> + <code>PrintPreviewDialog</code>.
+            A View gera o texto do cupom chamando o Controller (Cap. 08) e imprime.
+          </p>
+
+          <ol>
+            <li>No <code>FrmVendaSimples</code>, adicione no Designer: <code>PrintDocument</code> (printDoc) e <code>PrintPreviewDialog</code> (dlgPreview).</li>
+            <li>Crie um botão: <code>btnImprimir</code> (Text: "Pré-visualizar").</li>
+            <li>Implemente o evento <code>PrintPage</code>.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmVendaSimples.cs</code> (texto do cupom + PrintPage)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System.Drawing;
+using System.Drawing.Printing;
+
+private string _ultimoCupom = "";
+
+private void btnImprimir_Click(object sender, EventArgs e)
+{
+    try
+    {
+        int id = IdSelecionado();
+        string qtd = nudQtd.Value.ToString();
+        _ultimoCupom = _vendaController.GerarCupom(id, qtd, txtDesconto.Text);
+
+        dlgPreview.Document = printDoc;
+        dlgPreview.Width = 900;
+        dlgPreview.Height = 700;
+        dlgPreview.ShowDialog();
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+    }
+}
+
+private void printDoc_PrintPage(object sender, PrintPageEventArgs e)
+{
+    using var fonte = new Font("Consolas", 11);
+    e.Graphics.DrawString(_ultimoCupom, fonte, Brushes.Black, new RectangleF(40, 40, e.MarginBounds.Width, e.MarginBounds.Height));
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Dica</div>
+            <div class="small">Para cupom ficar alinhado, use fonte monoespaçada (Consolas/Courier New). Se a máquina não tiver, use uma fonte padrão.</div>
+          </div>
+        </div>
+
+        <!-- Step 6: Qualidade - mensagens e status -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 6 — Qualidade: mensagens e feedback no Dashboard</h3>
+          <p>
+            Use o StatusStrip para orientar o usuário (ex.: “Produto cadastrado”, “CSV exportado”).
+            Uma boa prática é o Dashboard expor um método <code>SetStatus</code> e as telas chamarem por evento.
+            Como alternativa simples, mostre MessageBox e atualize status apenas por ações do menu.
+          </p>
+
+          <div class="callout">
+            <div class="fw-semibold mb-1"><i class="bi bi-check2-circle me-1"></i>Fechamento técnico</div>
+            <div class="small">Entregar com navegação fluida, relatórios úteis e exportação/preview é o diferencial da Entrega 3.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Entrega 3 -->
+    <div class="card mb-4" id="entrega">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+          <h2 class="h4 section-title mb-0">3) Entrega 3 (Bimestre 3) — GUI + MVC + Relatórios</h2>
+          <span class="badge text-bg-warning"><i class="bi bi-box-seam me-1"></i>Avaliação</span>
+        </div>
+
+        <p class="text-secondary">
+          Esta entrega avalia integração e qualidade: arquitetura (MVC), UI profissional (Dashboard + abas + menus),
+          controles bem configurados, relatórios e exportação/impressão.
+        </p>
+
+        <h3 class="h6 section-title mb-2">Requisitos mínimos (rubrica do professor)</h3>
+        <ul class="rubrica">
+          <li><strong>Dashboard</strong> único com <code>MenuStrip</code>, <code>ToolStrip</code>, <code>StatusStrip</code> e <code>TabControl</code> (Produtos/Venda/Relatórios).</li>
+          <li><strong>Repositório compartilhado</strong> (um só) entre abas (consistência).</li>
+          <li><strong>MVC respeitado</strong>: View chama Controller; regras no Service; sem regra pesada no Form.</li>
+          <li><strong>Produtos</strong>: grid com colunas e destaque de estoque baixo; filtro por nome.</li>
+          <li><strong>Venda</strong>: cálculo com polimorfismo + cupom (MessageBox) + <em>(mínimo)</em> botão de cupom.</li>
+          <li><strong>Relatórios</strong>: estoque baixo e resumo por tipo em grids.</li>
+          <li><strong>Exportação CSV</strong> (SaveFileDialog) para pelo menos 1 relatório.</li>
+          <li><strong>Opcional/Bônus</strong>: PrintPreview do cupom (ou exportar cupom para TXT/CSV).</li>
+        </ul>
+
+        <h3 class="h6 section-title mb-2">O que entregar</h3>
+        <ol>
+          <li><strong>.zip</strong> da solução.</li>
+          <li><strong>README.txt</strong> contendo:
+            <ul>
+              <li>Nome, turma, data.</li>
+              <li>Como executar (1 parágrafo).</li>
+              <li>Estrutura de pastas e fluxo MVC (2–4 linhas).</li>
+              <li>Lista de funcionalidades entregues + bônus.</li>
+            </ul>
+          </li>
+          <li><strong>Evidências</strong> (prints ou vídeo curto) mostrando:
+            <ul>
+              <li>Dashboard com abas e menus</li>
+              <li>Produtos com destaque de estoque baixo e filtro</li>
+              <li>Venda com cupom</li>
+              <li>Relatórios (2 abas) + exportação CSV</li>
+              <li>Um erro tratado (ex.: desconto inválido) com mensagem amigável</li>
+            </ul>
+          </li>
+        </ol>
+
+        <div class="alert alert-warning border" role="alert">
+          <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Erros comuns</div>
+          <div class="small">
+            <ul class="mb-0">
+              <li>Dashboard criando múltiplos repositórios (cada aba com uma lista diferente).</li>
+              <li>Relatório fazendo cálculo no Form (deveria vir do Controller).</li>
+              <li>Exportação “hardcoded” sem SaveFileDialog.</li>
+              <li>Form com lógica de regra de negócio (validação complexa na View).</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="h6 section-title mb-2">Bônus (vale pontos extras)</h3>
+        <ul class="mb-0">
+          <li>PrintPreview do cupom e/ou salvar cupom em TXT.</li>
+          <li>ContextMenuStrip no grid com copiar/etiqueta (Cap. 11).</li>
+          <li>Filtro no ToolStrip (barra de busca global) para produtos.</li>
+          <li>Relatório com gráfico simples (pode ser só barras em Panel desenhado manualmente — opcional).</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">4) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — Em MVC, qual camada deve preparar dados para exibição (ViewModels)?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Controller (ou camada de aplicação), retornando ViewModels para a View.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) A View diretamente, com várias regras e cálculos.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) O StatusStrip.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) O Designer do Visual Studio.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) O PrintPreviewDialog.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>A</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — Qual é a responsabilidade do SaveFileDialog na exportação?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) Calcular o relatório e montar o CSV.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) Perguntar ao usuário onde salvar e qual nome do arquivo usar.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) Atualizar o repositório automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) Pintar linhas do DataGridView.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) Implementar polimorfismo.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Por que ter um repositório único no Dashboard é importante?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Para cada aba ter dados diferentes.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) Para garantir consistência: todas as abas usam os mesmos dados.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Porque o TabControl exige.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Para substituir o Controller.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) Para remover a necessidade de ViewModels.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — O PrintPreviewDialog serve para:
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Pré-visualizar antes de imprimir, usando PrintDocument.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) Exportar CSV automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Alterar cor do sistema.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) Validar entradas de preço.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) Criar abas no Dashboard.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>A</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Onde deve ficar a regra de cálculo da venda (total)?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) Na View (Form), com if/else por tipo.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) No Model/Service (e chamado pelo Controller), usando polimorfismo.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) No StatusStrip.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) Somente no CSV.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) No OpenFileDialog.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Dashboard com abas, menus, toolbar e status funcionando.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Criei ViewModels de relatórios (EstoqueBaixoVM e ResumoTipoVM).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Implementei RelatorioController com EstoqueBaixo e ResumoPorTipo.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Criei FrmRelatorios com duas abas (baixo + resumo) e grids.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Integrei FrmRelatorios na aba Relatórios do Dashboard.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Implementei exportação CSV com SaveFileDialog.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Venda simples gera cupom e (bônus) PrintPreview funciona.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Preparei README + prints/vídeo para a Entrega 3.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Próximo passo</div>
+          <div class="small">No Capítulo 13 iniciaremos o 4º bimestre com <strong>conexão MySQL</strong> e persistência de dados.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 11</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 13</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 12</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap12-quiz';
+    const quizAnswers = { q1:'A', q2:'B', q3:'B', q4:'A', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap12-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>

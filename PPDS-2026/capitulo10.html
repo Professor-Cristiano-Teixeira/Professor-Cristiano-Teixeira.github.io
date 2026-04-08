@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 • Controles de Tela (WinForms) • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c;
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d;
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+    body{ background: var(--bg-soft); }
+
+    /* Navbar vermelha */
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    /* Botões cinza */
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+    .card{ border:0; box-shadow: var(--card-shadow); }
+
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+    .small-muted{ color:#6b7280; }
+
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    a:focus, button:focus, input:focus, select:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background:#fff; border:1px solid rgba(15,23,42,.08); border-left:6px solid var(--brand-red); border-radius:14px; padding:1rem; }
+    .pill{ display:inline-block; padding:.15rem .5rem; border-radius:999px; font-size:.85rem; border:1px solid rgba(15,23,42,.12); background:#fff; }
+
+    .kbd-row code{ margin-right:.35rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html"><i class="bi bi-journal-code me-2"></i>PP-DS-NOVA</a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 09</a>
+        <a class="btn btn-gray" href="capitulo10.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 10 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 11</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#passo-a-passo" data-bs-dismiss="offcanvas"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <!-- 3º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB3">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB3" aria-expanded="true" aria-controls="cB3">
+              <span class="badge badge-bim me-2">3º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB3" class="accordion-collapse collapse show" aria-labelledby="hB3" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo09.html">Cap. 09 — GUI: formulários e layout</a></li>
+                <li><a class="nav-link px-0" href="capitulo10.html"><strong>Cap. 10</strong> — Controles de tela</a></li>
+                <li><a class="nav-link px-0" href="capitulo11.html">Cap. 11 — Painéis, abas, menus</a></li>
+                <li><a class="nav-link px-0" href="capitulo12.html">Cap. 12 — GUI + MVC + Entrega 3</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4º Bimestre (atalho) -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB4" aria-expanded="false" aria-controls="cB4">
+              <span class="badge badge-bim me-2">4º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB4" class="accordion-collapse collapse" aria-labelledby="hB4" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo13.html">Cap. 13 — Conexão MySQL</a></li>
+                <li><a class="nav-link px-0" href="capitulo14.html">Cap. 14 — DAO e CRUD</a></li>
+                <li><a class="nav-link px-0" href="capitulo15.html">Cap. 15 — Parâmetros e SQL Injection</a></li>
+                <li><a class="nav-link px-0" href="capitulo16.html">Cap. 16 — Integração final + Entrega 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0"><i class="bi bi-info-circle me-1"></i>Mantenha os arquivos HTML na mesma pasta para os links funcionarem.</p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Header -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">3º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 10 (100 min/semana)</span>
+            </div>
+            <h1 class="h3 mb-2">Controles de Tela (WinForms): DataGridView, ComboBox, Máscaras e Diálogos</h1>
+            <p class="mb-0 text-secondary">
+              Neste capítulo você vai dominar os controles mais usados do Windows Forms.
+              Vamos melhorar o <code>FrmProdutos</code> e o <code>FrmVendaSimples</code> com:
+              <strong>DataGridView</strong> (colunas, formatação e eventos), <strong>ComboBox</strong> (binding e AutoComplete),
+              <strong>MaskedTextBox/NumericUpDown</strong> (entradas seguras), e diálogos como <strong>OpenFileDialog</strong> e <strong>ColorDialog</strong>.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#atividades"><i class="bi bi-hammer me-1"></i>Atividades</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Objetivos / Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Configurar <strong>DataGridView</strong>: colunas, formatação, seleção e eventos.</li>
+              <li>Usar <strong>BindingSource</strong> para atualizar grid/combos sem “gambiarras”.</li>
+              <li>Configurar <strong>ComboBox</strong> com ViewModel e AutoComplete.</li>
+              <li>Usar <strong>NumericUpDown</strong> e <strong>MaskedTextBox</strong> para entradas mais seguras.</li>
+              <li>Aplicar diálogos (<strong>OpenFileDialog</strong>, <strong>ColorDialog</strong>) para melhorar UX.</li>
+              <li>Implementar filtro por nome e destaque visual para estoque baixo no grid.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Cap. 08 (MVC com Controllers e ViewModels) concluído</li>
+              <li>Cap. 09 (layout com Dock/Anchor/TableLayoutPanel) aplicado</li>
+              <li>Forms: <code>FrmProdutos</code> e <code>FrmVendaSimples</code> funcionando</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Meta do capítulo</div>
+              <div class="small text-secondary">Telas mais rápidas de usar, com menos erro de digitação e grid “inteligente”.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — DataGridView e Binding</div>
+              <ol class="mb-0 small">
+                <li>AutoGenerateColumns vs colunas manuais</li>
+                <li>Formatação (moeda, alinhamento, largura)</li>
+                <li>Eventos: CellFormatting, SelectionChanged, CellDoubleClick</li>
+                <li>BindingSource e atualização eficiente</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — ComboBox, máscaras e diálogos</div>
+              <ol class="mb-0 small">
+                <li>ComboBox com ViewModel e AutoComplete</li>
+                <li>NumericUpDown (quantidade) e MaskedTextBox (preço)</li>
+                <li>Diálogos (OpenFileDialog/ColorDialog) aplicados</li>
+                <li>Atividades + questionário + checklist</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (controles essenciais)</h2>
+
+        <h3 class="h5 mt-4">1.1 DataGridView: o “painel de dados”</h3>
+        <p>
+          O <strong>DataGridView</strong> exibe listas e tabelas. Ele funciona melhor quando você decide:
+          <span class="pill">(A) colunas automáticas</span> (rápido, porém menos controle) ou
+          <span class="pill">(B) colunas manuais</span> (mais trabalho, porém UI mais bonita).
+          Para projetos escolares e profissionais, colunas manuais são recomendadas quando a tela é “final”.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 BindingSource: atualizações sem dor</h3>
+        <p>
+          Em vez de ficar fazendo <code>DataSource = null</code> toda hora, você pode usar um <strong>BindingSource</strong>.
+          Ele “segura” a lista para o grid/combos e você só faz <code>ResetBindings(false)</code> para atualizar.
+        </p>
+
+        <h3 class="h5 mt-4">1.3 ComboBox: escolha guiada</h3>
+        <p>
+          Um <strong>ComboBox</strong> com <code>DisplayMember</code> e <code>ValueMember</code> evita erro de digitação.
+          Com <strong>AutoComplete</strong>, o usuário digita e o controle sugere.
+        </p>
+
+        <h3 class="h5 mt-4">1.4 Entradas seguras</h3>
+        <ul>
+          <li><strong>NumericUpDown</strong>: quantidade sem “texto inválido”.</li>
+          <li><strong>MaskedTextBox</strong>: aplica máscara (ex.: “0000” para ml, “00/00/0000” para data).</li>
+          <li><strong>DateTimePicker</strong>: data/hora sem erro de formato.</li>
+        </ul>
+
+        <h3 class="h5 mt-4">1.5 Diálogos úteis</h3>
+        <ul>
+          <li><strong>OpenFileDialog</strong>: abrir arquivo (ex.: imagem do produto).</li>
+          <li><strong>ColorDialog</strong>: escolher cor (ex.: cor de destaque do sistema).</li>
+          <li><strong>FontDialog</strong>: escolher fonte (opcional).</li>
+        </ul>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-lightbulb me-1"></i>Regra prática</div>
+          <div class="small">Use controles que impedem erro antes de acontecer (NumericUpDown/ComboBox) e deixe validação para regras de negócio no Service/Controller.</div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (aplicando no projeto)</h2>
+        <p class="text-secondary mb-4">Vamos melhorar <code>FrmProdutos</code> e <code>FrmVendaSimples</code> sem quebrar MVC.</p>
+
+        <!-- Step 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Antes de começar</h3>
+          <ol>
+            <li>Execute o projeto e confirme que Produtos e Venda Simples abrem (Cap. 08).</li>
+            <li>Faça backup/commit.</li>
+          </ol>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar colunas manuais no DataGridView (Produtos)</h3>
+          <p>
+            No Designer do <code>FrmProdutos</code>:
+            <strong>(1)</strong> selecione o DataGridView,
+            <strong>(2)</strong> defina <code>AutoGenerateColumns = false</code>,
+            <strong>(3)</strong> clique em “Edit Columns...” e crie colunas com os seguintes <code>DataPropertyName</code>:
+            <code>Id</code>, <code>Nome</code>, <code>Preco</code>, <code>Estoque</code>, <code>Tipo</code>, <code>Detalhes</code>.
+          </p>
+
+          <div class="callout">
+            <div class="fw-semibold mb-1"><i class="bi bi-ui-checks me-1"></i>Configuração recomendada</div>
+            <div class="small">
+              <ul class="mb-0">
+                <li><code>SelectionMode = FullRowSelect</code></li>
+                <li><code>MultiSelect = false</code></li>
+                <li><code>ReadOnly = true</code></li>
+                <li><code>AllowUserToAddRows = false</code></li>
+                <li><code>AutoSizeColumnsMode = Fill</code> (ou DisplayedCells)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="code-caption mb-2 mt-3">Opcional: ajustar formatação por código (moeda e alinhamento)</div>
+          <pre class="language-csharp"><code class="language-csharp">// após InitializeComponent()
+dgvProdutos.Columns["Preco"].DefaultCellStyle.Format = "C";
+dgvProdutos.Columns["Preco"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+dgvProdutos.Columns["Estoque"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+</code></pre>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Usar BindingSource para atualizar o grid com eficiência</h3>
+          <p>
+            No <code>FrmProdutos</code>, crie um <code>BindingSource</code> e use ele como DataSource.
+            Assim, quando atualizar, você troca a lista no BindingSource ou chama <code>ResetBindings</code>.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmProdutos.cs</code> (BindingSource)</div>
+          <pre class="language-csharp"><code class="language-csharp">private readonly BindingSource _bsProdutos = new BindingSource();
+
+private void ConfigurarGrid()
+{
+    dgvProdutos.AutoGenerateColumns = false;
+    dgvProdutos.DataSource = _bsProdutos;
+}
+
+private void AtualizarGrid()
+{
+    _bsProdutos.DataSource = _controller.ListarParaGrid();
+    _bsProdutos.ResetBindings(false);
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Dica: chame <code>ConfigurarGrid()</code> no construtor e depois <code>AtualizarGrid()</code>.</div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Destacar estoque baixo com CellFormatting</h3>
+          <p>
+            Vamos pintar linhas com estoque &lt;= 3 (ex.: amarelo) e estoque 0 (vermelho).
+            Isso melhora muito a leitura do grid.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmProdutos.cs</code> (evento CellFormatting)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void dgvProdutos_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+{
+    if (dgvProdutos.Rows[e.RowIndex].DataBoundItem is dynamic row)
+    {
+        int estoque = (int)row.Estoque;
+        var gridRow = dgvProdutos.Rows[e.RowIndex];
+
+        if (estoque == 0)
+        {
+            gridRow.DefaultCellStyle.BackColor = Color.MistyRose;
+            gridRow.DefaultCellStyle.ForeColor = Color.DarkRed;
+        }
+        else if (estoque &lt;= 3)
+        {
+            gridRow.DefaultCellStyle.BackColor = Color.LemonChiffon;
+            gridRow.DefaultCellStyle.ForeColor = Color.Black;
+        }
+        else
+        {
+            gridRow.DefaultCellStyle.BackColor = Color.White;
+            gridRow.DefaultCellStyle.ForeColor = Color.Black;
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Lembrete</div>
+            <div class="small">Não esqueça de adicionar o <code>using System.Drawing;</code> no topo do arquivo.</div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Filtro por nome (TextBox + botão “Filtrar”)</h3>
+          <p>
+            Vamos adicionar um TextBox <code>txtFiltro</code> e um botão <code>btnFiltrar</code> no topo do painel de formulário.
+            A lógica de filtro deve ficar no Controller (ou no Form de forma mínima).
+          </p>
+
+          <div class="code-caption mb-2">Adicionar no Controller: método de filtro simples</div>
+          <pre class="language-csharp"><code class="language-csharp">// em ProdutoController
+public List&lt;ProdutoListItemVM&gt; FiltrarPorNome(string texto)
+{
+    texto = (texto ?? "").Trim().ToLower();
+    var lista = ListarParaGrid();
+    if (string.IsNullOrWhiteSpace(texto)) return lista;
+
+    return lista.Where(p =&gt; p.Nome.ToLower().Contains(texto)).ToList();
+}
+</code></pre>
+
+          <div class="code-caption mb-2">No Form: usar filtro</div>
+          <pre class="language-csharp"><code class="language-csharp">private void btnFiltrar_Click(object sender, EventArgs e)
+{
+    _bsProdutos.DataSource = _controller.FiltrarPorNome(txtFiltro.Text);
+    _bsProdutos.ResetBindings(false);
+}
+
+private void btnLimparFiltro_Click(object sender, EventArgs e)
+{
+    txtFiltro.Clear();
+    AtualizarGrid();
+}
+</code></pre>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — ComboBox com AutoComplete (Venda Simples)</h3>
+          <p>
+            No <code>FrmVendaSimples</code>, configure o ComboBox assim:
+          </p>
+          <ul>
+            <li><code>DropDownStyle = DropDown</code> (para permitir digitar)</li>
+            <li><code>AutoCompleteMode = SuggestAppend</code></li>
+            <li><code>AutoCompleteSource = ListItems</code></li>
+          </ul>
+
+          <div class="code-caption mb-2">Exemplo (no construtor, após carregar produtos)</div>
+          <pre class="language-csharp"><code class="language-csharp">cboProduto.DropDownStyle = ComboBoxStyle.DropDown;
+cboProduto.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+cboProduto.AutoCompleteSource = AutoCompleteSource.ListItems;
+</code></pre>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 6 — Substituir TextBox de quantidade por NumericUpDown</h3>
+          <p>
+            Troque <code>txtQtd</code> por <code>nudQtd</code> (NumericUpDown) no Designer.
+            Configure <code>Minimum = 1</code>, <code>Maximum = 999</code>, <code>Value = 1</code>.
+            Depois, ajuste a chamada do controller.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmVendaSimples.cs</code> (chamar controller com nudQtd)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void btnCalcular_Click(object sender, EventArgs e)
+{
+    try
+    {
+        int id = IdSelecionado();
+        int qtd = (int)nudQtd.Value;
+        decimal total = _vendaController.CalcularTotal(id, qtd.ToString(), txtDesconto.Text);
+        lblResultado.Text = $"Total: {total:C}";
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Você continua passando string para reaproveitar o método do Controller, mas agora a quantidade nunca será inválida.</div>
+          </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 7 — MaskedTextBox para volume (ml) e desconto (opcional)</h3>
+          <p>
+            Para reduzir erro de digitação, você pode usar MaskedTextBox no volume (4 dígitos) e desconto (3 dígitos).
+            Exemplo de máscara:
+          </p>
+          <ul>
+            <li>Volume (ml): <code>0000</code></li>
+            <li>Desconto (%): <code>000</code></li>
+          </ul>
+          <div class="code-caption mb-2">Exemplo de configuração (Designer ou código)</div>
+          <pre class="language-csharp"><code class="language-csharp">mskVolume.Mask = "0000";
+mskDesconto.Mask = "000";
+</code></pre>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 8 — OpenFileDialog + PictureBox (imagem do produto) (opcional)</h3>
+          <p>
+            Para dar um salto de UX, adicione um <code>PictureBox</code> e um botão “Carregar imagem”.
+            Isso não muda o Model (por enquanto é só visual).
+          </p>
+
+          <div class="code-caption mb-2">Exemplo: abrir imagem e exibir no PictureBox</div>
+          <pre class="language-csharp"><code class="language-csharp">private void btnImagem_Click(object sender, EventArgs e)
+{
+    using var dlg = new OpenFileDialog();
+    dlg.Filter = "Imagens|*.png;*.jpg;*.jpeg;*.bmp";
+    dlg.Title = "Escolha uma imagem";
+
+    if (dlg.ShowDialog() == DialogResult.OK)
+    {
+        picProduto.SizeMode = PictureBoxSizeMode.Zoom;
+        picProduto.Image = Image.FromFile(dlg.FileName);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Cuidados</div>
+            <div class="small">Em projetos reais, você salva caminho/bytes em banco. Aqui é apenas para demonstrar controle e diálogo.</div>
+          </div>
+        </div>
+
+        <!-- Step 9 -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 9 — Testes obrigatórios</h3>
+          <ul>
+            <li>O grid mostra colunas corretas e preço formatado em moeda.</li>
+            <li>Linhas com estoque baixo ficam destacadas (<=3) e estoque 0 em vermelho.</li>
+            <li>Filtro por nome funciona e limpar filtro restaura lista.</li>
+            <li>Venda: ComboBox sugere itens ao digitar (AutoComplete).</li>
+            <li>Venda: quantidade não aceita valores inválidos (NumericUpDown).</li>
+          </ul>
+          <div class="alert alert-success border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+            <div class="small">Interface mais confiável: o usuário erra menos e acha as coisas mais rápido.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Atividades -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">3) Atividades práticas</h2>
+        <p class="text-secondary">Faça <strong>2</strong> atividades (ou todas). O foco é dominar controles e eventos.</p>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Duplo clique no grid</div>
+              <ul class="small mb-0">
+                <li>No evento <code>CellDoubleClick</code>, mostre a etiqueta do item selecionado.</li>
+                <li>Use o Controller para obter a etiqueta pelo Id.</li>
+                <li>Mostre em MessageBox (ou painel lateral).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Ordenação e busca rápida</div>
+              <ul class="small mb-0">
+                <li>Ative ordenação por clique no cabeçalho do grid.</li>
+                <li>Adicione busca rápida no TextBox: filtrar ao digitar (evento TextChanged).</li>
+                <li>Garanta que limpar o texto restaura lista.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — ColorDialog (tema do grid)</div>
+              <ul class="small mb-0">
+                <li>Crie um botão “Cor do destaque”.</li>
+                <li>Use <code>ColorDialog</code> para escolher a cor de estoque baixo.</li>
+                <li>Guarde a cor em uma variável e aplique no CellFormatting.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+        <h3 class="h6 section-title mb-2">Critérios rápidos</h3>
+        <ul class="small mb-0">
+          <li>Uso correto de eventos de controles (CellFormatting, TextChanged, Click).</li>
+          <li>Menos validação manual (NumericUpDown/ComboBox/MaskedTextBox).</li>
+          <li>UI clara: feedback visual e comandos fáceis de encontrar.</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Pesquisas complementares</h2>
+        <ul class="mb-0">
+          <li>O que é <strong>BindingSource</strong> e como ele ajuda a manter o grid atualizado?</li>
+          <li>Qual a diferença entre <strong>CellFormatting</strong> e <strong>RowPrePaint</strong>?</li>
+          <li>Quando usar <strong>ListView</strong> em vez de DataGridView?</li>
+          <li>Boas práticas de <strong>nomenclatura</strong> (prefixos: txt, btn, dgv, cbo, msk, nud).</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — Para que serve o BindingSource?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Para criar botões automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) Para mediar a ligação entre lista e controles (grid/combos) e facilitar atualização.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) Para acessar o banco de dados diretamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) Para validar campos numéricos.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Para substituir o Controller.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — Qual evento é adequado para colorir linhas do DataGridView conforme valor?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) FormClosing</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) CellFormatting</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) KeyPress</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) Shown</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) MouseHover</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Qual controle reduz erro de digitação para quantidade?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) NumericUpDown</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) OpenFileDialog</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Timer</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) PictureBox</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) GroupBox</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>A</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — Para AutoComplete do ComboBox com itens da lista, qual configuração é correta?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) AutoCompleteSource = FileSystem</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) AutoCompleteSource = ListItems e AutoCompleteMode = SuggestAppend</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) AutoGenerateColumns = true</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) SelectionMode = FullRowSelect</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) Dock = Fill</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Para carregar uma imagem do disco e exibir em PictureBox, qual diálogo é usado?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) ColorDialog</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) OpenFileDialog</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) FontDialog</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) FolderBrowserDialog</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) PageSetupDialog</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Configurei colunas manuais no DataGridView (AutoGenerateColumns=false).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Apliquei formatação (moeda/alinhamento) na coluna de preço.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Implementei BindingSource para atualizar o grid corretamente.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Destaquei estoque baixo com CellFormatting (cores diferentes).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Implementei filtro por nome e botão limpar filtro.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Configurei ComboBox com AutoComplete na venda simples.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Troquei quantidade por NumericUpDown para evitar erro de digitação.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Fiz pelo menos 2 atividades práticas e registrei evidências.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Próximo passo</div>
+          <div class="small">No Capítulo 11 vamos trabalhar <strong>Painéis, Abas (TabControl) e Menus</strong> para criar interfaces mais completas.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 09</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 11</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 10</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap10-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'A', q4:'B', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap10-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>

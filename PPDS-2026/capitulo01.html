@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 01 • POO: Classe, Objeto e Instanciação • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c; /* menu vermelho */
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d; /* botões cinza */
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+
+    body{ background: var(--bg-soft); }
+
+    /* Navbar vermelha */
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    /* Botões cinza (padrão da apostila) */
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{
+      padding-top: 6rem; /* compensa navbar fixed */
+      padding-bottom: 1.5rem;
+    }
+
+    .card{ border:0; box-shadow: var(--card-shadow); }
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+
+    .small-muted{ color:#6b7280; }
+
+    /* Offcanvas */
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    /* Code blocks polish */
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    /* Quiz */
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    /* Checklist */
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    /* Acessibilidade: foco visível */
+    a:focus, button:focus, input:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar (fixed + hamburguer/offcanvas) -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>PP-DS-NOVA
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo02.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas Menu (hamburguer) -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-gray" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#top" data-bs-dismiss="offcanvas"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <!-- 1º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB1">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB1" aria-expanded="true" aria-controls="cB1">
+              <span class="badge badge-bim me-2">1º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB1" class="accordion-collapse collapse show" aria-labelledby="hB1" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo01.html"><i class="bi bi-file-earmark-text me-1"></i><strong>Cap. 01</strong> — Classe, objeto e instanciação</a></li>
+                <li><a class="nav-link px-0" href="capitulo02.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 02 — Atributos, métodos e encapsulamento</a></li>
+                <li><a class="nav-link px-0" href="capitulo03.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 03 — Construtores e sobrecargas</a></li>
+                <li><a class="nav-link px-0" href="capitulo04.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 04 — Namespaces + entrega 1</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB2" aria-expanded="false" aria-controls="cB2">
+              <span class="badge badge-bim me-2">2º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB2" class="accordion-collapse collapse" aria-labelledby="hB2" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo05.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 05 — Herança e sobrescrita</a></li>
+                <li><a class="nav-link px-0" href="capitulo06.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 06 — Polimorfismo</a></li>
+                <li><a class="nav-link px-0" href="capitulo07.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 07 — Abstratas e interfaces</a></li>
+                <li><a class="nav-link px-0" href="capitulo08.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 08 — MVC + entrega 2</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB3" aria-expanded="false" aria-controls="cB3">
+              <span class="badge badge-bim me-2">3º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB3" class="accordion-collapse collapse" aria-labelledby="hB3" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo09.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 09 — GUI: formulários e layout</a></li>
+                <li><a class="nav-link px-0" href="capitulo10.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 10 — Controles de tela</a></li>
+                <li><a class="nav-link px-0" href="capitulo11.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 11 — Painéis, abas, menus</a></li>
+                <li><a class="nav-link px-0" href="capitulo12.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 12 — GUI + MVC + entrega 3</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB4" aria-expanded="false" aria-controls="cB4">
+              <span class="badge badge-bim me-2">4º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB4" class="accordion-collapse collapse" aria-labelledby="hB4" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo13.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 13 — Conexão MySQL</a></li>
+                <li><a class="nav-link px-0" href="capitulo14.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 14 — DAO e CRUD</a></li>
+                <li><a class="nav-link px-0" href="capitulo15.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 15 — Parâmetros e SQL Injection</a></li>
+                <li><a class="nav-link px-0" href="capitulo16.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 16 — Integração final + entrega 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Dica: mantenha todos os arquivos (<code>index.html</code> e <code>capituloXX.html</code>) na mesma pasta.
+      </p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Cabeçalho do capítulo -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">1º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 01 (100 min/semana)</span>
+            </div>
+            <h1 class="h3 mb-2">POO em C#: Classe, Objeto e Instanciação</h1>
+            <p class="mb-0 text-secondary">
+              Neste capítulo você vai entender como a Programação Orientada a Objetos organiza um sistema e vai iniciar o projeto da
+              <strong>Lanchonete</strong> criando a primeira classe (<code>Produto</code>) e instanciando objetos para exibir na tela.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro da aula</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#atividades"><i class="bi bi-hammer me-1"></i>Atividades</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objetivos e Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Explicar os conceitos de <strong>classe</strong>, <strong>objeto</strong> e <strong>instância</strong>.</li>
+              <li>Criar uma <strong>classe</strong> em C# no Visual Studio e instanciar objetos com <code>new</code>.</li>
+              <li>Organizar o projeto inicial do sistema da lanchonete em pastas (ex.: <code>Models</code>).</li>
+              <li>Exibir dados de objetos em uma interface Windows Forms (DataGridView).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Noções de lógica e variáveis</li>
+              <li>Conceito de tabela e registros (Banco de Dados 1/2)</li>
+              <li>Ambiente: Windows + Visual Studio 2022 + XAMPP (MySQL) <span class="text-secondary">(neste capítulo ainda sem banco)</span></li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Observação</div>
+              <div class="small text-secondary">Hoje o foco é POO e uma versão <strong>em memória</strong>. A conexão com MySQL será no 4º bimestre.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roteiro (2 semanas) -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — Conceitos + início do passo a passo</div>
+              <ol class="mb-0 small">
+                <li>O que é POO e por que usar</li>
+                <li>Classe, objeto, instância e instanciação</li>
+                <li>Criar solução Windows Forms</li>
+                <li>Criar classe <code>Produto</code> em <code>Models</code></li>
+                <li>Instanciar produtos e exibir na tela</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — Conclusão + atividade prática</div>
+              <ol class="mb-0 small">
+                <li>Concluir a tela de cadastro/listagem de produtos</li>
+                <li>Validar entradas básicas (campos vazios)</li>
+                <li>Atividades propostas (variações do modelo)</li>
+                <li>Questionário e checklist</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teoria/Conceitos -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (conceitos essenciais)</h2>
+
+        <h3 class="h5 mt-4">1.1 O que é Programação Orientada a Objetos (POO)?</h3>
+        <p>
+          A <strong>POO</strong> é um jeito de programar em que organizamos o sistema como um conjunto de <strong>objetos</strong>
+          que representam coisas do mundo real ou do problema (por exemplo: <em>Produto</em>, <em>Venda</em>, <em>Operador</em>).
+          Cada objeto tem <strong>dados</strong> (o que ele “sabe”) e <strong>ações</strong> (o que ele “faz”). Isso ajuda a deixar o
+          código mais organizado, mais fácil de manter e de evoluir.
+        </p>
+        <p>
+          No nosso sistema da lanchonete, pensar em objetos facilita separar responsabilidades: o <code>Produto</code> guarda informações do item
+          vendido; a <code>Venda</code> registra data/itens/total; a tela (Windows Forms) mostra e coleta dados do usuário.
+          <span class="text-secondary">Neste capítulo vamos começar pelo <code>Produto</code>.</span>
+        </p>
+
+        <h3 class="h5 mt-4">1.2 Classe</h3>
+        <p>
+          Uma <strong>classe</strong> é como um <strong>molde</strong> ou uma <strong>receita</strong>. Ela define quais informações (campos/propriedades) e
+          quais comportamentos (métodos) um tipo de objeto vai ter. A classe por si só <strong>não é um objeto</strong>, ela é a definição.
+        </p>
+        <p>
+          Exemplo: a classe <code>Produto</code> define que todo produto terá <code>Id</code>, <code>Nome</code>, <code>Preco</code> e <code>Estoque</code>.
+          Quando criarmos um produto específico (por exemplo, “X-Burger”), isso será um <strong>objeto</strong> criado a partir da classe.
+        </p>
+
+        <h3 class="h5 mt-4">1.3 Objeto e Instância</h3>
+        <p>
+          Um <strong>objeto</strong> é uma “coisa” criada a partir de uma classe, com valores reais nos seus dados. Quando dizemos que um objeto é uma
+          <strong>instância</strong> de uma classe, significa exatamente isso: ele é um “exemplar” daquele molde.
+        </p>
+        <p>
+          Exemplo prático: <code>Produto</code> (classe) → “X-Burger” (objeto/instância), “Batata Frita” (objeto/instância), “Refri Cola” (objeto/instância).
+        </p>
+
+        <h3 class="h5 mt-4">1.4 Instanciação (criando objetos com <code>new</code>)</h3>
+        <p>
+          <strong>Instanciar</strong> é o ato de criar um objeto a partir de uma classe. Em C#, normalmente fazemos isso com a palavra-chave <code>new</code>.
+          O <code>new</code> reserva espaço na memória e chama um <strong>construtor</strong> (vamos ver construtores com mais detalhes no Capítulo 03).
+        </p>
+        <p>
+          No nosso passo a passo, vamos instanciar objetos <code>Produto</code> quando o usuário clicar no botão “Adicionar”.
+          Em seguida, vamos colocar esses objetos em uma <code>List&lt;Produto&gt;</code> e exibi-los em um <code>DataGridView</code>.
+        </p>
+
+        <div class="alert alert-warning border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Conexão com a prática</div>
+          <div class="small">
+            Perceba como cada conceito aparece no projeto: <strong>classe</strong> (<code>Produto</code>), <strong>objetos</strong> (itens cadastrados),
+            <strong>instanciação</strong> (<code>new Produto(...)</code>) e uso na tela (lista exibida).
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (Windows Forms + C#)</h2>
+        <p class="text-secondary mb-4">
+          Vamos criar um primeiro módulo do sistema: <strong>Cadastro e listagem de produtos (em memória)</strong>.
+          Você fará isso no Visual Studio 2022 com Windows Forms.
+        </p>
+
+        <!-- Step 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar a solução e o projeto</h3>
+          <ol>
+            <li>Abra o <strong>Visual Studio 2022</strong>.</li>
+            <li>Clique em <strong>Criar um novo projeto</strong>.</li>
+            <li>Procure por <strong>Windows Forms App</strong> (C#) e selecione.</li>
+            <li>Nome do projeto: <code>LanchoneteApp</code></li>
+            <li>Nome da solução: <code>LanchoneteApp</code></li>
+            <li>Framework: <strong>.NET</strong> (use o padrão disponível no laboratório, ex.: .NET 6/7/8).</li>
+            <li>Confirme em <strong>Criar</strong>.</li>
+          </ol>
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-folder2-open me-1"></i>Dica: crie a pasta do projeto em um local sem espaços e com caminho curto (ex.: <code>C:\Projetos\LanchoneteApp</code>).</div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Organizar pastas (Models)</h3>
+          <ol>
+            <li>No <strong>Solution Explorer</strong>, clique com o botão direito no projeto <code>LanchoneteApp</code>.</li>
+            <li>Selecione <strong>Add</strong> → <strong>New Folder</strong> e crie a pasta <code>Models</code>.</li>
+            <li>Essa pasta vai guardar classes do “mundo do problema” (Produto, Venda, etc.).</li>
+          </ol>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Criar a classe <code>Produto</code> (classe → molde)</h3>
+          <ol>
+            <li>Clique com o botão direito na pasta <code>Models</code> → <strong>Add</strong> → <strong>Class...</strong></li>
+            <li>Nome: <code>Produto.cs</code></li>
+            <li>Substitua o conteúdo pelo código abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Produto.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.Models
+{
+    // Classe = molde (definição) de um produto
+    public class Produto
+    {
+        // Propriedades (dados do objeto)
+        public int Id { get; set; }
+        public string Nome { get; set; }
+        public decimal Preco { get; set; }
+        public int Estoque { get; set; }
+
+        // Construtor simples (vamos aprofundar no Cap. 03)
+        public Produto(int id, string nome, decimal preco, int estoque)
+        {
+            Id = id;
+            Nome = nome;
+            Preco = preco;
+            Estoque = estoque;
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-lightbulb me-1"></i>Onde este conceito aparece?</div>
+            <div class="small">
+              Aqui você definiu uma <strong>classe</strong> (<code>Produto</code>). Ainda não existe nenhum produto de verdade.
+              Eles vão surgir quando você <strong>instanciar</strong> a classe com <code>new Produto(...)</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Criar a tela de Produtos (Windows Forms)</h3>
+          <ol>
+            <li>No projeto, clique com o botão direito → <strong>Add</strong> → <strong>Windows Form...</strong></li>
+            <li>Nome: <code>FrmProdutos.cs</code></li>
+            <li>Abra o designer e ajuste as propriedades do formulário:</li>
+          </ol>
+
+          <ul>
+            <li><strong>Text</strong>: <code>Produtos - Lanchonete</code></li>
+            <li><strong>StartPosition</strong>: <code>CenterScreen</code></li>
+            <li><strong>FormBorderStyle</strong>: <code>FixedDialog</code> (opcional)</li>
+          </ul>
+
+          <p class="mb-2">Agora adicione os controles (arraste da Toolbox):</p>
+          <ul>
+            <li>4 Labels: <code>ID</code>, <code>Nome</code>, <code>Preço</code>, <code>Estoque</code></li>
+            <li>4 TextBox: <code>txtId</code>, <code>txtNome</code>, <code>txtPreco</code>, <code>txtEstoque</code></li>
+            <li>1 Button: <code>btnAdicionar</code> (Text: <code>Adicionar</code>)</li>
+            <li>1 DataGridView: <code>dgvProdutos</code></li>
+          </ul>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary">
+              <i class="bi bi-mouse me-1"></i>
+              Dica: deixe o <code>DataGridView</code> ocupando a parte inferior do formulário (Dock: Bottom), para visualizar a lista.
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — Criar a lista em memória e instanciar objetos</h3>
+          <p>
+            Aqui vamos criar uma <code>List&lt;Produto&gt;</code> para guardar os produtos cadastrados. Quando clicarmos em <strong>Adicionar</strong>,
+            vamos <strong>instanciar</strong> um <code>Produto</code> e colocar na lista.
+          </p>
+
+          <ol>
+            <li>No arquivo <code>FrmProdutos.cs</code>, dê dois cliques no botão <code>btnAdicionar</code> para criar o evento <code>Click</code>.</li>
+            <li>No topo do arquivo, adicione <code>using LanchoneteApp.Models;</code> e <code>using System.Globalization;</code>.</li>
+            <li>Substitua/complete o código conforme abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>FrmProdutos.cs</code> (código principal do capítulo)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Windows.Forms;
+using LanchoneteApp.Models;
+
+namespace LanchoneteApp
+{
+    public partial class FrmProdutos : Form
+    {
+        // Lista em memória (por enquanto). No 4º bimestre iremos persistir no MySQL.
+        private readonly List&lt;Produto&gt; _produtos = new();
+
+        public FrmProdutos()
+        {
+            InitializeComponent();
+
+            // Ajuste visual simples do grid
+            dgvProdutos.AutoGenerateColumns = true;
+            dgvProdutos.ReadOnly = true;
+            dgvProdutos.AllowUserToAddRows = false;
+
+            // Carrega alguns produtos iniciais para testar (instanciação)
+            _produtos.Add(new Produto(1, "X-Burger", 18.50m, 5));
+            _produtos.Add(new Produto(2, "Batata Frita", 12.00m, 10));
+            _produtos.Add(new Produto(3, "Refrigerante Cola", 7.00m, 12));
+
+            AtualizarGrid();
+        }
+
+        private void btnAdicionar_Click(object sender, EventArgs e)
+        {
+            // 1) Ler dados da tela
+            if (!int.TryParse(txtId.Text, out int id))
+            {
+                MessageBox.Show("ID inválido.");
+                return;
+            }
+
+            string nome = txtNome.Text.Trim();
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                MessageBox.Show("Informe o nome do produto.");
+                return;
+            }
+
+            // Aceita vírgula ou ponto (pt-BR) ao converter
+            var cultura = new CultureInfo("pt-BR");
+            if (!decimal.TryParse(txtPreco.Text, System.Globalization.NumberStyles.Any, cultura, out decimal preco))
+            {
+                MessageBox.Show("Preço inválido. Ex.: 9,50");
+                return;
+            }
+
+            if (!int.TryParse(txtEstoque.Text, out int estoque))
+            {
+                MessageBox.Show("Estoque inválido.");
+                return;
+            }
+
+            // 2) Instanciar (criar objeto) a partir da classe Produto
+            Produto novo = new Produto(id, nome, preco, estoque);
+
+            // 3) Guardar na lista (em memória)
+            _produtos.Add(novo);
+
+            // 4) Atualizar a visualização
+            AtualizarGrid();
+
+            // 5) Limpar campos
+            txtId.Clear();
+            txtNome.Clear();
+            txtPreco.Clear();
+            txtEstoque.Clear();
+            txtId.Focus();
+        }
+
+        private void AtualizarGrid()
+        {
+            // Rebind simples para atualizar a lista no grid
+            dgvProdutos.DataSource = null;
+            dgvProdutos.DataSource = _produtos;
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-pin-angle me-1"></i>Repare onde a POO acontece</div>
+            <div class="small">
+              A linha <code>new Produto(id, nome, preco, estoque)</code> é a <strong>instanciação</strong>. Cada clique cria um <strong>objeto</strong>
+              diferente (uma instância) guardado na lista <code>_produtos</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 6 — Abrir o formulário <code>FrmProdutos</code> como tela inicial</h3>
+          <ol>
+            <li>Abra o arquivo <code>Program.cs</code>.</li>
+            <li>Substitua o formulário inicial para <code>FrmProdutos</code>.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Program.cs</code> (trecho importante)</div>
+          <pre class="language-csharp"><code class="language-csharp">ApplicationConfiguration.Initialize();
+Application.Run(new FrmProdutos());
+</code></pre>
+
+          <p class="mb-0">Agora execute (<strong>F5</strong>) e teste cadastrando produtos.</p>
+        </div>
+
+        <div class="alert alert-success border" role="alert">
+          <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+          <div class="small">
+            Ao abrir a tela, você verá 3 produtos iniciais no grid. Ao preencher os campos e clicar em <strong>Adicionar</strong>, um novo
+            produto (objeto) será criado e aparecerá na lista.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Atividades -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">3) Atividades práticas (para fazer após o passo a passo)</h2>
+        <p class="text-secondary">As atividades abaixo seguem o modelo que você já implementou. Você não receberá tudo pronto — a ideia é praticar.</p>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Cadastro de Lanches</div>
+              <ul class="small mb-0">
+                <li>Crie a classe <code>Lanche</code> (Id, Nome, Preco, Estoque).</li>
+                <li>Faça um novo formulário <code>FrmLanches</code> com grid.</li>
+                <li>Reaproveite o mesmo padrão de lista em memória.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Botão Remover</div>
+              <ul class="small mb-0">
+                <li>Crie um botão <code>Remover</code>.</li>
+                <li>Remova o item selecionado do grid.</li>
+                <li>Dica: use <code>dgvProdutos.CurrentRow</code> e remova da lista.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — Estoque mínimo (alerta)</div>
+              <ul class="small mb-0">
+                <li>Se <code>Estoque</code> &lt;= 3, mostre um aviso.</li>
+                <li>Ex.: ícone na linha, cor diferente ou MessageBox ao adicionar.</li>
+                <li>Explique na entrega como você implementou.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h3 class="h6 section-title mb-2">Dicas para entregar</h3>
+        <ul class="small mb-0">
+          <li>Envie o projeto compactado (<code>.zip</code>) com a solução do Visual Studio.</li>
+          <li>Inclua prints da tela funcionando (ou grave um vídeo curto).</li>
+          <li>Explique, em 5–8 linhas, onde você usou <strong>classe</strong>, <strong>objeto</strong> e <strong>instanciação</strong>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Pesquisas complementares (para aprofundar)</h2>
+        <ul class="mb-0">
+          <li>O que é <strong>referência</strong> em C#? Diferença entre <em>tipo por valor</em> e <em>tipo por referência</em>.</li>
+          <li>O que são <strong>propriedades</strong> (<code>{ get; set; }</code>) e por que são usadas no lugar de campos públicos?</li>
+          <li>O que é <strong>binding</strong> de dados no Windows Forms (DataGridView + List)?</li>
+          <li>Como funciona o <strong>ciclo de vida</strong> de um objeto (criação, uso e coleta de lixo)?</li>
+        </ul>
+        <p class="small text-secondary mt-2 mb-0">
+          Sugestão: pesquise e escreva um parágrafo (com suas palavras) para cada item.
+        </p>
+      </div>
+    </div>
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — O que é uma classe em POO?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q1" id="q1a" value="A">
+                    <label class="form-check-label" for="q1a">A) Um objeto já criado na memória.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q1" id="q1b" value="B">
+                    <label class="form-check-label" for="q1b">B) Um molde/definição que descreve dados e comportamentos de um tipo.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q1" id="q1c" value="C">
+                    <label class="form-check-label" for="q1c">C) Um banco de dados com tabelas.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q1" id="q1d" value="D">
+                    <label class="form-check-label" for="q1d">D) Um método que executa ações.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q1" id="q1e" value="E">
+                    <label class="form-check-label" for="q1e">E) Um arquivo de interface gráfica.</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — No código <code>new Produto(1, \"X-Burger\", 18.50m, 5)</code>, o que está acontecendo?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q2" id="q2a" value="A">
+                    <label class="form-check-label" for="q2a">A) Compilação do projeto.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q2" id="q2b" value="B">
+                    <label class="form-check-label" for="q2b">B) Instanciação: criação de um objeto (instância) da classe Produto.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q2" id="q2c" value="C">
+                    <label class="form-check-label" for="q2c">C) Exclusão de um produto no banco de dados.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q2" id="q2d" value="D">
+                    <label class="form-check-label" for="q2d">D) Criação de uma nova classe.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q2" id="q2e" value="E">
+                    <label class="form-check-label" for="q2e">E) Abertura de um formulário no Windows Forms.</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Qual alternativa melhor descreve a diferença entre classe e objeto?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q3" id="q3a" value="A">
+                    <label class="form-check-label" for="q3a">A) Classe é um objeto; objeto é um método.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q3" id="q3b" value="B">
+                    <label class="form-check-label" for="q3b">B) Classe é o molde; objeto é uma instância com valores reais.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q3" id="q3c" value="C">
+                    <label class="form-check-label" for="q3c">C) Classe é a tela; objeto é o banco.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q3" id="q3d" value="D">
+                    <label class="form-check-label" for="q3d">D) Classe só existe em Java; objeto só existe em C#.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q3" id="q3e" value="E">
+                    <label class="form-check-label" for="q3e">E) Classe serve apenas para banco de dados.</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — Qual estrutura foi usada para guardar os produtos cadastrados antes do banco de dados?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q4" id="q4a" value="A">
+                    <label class="form-check-label" for="q4a">A) <code>List&lt;Produto&gt;</code> em memória.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q4" id="q4b" value="B">
+                    <label class="form-check-label" for="q4b">B) <code>DataTable</code> carregada do MySQL.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q4" id="q4c" value="C">
+                    <label class="form-check-label" for="q4c">C) <code>Dictionary</code> com SQL embutido.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q4" id="q4d" value="D">
+                    <label class="form-check-label" for="q4d">D) Um arquivo CSV externo.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q4" id="q4e" value="E">
+                    <label class="form-check-label" for="q4e">E) Apenas variáveis soltas (sem coleção).</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>A</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Por que organizamos classes em uma pasta como <code>Models</code>?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q5" id="q5a" value="A">
+                    <label class="form-check-label" for="q5a">A) Para deixar o projeto mais organizado e separar o “modelo” do sistema.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q5" id="q5b" value="B">
+                    <label class="form-check-label" for="q5b">B) Para o Windows Forms funcionar (sem isso não compila).</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q5" id="q5c" value="C">
+                    <label class="form-check-label" for="q5c">C) Para substituir o banco de dados definitivamente.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q5" id="q5d" value="D">
+                    <label class="form-check-label" for="q5d">D) Porque classes só podem existir dentro de pastas chamadas Models.</label>
+                  </div>
+                  <div class="form-check quiz-option">
+                    <input class="form-check-input" type="radio" name="q5" id="q5e" value="E">
+                    <label class="form-check-label" for="q5e">E) Para esconder o código do professor.</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>A</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="ck1">
+            <label class="form-check-label" for="ck1">Entendi a diferença entre <strong>classe</strong> e <strong>objeto</strong>.</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="ck2">
+            <label class="form-check-label" for="ck2">Criei o projeto Windows Forms <code>LanchoneteApp</code> no Visual Studio.</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="ck3">
+            <label class="form-check-label" for="ck3">Criei a pasta <code>Models</code> e a classe <code>Produto</code>.</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="ck4">
+            <label class="form-check-label" for="ck4">Consegui instanciar produtos usando <code>new Produto(...)</code>.</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="ck5">
+            <label class="form-check-label" for="ck5">Mostrei os produtos no <code>DataGridView</code> usando uma <code>List&lt;Produto&gt;</code>.</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="ck6">
+            <label class="form-check-label" for="ck6">Implementei pelo menos <strong>1</strong> das atividades práticas (A, B ou C).</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="ck7">
+            <label class="form-check-label" for="ck7">Respondi ao questionário e revisei os erros.</label>
+          </div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Meta do capítulo</div>
+          <div class="small">Você está pronto(a) para o Capítulo 02, onde vamos melhorar o código com <strong>atributos, métodos e encapsulamento</strong>.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Voltar ao início</a>
+          <a class="btn btn-gray" href="capitulo02.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 02</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 01</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Bootstrap Bundle (includes Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine (interativo)
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap01-quiz';
+    const quizAnswers = {
+      q1: 'B',
+      q2: 'B',
+      q3: 'B',
+      q4: 'A',
+      q5: 'A'
+    };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.` 
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Tente revisar o conceito e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      // persist
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        // opcional: mostrar feedback automaticamente
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine (interativo)
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap01-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      // feedback rápido
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    // init
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 13 • Conexão MySQL (WinForms + C#) • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c;
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d;
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+
+    body{ background: var(--bg-soft); }
+
+    /* Navbar */
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+    .card{ border:0; box-shadow: var(--card-shadow); }
+
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+    .small-muted{ color:#6b7280; }
+
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    a:focus, button:focus, input:focus, select:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background:#fff; border:1px solid rgba(15,23,42,.08); border-left:6px solid var(--brand-red); border-radius:14px; padding:1rem; }
+    .pill{ display:inline-block; padding:.15rem .55rem; border-radius:999px; font-size:.85rem; border:1px solid rgba(15,23,42,.12); background:#fff; }
+
+    .kbd-row code{ margin-right:.35rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html"><i class="bi bi-journal-code me-2"></i>PP-DS-NOVA</a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 12</a>
+        <a class="btn btn-gray" href="capitulo13.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 13 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 14</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#passo-a-passo" data-bs-dismiss="offcanvas"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB4">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB4" aria-expanded="true" aria-controls="cB4">
+              <span class="badge badge-bim me-2">4º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB4" class="accordion-collapse collapse show" aria-labelledby="hB4" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo13.html"><strong>Cap. 13</strong> — Conexão MySQL</a></li>
+                <li><a class="nav-link px-0" href="capitulo14.html">Cap. 14 — DAO e CRUD</a></li>
+                <li><a class="nav-link px-0" href="capitulo15.html">Cap. 15 — Parâmetros e SQL Injection</a></li>
+                <li><a class="nav-link px-0" href="capitulo16.html">Cap. 16 — Integração final + Entrega 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB3" aria-expanded="false" aria-controls="cB3">
+              <span class="badge badge-bim me-2">3º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB3" class="accordion-collapse collapse" aria-labelledby="hB3" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo09.html">Cap. 09 — GUI: formulários e layout</a></li>
+                <li><a class="nav-link px-0" href="capitulo10.html">Cap. 10 — Controles de tela</a></li>
+                <li><a class="nav-link px-0" href="capitulo11.html">Cap. 11 — Painéis, abas, menus</a></li>
+                <li><a class="nav-link px-0" href="capitulo12.html">Cap. 12 — GUI + MVC + Entrega 3</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0"><i class="bi bi-info-circle me-1"></i>Mantenha os arquivos HTML na mesma pasta para os links funcionarem.</p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Header card -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">4º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 13 (100 min/semana)</span>
+            </div>
+            <h1 class="h3 mb-2">Conexão MySQL (WinForms + C#)</h1>
+            <p class="mb-0 text-secondary">
+              Chegou a hora de sair do “repositório em memória” e entrar em persistência real.
+              Neste capítulo você vai instalar o conector, criar o banco, configurar <strong>connection string</strong> no <code>app.config</code>
+              e criar uma camada simples de acesso para abrir conexões com segurança.
+              O Capítulo 14 vai usar isso para implementar o DAO e o CRUD completo.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#atividades"><i class="bi bi-hammer me-1"></i>Atividades</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Objetivos / Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Instalar o <strong>MySQL Server</strong> e um cliente (Workbench ou equivalente) e criar um banco.</li>
+              <li>Adicionar o pacote do driver MySQL ao projeto (.NET): <code>MySql.Data</code> ou <code>MySqlConnector</code>.</li>
+              <li>Configurar <strong>connection string</strong> via <code>app.config</code> (sem hardcode no código).</li>
+              <li>Criar uma <strong>ConnectionFactory</strong> para abrir conexões com <code>using</code>.</li>
+              <li>Criar uma tela “Testar conexão” e tratar erros comuns (host, porta, usuário, senha, firewall).</li>
+              <li>Preparar o terreno para o <strong>DAO/CRUD</strong> do Cap. 14.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Projeto LanchoneteApp funcionando com Dashboard (Cap. 11/12)</li>
+              <li>Conhecer o conceito de Repository/DAO (sem implementar ainda)</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Nota</div>
+              <div class="small text-secondary">No 4º bimestre, o foco é persistência: banco, DAO, SQL seguro e integração final.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — Banco + conexão</div>
+              <ol class="mb-0 small">
+                <li>Instalar MySQL + Workbench</li>
+                <li>Criar database e usuário (permissões)</li>
+                <li>Adicionar driver no projeto (NuGet)</li>
+                <li>Configurar connection string no app.config</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — ConnectionFactory + tela de teste</div>
+              <ol class="mb-0 small">
+                <li>Criar MySqlConnectionFactory</li>
+                <li>Testar conexão (ping)</li>
+                <li>Tratar erros e mensagens amigáveis</li>
+                <li>Atividades + questionário + checklist</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (fundamentos de conexão)</h2>
+
+        <h3 class="h5 mt-4">1.1 O que é uma conexão?</h3>
+        <p>
+          Uma conexão é um “canal” entre sua aplicação e o servidor de banco.
+          Em C#, ela é representada por um objeto (ex.: <code>MySqlConnection</code>). Você abre, executa comandos e fecha.
+          Boas práticas: <strong>abra só quando precisar</strong> e <strong>feche sempre</strong> (use <code>using</code>).
+        </p>
+
+        <h3 class="h5 mt-4">1.2 Connection String</h3>
+        <p>
+          A <strong>connection string</strong> é um texto com parâmetros do acesso:
+          servidor, porta, database, usuário, senha e opções.
+          Ela deve ficar em arquivo de configuração (app.config) e não “hardcoded” no código.
+        </p>
+
+        <h3 class="h5 mt-4">1.3 Driver/Connector</h3>
+        <p>
+          Para C# falar com MySQL, você precisa de um driver. Duas opções comuns:
+          <span class="pill">MySql.Data (Oracle)</span> e <span class="pill">MySqlConnector (community)</span>.
+          Neste material vamos exemplificar com <strong>MySql.Data</strong> (mais conhecido em cursos), mas a ideia é igual.
+        </p>
+
+        <h3 class="h5 mt-4">1.4 Erros comuns (e como pensar)</h3>
+        <ul>
+          <li><strong>Access denied</strong>: usuário/senha ou permissões.</li>
+          <li><strong>Unable to connect</strong>: host/porta/firewall/serviço parado.</li>
+          <li><strong>Unknown database</strong>: banco não existe ou nome errado.</li>
+          <li><strong>SSL</strong>: alguns ambientes exigem configurar <code>SslMode</code>.</li>
+        </ul>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-lightbulb me-1"></i>Dica prática</div>
+          <div class="small">Primeiro teste no Workbench. Depois use a mesma host/porta/usuário/database no app.config.</div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (MySQL + WinForms)</h2>
+        <p class="text-secondary mb-4">Vamos configurar o ambiente e criar uma camada de conexão reutilizável.</p>
+
+        <!-- Step 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 0 — Preparar o MySQL</h3>
+          <ol>
+            <li>Instale o <strong>MySQL Server 8.x</strong> e o <strong>MySQL Workbench</strong> (ou outro cliente).</li>
+            <li>Confirme que o serviço do MySQL está rodando.</li>
+            <li>No Workbench, conecte como <code>root</code> (ou admin) e crie o banco e um usuário do sistema.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Script SQL (execute no Workbench)</div>
+          <pre class="language-sql"><code class="language-sql">CREATE DATABASE IF NOT EXISTS lanchonete_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+CREATE USER IF NOT EXISTS 'lanchonete'@'localhost' IDENTIFIED BY 'L@123456';
+GRANT ALL PRIVILEGES ON lanchonete_db.* TO 'lanchonete'@'localhost';
+FLUSH PRIVILEGES;
+</code></pre>
+
+          <div class="alert alert-warning border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Segurança</div>
+            <div class="small">Em projetos reais, não use senha fraca nem deixe usuário com ALL PRIVILEGES. Aqui é didático.</div>
+          </div>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar tabelas (modelo inicial)</h3>
+          <p>
+            Vamos usar <strong>uma tabela</strong> <code>produto</code> com um campo <code>tipo</code> (lanche/bebida) e campos específicos.
+            Isso é suficiente para o curso e facilita o CRUD.
+          </p>
+
+          <div class="code-caption mb-2">Script SQL (tabela produto)</div>
+          <pre class="language-sql"><code class="language-sql">USE lanchonete_db;
+
+CREATE TABLE IF NOT EXISTS produto (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL,
+  estoque INT NOT NULL DEFAULT 0,
+  tipo ENUM('Lanche','Bebida') NOT NULL,
+
+  -- específicos
+  tamanho VARCHAR(20) NULL,
+  volume_ml INT NULL,
+  alcoolica TINYINT(1) NULL,
+
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_produto_nome ON produto(nome);
+CREATE INDEX idx_produto_tipo ON produto(tipo);
+</code></pre>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold mb-1"><i class="bi bi-diagram-3 me-1"></i>Observação</div>
+            <div class="small">No Cap. 14 você vai mapear essa tabela para classes (Lanche/Bebida) usando DAO.</div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Adicionar o driver MySQL via NuGet</h3>
+          <ol>
+            <li>No Visual Studio: clique com botão direito no projeto → <strong>Manage NuGet Packages</strong>.</li>
+            <li>Pesquise e instale: <strong>MySql.Data</strong>.</li>
+            <li>Se estiver em .NET 6/7/8, pode ser necessário instalar também: <strong>System.Configuration.ConfigurationManager</strong>.</li>
+          </ol>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Se preferir <code>MySqlConnector</code>, a API é muito parecida (MySqlConnection/MySqlCommand).</div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Configurar connection string no <code>app.config</code></h3>
+          <p>
+            Em projetos WinForms, use o arquivo <code>App.config</code>. Se não existir, adicione: Add → New Item → Application Configuration File.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>App.config</code> (connectionStrings)</div>
+          <pre class="language-xml"><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;configuration&gt;
+  &lt;connectionStrings&gt;
+    &lt;add name="LanchoneteDb"
+         connectionString="Server=localhost;Port=3306;Database=lanchonete_db;Uid=lanchonete;Pwd=L@123456;SslMode=Preferred;" /&gt;
+  &lt;/connectionStrings&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Dica</div>
+            <div class="small">Se der erro de SSL, teste <code>SslMode=None</code> no laboratório (somente para aula).</div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Criar uma ConnectionFactory</h3>
+          <p>
+            O objetivo é ter um único lugar para abrir conexão. Isso facilita manutenção e testes.
+            Crie a pasta <code>Data</code> (ou <code>Infra</code>) e adicione <code>MySqlConnectionFactory</code>.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Data/MySqlConnectionFactory.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System.Configuration;
+using MySql.Data.MySqlClient;
+
+namespace LanchoneteApp.Data
+{
+    public static class MySqlConnectionFactory
+    {
+        public static MySqlConnection Create()
+        {
+            string cs = ConfigurationManager.ConnectionStrings["LanchoneteDb"].ConnectionString;
+            return new MySqlConnection(cs);
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Se aparecer erro no ConfigurationManager, instale o pacote <code>System.Configuration.ConfigurationManager</code>.</div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — Criar um "teste de conexão" (Service/Controller simples)</h3>
+          <p>
+            Antes de CRUD, confirme que consegue abrir conexão.
+            Vamos criar um método que abre e fecha com segurança.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Services/ConexaoService.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using MySql.Data.MySqlClient;
+using LanchoneteApp.Data;
+
+namespace LanchoneteApp.Services
+{
+    public class ConexaoService
+    {
+        public (bool ok, string mensagem) Testar()
+        {
+            try
+            {
+                using MySqlConnection conn = MySqlConnectionFactory.Create();
+                conn.Open();
+
+                using var cmd = new MySqlCommand("SELECT 1", conn);
+                var r = cmd.ExecuteScalar();
+
+                return (true, "Conexão OK! Resposta: " + r);
+            }
+            catch (Exception ex)
+            {
+                return (false, "Falha na conexão: " + ex.Message);
+            }
+        }
+    }
+}
+</code></pre>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 6 — Criar a View <code>FrmTestarConexao</code></h3>
+          <p>
+            Crie um Form simples com:
+            <span class="pill">Botão</span> “Testar”,
+            <span class="pill">TextBox multiline</span> para log,
+            e um <span class="pill">Label</span> para status.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmTestarConexao.cs</code> (exemplo)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Windows.Forms;
+using LanchoneteApp.Services;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmTestarConexao : Form
+    {
+        private readonly ConexaoService _svc = new();
+
+        public FrmTestarConexao()
+        {
+            InitializeComponent();
+            this.Text = "LanchoneteApp • Teste de Conexão";
+        }
+
+        private void btnTestar_Click(object sender, EventArgs e)
+        {
+            var (ok, msg) = _svc.Testar();
+            lblStatus.Text = ok ? "OK" : "ERRO";
+            txtLog.AppendText(DateTime.Now + " - " + msg + Environment.NewLine);
+        }
+    }
+}
+</code></pre>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 7 — Integrar no Dashboard (menu Ajuda → Testar conexão)</h3>
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmDashboard.cs</code> (menu)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void menuTestarConexao_Click(object sender, EventArgs e)
+{
+    new FrmTestarConexao().ShowDialog();
+}
+</code></pre>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 8 — Checklist de diagnóstico (se der erro)</h3>
+          <ul>
+            <li>Servidor MySQL está rodando?</li>
+            <li>Host/porta corretos? (geralmente localhost:3306)</li>
+            <li>Usuário e senha corretos? (teste no Workbench com o mesmo usuário)</li>
+            <li>Database existe? (lanchonete_db)</li>
+            <li>Se for remoto: firewall liberando porta 3306?</li>
+          </ul>
+          <div class="alert alert-success border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+            <div class="small">Você consegue abrir conexão e executar <code>SELECT 1</code>. Pronto para DAO/CRUD no Cap. 14.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Atividades -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">3) Atividades práticas</h2>
+        <p class="text-secondary">Faça <strong>2</strong> atividades (ou todas). O foco é conexão e preparação para o DAO.</p>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Tela de Configuração</div>
+              <ul class="small mb-0">
+                <li>Crie um form <code>FrmConfigDb</code> com campos: host, porta, database, usuário, senha.</li>
+                <li>Monte a connection string e teste conexão.</li>
+                <li>Bônus: salvar em app.config (ou arquivo local) e recarregar ao abrir.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Inserção de teste (sem DAO)</div>
+              <ul class="small mb-0">
+                <li>Crie um método que execute um <code>INSERT</code> fixo em <code>produto</code>.</li>
+                <li>Use <code>MySqlCommand</code> com parâmetros (sem concatenar string!).</li>
+                <li>Mostre quantas linhas foram afetadas.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — Script de Seed no banco</div>
+              <ul class="small mb-0">
+                <li>Crie um arquivo <code>seed.sql</code> para inserir 6 produtos (3 lanches, 3 bebidas).</li>
+                <li>Execute no Workbench e confirme que aparecem no SELECT.</li>
+                <li>Prepare para o CRUD do Cap. 14.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+        <h3 class="h6 section-title mb-2">Critérios rápidos</h3>
+        <ul class="small mb-0">
+          <li>Connection string no app.config (não hardcoded).</li>
+          <li>Conexão aberta/fechada com <code>using</code>.</li>
+          <li>Teste de conexão (SELECT 1) funcionando.</li>
+          <li>Boas práticas: parâmetros (se fizer INSERT/SELECT).</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Pesquisas complementares</h2>
+        <ul class="mb-0">
+          <li>Qual a diferença entre <strong>conexão</strong> e <strong>transação</strong>?</li>
+          <li>Por que “abrir conexão cedo e deixar aberta” é ruim?</li>
+          <li>O que é <strong>pool de conexões</strong> (connection pooling)?</li>
+          <li>O que muda ao usar MySQL remoto (host, firewall, permissões)?</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — Onde é melhor guardar a connection string?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) No código, em uma string fixa (hardcoded).</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) No app.config (connectionStrings), para facilitar manutenção e evitar hardcode.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) No DataGridView.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) No StatusStrip.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Em um comentário do código.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — Qual comando simples você pode executar para testar a conexão?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) DELETE *</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) SELECT 1</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) CREATE USER</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) FORMAT C:</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) DROP DATABASE</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Por que usamos using ao abrir conexão?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Para deixar a conexão aberta para sempre.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) Para garantir fechamento/liberação de recursos mesmo com erro.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Para aumentar o preço do produto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Para criar tabelas automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) Para atualizar o DataGridView.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — O que significa “Access denied” ao conectar?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Usuário/senha incorretos ou falta de permissão.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) O banco está muito grande.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Falta de TableLayoutPanel.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) O Visual Studio não está atualizado.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) O DataGridView está com AutoGenerateColumns=true.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>A</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Qual prática evita SQL Injection ao executar comandos?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) Concatenar strings com valores do usuário.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) Usar parâmetros (<code>@nome</code>, <code>@preco</code>) no MySqlCommand.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) Colocar o SQL no StatusStrip.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) Usar TabControl.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) Aumentar o timeout.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Instalei MySQL Server e consegui conectar no Workbench.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Criei o banco <code>lanchonete_db</code> e um usuário com permissão (didático).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Criei a tabela <code>produto</code> com índice em nome/tipo.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Instalei o driver MySQL via NuGet (<code>MySql.Data</code> ou equivalente).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Configurei connection string no <code>App.config</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Implementei <code>MySqlConnectionFactory</code> lendo do app.config.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Criei teste de conexão (<code>SELECT 1</code>) e tratei erros com mensagens.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Integrei a tela de teste no Dashboard (menu Ajuda).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Fiz pelo menos 2 atividades práticas e registrei evidências.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck10"><label class="form-check-label" for="ck10">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Próximo passo</div>
+          <div class="small">No Capítulo 14 você vai implementar <strong>DAO + CRUD</strong> usando essa conexão.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 12</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 14</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 13</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms • MySQL</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-xml-doc.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap13-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'B', q4:'A', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap13-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 03 • Construtores e Sobrecargas • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c; /* menu vermelho */
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d; /* botões cinza */
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+
+    body{ background: var(--bg-soft); }
+
+    /* Navbar vermelha */
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    /* Botões cinza (padrão da apostila) */
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+
+    .card{ border:0; box-shadow: var(--card-shadow); }
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+
+    .small-muted{ color:#6b7280; }
+
+    /* Offcanvas */
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    /* Code blocks */
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    /* Quiz */
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    /* Checklist */
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    /* Acessibilidade */
+    a:focus, button:focus, input:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar (fixed + hamburguer/offcanvas) -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>PP-DS-NOVA
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas Menu (hamburguer) -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 02</a>
+        <a class="btn btn-gray" href="capitulo03.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 03 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 04</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <!-- 1º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB1">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB1" aria-expanded="true" aria-controls="cB1">
+              <span class="badge badge-bim me-2">1º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB1" class="accordion-collapse collapse show" aria-labelledby="hB1" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo01.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 01 — Classe, objeto e instanciação</a></li>
+                <li><a class="nav-link px-0" href="capitulo02.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 02 — Atributos, métodos e encapsulamento</a></li>
+                <li><a class="nav-link px-0" href="capitulo03.html"><i class="bi bi-file-earmark-text me-1"></i><strong>Cap. 03</strong> — Construtores e sobrecargas</a></li>
+                <li><a class="nav-link px-0" href="capitulo04.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 04 — Namespaces + entrega 1</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB2" aria-expanded="false" aria-controls="cB2">
+              <span class="badge badge-bim me-2">2º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB2" class="accordion-collapse collapse" aria-labelledby="hB2" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo05.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 05 — Herança e sobrescrita</a></li>
+                <li><a class="nav-link px-0" href="capitulo06.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 06 — Polimorfismo</a></li>
+                <li><a class="nav-link px-0" href="capitulo07.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 07 — Abstratas e interfaces</a></li>
+                <li><a class="nav-link px-0" href="capitulo08.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 08 — MVC + entrega 2</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB3" aria-expanded="false" aria-controls="cB3">
+              <span class="badge badge-bim me-2">3º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB3" class="accordion-collapse collapse" aria-labelledby="hB3" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo09.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 09 — GUI: formulários e layout</a></li>
+                <li><a class="nav-link px-0" href="capitulo10.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 10 — Controles de tela</a></li>
+                <li><a class="nav-link px-0" href="capitulo11.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 11 — Painéis, abas, menus</a></li>
+                <li><a class="nav-link px-0" href="capitulo12.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 12 — GUI + MVC + entrega 3</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB4" aria-expanded="false" aria-controls="cB4">
+              <span class="badge badge-bim me-2">4º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB4" class="accordion-collapse collapse" aria-labelledby="hB4" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo13.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 13 — Conexão MySQL</a></li>
+                <li><a class="nav-link px-0" href="capitulo14.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 14 — DAO e CRUD</a></li>
+                <li><a class="nav-link px-0" href="capitulo15.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 15 — Parâmetros e SQL Injection</a></li>
+                <li><a class="nav-link px-0" href="capitulo16.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 16 — Integração final + entrega 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Dica: mantenha todos os arquivos (<code>index.html</code> e <code>capituloXX.html</code>) na mesma pasta.
+      </p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Cabeçalho do capítulo -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">1º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 03 (100 min/semana)</span>
+            </div>
+            <h1 class="h3 mb-2">Construtores e Sobrecarga (métodos e construtores)</h1>
+            <p class="mb-0 text-secondary">
+              Neste capítulo você vai aprender a criar <strong>construtores</strong> para garantir que um objeto já nasce válido,
+              e vai usar <strong>sobrecarga</strong> para permitir diferentes formas de criar e usar um <code>Produto</code>.
+              Na prática, você vai implementar um <strong>cadastro rápido</strong> (com ID automático) e criar métodos sobrecarregados.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#atividades"><i class="bi bi-hammer me-1"></i>Atividades</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objetivos e Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Explicar o que é um <strong>construtor</strong> e por que ele existe.</li>
+              <li>Aplicar <strong>sobrecarga de construtores</strong> para criar objetos de formas diferentes.</li>
+              <li>Aplicar <strong>sobrecarga de métodos</strong> para oferecer formas diferentes de executar uma ação.</li>
+              <li>Usar <code>this(...)</code> para reaproveitar lógica entre construtores.</li>
+              <li>Evoluir o sistema da lanchonete com <strong>ID automático</strong> (cadastro rápido) e métodos de cálculo.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Capítulos 01 e 02 concluídos</li>
+              <li>Projeto <code>LanchoneteApp</code> funcionando com a classe <code>Produto</code> encapsulada</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Você vai praticar</div>
+              <div class="small text-secondary">Criar objetos com diferentes “jeitos” (com ID manual ou automático) e calcular valores como subtotal.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roteiro (2 semanas) -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — Conceitos + início da prática</div>
+              <ol class="mb-0 small">
+                <li>Construtor: papel e regras</li>
+                <li>Sobrecarga: mesma “ação”, assinaturas diferentes</li>
+                <li>Sobrecarga de construtores + <code>this(...)</code></li>
+                <li>Adicionar construtores para ID automático</li>
+                <li>Adicionar métodos de cálculo (sobrecarga)</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — Conclusão + atividade prática</div>
+              <ol class="mb-0 small">
+                <li>Ajustar formulário para ID opcional (cadastro rápido)</li>
+                <li>Testar cenários e validar regras</li>
+                <li>Atividades propostas (variações)</li>
+                <li>Questionário e checklist</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (conceitos essenciais)</h2>
+
+        <h3 class="h5 mt-4">1.1 Construtor</h3>
+        <p>
+          Um <strong>construtor</strong> é um “método especial” da classe que é executado automaticamente quando você cria um objeto com <code>new</code>.
+          Ele tem o mesmo nome da classe e <strong>não tem tipo de retorno</strong>. A principal função do construtor é garantir que o objeto
+          já nasça em um estado válido, inicializando dados e aplicando regras desde o início.
+        </p>
+        <p>
+          No nosso <code>Produto</code>, o construtor impede, por exemplo, que o ID seja menor que 1, que o nome seja vazio ou que o preço seja negativo.
+          Isso é muito importante porque evita que o sistema carregue objetos “quebrados”.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 Sobrecarga (Overload) — métodos</h3>
+        <p>
+          <strong>Sobrecarga</strong> significa ter <strong>o mesmo nome</strong> para um método, mas com <strong>assinaturas diferentes</strong>.
+          A assinatura é definida pelo conjunto de parâmetros (quantidade, tipos e ordem). Assim, você oferece diferentes formas de usar
+          a mesma ideia de ação.
+        </p>
+        <p>
+          Exemplo: podemos ter um método <code>CalcularSubtotal(int qtd)</code> e outro <code>CalcularSubtotal(int qtd, decimal desconto)</code>.
+          Ambos calculam um subtotal, mas o segundo considera um desconto.
+        </p>
+
+        <h3 class="h5 mt-4">1.3 Sobrecarga de construtores</h3>
+        <p>
+          A mesma ideia de sobrecarga vale para construtores: você pode ter <strong>vários construtores</strong> com diferentes parâmetros.
+          Isso permite criar um objeto de formas diferentes. Por exemplo: criar um produto com ID manual (para testes) ou com ID automático
+          (para cadastro rápido).
+        </p>
+        <p>
+          Um cuidado importante: evite repetir a mesma lógica de validação em todos os construtores. Para isso, usamos o <code>this(...)</code>,
+          que chama outro construtor da mesma classe e reaproveita o código.
+        </p>
+
+        <h3 class="h5 mt-4">1.4 <code>this</code> em construtores</h3>
+        <p>
+          A palavra <code>this</code> representa o objeto atual. Em construtores, existe um uso especial: <code>this(...)</code> pode chamar
+          outro construtor da mesma classe. Assim você centraliza validações em um único lugar.
+        </p>
+        <p>
+          No passo a passo, o construtor <code>Produto(string nome, decimal preco)</code> vai chamar o construtor principal
+          <code>Produto(int id, string nome, decimal preco, int estoque)</code>, reaproveitando as regras.
+        </p>
+
+        <div class="alert alert-warning border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Overload x Override (não confundir)</div>
+          <div class="small">
+            <strong>Overload (sobrecarga)</strong> = mesmo nome, parâmetros diferentes (vamos usar aqui).
+            <strong>Override (sobrescrita)</strong> = trocar o comportamento de um método herdado (veremos em herança mais à frente).
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (construtores + sobrecargas no projeto)</h2>
+        <p class="text-secondary mb-4">
+          Vamos evoluir o <code>Produto</code> com 3 melhorias: (1) <strong>construtores sobrecarregados</strong>, (2) <strong>ID automático</strong>
+          para cadastro rápido, e (3) <strong>métodos sobrecarregados</strong> para calcular subtotal com e sem desconto.
+          Depois vamos ajustar o formulário para aceitar ID <em>opcional</em>.
+        </p>
+
+        <!-- Step 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Antes de começar</h3>
+          <ol>
+            <li>Abra a solução <code>LanchoneteApp</code>.</li>
+            <li>Execute (<code class="kbd">F5</code>) e confirme que o Capítulo 02 está funcionando.</li>
+          </ol>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Adicionar sobrecarga de construtores + ID automático</h3>
+          <ol>
+            <li>Abra <code>Models/Produto.cs</code>.</li>
+            <li>Substitua pelo código abaixo (observe os construtores e o uso de <code>this(...)</code>).</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Produto.cs</code> (construtores sobrecarregados + métodos sobrecarregados)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+
+namespace LanchoneteApp.Models
+{
+    public class Produto
+    {
+        // Sequência interna para gerar IDs automaticamente (cadastro rápido)
+        private static int _nextId = 1;
+
+        // Campos privados
+        private string _nome;
+        private decimal _preco;
+        private int _estoque;
+
+        public int Id { get; }
+
+        public string Nome
+        {
+            get => _nome;
+            private set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Nome não pode ser vazio.");
+
+                _nome = value.Trim();
+            }
+        }
+
+        public decimal Preco
+        {
+            get => _preco;
+            private set
+            {
+                if (value &lt; 0)
+                    throw new ArgumentException("Preço não pode ser negativo.");
+
+                _preco = value;
+            }
+        }
+
+        public int Estoque
+        {
+            get => _estoque;
+            private set
+            {
+                if (value &lt; 0)
+                    throw new ArgumentException("Estoque não pode ser negativo.");
+
+                _estoque = value;
+            }
+        }
+
+        // 1) Construtor principal (mais completo): valida e define tudo
+        public Produto(int id, string nome, decimal preco, int estoque)
+        {
+            if (id &lt;= 0)
+                throw new ArgumentException("Id deve ser maior que zero.");
+
+            Id = id;
+            Nome = nome;
+            Preco = preco;
+            Estoque = estoque;
+        }
+
+        // 2) Sobrecarga: sem estoque (assume estoque = 0)
+        public Produto(int id, string nome, decimal preco)
+            : this(id, nome, preco, 0)
+        {
+        }
+
+        // 3) Sobrecarga: sem ID (gera automaticamente) + estoque opcional
+        public Produto(string nome, decimal preco, int estoque = 0)
+            : this(_nextId++, nome, preco, estoque)
+        {
+        }
+
+        // Métodos (ações) já existentes
+        public void AlterarPreco(decimal novoPreco)
+        {
+            if (novoPreco &lt; 0)
+                throw new ArgumentException("Preço não pode ser negativo.");
+
+            Preco = novoPreco;
+        }
+
+        public void Renomear(string novoNome) => Nome = novoNome;
+
+        public void ReporEstoque(int quantidade)
+        {
+            if (quantidade &lt;= 0)
+                throw new ArgumentException("Quantidade para repor deve ser maior que zero.");
+
+            Estoque = Estoque + quantidade;
+        }
+
+        public void BaixarEstoque(int quantidade)
+        {
+            if (quantidade &lt;= 0)
+                throw new ArgumentException("Quantidade para baixar deve ser maior que zero.");
+
+            if (quantidade &gt; Estoque)
+                throw new InvalidOperationException("Não há estoque suficiente para baixar essa quantidade.");
+
+            Estoque = Estoque - quantidade;
+        }
+
+        // -----------------------------
+        // Sobrecarga de MÉTODOS: calcular subtotal
+        // -----------------------------
+
+        // A) Subtotal simples (sem desconto)
+        public decimal CalcularSubtotal(int quantidade)
+        {
+            if (quantidade &lt;= 0)
+                throw new ArgumentException("Quantidade deve ser maior que zero.");
+
+            return Preco * quantidade;
+        }
+
+        // B) Subtotal com desconto (desconto em %: 0 a 100)
+        public decimal CalcularSubtotal(int quantidade, decimal descontoPercentual)
+        {
+            if (descontoPercentual &lt; 0 || descontoPercentual &gt; 100)
+                throw new ArgumentException("Desconto deve estar entre 0 e 100.");
+
+            decimal subtotal = CalcularSubtotal(quantidade);
+            decimal desconto = subtotal * (descontoPercentual / 100m);
+            return subtotal - desconto;
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-lightbulb me-1"></i>Onde está o conteúdo do capítulo?</div>
+            <div class="small">
+              <ul class="mb-0">
+                <li><strong>Construtor principal:</strong> <code>Produto(int id, string nome, decimal preco, int estoque)</code></li>
+                <li><strong>Sobrecarga de construtor:</strong> construtores com menos parâmetros chamando o principal com <code>this(...)</code></li>
+                <li><strong>ID automático:</strong> <code>private static int _nextId</code> + construtor sem ID</li>
+                <li><strong>Sobrecarga de métodos:</strong> <code>CalcularSubtotal</code> com e sem desconto</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Ajustar o formulário para aceitar ID opcional (cadastro rápido)</h3>
+          <p>
+            Agora o usuário poderá cadastrar produtos com ID manual <em>ou</em> deixar o campo de ID vazio para o sistema gerar automaticamente.
+            Assim, você vai praticar o uso de construtores diferentes.
+          </p>
+
+          <ol>
+            <li>No designer do <code>FrmProdutos</code>, altere o label do ID para: <code>ID (opcional)</code>.</li>
+            <li>No arquivo <code>FrmProdutos.cs</code>, atualize o método <code>btnAdicionar_Click</code> conforme abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>FrmProdutos.cs</code> (trecho do botão Adicionar com construtores diferentes)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void btnAdicionar_Click(object sender, EventArgs e)
+{
+    try
+    {
+        string nome = txtNome.Text.Trim();
+        if (string.IsNullOrWhiteSpace(nome))
+            throw new ArgumentException("Informe o nome do produto.");
+
+        var cultura = new CultureInfo("pt-BR");
+        if (!decimal.TryParse(txtPreco.Text, NumberStyles.Any, cultura, out decimal preco))
+            throw new ArgumentException("Preço inválido. Ex.: 9,50");
+
+        if (!int.TryParse(txtEstoque.Text, out int estoque))
+            throw new ArgumentException("Estoque inválido.");
+
+        Produto novo;
+
+        // Se o ID estiver vazio, usa construtor com ID automático
+        if (string.IsNullOrWhiteSpace(txtId.Text))
+        {
+            novo = new Produto(nome, preco, estoque);
+        }
+        else
+        {
+            if (!int.TryParse(txtId.Text, out int id))
+                throw new ArgumentException("ID inválido.");
+
+            // Regra: não permitir ID repetido
+            if (_produtos.Any(p => p.Id == id))
+                throw new InvalidOperationException("Já existe um produto com esse ID.");
+
+            // Construtor com ID manual
+            novo = new Produto(id, nome, preco, estoque);
+        }
+
+        _produtos.Add(novo);
+        AtualizarGrid();
+
+        txtId.Clear(); txtNome.Clear(); txtPreco.Clear(); txtEstoque.Clear();
+        txtNome.Focus();
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-success border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>O que você praticou aqui?</div>
+            <div class="small">
+              A mesma ideia de criar <code>Produto</code> agora tem duas formas: com ID manual (construtor completo) ou ID automático (construtor sobrecarregado).
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Usar a sobrecarga de métodos (subtotal) em um teste rápido</h3>
+          <p>
+            Ainda não temos a tela de Vendas, mas podemos testar a sobrecarga de métodos com um botão simples.
+            Você vai criar um botão “Testar Subtotal” que calcula o subtotal do produto selecionado.
+          </p>
+
+          <ol>
+            <li>No designer do <code>FrmProdutos</code>, adicione um botão: <code>btnTestarSubtotal</code> (Text: <code>Testar Subtotal</code>).</li>
+            <li>Adicione também 2 campos (TextBox) para entrada:</li>
+          </ol>
+          <ul>
+            <li><code>txtQtdTeste</code> (Label: <code>Qtd.</code>)</li>
+            <li><code>txtDescontoTeste</code> (Label: <code>Desconto (%) (opcional)</code>)</li>
+          </ul>
+          <ol start="3">
+            <li>Dê duplo clique no botão para criar o evento e use o código abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>FrmProdutos.cs</code> (evento para testar métodos sobrecarregados)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void btnTestarSubtotal_Click(object sender, EventArgs e)
+{
+    try
+    {
+        Produto p = ProdutoSelecionado();
+
+        if (!int.TryParse(txtQtdTeste.Text, out int qtd))
+            throw new ArgumentException("Quantidade inválida.");
+
+        decimal total;
+
+        // Se desconto vazio, usa o método sem desconto
+        if (string.IsNullOrWhiteSpace(txtDescontoTeste.Text))
+        {
+            total = p.CalcularSubtotal(qtd);
+        }
+        else
+        {
+            var cultura = new CultureInfo("pt-BR");
+            if (!decimal.TryParse(txtDescontoTeste.Text, NumberStyles.Any, cultura, out decimal desconto))
+                throw new ArgumentException("Desconto inválido.");
+
+            total = p.CalcularSubtotal(qtd, desconto);
+        }
+
+        MessageBox.Show($"Subtotal: {total:C}", "Subtotal", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Esse botão é apenas para treino. Na unidade de Vendas, esse cálculo será usado de verdade.</div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 4 — Testes obrigatórios</h3>
+          <ul>
+            <li>Cadastre um produto <strong>sem ID</strong> (ID automático) e veja o ID no grid.</li>
+            <li>Cadastre um produto <strong>com ID</strong> e confirme que IDs repetidos são bloqueados.</li>
+            <li>Selecione um produto e teste subtotal com quantidade válida (sem desconto).</li>
+            <li>Teste subtotal com desconto (ex.: 10%).</li>
+            <li>Teste desconto inválido (ex.: 150) e confirme a mensagem de erro.</li>
+          </ul>
+          <div class="alert alert-success border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+            <div class="small">Você consegue criar produtos com construtores diferentes e chamar métodos sobrecarregados corretamente.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Atividades -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">3) Atividades práticas (para concluir na semana seguinte)</h2>
+        <p class="text-secondary">Escolha <strong>2</strong> atividades (ou faça todas para bônus). O foco é praticar sobrecarga e construtores.</p>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Construtor “Cadastro rápido” sem estoque</div>
+              <ul class="small mb-0">
+                <li>Crie uma nova sobrecarga: <code>Produto(string nome, decimal preco)</code> (sem estoque).</li>
+                <li>Ela deve chamar <code>this(nome, preco, 0)</code>.</li>
+                <li>No form, permita cadastrar deixando o estoque vazio (assuma 0).</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Sobrecarga de método para baixar com “motivo”</div>
+              <ul class="small mb-0">
+                <li>Crie uma sobrecarga: <code>BaixarEstoque(int qtd, string motivo)</code>.</li>
+                <li>Ela deve chamar o método original e depois mostrar o motivo no <code>MessageBox</code> ou registrar em uma lista em memória.</li>
+                <li>Ex.: motivo = “Venda”, “Perda”, “Teste”.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — Subtotal com desconto fixo por item</div>
+              <ul class="small mb-0">
+                <li>Crie outra sobrecarga: <code>CalcularSubtotal(int qtd, decimal descontoReaisPorItem, bool descontoEmReais)</code>.</li>
+                <li>Ex.: desconto de R$ 1,00 por item (qtd 3 → desconto R$ 3,00).</li>
+                <li>Atualize o botão de teste para permitir esse modo (opcional).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h3 class="h6 section-title mb-2">Critérios de avaliação (simples)</h3>
+        <ul class="small mb-0">
+          <li><strong>Correto uso de sobrecarga:</strong> assinaturas diferentes, mesmo nome.</li>
+          <li><strong>Reaproveitamento com <code>this(...)</code>:</strong> evita duplicação.</li>
+          <li><strong>Regras funcionando:</strong> validações continuam funcionando.</li>
+          <li><strong>Demonstração:</strong> prints/vídeo com pelo menos 1 teste por atividade escolhida.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Pesquisas complementares (para aprofundar)</h2>
+        <ul class="mb-0">
+          <li>O que são <strong>parâmetros opcionais</strong> em C# e quando usar?</li>
+          <li>O que significa um campo <strong>static</strong> e por que ele é compartilhado?</li>
+          <li>O que é <strong>encadeamento de construtores</strong> (constructor chaining)?</li>
+          <li>Quando é melhor usar sobrecarga vs parâmetros opcionais?</li>
+        </ul>
+        <p class="small text-secondary mt-2 mb-0">Escreva exemplos aplicados ao <code>Produto</code> e ao cadastro rápido da lanchonete.</p>
+      </div>
+    </div>
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Se quiser, use <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — Qual é a principal função de um construtor?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Executar uma consulta no banco de dados.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) Garantir que o objeto seja criado com estado inicial válido e inicializar dados.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) Substituir um método herdado.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) Gerar automaticamente uma interface gráfica.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Impedir que o programa compile.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — O que caracteriza sobrecarga (overload) em C#?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) Mesmo nome e mesma lista de parâmetros.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) Mesmo nome com parâmetros diferentes (quantidade/tipos/ordem).</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) Um método privado com o mesmo nome de um método público.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) Substituir um método de uma classe pai.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) Usar <code>static</code> em um método.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Qual é o objetivo de usar <code>this(...)</code> entre construtores?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Criar um novo formulário automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) Reaproveitar lógica/validações chamando um construtor mais completo.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Transformar um método em static.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Permitir sobrescrita de métodos (override).</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) Impedir exceções.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — No cadastro rápido, por que usamos <code>static int _nextId</code>?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Para que cada objeto tenha seu próprio contador separado.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) Para ter um contador compartilhado pela classe e gerar IDs únicos.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Para o DataGridView funcionar.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) Para substituir o encapsulamento.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) Para permitir sobrescrita de método.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Qual chamada usa a sobrecarga correta para subtotal com desconto?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) <code>p.CalcularSubtotal()</code></label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) <code>p.CalcularSubtotal(3, 10)</code> (qtd=3, desconto=10%)</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) <code>p.CalcularSubtotal("3", "10")</code></label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) <code>p.CalcularSubtotal(10)</code> (desconto)</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) <code>p.CalcularSubtotal(3, "10%")</code></label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Sei explicar o que é um <strong>construtor</strong> e quando ele é executado.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Criei <strong>sobrecarga de construtores</strong> e usei <code>this(...)</code> para reaproveitar validações.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Implementei o <strong>ID automático</strong> com um contador <code>static</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Implementei <strong>sobrecarga de métodos</strong> com <code>CalcularSubtotal</code> (com e sem desconto).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Ajustei o formulário para cadastrar com ID manual <em>ou</em> automático (ID opcional).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Testei cenários de erro (desconto inválido, ID repetido) e de sucesso.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Implementei pelo menos <strong>2</strong> atividades práticas e registrei evidências (prints/vídeo).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Respondi ao questionário e revisei os erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Meta do capítulo</div>
+          <div class="small">Você está pronto(a) para o Capítulo 04: <strong>Namespaces, organização do projeto</strong> e a <strong>Entrega 1</strong> do bimestre.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 02</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 04</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 03</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Bootstrap Bundle (includes Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine (interativo)
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap03-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'B', q4:'B', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine (interativo)
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap03-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 14 • DAO e CRUD (MySQL) • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c;
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d;
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+
+    body{ background: var(--bg-soft); }
+
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+    .card{ border:0; box-shadow: var(--card-shadow); }
+
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+    .small-muted{ color:#6b7280; }
+
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    a:focus, button:focus, input:focus, select:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background:#fff; border:1px solid rgba(15,23,42,.08); border-left:6px solid var(--brand-red); border-radius:14px; padding:1rem; }
+    .pill{ display:inline-block; padding:.15rem .55rem; border-radius:999px; font-size:.85rem; border:1px solid rgba(15,23,42,.12); background:#fff; }
+
+    .rubrica li{ margin-bottom:.35rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html"><i class="bi bi-journal-code me-2"></i>PP-DS-NOVA</a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 13</a>
+        <a class="btn btn-gray" href="capitulo14.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 14 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 15</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#passo-a-passo" data-bs-dismiss="offcanvas"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB4">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB4" aria-expanded="true" aria-controls="cB4">
+              <span class="badge badge-bim me-2">4º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB4" class="accordion-collapse collapse show" aria-labelledby="hB4" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo13.html">Cap. 13 — Conexão MySQL</a></li>
+                <li><a class="nav-link px-0" href="capitulo14.html"><strong>Cap. 14</strong> — DAO e CRUD</a></li>
+                <li><a class="nav-link px-0" href="capitulo15.html">Cap. 15 — Parâmetros e SQL Injection</a></li>
+                <li><a class="nav-link px-0" href="capitulo16.html">Cap. 16 — Integração final + Entrega 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0"><i class="bi bi-info-circle me-1"></i>Mantenha os arquivos HTML na mesma pasta para os links funcionarem.</p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Header -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">4º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 14 (100 min/semana)</span>
+            </div>
+            <h1 class="h3 mb-2">DAO e CRUD (MySQL) — Persistindo Produtos</h1>
+            <p class="mb-0 text-secondary">
+              Neste capítulo você vai implementar o <strong>DAO</strong> (Data Access Object) e o <strong>CRUD</strong>
+              (Create, Read, Update, Delete) usando MySQL.
+              Você vai criar classes de acesso ao banco, mapear a tabela <code>produto</code> para <code>Lanche</code> e <code>Bebida</code>,
+              e substituir o repositório em memória por um repositório baseado em banco.
+              No Capítulo 15 vamos reforçar ainda mais segurança com parâmetros e prevenção de SQL Injection.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#atividades"><i class="bi bi-hammer me-1"></i>Atividades</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Objetivos / Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Explicar o que é <strong>DAO</strong> e por que ele reduz acoplamento com o banco.</li>
+              <li>Implementar <strong>CRUD</strong> completo na tabela <code>produto</code> usando comandos parametrizados.</li>
+              <li>Mapear o resultado do SELECT para objetos <code>Lanche</code> e <code>Bebida</code> (polimorfismo).</li>
+              <li>Criar um <strong>repositório MySQL</strong> para substituir o repositório em memória.</li>
+              <li>Integrar o DAO ao sistema (Controllers/Views) mantendo MVC.</li>
+              <li>Garantir que o sistema funciona com dados persistidos no banco.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Cap. 13 concluído (MySQL + ConnectionFactory + teste de conexão)</li>
+              <li>Tabela <code>produto</code> criada em <code>lanchonete_db</code></li>
+              <li>Classes <code>Produto</code> (abstract), <code>Lanche</code> e <code>Bebida</code> funcionando (Caps. 5–7)</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Importante</div>
+              <div class="small text-secondary">Se o teste de conexão ainda falha, volte ao Cap. 13 e resolva antes de seguir.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — DAO + leitura</div>
+              <ol class="mb-0 small">
+                <li>Criar interface do repositório</li>
+                <li>Implementar ProdutoDao (SELECT / FindById)</li>
+                <li>Mapeamento para Lanche/Bebida</li>
+                <li>Integrar leitura no grid</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — CRUD completo + integração</div>
+              <ol class="mb-0 small">
+                <li>INSERT (Create) e capturar ID</li>
+                <li>UPDATE (Update) e DELETE (Delete)</li>
+                <li>Transações (opcional) + mensagens de erro</li>
+                <li>Atividades e testes finais</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (DAO e CRUD)</h2>
+
+        <h3 class="h5 mt-4">1.1 O que é DAO?</h3>
+        <p>
+          <strong>DAO</strong> (Data Access Object) é uma classe responsável por acessar o banco.
+          Ela encapsula SQL e operações de leitura/escrita, evitando que a UI ou Controllers conheçam detalhes de SQL.
+          Isso melhora manutenção: se amanhã mudar MySQL para outro banco, você troca o DAO.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 CRUD</h3>
+        <ul>
+          <li><strong>Create</strong>: inserir registros (INSERT)</li>
+          <li><strong>Read</strong>: consultar registros (SELECT)</li>
+          <li><strong>Update</strong>: atualizar registros (UPDATE)</li>
+          <li><strong>Delete</strong>: remover registros (DELETE)</li>
+        </ul>
+
+        <h3 class="h5 mt-4">1.3 Mapeamento objeto-relacional (bem simples)</h3>
+        <p>
+          Sua tabela <code>produto</code> tem campos comuns e campos específicos.
+          No código, vamos mapear assim:
+        </p>
+        <ul>
+          <li><code>tipo = 'Lanche'</code> ⇒ cria <code>new Lanche(..., tamanho)</code></li>
+          <li><code>tipo = 'Bebida'</code> ⇒ cria <code>new Bebida(..., volumeMl, alcoolica)</code></li>
+        </ul>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-shield-check me-1"></i>Segurança (já comece certo)</div>
+          <div class="small">Use sempre <strong>parâmetros</strong> no SQL. Evite concatenar strings com dados do usuário. Cap. 15 aprofunda isso.</div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (CRUD completo)</h2>
+        <p class="text-secondary mb-4">Vamos criar o DAO e substituir o repositório em memória por um repositório MySQL.</p>
+
+        <!-- Step 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Antes de começar</h3>
+          <ol>
+            <li>Confirme que <code>MySqlConnectionFactory</code> funciona (Cap. 13).</li>
+            <li>Confirme que a tabela <code>produto</code> existe.</li>
+            <li>Faça backup/commit.</li>
+          </ol>
+        </div>
+
+        <!-- Step 1: Interface do repositório -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar uma interface de repositório</h3>
+          <p>
+            Para não quebrar o MVC e permitir trocar a fonte dos dados (memória vs MySQL),
+            crie uma interface <code>IProdutoRepository</code>.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Data/IProdutoRepository.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System.Collections.Generic;
+using LanchoneteApp.Models;
+
+namespace LanchoneteApp.Data
+{
+    public interface IProdutoRepository
+    {
+        List&lt;Produto&gt; GetAll();
+        Produto? FindById(int id);
+        void Add(Produto p);
+        void Update(Produto p);
+        void Delete(int id);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Seu repositório em memória pode implementar essa interface depois (opcional). Vamos focar no MySQL.</div>
+          </div>
+        </div>
+
+        <!-- Step 2: DAO ProdutoDaoMySql -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Criar o DAO (<code>ProdutoDaoMySql</code>)</h3>
+          <p>
+            O DAO executa SQL e devolve objetos <code>Produto</code>. Ele usa a <code>MySqlConnectionFactory</code>.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Data/ProdutoDaoMySql.cs</code> (CRUD)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Collections.Generic;
+using MySql.Data.MySqlClient;
+using LanchoneteApp.Models;
+
+namespace LanchoneteApp.Data
+{
+    public class ProdutoDaoMySql
+    {
+        private Produto Map(MySqlDataReader r)
+        {
+            int id = r.GetInt32("id");
+            string nome = r.GetString("nome");
+            decimal preco = r.GetDecimal("preco");
+            int estoque = r.GetInt32("estoque");
+            string tipo = r.GetString("tipo");
+
+            if (tipo == "Lanche")
+            {
+                string tamanho = r["tamanho"] == DBNull.Value ? "" : r.GetString("tamanho");
+                return new Lanche(id, nome, preco, estoque, tamanho);
+            }
+            else // Bebida
+            {
+                int volume = r["volume_ml"] == DBNull.Value ? 0 : r.GetInt32("volume_ml");
+                bool alcoolica = r["alcoolica"] != DBNull.Value &amp;&amp; r.GetInt32("alcoolica") == 1;
+                return new Bebida(id, nome, preco, estoque, volume, alcoolica);
+            }
+        }
+
+        public List&lt;Produto&gt; Listar()
+        {
+            var lista = new List&lt;Produto&gt;();
+            using var conn = MySqlConnectionFactory.Create();
+            conn.Open();
+
+            using var cmd = new MySqlCommand(
+                "SELECT id,nome,preco,estoque,tipo,tamanho,volume_ml,alcoolica FROM produto ORDER BY id DESC", conn);
+
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                lista.Add(Map(r));
+
+            return lista;
+        }
+
+        public Produto? ObterPorId(int id)
+        {
+            using var conn = MySqlConnectionFactory.Create();
+            conn.Open();
+
+            using var cmd = new MySqlCommand(
+                "SELECT id,nome,preco,estoque,tipo,tamanho,volume_ml,alcoolica FROM produto WHERE id=@id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            using var r = cmd.ExecuteReader();
+            return r.Read() ? Map(r) : null;
+        }
+
+        public int Inserir(Produto p)
+        {
+            using var conn = MySqlConnectionFactory.Create();
+            conn.Open();
+
+            string sql = @"INSERT INTO produto (nome,preco,estoque,tipo,tamanho,volume_ml,alcoolica)
+                           VALUES (@nome,@preco,@estoque,@tipo,@tamanho,@volume,@alcoolica);
+                           SELECT LAST_INSERT_ID();";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            PreencherParametros(cmd, p);
+
+            object? id = cmd.ExecuteScalar();
+            return Convert.ToInt32(id);
+        }
+
+        public bool Atualizar(Produto p)
+        {
+            using var conn = MySqlConnectionFactory.Create();
+            conn.Open();
+
+            string sql = @"UPDATE produto
+                           SET nome=@nome, preco=@preco, estoque=@estoque, tipo=@tipo,
+                               tamanho=@tamanho, volume_ml=@volume, alcoolica=@alcoolica
+                           WHERE id=@id";
+
+            using var cmd = new MySqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@id", p.Id);
+            PreencherParametros(cmd, p);
+
+            int linhas = cmd.ExecuteNonQuery();
+            return linhas &gt; 0;
+        }
+
+        public bool Remover(int id)
+        {
+            using var conn = MySqlConnectionFactory.Create();
+            conn.Open();
+
+            using var cmd = new MySqlCommand("DELETE FROM produto WHERE id=@id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            int linhas = cmd.ExecuteNonQuery();
+            return linhas &gt; 0;
+        }
+
+        private void PreencherParametros(MySqlCommand cmd, Produto p)
+        {
+            cmd.Parameters.AddWithValue("@nome", p.Nome);
+            cmd.Parameters.AddWithValue("@preco", p.Preco);
+            cmd.Parameters.AddWithValue("@estoque", p.Estoque);
+            cmd.Parameters.AddWithValue("@tipo", p.Tipo);
+
+            if (p is Lanche l)
+            {
+                cmd.Parameters.AddWithValue("@tamanho", l.Tamanho);
+                cmd.Parameters.AddWithValue("@volume", DBNull.Value);
+                cmd.Parameters.AddWithValue("@alcoolica", DBNull.Value);
+            }
+            else if (p is Bebida b)
+            {
+                cmd.Parameters.AddWithValue("@tamanho", DBNull.Value);
+                cmd.Parameters.AddWithValue("@volume", b.VolumeMl);
+                cmd.Parameters.AddWithValue("@alcoolica", b.Alcoolica ? 1 : 0);
+            }
+            else
+            {
+                // se surgir outro tipo no futuro
+                cmd.Parameters.AddWithValue("@tamanho", DBNull.Value);
+                cmd.Parameters.AddWithValue("@volume", DBNull.Value);
+                cmd.Parameters.AddWithValue("@alcoolica", DBNull.Value);
+            }
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Atenção ao tipo</div>
+            <div class="small">O campo <code>tipo</code> no banco usa valores <code>Lanche</code> e <code>Bebida</code>. Garanta que suas propriedades <code>Tipo</code> retornem exatamente esses textos.</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Repository MySQL -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Criar o repositório MySQL (implementa IProdutoRepository)</h3>
+          <p>
+            O repositório será um adaptador: ele implementa a interface e chama o DAO.
+            Assim, Controllers/Services não precisam saber SQL.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Data/ProdutoRepositoryMySql.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System.Collections.Generic;
+using LanchoneteApp.Models;
+
+namespace LanchoneteApp.Data
+{
+    public class ProdutoRepositoryMySql : IProdutoRepository
+    {
+        private readonly ProdutoDaoMySql _dao = new();
+
+        public List&lt;Produto&gt; GetAll() =&gt; _dao.Listar();
+        public Produto? FindById(int id) =&gt; _dao.ObterPorId(id);
+
+        public void Add(Produto p)
+        {
+            int id = _dao.Inserir(p);
+            // opcional: se seu Model permitir setar Id, ajuste; se não, ignore
+            // Em muitos projetos, Id é set privado. Nesse caso, apenas confie no banco.
+        }
+
+        public void Update(Produto p) =&gt; _dao.Atualizar(p);
+        public void Delete(int id) =&gt; _dao.Remover(id);
+    }
+}
+</code></pre>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold mb-1"><i class="bi bi-lightbulb me-1"></i>Nota sobre Id</div>
+            <div class="small">Como o banco gera o Id, você não precisa aceitar Id manual no cadastro. No Cap. 14/15 você pode ocultar o campo Id na UI.</div>
+          </div>
+        </div>
+
+        <!-- Step 4: Ajustar Controllers para receber IProdutoRepository -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Ajustar Controllers/Services para dependerem da interface</h3>
+          <p>
+            Refatore o <code>ProdutoController</code> para receber <code>IProdutoRepository</code> (em vez de ProdutoRepository). Faça o mesmo nos outros.
+            Isso permite trocar de memória para MySQL sem alterar a lógica.
+          </p>
+
+          <div class="code-caption mb-2">Exemplo: <code>ProdutoController</code> (construtor)</div>
+          <pre class="language-csharp"><code class="language-csharp">private readonly IProdutoRepository _repo;
+private readonly ProdutoService _service;
+
+public ProdutoController(IProdutoRepository repo)
+{
+    _repo = repo;
+    _service = new ProdutoService(_repo); // ajuste ProdutoService para aceitar IProdutoRepository
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Refatoração necessária</div>
+            <div class="small">Se seu ProdutoService foi criado com ProdutoRepository concreto, altere-o para receber <code>IProdutoRepository</code>. Isso é DI manual.</div>
+          </div>
+        </div>
+
+        <!-- Step 5: Ajustar Dashboard para instanciar repo MySQL -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — No Dashboard, trocar para repositório MySQL</h3>
+          <p>
+            Em vez de manter um repositório em memória no Dashboard, mantenha um <code>IProdutoRepository</code>
+            e instancie a versão MySQL.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmDashboard.cs</code> (trecho)</div>
+          <pre class="language-csharp"><code class="language-csharp">using LanchoneteApp.Data;
+
+private readonly IProdutoRepository _repo = new ProdutoRepositoryMySql();
+
+private void FrmDashboard_Load(object sender, EventArgs e)
+{
+    AbrirFormNaAba(new FrmProdutos(_repo), tabProdutos);
+    AbrirFormNaAba(new FrmVendaSimples(_repo), tabVenda);
+    AbrirFormNaAba(new FrmRelatorios(_repo), tabRelatorios);
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Você precisará ajustar os construtores dos Forms para receber <code>IProdutoRepository</code> em vez de ProdutoRepository.</div>
+          </div>
+        </div>
+
+        <!-- Step 6: Ajustar Forms -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 6 — Ajustar os Forms (Views) para receber IProdutoRepository</h3>
+          <p>
+            Atualize os construtores de <code>FrmProdutos</code>, <code>FrmVendaSimples</code> e <code>FrmRelatorios</code>
+            para receberem <code>IProdutoRepository</code>.
+          </p>
+
+          <div class="code-caption mb-2">Exemplo: <code>FrmProdutos</code> (construtor)</div>
+          <pre class="language-csharp"><code class="language-csharp">private readonly ProdutoController _controller;
+
+public FrmProdutos(IProdutoRepository repo)
+{
+    InitializeComponent();
+    _controller = new ProdutoController(repo);
+    ConfigurarGrid();
+    AtualizarGrid();
+}
+</code></pre>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold mb-1"><i class="bi bi-check2-circle me-1"></i>Resultado</div>
+            <div class="small">Agora sua UI não sabe se os dados vêm da memória ou do MySQL — ela só fala com Controllers.</div>
+          </div>
+        </div>
+
+        <!-- Step 7: Testes -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 7 — Testes obrigatórios</h3>
+          <ul>
+            <li>Abra o Dashboard e verifique que o grid carrega produtos do banco (não da memória).</li>
+            <li>Cadastre um Lanche e uma Bebida: feche e reabra o app — os itens continuam lá (persistência).</li>
+            <li>Atualize preço/estoque e confirme no MySQL com <code>SELECT</code>.</li>
+            <li>Remova um produto e confirme que sumiu do banco.</li>
+          </ul>
+          <div class="alert alert-success border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+            <div class="small">CRUD funcionando com MySQL: dados persistem após fechar a aplicação.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Atividades -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">3) Atividades práticas</h2>
+        <p class="text-secondary">Faça <strong>2</strong> atividades (ou todas). O foco é consolidar CRUD + boas práticas.</p>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Busca no banco</div>
+              <ul class="small mb-0">
+                <li>Crie no DAO um método <code>BuscarPorNome(string texto)</code>.</li>
+                <li>Use <code>LIKE</code> com parâmetros (<code>@texto</code>).</li>
+                <li>Integre ao filtro do Cap. 10 (agora filtrando no banco).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Transação (bônus técnico)</div>
+              <ul class="small mb-0">
+                <li>Implemente uma transação para atualizar estoque e registrar uma venda (tabela nova opcional).</li>
+                <li>Use <code>MySqlTransaction</code> com commit/rollback.</li>
+                <li>Explique em 5 linhas por que transação evita inconsistência.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — Logs e mensagens</div>
+              <ul class="small mb-0">
+                <li>Crie um método para registrar erros em <code>logs.txt</code> (data + mensagem).</li>
+                <li>Em falhas do DAO, mostre mensagem amigável ao usuário.</li>
+                <li>Evite exibir stack trace no MessageBox (mostre só no log).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+        <h3 class="h6 section-title mb-2">Critérios rápidos</h3>
+        <ul class="small mb-0">
+          <li>CRUD completo com comandos parametrizados.</li>
+          <li>Mapeamento correto para Lanche/Bebida.</li>
+          <li>Persistência real (fecha e abre e mantém dados).</li>
+          <li>Arquitetura preservada (View não faz SQL).</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Pesquisas complementares</h2>
+        <ul class="mb-0">
+          <li>Qual a diferença entre DAO, Repository e Service?</li>
+          <li>Por que é melhor retornar ViewModels em relatórios (em vez de Model)?</li>
+          <li>O que é “Unit of Work” e como se relaciona com transações?</li>
+          <li>Como versionar o banco (migrações) em projetos reais?</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — Qual é o objetivo do DAO?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Guardar a UI do projeto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) Encapsular acesso ao banco (SQL) e reduzir acoplamento do resto do sistema.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) Substituir o Controller.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) Criar TabControl automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Formatar DataGridView.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — Qual comando SQL pertence ao “Create” do CRUD?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) SELECT</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) INSERT</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) UPDATE</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) DELETE</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) GROUP BY</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Qual prática ajuda a evitar SQL Injection?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Concatenar valores do usuário no SQL.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) Usar parâmetros no MySqlCommand.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Colocar o SQL no Label.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Usar TabControl.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) Aumentar o timeout.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — Por que usar interface (IProdutoRepository) ajuda?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Permite trocar a implementação (memória/MySQL) sem mudar Controllers/Views.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) Impede o uso de MVC.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Substitui o MySQL.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) Elimina a necessidade de SQL.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) Faz o banco criar tabelas automaticamente.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>A</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Como capturar o ID gerado no INSERT do MySQL?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) Usando SELECT *.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) Usando SELECT LAST_INSERT_ID() após o INSERT.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) Colocando o Id manualmente sempre.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) Com TabControl.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) Com StatusStrip.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Criei <code>IProdutoRepository</code> para desacoplar dados (memória/MySQL).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Implementei <code>ProdutoDaoMySql</code> com Listar/ObterPorId/Inserir/Atualizar/Remover.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Mapeei corretamente <code>tipo</code> para <code>Lanche</code>/<code>Bebida</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Criei <code>ProdutoRepositoryMySql</code> implementando a interface.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Refatorei Controllers/Services para dependerem de <code>IProdutoRepository</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Atualizei Forms e Dashboard para usar o repositório MySQL.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Testei persistência (fecha/abre e mantém dados) e delete/update no banco.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Fiz pelo menos 2 atividades práticas e registrei evidências.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Próximo passo</div>
+          <div class="small">No Capítulo 15 vamos reforçar <strong>parâmetros</strong>, prevenção de <strong>SQL Injection</strong> e boas práticas de SQL seguro.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 13</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 15</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 14</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms • MySQL</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+  <script>
+    // -----------------------------
+    // Quiz engine
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap14-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'B', q4:'A', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap14-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>

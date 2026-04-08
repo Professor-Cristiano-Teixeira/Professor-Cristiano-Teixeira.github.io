@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 • Classes Abstratas e Interfaces • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c;
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d;
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+
+    body{ background: var(--bg-soft); }
+
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+
+    .card{ border:0; box-shadow: var(--card-shadow); }
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+    .small-muted{ color:#6b7280; }
+
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    a:focus, button:focus, input:focus, select:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background: #fff; border: 1px solid rgba(15,23,42,.08); border-left: 6px solid var(--brand-red); border-radius: 14px; padding: 1rem; }
+
+    .pill{ display:inline-block; padding:.15rem .5rem; border-radius:999px; font-size:.85rem; border:1px solid rgba(15,23,42,.12); background:#fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html"><i class="bi bi-journal-code me-2"></i>PP-DS-NOVA</a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 06</a>
+        <a class="btn btn-gray" href="capitulo07.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 07 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 08</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#passo-a-passo" data-bs-dismiss="offcanvas"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB2">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB2" aria-expanded="true" aria-controls="cB2">
+              <span class="badge badge-bim me-2">2º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB2" class="accordion-collapse collapse show" aria-labelledby="hB2" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo05.html">Cap. 05 — Herança e sobrescrita</a></li>
+                <li><a class="nav-link px-0" href="capitulo06.html">Cap. 06 — Polimorfismo</a></li>
+                <li><a class="nav-link px-0" href="capitulo07.html"><strong>Cap. 07</strong> — Abstratas e interfaces</a></li>
+                <li><a class="nav-link px-0" href="capitulo08.html">Cap. 08 — MVC + entrega 2</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0"><i class="bi bi-info-circle me-1"></i>Abra os arquivos na mesma pasta para manter os links funcionando.</p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Cabeçalho -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">2º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 07 (100 min/semana)</span>
+            </div>
+            <h1 class="h3 mb-2">Classes Abstratas e Interfaces (C#)</h1>
+            <p class="mb-0 text-secondary">
+              Agora que temos <code>Produto</code>, <code>Lanche</code> e <code>Bebida</code>, vamos dar um passo a mais no design:
+              usar <strong>classe abstrata</strong> para impedir que existam “produtos genéricos” e usar <strong>interfaces</strong> para
+              garantir capacidades (ex.: calcular total e gerar etiqueta) sem depender apenas de herança.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#atividades"><i class="bi bi-hammer me-1"></i>Atividades</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objetivos / Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Explicar o que é <strong>classe abstrata</strong> e por que ela não pode ser instanciada.</li>
+              <li>Criar <strong>membros abstratos</strong> (obrigatórios) e <strong>membros concretos</strong> (reaproveitáveis) na mesma classe.</li>
+              <li>Explicar o que é <strong>interface</strong> e quando usar em vez de herança.</li>
+              <li>Aplicar interfaces no projeto: <code>IEtiquetavel</code> e <code>IPrecificavel</code>.</li>
+              <li>Refatorar o cadastro para criar o tipo correto (<code>Lanche</code>/<code>Bebida</code>) — já preparando MVC do Cap. 08.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Capítulo 06 concluído (venda simples + <code>CalcularTotalVenda</code>)</li>
+              <li>Projeto organizado por pastas/namespaces (Cap. 04)</li>
+              <li>Herança e override funcionando (Cap. 05)</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Observação</div>
+              <div class="small text-secondary">Como vamos tornar <code>Produto</code> abstrato, o cadastro precisa escolher o tipo (Lanche/Bebida) para criar objetos.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — Conceitos + refatoração</div>
+              <ol class="mb-0 small">
+                <li>Classe abstrata: por que usar</li>
+                <li>Membros abstratos: “obrigatórios nas filhas”</li>
+                <li>Interfaces: capacidades (contratos)</li>
+                <li>Tornar <code>Produto</code> abstrato + criar interfaces</li>
+                <li>Adaptar <code>Lanche</code>/<code>Bebida</code> para cumprir o contrato</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — Tela + prática</div>
+              <ol class="mb-0 small">
+                <li>Adicionar seleção de tipo no <code>FrmProdutos</code></li>
+                <li>Criar produto via Service conforme tipo</li>
+                <li>Reusar interfaces em métodos (ex.: imprimir etiqueta)</li>
+                <li>Atividades propostas + revisão</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (conceitos essenciais)</h2>
+
+        <h3 class="h5 mt-4">1.1 Classe abstrata (abstract)</h3>
+        <p>
+          Uma <strong>classe abstrata</strong> é uma classe que <strong>não pode ser instanciada</strong>. Ela existe para servir como “modelo base”
+          e para concentrar código comum. Você usa classe abstrata quando faz sentido dizer:
+          <span class="pill">“nunca deve existir um objeto desse tipo genérico”</span>.
+        </p>
+        <p>
+          No nosso caso: faz sentido existir um <strong>Lanche</strong> e uma <strong>Bebida</strong>, mas não faz muito sentido existir um “Produto”
+          genérico sem tipo. Então vamos tornar <code>Produto</code> abstrato.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 Membros abstratos x membros virtuais</h3>
+        <p>
+          Um <strong>membro abstrato</strong> (propriedade/método) não tem implementação na classe base e <strong>obriga</strong> as classes filhas a implementarem.
+          Já um membro <strong>virtual</strong> tem implementação padrão e permite que a filha sobrescreva se quiser.
+        </p>
+        <p>
+          Exemplo: queremos <code>Tipo</code> e <code>Detalhes</code> obrigatórios (cada produto deve dizer o seu). Então vamos torná-los <strong>abstratos</strong>.
+          Já <code>Etiqueta()</code> pode ter implementação padrão e permitir customização (pode ser virtual).
+        </p>
+
+        <h3 class="h5 mt-4">1.3 Interface (contrato de capacidades)</h3>
+        <p>
+          Uma <strong>interface</strong> define um <strong>contrato</strong>: um conjunto de membros que uma classe promete ter.
+          Ela não diz <em>como</em> fazer, só define <em>o que</em> deve existir. Interfaces são úteis quando diferentes classes (nem sempre relacionadas)
+          precisam oferecer a mesma capacidade.
+        </p>
+        <p>
+          No projeto, vamos criar duas interfaces simples:
+          <span class="pill"><code>IEtiquetavel</code></span> (gera etiqueta) e <span class="pill"><code>IPrecificavel</code></span> (calcula total).
+          Assim, um método pode aceitar “qualquer coisa que gere etiqueta”, sem se importar se é Lanche, Bebida, Combo etc.
+        </p>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-lightbulb me-1"></i>Regra prática</div>
+          <div class="small">
+            <strong>Herança</strong> resolve reutilização e relação “é um”.
+            <strong>Interface</strong> resolve “tem a capacidade de”.
+            <strong>Classe abstrata</strong> resolve “tipo genérico não deve existir como objeto”.
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (abstratas + interfaces no projeto)</h2>
+        <p class="text-secondary mb-4">
+          Vamos criar as interfaces, tornar <code>Produto</code> abstrato e adaptar o cadastro para criar Lanche/Bebida.
+          Depois vamos reaproveitar interfaces para gerar etiqueta e calcular total.
+        </p>
+
+        <!-- Passo 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Antes de começar</h3>
+          <ol>
+            <li>Abra a solução <code>LanchoneteApp</code>.</li>
+            <li>Garanta que o Cap. 06 está funcionando (Venda simples abre e calcula).</li>
+            <li>Faça um commit (se usar Git) ou crie uma cópia da pasta do projeto (backup).</li>
+          </ol>
+        </div>
+
+        <!-- Passo 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar interfaces em <code>Models</code></h3>
+          <ol>
+            <li>Crie <code>Models/IEtiquetavel.cs</code></li>
+            <li>Crie <code>Models/IPrecificavel.cs</code></li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/IEtiquetavel.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.Models
+{
+    public interface IEtiquetavel
+    {
+        string Etiqueta();
+    }
+}
+</code></pre>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/IPrecificavel.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.Models
+{
+    public interface IPrecificavel
+    {
+        decimal CalcularTotalVenda(int quantidade, decimal descontoPercentual = 0);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Interfaces são “contratos”: qualquer classe que implementar deve ter esses métodos.</div>
+          </div>
+        </div>
+
+        <!-- Passo 2 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Tornar <code>Produto</code> uma classe abstrata e implementar as interfaces</h3>
+          <p>
+            Agora vamos:
+            <strong>(1)</strong> declarar <code>abstract class Produto</code>,
+            <strong>(2)</strong> implementar <code>IEtiquetavel</code> e <code>IPrecificavel</code>,
+            <strong>(3)</strong> tornar <code>Tipo</code> e <code>Detalhes</code> <strong>abstratos</strong> (obrigatórios).
+          </p>
+
+          <ol>
+            <li>Abra <code>Models/Produto.cs</code>.</li>
+            <li>Altere o cabeçalho da classe e as propriedades conforme o trecho abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Produto.cs</code> (trechos principais para ajustar)</div>
+          <pre class="language-csharp"><code class="language-csharp">namespace LanchoneteApp.Models
+{
+    // Produto agora é abstrato e implementa interfaces
+    public abstract class Produto : IEtiquetavel, IPrecificavel
+    {
+        // ... (mantenha seus campos/propriedades/constructores existentes)
+
+        // Agora são obrigatórios nas classes filhas
+        public abstract string Tipo { get; }
+        public abstract string Detalhes { get; }
+
+        // Etiqueta pode continuar com implementação padrão (virtual)
+        public virtual string Etiqueta()
+        {
+            return $"[{Tipo}] {Nome} • Preço: {Preco:C} • Estoque: {Estoque} • {Detalhes}";
+        }
+
+        // CalcularTotalVenda já existe do Cap. 06. Mantenha virtual.
+        public virtual decimal CalcularTotalVenda(int quantidade, decimal descontoPercentual = 0)
+        {
+            // (mantenha sua implementação)
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Atenção</div>
+            <div class="small">
+              Depois dessa mudança, <strong>não será possível</strong> fazer <code>new Produto(...)</code>.
+              Por isso, no próximo passo vamos adaptar o Service/Form para criar <code>Lanche</code> ou <code>Bebida</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Ajustar <code>Lanche</code> e <code>Bebida</code> para cumprir os membros abstratos</h3>
+          <p>
+            Como <code>Tipo</code> e <code>Detalhes</code> ficaram abstratos, as classes filhas precisam implementar.
+            Elas já tinham <code>override</code>, então normalmente basta garantir que está usando <code>override</code> corretamente.
+          </p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Lanche.cs</code> (garanta override das propriedades)</div>
+          <pre class="language-csharp"><code class="language-csharp">public override string Tipo =&gt; "Lanche";
+public override string Detalhes =&gt; $"Tamanho: {Tamanho}";
+</code></pre>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Bebida.cs</code> (garanta override das propriedades)</div>
+          <pre class="language-csharp"><code class="language-csharp">public override string Tipo =&gt; "Bebida";
+public override string Detalhes =&gt; $"{VolumeMl}ml • {(Alcoolica ? "Alcoólica" : "Não alcoólica")}";
+</code></pre>
+
+          <div class="alert alert-success border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Ok!</div>
+            <div class="small">Agora Lanche e Bebida cumprem o contrato da classe abstrata.</div>
+          </div>
+        </div>
+
+        <!-- Passo 4 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Refatorar o Service: criar produto por tipo (factory simples)</h3>
+          <p>
+            Antes, o Service criava <code>new Produto(...)</code> quando o ID estava vazio. Agora isso não existe.
+            Vamos criar um método de cadastro que recebe o <strong>tipo</strong> e campos específicos.
+          </p>
+
+          <ol>
+            <li>Abra <code>Services/ProdutoService.cs</code>.</li>
+            <li>Adicione o método abaixo (ou substitua o método antigo de criação, se preferir):</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Services/ProdutoService.cs</code> (novo método CriarProdutoPorTipo)</div>
+          <pre class="language-csharp"><code class="language-csharp">public Produto CriarProdutoPorTipo(
+    string tipo,
+    string? idTexto,
+    string nome,
+    string precoTexto,
+    string estoqueTexto,
+    string? tamanhoTexto,
+    string? volumeTexto,
+    bool alcoolica)
+{
+    // validações comuns (aproveite sua lógica existente)
+    nome = (nome ?? "").Trim();
+    if (string.IsNullOrWhiteSpace(nome))
+        throw new ArgumentException("Informe o nome.");
+
+    var cultura = new CultureInfo("pt-BR");
+    if (!decimal.TryParse(precoTexto, NumberStyles.Any, cultura, out decimal preco))
+        throw new ArgumentException("Preço inválido.");
+
+    int estoque = 0;
+    if (!string.IsNullOrWhiteSpace(estoqueTexto))
+    {
+        if (!int.TryParse(estoqueTexto, out estoque))
+            throw new ArgumentException("Estoque inválido.");
+    }
+
+    // id opcional
+    int? id = null;
+    if (!string.IsNullOrWhiteSpace(idTexto))
+    {
+        if (!int.TryParse(idTexto, out int tmp))
+            throw new ArgumentException("ID inválido.");
+        if (_repo.FindById(tmp) != null)
+            throw new InvalidOperationException("Já existe um produto com esse ID.");
+        id = tmp;
+    }
+
+    Produto novo;
+    tipo = (tipo ?? "").Trim().ToLower();
+
+    if (tipo == "lanche")
+    {
+        string tamanho = (tamanhoTexto ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(tamanho))
+            throw new ArgumentException("Informe o tamanho do lanche.");
+
+        novo = id.HasValue
+            ? new Lanche(id.Value, nome, preco, estoque, tamanho)
+            : new Lanche(nome, preco, estoque, tamanho);
+    }
+    else if (tipo == "bebida")
+    {
+        if (!int.TryParse(volumeTexto, out int volume) || volume &lt;= 0)
+            throw new ArgumentException("Informe o volume (ml) da bebida.");
+
+        novo = id.HasValue
+            ? new Bebida(id.Value, nome, preco, estoque, volume, alcoolica)
+            : new Bebida(nome, preco, estoque, volume, alcoolica);
+    }
+    else
+    {
+        throw new ArgumentException("Tipo inválido. Use Lanche ou Bebida.");
+    }
+
+    _repo.Add(novo);
+    return novo;
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-pin-angle me-1"></i>Conceito importante</div>
+            <div class="small">Isso é uma “factory simples”: um método que decide qual classe instanciar. Você está preparando o terreno para padrões (Cap. 08 MVC e, mais tarde, DAO).</div>
+          </div>
+        </div>
+
+        <!-- Passo 5 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — Atualizar o <code>FrmProdutos</code> para escolher o tipo</h3>
+          <p>
+            Agora a tela deve permitir escolher <strong>Lanche</strong> ou <strong>Bebida</strong> e exibir campos específicos.
+            Faça assim (simples):
+          </p>
+
+          <ol>
+            <li>No Designer do <code>FrmProdutos</code>, adicione um <strong>ComboBox</strong> <code>cboTipo</code> com itens: <code>Lanche</code> e <code>Bebida</code>.</li>
+            <li>Adicione campos específicos:</li>
+          </ol>
+          <ul>
+            <li>Para lanche: TextBox <code>txtTamanho</code> (Label: Tamanho)</li>
+            <li>Para bebida: TextBox <code>txtVolume</code> (Label: Volume (ml)) + CheckBox <code>chkAlcoolica</code> (Text: Alcoólica)</li>
+          </ul>
+          <p class="mb-2">Dica visual: deixe os campos em um GroupBox “Dados do tipo”.</p>
+
+          <p class="mb-2">Agora, no código do form, carregue o combo e altere o botão Adicionar para usar o novo método do service:</p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmProdutos.cs</code> (inicializar o combo)</div>
+          <pre class="language-csharp"><code class="language-csharp">// no construtor do FrmProdutos, após InitializeComponent():
+cboTipo.Items.Clear();
+cboTipo.Items.AddRange(new object[] { "Lanche", "Bebida" });
+cboTipo.SelectedIndex = 0;
+</code></pre>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmProdutos.cs</code> (btnAdicionar_Click atualizado)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void btnAdicionar_Click(object sender, EventArgs e)
+{
+    try
+    {
+        string tipo = cboTipo.SelectedItem?.ToString() ?? "";
+
+        _service.CriarProdutoPorTipo(
+            tipo,
+            txtId.Text,
+            txtNome.Text,
+            txtPreco.Text,
+            txtEstoque.Text,
+            txtTamanho.Text,
+            txtVolume.Text,
+            chkAlcoolica.Checked
+        );
+
+        AtualizarGrid();
+
+        // limpar
+        txtId.Clear(); txtNome.Clear(); txtPreco.Clear(); txtEstoque.Clear();
+        txtTamanho.Clear(); txtVolume.Clear(); chkAlcoolica.Checked = false;
+        txtNome.Focus();
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-success border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado</div>
+            <div class="small">Agora o sistema não cria “Produto genérico”. Ele cria um Lanche ou Bebida, respeitando a classe abstrata.</div>
+          </div>
+        </div>
+
+        <!-- Passo 6 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 6 — Usar interfaces no código (sem depender da classe concreta)</h3>
+          <p>
+            Vamos criar métodos utilitários (pode ser no Service ou Utils) que aceitam interfaces.
+            Isso mostra o poder das interfaces: o método não precisa saber se é Bebida/Lanche.
+          </p>
+
+          <ol>
+            <li>Crie uma classe <code>Utils/Operacoes.cs</code> (ou coloque no Service) com os métodos abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Utils/Operacoes.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using LanchoneteApp.Models;
+
+namespace LanchoneteApp.Utils
+{
+    public static class Operacoes
+    {
+        public static string GerarEtiqueta(IEtiquetavel item)
+        {
+            return item.Etiqueta();
+        }
+
+        public static decimal CalcularTotal(IPrecificavel item, int qtd, decimal desconto = 0)
+        {
+            return item.CalcularTotalVenda(qtd, desconto);
+        }
+    }
+}
+</code></pre>
+
+          <p class="mt-3 mb-2">Agora, em qualquer lugar (ex.: botão Etiqueta no FrmProdutos), você pode usar:</p>
+
+          <div class="code-caption mb-2">Exemplo: <code>Views/FrmProdutos.cs</code> (usar interface)</div>
+          <pre class="language-csharp"><code class="language-csharp">using LanchoneteApp.Utils;
+
+// ...
+if (dgvProdutos.CurrentRow?.DataBoundItem is Produto p)
+{
+    MessageBox.Show(Operacoes.GerarEtiqueta(p), "Etiqueta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+}
+</code></pre>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold mb-1"><i class="bi bi-diagram-3 me-1"></i>O que você ganhou com isso?</div>
+            <div class="small">Agora o código pode trabalhar com <code>IEtiquetavel</code> e <code>IPrecificavel</code>. Se amanhã surgir <code>Combo</code>, basta implementar as interfaces — sem mudar o resto.</div>
+          </div>
+        </div>
+
+        <!-- Passo 7 -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 7 — Testes obrigatórios</h3>
+          <ul>
+            <li>Cadastre um <strong>Lanche</strong> com tamanho e verifique <code>Tipo</code>/<code>Detalhes</code> no grid.</li>
+            <li>Cadastre uma <strong>Bebida</strong> com volume e marque “Alcoólica”.</li>
+            <li>Abra a Venda Simples (Cap. 06) e calcule: as regras específicas continuam funcionando.</li>
+            <li>Clique em “Etiqueta” e veja que ela sempre mostra o tipo/detalhes (classe abstrata obrigou isso).</li>
+          </ul>
+          <div class="alert alert-success border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+            <div class="small">Projeto mais seguro: não existe Produto genérico, e as capacidades são garantidas por interfaces.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Atividades -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">3) Atividades práticas (para fixar)</h2>
+        <p class="text-secondary">Faça <strong>2</strong> atividades (ou todas para bônus). Elas reforçam abstract + interface.</p>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Criar <code>Combo</code> como novo tipo</div>
+              <ul class="small mb-0">
+                <li>Crie <code>Combo : Produto</code> com <code>Itens</code> e <code>DescontoPercentual</code>.</li>
+                <li>Implemente <code>Tipo</code> e <code>Detalhes</code> (obrigatórios).</li>
+                <li>Override de <code>CalcularTotalVenda</code> aplicando desconto extra do combo.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Interface extra: <code>IExportavel</code></div>
+              <ul class="small mb-0">
+                <li>Crie <code>IExportavel</code> com método <code>string ToCsv()</code>.</li>
+                <li>Implemente em <code>Lanche</code> e <code>Bebida</code> (CSV com campos principais).</li>
+                <li>Crie um botão no form para exportar o item selecionado (MessageBox com CSV).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — Melhorar UI: mostrar campos por tipo</div>
+              <ul class="small mb-0">
+                <li>No evento <code>cboTipo_SelectedIndexChanged</code>, oculte/mostre campos (tamanho vs volume/alcoolica).</li>
+                <li>Garanta que a validação acompanha (não exigir volume quando for lanche, etc.).</li>
+                <li>Mostre mensagens amigáveis quando faltar dado do tipo.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+        <h3 class="h6 section-title mb-2">Critérios rápidos</h3>
+        <ul class="small mb-0">
+          <li><code>Produto</code> abstrato e sem instância direta.</li>
+          <li>Classes filhas implementam <code>Tipo</code> e <code>Detalhes</code> (obrigatório).</li>
+          <li>Uso correto de interfaces em pelo menos 1 ponto do código.</li>
+          <li>Projeto compila e funciona.</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Pesquisas complementares (para aprofundar)</h2>
+        <ul class="mb-0">
+          <li>Qual a diferença entre <strong>classe abstrata</strong> e <strong>interface</strong> em C#?</li>
+          <li>O que é <strong>segregação de interfaces</strong> (ISP) e por que ter interfaces pequenas ajuda?</li>
+          <li>O que é <strong>factory method</strong> e como ele aparece no nosso <code>CriarProdutoPorTipo</code>?</li>
+          <li>Quais vantagens isso traz para o MVC no Capítulo 08?</li>
+        </ul>
+        <p class="small text-secondary mt-2 mb-0">Escreva um parágrafo por item e cite exemplos do seu projeto.</p>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — O que significa uma classe ser abstrata?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Ela é mais rápida na execução.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) Ela não pode ser instanciada diretamente e serve como base para outras classes.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) Ela substitui interfaces automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) Ela só pode ter métodos private.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Ela é usada apenas com MySQL.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — Qual a diferença entre membro abstrato e virtual?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) Não existe diferença; são sinônimos.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) Abstrato não tem implementação e obriga a filha; virtual tem implementação padrão e a filha pode sobrescrever.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) Virtual não pode ser sobrescrito.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) Abstrato só funciona com static.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) Virtual existe apenas em interfaces.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — O que é uma interface em C#?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Um tipo que sempre possui implementação completa.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) Um contrato de membros que uma classe promete implementar.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Uma pasta do projeto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Um banco de dados temporário.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) Um tipo que só existe para Windows Forms.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — Por que tornar <code>Produto</code> abstrato foi útil no nosso projeto?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Para poder instanciar Produto mais facilmente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) Para impedir produto genérico e obrigar definição de tipo/detalhes nas classes filhas.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Para o MySQL funcionar.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) Para remover a necessidade de herança.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) Para impedir override.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Qual vantagem de usar <code>IEtiquetavel</code> e <code>IPrecificavel</code>?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) Força todas as classes a herdar de Produto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) Permite criar métodos que aceitam “qualquer item com aquela capacidade”, sem depender do tipo concreto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) Substitui a necessidade de validação.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) Impede polimorfismo.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) Serve apenas para interface gráfica.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Sei explicar o que é classe abstrata e por que não instancia.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Criei as interfaces <code>IEtiquetavel</code> e <code>IPrecificavel</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Tornei <code>Produto</code> abstrato e implementei as interfaces.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Transformei <code>Tipo</code> e <code>Detalhes</code> em membros abstratos e ajustei Lanche/Bebida.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Criei <code>CriarProdutoPorTipo</code> no Service para instanciar a classe certa.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Atualizei o <code>FrmProdutos</code> com seleção de tipo e campos específicos.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Usei pelo menos 1 método aceitando interface (ex.: <code>Operacoes.GerarEtiqueta</code>).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Fiz pelo menos 2 atividades práticas e registrei evidências.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Próximo passo</div>
+          <div class="small">No Capítulo 08 vamos organizar o projeto com o padrão <strong>MVC</strong> e realizar a <strong>Entrega 2</strong>.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 06</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 08</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 07</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine (interativo)
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap07-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'B', q4:'B', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine (interativo)
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap07-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>

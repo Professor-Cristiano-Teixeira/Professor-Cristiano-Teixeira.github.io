@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 06 • Polimorfismo (aplicado) • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c;
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d;
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+
+    body{ background: var(--bg-soft); }
+
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+
+    .card{ border:0; box-shadow: var(--card-shadow); }
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+
+    .small-muted{ color:#6b7280; }
+
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    a:focus, button:focus, input:focus, select:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background: #fff; border: 1px solid rgba(15,23,42,.08); border-left: 6px solid var(--brand-red); border-radius: 14px; padding: 1rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html"><i class="bi bi-journal-code me-2"></i>PP-DS-NOVA</a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 05</a>
+        <a class="btn btn-gray" href="capitulo06.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 06 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 07</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#passo-a-passo" data-bs-dismiss="offcanvas"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB2">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB2" aria-expanded="true" aria-controls="cB2">
+              <span class="badge badge-bim me-2">2º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB2" class="accordion-collapse collapse show" aria-labelledby="hB2" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo05.html">Cap. 05 — Herança e sobrescrita</a></li>
+                <li><a class="nav-link px-0" href="capitulo06.html"><strong>Cap. 06</strong> — Polimorfismo</a></li>
+                <li><a class="nav-link px-0" href="capitulo07.html">Cap. 07 — Abstratas e interfaces</a></li>
+                <li><a class="nav-link px-0" href="capitulo08.html">Cap. 08 — MVC + entrega 2</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0"><i class="bi bi-info-circle me-1"></i>Abra os arquivos na mesma pasta para manter os links funcionando.</p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Cabeçalho -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">2º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 06 (100 min/semana)</span>
+            </div>
+            <h1 class="h3 mb-2">Polimorfismo (aplicado ao projeto da lanchonete)</h1>
+            <p class="mb-0 text-secondary">
+              Você já criou <code>Produto</code>, <code>Lanche</code> e <code>Bebida</code>. Agora vamos usar <strong>polimorfismo</strong> para tratar
+              todos como <code>Produto</code>, mas com comportamentos diferentes em tempo de execução.
+              Na prática, vamos criar uma <strong>simulação de venda</strong> que calcula preço final de acordo com o tipo do produto.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#atividades"><i class="bi bi-hammer me-1"></i>Atividades</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objetivos e Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Explicar <strong>polimorfismo</strong> (mesma referência, comportamentos diferentes).</li>
+              <li>Usar coleções do tipo base (<code>List&lt;Produto&gt;</code>) com objetos de classes filhas.</li>
+              <li>Criar um método <code>virtual</code> na base e sobrescrever (<code>override</code>) nas filhas para regras de preço.</li>
+              <li>Aplicar <strong>pattern matching</strong> (<code>is</code>, <code>switch</code>) para casos específicos (sem exagero).</li>
+              <li>Construir uma tela de <strong>Simulação de Venda</strong> e um <strong>Resumo</strong> por tipo.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Capítulo 05 finalizado (classes <code>Lanche</code> e <code>Bebida</code> com overrides)</li>
+              <li><code>FrmMenu</code> e <code>FrmProdutos</code> funcionando (Cap. 04)</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Ideia central</div>
+              <div class="small text-secondary">Uma lista de <code>Produto</code> pode conter <code>Lanche</code> e <code>Bebida</code>. Ao chamar um método virtual, cada tipo responde do seu jeito.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — Conceitos + implementação</div>
+              <ol class="mb-0 small">
+                <li>Polimorfismo e despacho dinâmico (virtual/override)</li>
+                <li>Criar método <code>CalcularTotalVenda</code> na base (virtual)</li>
+                <li>Override em <code>Bebida</code> e <code>Lanche</code> com regras simples</li>
+                <li>Atualizar Service para calcular total de venda usando <code>Produto</code></li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — Tela e prática</div>
+              <ol class="mb-0 small">
+                <li>Criar <code>FrmVendaSimples</code> (simular venda)</li>
+                <li>Criar resumo por tipo (totalizadores)</li>
+                <li>Atividades práticas propostas</li>
+                <li>Questionário e checklist</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (conceitos essenciais)</h2>
+
+        <h3 class="h5 mt-4">1.1 O que é polimorfismo?</h3>
+        <p>
+          <strong>Polimorfismo</strong> significa “muitas formas”. Em POO, ele acontece quando você trata objetos diferentes através do mesmo tipo
+          (geralmente o tipo base), mas cada objeto executa o comportamento de acordo com seu tipo real.
+          Ou seja: a variável pode ser do tipo <code>Produto</code>, mas o objeto dentro dela pode ser um <code>Lanche</code> ou uma <code>Bebida</code>.
+        </p>
+        <p>
+          No nosso projeto, a lista do repositório é uma <code>List&lt;Produto&gt;</code>. Ela contém lanches e bebidas.
+          Quando chamamos um método <code>virtual</code> (por exemplo, <code>Etiqueta()</code>), cada item responde do seu jeito
+          porque as classes filhas usam <code>override</code>.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 Polimorfismo na prática: despacho dinâmico (virtual/override)</h3>
+        <p>
+          Quando um método é <code>virtual</code> na classe base e <code>override</code> na filha, o C# decide em tempo de execução qual método executar.
+          Isso permite criar regras diferentes por tipo sem precisar escrever vários <code>if</code> no formulário.
+        </p>
+        <p>
+          Exemplo: a regra de preço final pode variar: bebida alcoólica pode ter uma taxa extra; lanche grande pode ter um acréscimo.
+          Em vez de fazer isso no Form, colocamos a regra no próprio objeto (classe filha), usando polimorfismo.
+        </p>
+
+        <h3 class="h5 mt-4">1.3 Pattern matching (uso moderado)</h3>
+        <p>
+          Às vezes precisamos de informações específicas do tipo (ex.: mostrar volume da bebida). Para isso, usamos
+          <strong>pattern matching</strong> com <code>is</code> e <code>switch</code>.
+          A regra é: use com moderação. Se você faz <code>if (p is Bebida)</code> toda hora, talvez você esteja perdendo o benefício do polimorfismo.
+        </p>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-lightbulb me-1"></i>Dica de ouro</div>
+          <div class="small">Preferir polimorfismo (virtual/override) para regras; usar pattern matching apenas para detalhes específicos (exibir algo extra).</div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (Simulação de venda com polimorfismo)</h2>
+        <p class="text-secondary mb-4">
+          Vamos criar um método <code>CalcularTotalVenda</code> em <code>Produto</code> e sobrescrever em <code>Bebida</code> e <code>Lanche</code>.
+          Depois, vamos criar a tela <code>FrmVendaSimples</code> para simular uma venda: escolher um produto, informar quantidade e desconto.
+        </p>
+
+        <!-- Passo 0 -->
+        <div class="mb-4">
+          <h3 class="h5">Antes de começar</h3>
+          <ol>
+            <li>Abra a solução <code>LanchoneteApp</code>.</li>
+            <li>Execute (<code class="kbd">F5</code>) e confirme que a tela de produtos mostra lanches e bebidas (Cap. 05).</li>
+          </ol>
+        </div>
+
+        <!-- Passo 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar um método virtual de cálculo na classe base (<code>Produto</code>)</h3>
+          <p>
+            Vamos criar <code>CalcularTotalVenda</code> como <code>virtual</code> na classe base. Ele calcula:
+            <code>Preço * quantidade</code> e aplica desconto percentual.
+            As classes filhas poderão alterar isso.
+          </p>
+          <ol>
+            <li>Abra <code>Models/Produto.cs</code>.</li>
+            <li>Adicione este método <strong>dentro</strong> da classe (perto dos outros métodos):</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Produto.cs</code> (novo método virtual)</div>
+          <pre class="language-csharp"><code class="language-csharp">public virtual decimal CalcularTotalVenda(int quantidade, decimal descontoPercentual = 0)
+{
+    if (quantidade &lt;= 0)
+        throw new ArgumentException("Quantidade deve ser maior que zero.");
+
+    if (descontoPercentual &lt; 0 || descontoPercentual &gt; 100)
+        throw new ArgumentException("Desconto deve estar entre 0 e 100.");
+
+    decimal bruto = Preco * quantidade;
+    decimal desconto = bruto * (descontoPercentual / 100m);
+    return bruto - desconto;
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-pin-angle me-1"></i>Por que virtual?</div>
+            <div class="small">Porque Bebida e Lanche vão sobrescrever o cálculo para regras específicas (taxa, acréscimo etc.).</div>
+          </div>
+        </div>
+
+        <!-- Passo 2 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Sobrescrever o cálculo em <code>Bebida</code> (taxa para alcoólica)</h3>
+          <p>
+            Regra simples (didática): se a bebida for <strong>alcoólica</strong>, acrescenta <strong>10%</strong> de taxa no valor final.
+            Assim, o mesmo método se comporta de modo diferente dependendo do tipo.
+          </p>
+          <ol>
+            <li>Abra <code>Models/Bebida.cs</code>.</li>
+            <li>Adicione este override dentro da classe:</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Bebida.cs</code> (override do cálculo)</div>
+          <pre class="language-csharp"><code class="language-csharp">public override decimal CalcularTotalVenda(int quantidade, decimal descontoPercentual = 0)
+{
+    decimal total = base.CalcularTotalVenda(quantidade, descontoPercentual);
+
+    // Regra: bebida alcoólica tem taxa de 10%
+    if (Alcoolica)
+        total *= 1.10m;
+
+    return total;
+}
+</code></pre>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Sobrescrever o cálculo em <code>Lanche</code> (acréscimo por tamanho)</h3>
+          <p>
+            Regra simples: se o tamanho for <strong>Grande</strong>, acrescenta 15%.
+            Se for <strong>Média</strong>, acrescenta 5%. Se for Pequeno, não acrescenta.
+          </p>
+          <ol>
+            <li>Abra <code>Models/Lanche.cs</code>.</li>
+            <li>Adicione este override dentro da classe:</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Models/Lanche.cs</code> (override do cálculo)</div>
+          <pre class="language-csharp"><code class="language-csharp">public override decimal CalcularTotalVenda(int quantidade, decimal descontoPercentual = 0)
+{
+    decimal total = base.CalcularTotalVenda(quantidade, descontoPercentual);
+
+    string t = (Tamanho ?? "").Trim().ToLower();
+    if (t == "grande") total *= 1.15m;
+    else if (t == "média" || t == "media") total *= 1.05m;
+
+    return total;
+}
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Essa regra é só para aprendizado. Em sistemas reais, regras ficam mais sofisticadas e parametrizadas.</div>
+          </div>
+        </div>
+
+        <!-- Passo 4 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Atualizar o Service para simular venda com polimorfismo</h3>
+          <p>
+            Agora o Service vai chamar <code>CalcularTotalVenda</code> do produto escolhido.
+            Note: o service vai tratar como <code>Produto</code>, mas o método executado depende do tipo real.
+          </p>
+          <ol>
+            <li>Abra <code>Services/ProdutoService.cs</code>.</li>
+            <li>Adicione este método:</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Services/ProdutoService.cs</code> (novo método)</div>
+          <pre class="language-csharp"><code class="language-csharp">public decimal SimularVenda(int id, string qtdTexto, string? descontoTexto)
+{
+    if (!int.TryParse(qtdTexto, out int qtd))
+        throw new ArgumentException("Quantidade inválida.");
+
+    decimal desconto = 0;
+    if (!string.IsNullOrWhiteSpace(descontoTexto))
+    {
+        var cultura = new CultureInfo("pt-BR");
+        if (!decimal.TryParse(descontoTexto, NumberStyles.Any, cultura, out desconto))
+            throw new ArgumentException("Desconto inválido.");
+    }
+
+    var p = _repo.FindById(id) ?? throw new InvalidOperationException("Produto não encontrado.");
+
+    // POLIMORFISMO: chama o método virtual (cada tipo calcula do seu jeito)
+    return p.CalcularTotalVenda(qtd, desconto);
+}
+</code></pre>
+        </div>
+
+        <!-- Passo 5 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — Criar a tela <code>FrmVendaSimples</code> (Views)</h3>
+          <p>
+            Vamos criar uma tela de simulação de venda:
+            o usuário escolhe um produto da lista, informa quantidade e desconto e clica em “Calcular”.
+          </p>
+
+          <ol>
+            <li>Crie um novo Form em <code>Views</code>: <code>FrmVendaSimples.cs</code>.</li>
+            <li>No Designer, crie os controles:</li>
+          </ol>
+          <ul>
+            <li><code>ComboBox</code> <strong>cboProduto</strong> (DropDownStyle: DropDownList)</li>
+            <li>TextBox <strong>txtQtd</strong> (Label: Quantidade)</li>
+            <li>TextBox <strong>txtDesconto</strong> (Label: Desconto % (opcional))</li>
+            <li>Button <strong>btnCalcular</strong> (Text: Calcular Total)</li>
+            <li>Label <strong>lblResultado</strong> (Text inicial: “Total: R$ 0,00”)</li>
+          </ul>
+
+          <p class="mb-2">Agora use este código do form (você pode adaptar nomes dos controles se necessário):</p>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmVendaSimples.cs</code> (código completo sugerido)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Linq;
+using System.Windows.Forms;
+using LanchoneteApp.Data;
+using LanchoneteApp.Models;
+using LanchoneteApp.Services;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmVendaSimples : Form
+    {
+        private readonly ProdutoRepository _repo;
+        private readonly ProdutoService _service;
+
+        public FrmVendaSimples(ProdutoRepository repo)
+        {
+            InitializeComponent();
+
+            _repo = repo;
+            _service = new ProdutoService(_repo);
+
+            CarregarProdutos();
+            lblResultado.Text = "Total: R$ 0,00";
+        }
+
+        private void CarregarProdutos()
+        {
+            var lista = _repo.GetAll().ToList();
+            cboProduto.DataSource = lista;
+            cboProduto.DisplayMember = "Nome"; // aparece no combo
+            cboProduto.ValueMember = "Id";
+        }
+
+        private int IdSelecionado()
+        {
+            // ValueMember = Id
+            if (cboProduto.SelectedValue is int id)
+                return id;
+
+            // fallback (caso SelectedValue não seja int)
+            if (cboProduto.SelectedItem is Produto p)
+                return p.Id;
+
+            throw new InvalidOperationException("Selecione um produto.");
+        }
+
+        private void btnCalcular_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int id = IdSelecionado();
+                decimal total = _service.SimularVenda(id, txtQtd.Text, txtDesconto.Text);
+
+                // Exibir resultado
+                lblResultado.Text = $"Total: {total:C}";
+
+                // (Opcional) Mostrar detalhes do tipo usando pattern matching
+                if (cboProduto.SelectedItem is Produto p)
+                {
+                    string extra = p switch
+                    {
+                        Bebida b => $"Tipo: Bebida ({b.VolumeMl}ml)",
+                        Lanche l => $"Tipo: Lanche ({l.Tamanho})",
+                        _ => $"Tipo: {p.Tipo}"
+                    };
+                    this.Text = $"Venda Simples • {extra}";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Onde está o polimorfismo?</div>
+            <div class="small">O Service chama <code>p.CalcularTotalVenda</code>. Se <code>p</code> for Bebida ou Lanche, o C# executa o override correto automaticamente.</div>
+          </div>
+        </div>
+
+        <!-- Passo 6 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 6 — Adicionar opção no Menu principal para abrir a Venda Simples</h3>
+          <ol>
+            <li>No <code>FrmMenu</code>, adicione no MenuStrip uma opção: <strong>Vendas</strong> → <strong>Venda simples</strong>.</li>
+            <li>No evento click, abra a tela usando o mesmo repositório:</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmMenu.cs</code> (evento do menu Venda simples)</div>
+          <pre class="language-csharp"><code class="language-csharp">private void menuVendaSimples_Click(object sender, EventArgs e)
+{
+    new FrmVendaSimples(_repo).ShowDialog();
+}
+</code></pre>
+        </div>
+
+        <!-- Passo 7 -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 7 — Testes obrigatórios</h3>
+          <ul>
+            <li>Simule venda de <strong>Bebida alcoólica</strong> e compare com uma não alcoólica (a alcoólica deve ficar ~10% mais cara).</li>
+            <li>Simule venda de <strong>Lanche Grande</strong> e compare com um lanche Médio (Grande deve ter acréscimo maior).</li>
+            <li>Teste desconto inválido (ex.: 150) e confirme a mensagem.</li>
+            <li>Teste quantidade inválida (ex.: 0 ou texto) e confirme a mensagem.</li>
+          </ul>
+          <div class="alert alert-success border" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Resultado esperado</div>
+            <div class="small">A mesma ação “calcular total” funciona para todos, mas cada tipo aplica sua regra automaticamente (polimorfismo).</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Atividades -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">3) Atividades práticas (para consolidar)</h2>
+        <p class="text-secondary">Escolha <strong>2</strong> atividades (ou faça todas). Elas reforçam polimorfismo e boas decisões de design.</p>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Regra de preço por volume (Bebida)</div>
+              <ul class="small mb-0">
+                <li>Se <code>VolumeMl &gt;= 600</code>, aplicar 5% de desconto no total (além do desconto do usuário).</li>
+                <li>Faça isso no <code>override</code> de <code>Bebida</code>.</li>
+                <li>Teste com uma bebida 600ml no Seed.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Resumo por tipo (relatório)</div>
+              <ul class="small mb-0">
+                <li>Crie um form <code>FrmResumoProdutos</code> com 3 labels: Total de Lanches, Total de Bebidas, Total Geral.</li>
+                <li>Some usando <code>Tipo</code> (ou pattern matching) a partir de <code>_repo.GetAll()</code>.</li>
+                <li>Mostre o resultado formatado em moeda.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — “Cupom” com etiqueta final</div>
+              <ul class="small mb-0">
+                <li>Na venda simples, mostre um cupom com: <code>Etiqueta()</code> + quantidade + desconto + total.</li>
+                <li>Use <code>Etiqueta()</code> (polimórfico) para que o cupom mude conforme o tipo.</li>
+                <li>Exiba em MessageBox ou em um TextBox multilinha.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h3 class="h6 section-title mb-2">Critérios rápidos</h3>
+        <ul class="small mb-0">
+          <li>Uso de <code>virtual</code>/<code>override</code> correto (polimorfismo de verdade).</li>
+          <li>Sem excesso de <code>if (p is ...)</code> para regras (usar override para regras).</li>
+          <li>Evidências: prints/vídeo comparando pelo menos 2 tipos com resultados diferentes.</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Pesquisas complementares (para aprofundar)</h2>
+        <ul class="mb-0">
+          <li>Qual é a diferença entre <strong>polimorfismo</strong> e <strong>herança</strong>?</li>
+          <li>O que é <strong>despacho dinâmico</strong> (dynamic dispatch) e como ele se relaciona com <code>virtual</code>?</li>
+          <li>O que é <strong>pattern matching</strong> em C#? Exemplos com <code>switch</code>.</li>
+          <li>Quando usar <code>switch</code> por tipo pode ser um “cheiro ruim” (code smell)?</li>
+        </ul>
+        <p class="small text-secondary mt-2 mb-0">Escreva um parágrafo por item e relacione com <code>CalcularTotalVenda</code> e a tela de venda.</p>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">5) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Depois, se quiser, clique em <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — O que é polimorfismo em POO?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Guardar dados em uma tabela do banco.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) Tratar objetos diferentes pelo mesmo tipo, com comportamentos diferentes em execução.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) Ter dois métodos com o mesmo nome e parâmetros iguais.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) Criar várias pastas no projeto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Substituir o construtor da classe.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — Para o C# escolher o método correto em tempo de execução, o método na base deve ser:
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) static</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) virtual</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) const</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) sealed</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) private</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — No Service, ao chamar <code>p.CalcularTotalVenda(...)</code>, qual cálculo será usado?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Sempre o da classe base Produto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) O do tipo real do objeto (Lanche/Bebida), se houver override.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Um método aleatório escolhido pelo compilador.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Apenas funciona se usar switch-case sempre.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) Um cálculo vindo do banco de dados.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — Quando é mais adequado usar pattern matching (<code>switch</code> por tipo)?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Sempre, para qualquer regra de negócio.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) Para detalhes específicos de exibição, quando polimorfismo não resolve sozinho.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Para substituir virtual/override.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) Somente quando o projeto não compila.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) Para criar construtores automaticamente.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Qual é uma vantagem de colocar regras em overrides nas classes?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) O formulário precisa ter mais if/else.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) As regras ficam no lugar certo e o código da tela fica mais simples.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) O sistema passa a depender do MySQL.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) Não é possível testar o código.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) O polimorfismo deixa de existir.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Sei explicar polimorfismo com minhas palavras.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Criei o método <code>virtual CalcularTotalVenda</code> em <code>Produto</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Implementei override em <code>Bebida</code> (taxa para alcoólica).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Implementei override em <code>Lanche</code> (acréscimo por tamanho).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Criei <code>SimularVenda</code> no Service chamando o método polimórfico.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Criei o form <code>FrmVendaSimples</code> e calculei total para diferentes tipos.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Usei pattern matching apenas para mostrar detalhes (sem colocar regras no Form).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Fiz pelo menos 2 atividades práticas e registrei evidências.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Próximo passo</div>
+          <div class="small">No Capítulo 07 vamos trabalhar <strong>classes abstratas</strong> e <strong>interfaces</strong> para deixar o design ainda mais forte.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 05</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 07</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 06</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine (interativo)
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap06-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'B', q4:'B', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine (interativo)
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap06-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>

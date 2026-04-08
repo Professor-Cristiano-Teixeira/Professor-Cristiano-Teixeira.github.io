@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 • Namespaces, Organização do Projeto e Entrega 1 • PP-DS-NOVA</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --brand-red:#b71c1c; /* menu vermelho */
+      --brand-red-dark:#8a1414;
+      --btn-gray:#6c757d; /* botões cinza */
+      --bg-soft:#f7f7fb;
+      --card-shadow: 0 8px 24px rgba(17, 24, 39, .08);
+    }
+
+    body{ background: var(--bg-soft); }
+
+    /* Navbar vermelha */
+    .navbar-red{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); }
+    .navbar-red .navbar-brand, .navbar-red .nav-link, .navbar-red .navbar-text{ color:#fff !important; }
+    .navbar-red .nav-link:hover{ opacity:.9; }
+
+    /* Botões cinza (padrão da apostila) */
+    .btn-gray{ background: var(--btn-gray); border-color: var(--btn-gray); color:#fff; }
+    .btn-gray:hover{ filter: brightness(.95); color:#fff; }
+
+    .hero{ padding-top: 6rem; padding-bottom: 1.5rem; }
+
+    .card{ border:0; box-shadow: var(--card-shadow); }
+    .badge-bim{ background: rgba(183, 28, 28, .1); color: var(--brand-red-dark); border:1px solid rgba(183, 28, 28, .2); }
+
+    .small-muted{ color:#6b7280; }
+
+    /* Offcanvas */
+    .offcanvas-red .offcanvas-header{ background: linear-gradient(90deg, var(--brand-red), var(--brand-red-dark)); color:#fff; }
+    .offcanvas-red .btn-close{ filter: invert(1) grayscale(100%); }
+
+    .section-title{ border-left: 6px solid var(--brand-red); padding-left: .75rem; }
+
+    /* Code blocks */
+    pre[class*="language-"]{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+    .code-caption{ font-size: .875rem; color:#94a3b8; }
+
+    /* Quiz */
+    .quiz-option{ cursor:pointer; }
+    .quiz-option input{ cursor:pointer; }
+    .quiz-feedback{ display:none; }
+    .quiz-answer{ display:none; }
+
+    /* Checklist */
+    .checklist .form-check{ padding: .5rem .75rem; border-radius: .75rem; }
+    .checklist .form-check:hover{ background: rgba(183, 28, 28, .04); }
+
+    /* Acessibilidade */
+    a:focus, button:focus, input:focus{ outline: 3px solid rgba(183, 28, 28, .35) !important; outline-offset: 2px; }
+
+    code.kbd{ background:#111827; color:#e5e7eb; border-radius:.5rem; padding:.12rem .35rem; }
+
+    .callout{ background: #fff; border: 1px solid rgba(15,23,42,.08); border-left: 6px solid var(--brand-red); border-radius: 14px; padding: 1rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar (fixed + hamburguer/offcanvas) -->
+  <nav class="navbar navbar-red navbar-expand-lg fixed-top" id="top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>PP-DS-NOVA
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas" aria-controls="menuOffcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(100%);"></span>
+      </button>
+
+      <div class="d-none d-lg-flex align-items-center ms-auto gap-2">
+        <a class="btn btn-sm btn-outline-light" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Anterior</a>
+        <a class="btn btn-sm btn-outline-light" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-sm btn-gray" href="#entrega"><i class="bi bi-box-seam me-1"></i>Entrega 1</a>
+        <a class="btn btn-sm btn-gray" href="#questionario"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-sm btn-gray" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+        <a class="btn btn-sm btn-outline-light" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas Menu (hamburguer) -->
+  <div class="offcanvas offcanvas-start offcanvas-red" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="menuOffcanvasLabel"><i class="bi bi-compass me-2"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Cap. 03</a>
+        <a class="btn btn-gray" href="capitulo04.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 04 (atual)</a>
+        <a class="btn btn-outline-secondary" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 05</a>
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+        <a class="btn btn-outline-secondary" href="#entrega" data-bs-dismiss="offcanvas"><i class="bi bi-box-seam me-1"></i>Entrega 1</a>
+        <a class="btn btn-outline-secondary" href="#questionario" data-bs-dismiss="offcanvas"><i class="bi bi-ui-checks-grid me-1"></i>Questionário</a>
+        <a class="btn btn-outline-secondary" href="#checklist" data-bs-dismiss="offcanvas"><i class="bi bi-check2-square me-1"></i>Checklist</a>
+      </div>
+
+      <div class="accordion" id="accordionBimestres">
+        <!-- 1º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB1">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cB1" aria-expanded="true" aria-controls="cB1">
+              <span class="badge badge-bim me-2">1º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB1" class="accordion-collapse collapse show" aria-labelledby="hB1" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo01.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 01 — Classe, objeto e instanciação</a></li>
+                <li><a class="nav-link px-0" href="capitulo02.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 02 — Atributos, métodos e encapsulamento</a></li>
+                <li><a class="nav-link px-0" href="capitulo03.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 03 — Construtores e sobrecargas</a></li>
+                <li><a class="nav-link px-0" href="capitulo04.html"><i class="bi bi-file-earmark-text me-1"></i><strong>Cap. 04</strong> — Namespaces + organização + Entrega 1</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB2" aria-expanded="false" aria-controls="cB2">
+              <span class="badge badge-bim me-2">2º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB2" class="accordion-collapse collapse" aria-labelledby="hB2" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo05.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 05 — Herança e sobrescrita</a></li>
+                <li><a class="nav-link px-0" href="capitulo06.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 06 — Polimorfismo</a></li>
+                <li><a class="nav-link px-0" href="capitulo07.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 07 — Abstratas e interfaces</a></li>
+                <li><a class="nav-link px-0" href="capitulo08.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 08 — MVC + entrega 2</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB3" aria-expanded="false" aria-controls="cB3">
+              <span class="badge badge-bim me-2">3º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB3" class="accordion-collapse collapse" aria-labelledby="hB3" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo09.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 09 — GUI: formulários e layout</a></li>
+                <li><a class="nav-link px-0" href="capitulo10.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 10 — Controles de tela</a></li>
+                <li><a class="nav-link px-0" href="capitulo11.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 11 — Painéis, abas, menus</a></li>
+                <li><a class="nav-link px-0" href="capitulo12.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 12 — GUI + MVC + entrega 3</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4º Bimestre -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hB4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cB4" aria-expanded="false" aria-controls="cB4">
+              <span class="badge badge-bim me-2">4º</span> Bimestre
+            </button>
+          </h2>
+          <div id="cB4" class="accordion-collapse collapse" aria-labelledby="hB4" data-bs-parent="#accordionBimestres">
+            <div class="accordion-body">
+              <ul class="list-unstyled mb-0">
+                <li><a class="nav-link px-0" href="capitulo13.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 13 — Conexão MySQL</a></li>
+                <li><a class="nav-link px-0" href="capitulo14.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 14 — DAO e CRUD</a></li>
+                <li><a class="nav-link px-0" href="capitulo15.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 15 — Parâmetros e SQL Injection</a></li>
+                <li><a class="nav-link px-0" href="capitulo16.html"><i class="bi bi-file-earmark-text me-1"></i>Cap. 16 — Integração final + entrega 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <p class="small small-muted mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Dica: mantenha todos os arquivos (<code>index.html</code> e <code>capituloXX.html</code>) na mesma pasta.
+      </p>
+    </div>
+  </div>
+
+
+  <main class="container hero">
+
+    <!-- Cabeçalho -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge badge-bim">1º Bimestre</span>
+              <span class="text-secondary">•</span>
+              <span class="text-secondary">Capítulo 04 (100 min/semana)</span>
+              <span class="text-secondary">•</span>
+              <span class="badge text-bg-warning"><i class="bi bi-box-seam me-1"></i>Entrega 1</span>
+            </div>
+            <h1 class="h3 mb-2">Namespaces, Organização do Projeto e Mini-Entrega (B1)</h1>
+            <p class="mb-0 text-secondary">
+              Neste capítulo você vai aprender a <strong>organizar</strong> seu projeto: usar <strong>namespaces</strong> para evitar conflitos,
+              separar arquivos em pastas coerentes e criar uma estrutura simples em camadas (<code>Models</code>, <code>Data</code>, <code>Services</code>, <code>Views</code>).
+              Ao final, você fará a <strong>Entrega 1</strong> integrando tudo que foi visto no 1º bimestre.
+            </p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-gray" href="#roteiro"><i class="bi bi-signpost-2 me-1"></i>Roteiro</a>
+            <a class="btn btn-outline-secondary" href="#passo-a-passo"><i class="bi bi-terminal me-1"></i>Passo a passo</a>
+            <a class="btn btn-outline-secondary" href="#entrega"><i class="bi bi-box-seam me-1"></i>Entrega 1</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Objetivos / Pré-requisitos -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Objetivos de aprendizagem</h2>
+            <ul class="mb-0">
+              <li>Explicar o que é <strong>namespace</strong> e quando ele evita conflitos de nomes.</li>
+              <li>Relacionar <strong>pastas</strong> e <strong>namespaces</strong> (organização do código).</li>
+              <li>Aplicar uma estrutura simples por camadas: <code>Models</code>, <code>Data</code>, <code>Services</code>, <code>Views</code>, <code>Utils</code>.</li>
+              <li>Refatorar o projeto para usar um <strong>repositório em memória</strong> e um <strong>serviço</strong> (preparação para DAO no futuro).</li>
+              <li>Concluir a <strong>Entrega 1</strong> (módulo Produtos v1) com organização e evidências.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <h2 class="h5 section-title mb-3">Pré-requisitos</h2>
+            <ul class="mb-3">
+              <li>Capítulos 01–03 concluídos</li>
+              <li>Projeto <code>LanchoneteApp</code> com <code>Produto</code> (encapsulado) e cadastro/alteração funcionando</li>
+            </ul>
+            <div class="alert alert-light border mb-0" role="alert">
+              <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>Por que isso importa?</div>
+              <div class="small text-secondary">Projeto organizado = manutenção mais fácil, menos bugs e base pronta para MVC/DAO/BD depois.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roteiro -->
+    <div class="card mb-4" id="roteiro">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">Roteiro sugerido (2 encontros de 100 minutos)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-1-circle me-1"></i>Semana 1 — Conceitos + refatoração guiada</div>
+              <ol class="mb-0 small">
+                <li>Namespace e <code>using</code> (evitar conflitos)</li>
+                <li>Pastas x namespaces (organização)</li>
+                <li>Criar estrutura: Models, Data, Services, Views, Utils</li>
+                <li>Criar <code>ProdutoRepository</code> (memória) e <code>ProdutoService</code></li>
+                <li>Atualizar o Form para usar o serviço</li>
+              </ol>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-2-circle me-1"></i>Semana 2 — Conclusão + Entrega 1</div>
+              <ol class="mb-0 small">
+                <li>Criar tela inicial (Menu principal) e navegação</li>
+                <li>Relatório simples: estoque baixo</li>
+                <li>Checklist de requisitos da entrega</li>
+                <li>Questionário e finalização do bimestre</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Teoria -->
+    <div class="card mb-4">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="h4 section-title mb-3">1) Parte teórica (conceitos essenciais)</h2>
+
+        <h3 class="h5 mt-4">1.1 O que é namespace?</h3>
+        <p>
+          Um <strong>namespace</strong> é um “sobrenome” do código. Ele agrupa classes relacionadas e evita conflito quando existem duas classes com o mesmo nome.
+          Exemplo: você pode ter <code>LanchoneteApp.Models.Produto</code> e, em outro contexto, <code>OutraBiblioteca.Models.Produto</code>.
+          O namespace deixa claro <em>qual</em> Produto você quer usar.
+        </p>
+
+        <h3 class="h5 mt-4">1.2 <code>using</code>: como você “importa” um namespace</h3>
+        <p>
+          O <code>using</code> permite usar classes de um namespace sem escrever o nome completo toda hora.
+          Ex.: com <code>using LanchoneteApp.Models;</code> você pode escrever <code>Produto</code> em vez de <code>LanchoneteApp.Models.Produto</code>.
+          Se houver conflito de nomes, você pode usar o nome completo para resolver.
+        </p>
+
+        <h3 class="h5 mt-4">1.3 Pastas x Namespaces (o que tem a ver?)</h3>
+        <p>
+          Pastas organizam arquivos no seu projeto (visual). Namespaces organizam nomes no código (lógico). O Visual Studio normalmente sugere um namespace
+          baseado no nome do projeto e na pasta, mas isso pode ser ajustado. Uma boa prática é manter <strong>pastas e namespaces alinhados</strong>.
+        </p>
+
+        <h3 class="h5 mt-4">1.4 Organização por camadas (simples e realista)</h3>
+        <p>
+          Para deixar o projeto mais claro, vamos separar responsabilidades:
+          <strong>Models</strong> (entidades como Produto), <strong>Data</strong> (armazenamento: lista em memória agora, DAO depois),
+          <strong>Services</strong> (regras de negócio), <strong>Views</strong> (forms/telas) e <strong>Utils</strong> (ajudas como parse).
+          Isso prepara o terreno para MVC e DAO no futuro.
+        </p>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold mb-1"><i class="bi bi-diagram-3 me-1"></i>Resumo em 1 frase</div>
+          <div class="small">Pastas + namespaces organizados = menos confusão, código mais limpo e evolução mais fácil (especialmente quando o projeto cresce).</div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h2 class="h4 section-title mb-3" id="passo-a-passo">2) Passo a passo (refatoração de organização)</h2>
+        <p class="text-secondary mb-4">
+          Vamos reorganizar o projeto criando as pastas e classes necessárias e refatorando o formulário para usar um serviço.
+          <strong>Sem banco ainda</strong>: o repositório será em memória, mas estruturado como se fosse o “Data Access” futuro.
+        </p>
+
+        <!-- Passo 1 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 1 — Criar pastas (camadas) e ajustar namespaces</h3>
+          <ol>
+            <li>No projeto <code>LanchoneteApp</code>, crie as pastas: <code>Models</code>, <code>Data</code>, <code>Services</code>, <code>Views</code>, <code>Utils</code>.</li>
+            <li>Mova <code>FrmProdutos.cs</code> para a pasta <code>Views</code> (arraste no Solution Explorer).</li>
+            <li>Se o Visual Studio perguntar para ajustar o namespace, aceite (ou ajuste manualmente).</li>
+          </ol>
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Se o namespace não mudar automaticamente, você pode editar no topo do arquivo: <code>namespace LanchoneteApp.Views</code>.</div>
+          </div>
+        </div>
+
+        <!-- Passo 2 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 2 — Criar o repositório em memória (<code>Data</code>)</h3>
+          <p>
+            O repositório será responsável por <strong>guardar</strong> e <strong>fornecer</strong> produtos. Ele encapsula a lista interna.
+            No futuro, você poderá substituir o conteúdo por um DAO com MySQL sem mudar tanto o resto do sistema.
+          </p>
+
+          <ol>
+            <li>Crie uma classe em <code>Data</code> chamada <code>ProdutoRepository.cs</code>.</li>
+            <li>Use o código abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Data/ProdutoRepository.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Collections.Generic;
+using System.Linq;
+using LanchoneteApp.Models;
+
+namespace LanchoneteApp.Data
+{
+    public class ProdutoRepository
+    {
+        private readonly List&lt;Produto&gt; _dados = new();
+
+        public IReadOnlyList&lt;Produto&gt; GetAll() =&gt; _dados;
+
+        public Produto? FindById(int id) =&gt; _dados.FirstOrDefault(p =&gt; p.Id == id);
+
+        public void Add(Produto produto)
+        {
+            if (FindById(produto.Id) != null)
+                throw new InvalidOperationException("Já existe um produto com esse ID.");
+
+            _dados.Add(produto);
+        }
+
+        public bool Remove(int id)
+        {
+            var p = FindById(id);
+            if (p == null) return false;
+            _dados.Remove(p);
+            return true;
+        }
+
+        public List&lt;Produto&gt; GetEstoqueBaixo(int limite = 3)
+        {
+            return _dados.Where(p =&gt; p.Estoque &lt;= limite).ToList();
+        }
+
+        // Para testes iniciais
+        public void SeedBasico()
+        {
+            if (_dados.Count &gt; 0) return;
+            _dados.Add(new Produto(1, "X-Burger", 18.50m, 5));
+            _dados.Add(new Produto(2, "Batata Frita", 12.00m, 2));
+            _dados.Add(new Produto(3, "Refrigerante Cola", 7.00m, 12));
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-pin-angle me-1"></i>Onde entra namespace aqui?</div>
+            <div class="small">Perceba o <code>namespace LanchoneteApp.Data</code>. Agora você tem uma área do projeto dedicada a dados.</div>
+          </div>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 3 — Criar o serviço (<code>Services</code>) para regras e ações</h3>
+          <p>
+            O <strong>serviço</strong> coordena regras e usa o repositório. Ele vira o “lugar certo” para decisões de negócio.
+            Ex.: como cadastrar produto, quando bloquear, como ajustar estoque etc.
+          </p>
+
+          <ol>
+            <li>Crie uma classe em <code>Services</code> chamada <code>ProdutoService.cs</code>.</li>
+            <li>Use o código abaixo.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Services/ProdutoService.cs</code></div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Globalization;
+using System.Linq;
+using LanchoneteApp.Data;
+using LanchoneteApp.Models;
+
+namespace LanchoneteApp.Services
+{
+    public class ProdutoService
+    {
+        private readonly ProdutoRepository _repo;
+
+        public ProdutoService(ProdutoRepository repo)
+        {
+            _repo = repo;
+        }
+
+        public Produto CriarProduto(string? idTexto, string nome, string precoTexto, string estoqueTexto)
+        {
+            nome = (nome ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(nome))
+                throw new ArgumentException("Informe o nome do produto.");
+
+            var cultura = new CultureInfo("pt-BR");
+            if (!decimal.TryParse(precoTexto, NumberStyles.Any, cultura, out decimal preco))
+                throw new ArgumentException("Preço inválido. Ex.: 9,50");
+
+            int estoque = 0;
+            if (!string.IsNullOrWhiteSpace(estoqueTexto))
+            {
+                if (!int.TryParse(estoqueTexto, out estoque))
+                    throw new ArgumentException("Estoque inválido.");
+            }
+
+            Produto novo;
+
+            // ID opcional: se vazio, usa construtor com ID automático
+            if (string.IsNullOrWhiteSpace(idTexto))
+            {
+                novo = new Produto(nome, preco, estoque);
+            }
+            else
+            {
+                if (!int.TryParse(idTexto, out int id))
+                    throw new ArgumentException("ID inválido.");
+
+                if (_repo.FindById(id) != null)
+                    throw new InvalidOperationException("Já existe um produto com esse ID.");
+
+                novo = new Produto(id, nome, preco, estoque);
+            }
+
+            _repo.Add(novo);
+            return novo;
+        }
+
+        public void AlterarPreco(int id, string novoPrecoTexto)
+        {
+            var cultura = new CultureInfo("pt-BR");
+            if (!decimal.TryParse(novoPrecoTexto, NumberStyles.Any, cultura, out decimal novoPreco))
+                throw new ArgumentException("Novo preço inválido.");
+
+            var p = _repo.FindById(id) ?? throw new InvalidOperationException("Produto não encontrado.");
+            p.AlterarPreco(novoPreco);
+        }
+
+        public void ReporEstoque(int id, string qtdTexto)
+        {
+            if (!int.TryParse(qtdTexto, out int qtd))
+                throw new ArgumentException("Quantidade inválida.");
+
+            var p = _repo.FindById(id) ?? throw new InvalidOperationException("Produto não encontrado.");
+            p.ReporEstoque(qtd);
+        }
+
+        public void BaixarEstoque(int id, string qtdTexto)
+        {
+            if (!int.TryParse(qtdTexto, out int qtd))
+                throw new ArgumentException("Quantidade inválida.");
+
+            var p = _repo.FindById(id) ?? throw new InvalidOperationException("Produto não encontrado.");
+            p.BaixarEstoque(qtd);
+        }
+
+        public decimal TestarSubtotal(int id, string qtdTexto, string? descontoTexto)
+        {
+            if (!int.TryParse(qtdTexto, out int qtd))
+                throw new ArgumentException("Quantidade inválida.");
+
+            var p = _repo.FindById(id) ?? throw new InvalidOperationException("Produto não encontrado.");
+
+            if (string.IsNullOrWhiteSpace(descontoTexto))
+                return p.CalcularSubtotal(qtd);
+
+            var cultura = new CultureInfo("pt-BR");
+            if (!decimal.TryParse(descontoTexto, NumberStyles.Any, cultura, out decimal desc))
+                throw new ArgumentException("Desconto inválido.");
+
+            return p.CalcularSubtotal(qtd, desc);
+        }
+
+        public object ListarParaGrid() =&gt; _repo.GetAll().ToList();
+        public object EstoqueBaixo(int limite = 3) =&gt; _repo.GetEstoqueBaixo(limite);
+    }
+}
+</code></pre>
+
+          <div class="alert alert-success border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Benefício real</div>
+            <div class="small">O Form fica mais simples. As regras ficam no serviço/modelo. Isso é um passo importante para MVC e DAO no futuro.</div>
+          </div>
+        </div>
+
+        <!-- Passo 4 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 4 — Atualizar o formulário (<code>Views</code>) para usar o serviço</h3>
+          <ol>
+            <li>Abra <code>Views/FrmProdutos.cs</code>.</li>
+            <li>No topo, ajuste os <code>using</code> para apontar para os novos namespaces.</li>
+            <li>Substitua o uso da lista <code>_produtos</code> por <code>ProdutoRepository</code> + <code>ProdutoService</code>.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmProdutos.cs</code> (estrutura-base após refatoração)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Windows.Forms;
+using LanchoneteApp.Data;
+using LanchoneteApp.Models;
+using LanchoneteApp.Services;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmProdutos : Form
+    {
+        private readonly ProdutoRepository _repo;
+        private readonly ProdutoService _service;
+
+        public FrmProdutos(ProdutoRepository repo)
+        {
+            InitializeComponent();
+
+            _repo = repo;
+            _service = new ProdutoService(_repo);
+
+            dgvProdutos.AutoGenerateColumns = true;
+            dgvProdutos.ReadOnly = true;
+            dgvProdutos.AllowUserToAddRows = false;
+
+            _repo.SeedBasico();
+            AtualizarGrid();
+        }
+
+        private int IdSelecionado()
+        {
+            if (dgvProdutos.CurrentRow?.DataBoundItem is Produto p)
+                return p.Id;
+            throw new InvalidOperationException("Selecione um produto no grid.");
+        }
+
+        private void btnAdicionar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _service.CriarProduto(txtId.Text, txtNome.Text, txtPreco.Text, txtEstoque.Text);
+                AtualizarGrid();
+
+                txtId.Clear(); txtNome.Clear(); txtPreco.Clear(); txtEstoque.Clear();
+                txtNome.Focus();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnAlterarPreco_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _service.AlterarPreco(IdSelecionado(), txtNovoPreco.Text);
+                AtualizarGrid();
+                txtNovoPreco.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnRepor_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _service.ReporEstoque(IdSelecionado(), txtQtdEstoque.Text);
+                AtualizarGrid();
+                txtQtdEstoque.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnBaixar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _service.BaixarEstoque(IdSelecionado(), txtQtdEstoque.Text);
+                AtualizarGrid();
+                txtQtdEstoque.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnTestarSubtotal_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                decimal total = _service.TestarSubtotal(IdSelecionado(), txtQtdTeste.Text, txtDescontoTeste.Text);
+                MessageBox.Show($"Subtotal: {total:C}", "Subtotal", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void AtualizarGrid()
+        {
+            dgvProdutos.DataSource = null;
+            dgvProdutos.DataSource = _service.ListarParaGrid();
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-warning border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Importante</div>
+            <div class="small">Perceba que o construtor do Form agora recebe o <code>ProdutoRepository</code>. Isso evita “listas soltas” e centraliza os dados.</div>
+          </div>
+        </div>
+
+        <!-- Passo 5 -->
+        <div class="mb-4">
+          <h3 class="h5">Passo 5 — Criar uma tela inicial (Menu Principal) e um relatório simples</h3>
+          <p>
+            Para fechar o bimestre com algo integrado, vamos criar:
+            <strong>(1)</strong> um <code>FrmMenu</code> como tela inicial e
+            <strong>(2)</strong> um <code>FrmEstoqueBaixo</code> que mostra produtos com estoque &lt;= 3.
+          </p>
+
+          <ol>
+            <li>Crie um novo Form em <code>Views</code>: <code>FrmMenu.cs</code>.</li>
+            <li>No Designer, adicione um <strong>MenuStrip</strong> com itens:</li>
+          </ol>
+          <ul>
+            <li><strong>Cadastros</strong> → <strong>Produtos</strong></li>
+            <li><strong>Relatórios</strong> → <strong>Estoque baixo</strong></li>
+            <li><strong>Ajuda</strong> → <strong>Sobre</strong></li>
+          </ul>
+
+          <p class="mb-2">Agora crie o Form do relatório:</p>
+          <ol>
+            <li>Crie um Form em <code>Views</code>: <code>FrmEstoqueBaixo.cs</code>.</li>
+            <li>Adicione um <code>DataGridView</code> chamado <code>dgvEstoqueBaixo</code> e um TextBox <code>txtLimite</code> (valor padrão 3) + botão <code>btnAtualizar</code>.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmEstoqueBaixo.cs</code> (carregar relatório)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Windows.Forms;
+using LanchoneteApp.Data;
+using LanchoneteApp.Services;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmEstoqueBaixo : Form
+    {
+        private readonly ProdutoService _service;
+
+        public FrmEstoqueBaixo(ProdutoRepository repo)
+        {
+            InitializeComponent();
+            _service = new ProdutoService(repo);
+            dgvEstoqueBaixo.AutoGenerateColumns = true;
+            dgvEstoqueBaixo.ReadOnly = true;
+            dgvEstoqueBaixo.AllowUserToAddRows = false;
+
+            txtLimite.Text = "3";
+            Atualizar();
+        }
+
+        private void btnAtualizar_Click(object sender, EventArgs e)
+        {
+            Atualizar();
+        }
+
+        private void Atualizar()
+        {
+            int limite = 3;
+            int.TryParse(txtLimite.Text, out limite);
+            dgvEstoqueBaixo.DataSource = null;
+            dgvEstoqueBaixo.DataSource = _service.EstoqueBaixo(limite);
+        }
+    }
+}
+</code></pre>
+
+          <div class="code-caption mb-2">Arquivo: <code>Views/FrmMenu.cs</code> (abrir telas com o mesmo repositório)</div>
+          <pre class="language-csharp"><code class="language-csharp">using System;
+using System.Windows.Forms;
+using LanchoneteApp.Data;
+
+namespace LanchoneteApp.Views
+{
+    public partial class FrmMenu : Form
+    {
+        private readonly ProdutoRepository _repo = new();
+
+        public FrmMenu()
+        {
+            InitializeComponent();
+            _repo.SeedBasico();
+        }
+
+        private void menuProdutos_Click(object sender, EventArgs e)
+        {
+            new FrmProdutos(_repo).ShowDialog();
+        }
+
+        private void menuEstoqueBaixo_Click(object sender, EventArgs e)
+        {
+            new FrmEstoqueBaixo(_repo).ShowDialog();
+        }
+
+        private void menuSobre_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("LanchoneteApp • PP-DS-NOVA\nMódulo Produtos v1 (Bimestre 1)", "Sobre", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+}
+</code></pre>
+
+          <div class="alert alert-success border mt-3" role="alert">
+            <div class="fw-semibold"><i class="bi bi-check2-circle me-1"></i>Por que isso integra bem?</div>
+            <div class="small">Você criou organização (namespaces/pastas), separou dados/regra/tela, e usou o mesmo repositório para duas telas.</div>
+          </div>
+        </div>
+
+        <!-- Passo 6 -->
+        <div class="mb-2">
+          <h3 class="h5">Passo 6 — Definir o formulário inicial no <code>Program.cs</code></h3>
+          <ol>
+            <li>Abra <code>Program.cs</code>.</li>
+            <li>Troque o <code>Application.Run</code> para iniciar em <code>FrmMenu</code>.</li>
+          </ol>
+
+          <div class="code-caption mb-2">Arquivo: <code>Program.cs</code> (trecho)</div>
+          <pre class="language-csharp"><code class="language-csharp">using LanchoneteApp.Views;
+
+ApplicationConfiguration.Initialize();
+Application.Run(new FrmMenu());
+</code></pre>
+
+          <div class="alert alert-light border" role="alert">
+            <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>Se der erro de namespace, confirme se <code>FrmMenu</code> está em <code>LanchoneteApp.Views</code> e se você adicionou o <code>using</code>.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Entrega 1 -->
+    <div class="card mb-4" id="entrega">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+          <h2 class="h4 section-title mb-0">3) Entrega 1 (Bimestre 1) — Módulo Produtos v1</h2>
+          <span class="badge text-bg-warning"><i class="bi bi-box-seam me-1"></i>Avaliação</span>
+        </div>
+        <p class="text-secondary">
+          Esta entrega integra: <strong>POO (classe/objeto)</strong>, <strong>encapsulamento</strong>, <strong>construtores/sobrecargas</strong> e
+          <strong>organização com namespaces</strong>. O objetivo é entregar um projeto <em>funcional e bem organizado</em>.
+        </p>
+
+        <h3 class="h6 section-title mb-2">Requisitos mínimos (checklist do professor)</h3>
+        <ul>
+          <li><strong>Estrutura</strong>: pastas e namespaces alinhados: <code>Models</code>, <code>Data</code>, <code>Services</code>, <code>Views</code>.</li>
+          <li><strong>Produto encapsulado</strong>: setters privados + validações + métodos de ajuste (preço/estoque).</li>
+          <li><strong>Construtores</strong>: permitir criação com ID manual e <strong>ID automático</strong> (cadastro rápido).</li>
+          <li><strong>Form Menu</strong> como tela inicial com MenuStrip abrindo:
+            <ul>
+              <li><code>FrmProdutos</code> (cadastro/manutenção + teste de subtotal)</li>
+              <li><code>FrmEstoqueBaixo</code> (relatório por limite)</li>
+            </ul>
+          </li>
+          <li><strong>Repositório único compartilhado</strong> entre as telas (mesmos dados em todas as telas).</li>
+        </ul>
+
+        <h3 class="h6 section-title mb-2">O que entregar</h3>
+        <ol>
+          <li>Arquivo <strong>.zip</strong> da solução (<code>LanchoneteApp</code>).</li>
+          <li><strong>Prints</strong> (ou vídeo curto) mostrando:
+            <ul>
+              <li>Menu inicial</li>
+              <li>Cadastro rápido (ID vazio) funcionando</li>
+              <li>Relatório de estoque baixo</li>
+              <li>Um caso de erro tratado (ex.: desconto inválido, baixar mais que estoque)</li>
+            </ul>
+          </li>
+          <li>Um arquivo <strong>README.txt</strong> (ou comentário no envio) com:
+            <ul>
+              <li>Seu nome e turma</li>
+              <li>O que foi feito</li>
+              <li>Onde aparecem os 4 pilares deste bimestre (classe/objeto, encapsulamento, construtores, namespaces)</li>
+            </ul>
+          </li>
+        </ol>
+
+        <div class="alert alert-warning border" role="alert">
+          <div class="fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i>Dica de ouro</div>
+          <div class="small">Se você organizar bem agora, o resto do ano (MVC, GUI avançada e MySQL/DAO) fica muito mais fácil.</div>
+        </div>
+
+        <h3 class="h6 section-title mb-2">Sugestões de extensão (opcional/bônus)</h3>
+        <ul class="mb-0">
+          <li>Adicionar botão <strong>Remover</strong> produto (usando repository).</li>
+          <li>Adicionar filtro por nome (TextBox + botão “Filtrar”).</li>
+          <li>Adicionar indicador visual no grid para estoque baixo (cor da linha).</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Atividades (extras) -->
+    <div class="card mb-4" id="atividades">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">4) Atividades práticas sugeridas (além da entrega)</h2>
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade A — Repository para Lanches</div>
+              <ul class="small mb-0">
+                <li>Crie <code>Lanche</code> em <code>Models</code>.</li>
+                <li>Crie <code>LancheRepository</code> em <code>Data</code>.</li>
+                <li>Crie <code>LancheService</code> em <code>Services</code>.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade B — Padronizar mensagens</div>
+              <ul class="small mb-0">
+                <li>Crie <code>Utils/Mensagens.cs</code> com métodos estáticos.</li>
+                <li>Ex.: <code>MostrarErro(string msg)</code>, <code>MostrarInfo(string msg)</code>.</li>
+                <li>Use em todas as telas.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="p-3 border rounded-3 bg-light h-100">
+              <div class="fw-semibold mb-2"><i class="bi bi-hammer me-1"></i>Atividade C — Validação centralizada</div>
+              <ul class="small mb-0">
+                <li>Crie <code>Utils/Conversoes.cs</code> com métodos para parse.</li>
+                <li>Use no Service para evitar repetir <code>TryParse</code>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Pesquisas complementares -->
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h2 class="h5 section-title mb-3">5) Pesquisas complementares (para aprofundar)</h2>
+        <ul class="mb-0">
+          <li>O que é o modificador <strong>internal</strong> em C# e quando usar?</li>
+          <li>Qual a diferença entre <strong>namespace</strong> e <strong>assembly</strong>?</li>
+          <li>O que é <strong>partial class</strong> e por que Windows Forms usa isso?</li>
+          <li>O que é <strong>camada de serviço</strong> (service layer) e qual vantagem em projetos reais?</li>
+        </ul>
+        <p class="small text-secondary mt-2 mb-0">Sugestão: pesquise e escreva um parágrafo com exemplos do seu projeto.</p>
+      </div>
+    </div>
+
+
+    <!-- Questionário -->
+    <div class="card mb-4" id="questionario">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">6) Questionário (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="quizReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-gray" onclick="quizShowScore()"><i class="bi bi-bar-chart me-1"></i>Ver Pontuação</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Responda e clique em <strong>Enviar Resposta</strong>. Se quiser, use <strong>Ver Gabarito</strong>.</p>
+
+        <div class="accordion" id="quizAccordion">
+
+          <!-- Q1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q1h">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#q1" aria-expanded="true" aria-controls="q1">
+                Questão 1 — Para que serve um namespace?
+              </button>
+            </h2>
+            <div id="q1" class="accordion-collapse collapse show" aria-labelledby="q1h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q1" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1a" value="A"><label class="form-check-label" for="q1a">A) Para armazenar dados no MySQL.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1b" value="B"><label class="form-check-label" for="q1b">B) Para organizar classes e evitar conflitos de nomes.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1c" value="C"><label class="form-check-label" for="q1c">C) Para criar um DataGridView automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1d" value="D"><label class="form-check-label" for="q1d">D) Para compilar o projeto mais rápido sempre.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q1" id="q1e" value="E"><label class="form-check-label" for="q1e">E) Para substituir classes por funções.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q1')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q1')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q1-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q1-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q2h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q2" aria-expanded="false" aria-controls="q2">
+                Questão 2 — O que o <code>using</code> faz no topo do arquivo C#?
+              </button>
+            </h2>
+            <div id="q2" class="accordion-collapse collapse" aria-labelledby="q2h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q2" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2a" value="A"><label class="form-check-label" for="q2a">A) Cria uma nova classe automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2b" value="B"><label class="form-check-label" for="q2b">B) Importa um namespace para usar classes sem escrever o nome completo.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2c" value="C"><label class="form-check-label" for="q2c">C) Impede o uso de namespaces.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2d" value="D"><label class="form-check-label" for="q2d">D) Troca o banco de dados do projeto.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q2" id="q2e" value="E"><label class="form-check-label" for="q2e">E) Substitui o método construtor.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q2')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q2')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q2-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q2-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q3h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q3" aria-expanded="false" aria-controls="q3">
+                Questão 3 — Qual afirmativa é verdadeira sobre pastas e namespaces?
+              </button>
+            </h2>
+            <div id="q3" class="accordion-collapse collapse" aria-labelledby="q3h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q3" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3a" value="A"><label class="form-check-label" for="q3a">A) Pastas e namespaces são a mesma coisa e sempre iguais.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3b" value="B"><label class="form-check-label" for="q3b">B) Pastas organizam arquivos; namespaces organizam nomes no código (podem ser alinhados).</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3c" value="C"><label class="form-check-label" for="q3c">C) Namespaces existem apenas em Java.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3d" value="D"><label class="form-check-label" for="q3d">D) Pastas definem automaticamente o comportamento do programa.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q3" id="q3e" value="E"><label class="form-check-label" for="q3e">E) O compilador ignora namespaces.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q3')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q3')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q3-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q3-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q4h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q4" aria-expanded="false" aria-controls="q4">
+                Questão 4 — Qual é um benefício de usar Repository + Service no projeto?
+              </button>
+            </h2>
+            <div id="q4" class="accordion-collapse collapse" aria-labelledby="q4h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q4" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4a" value="A"><label class="form-check-label" for="q4a">A) Remove a necessidade de classes e objetos.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4b" value="B"><label class="form-check-label" for="q4b">B) Separa responsabilidades: dados em um lugar, regras em outro e tela mais simples.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4c" value="C"><label class="form-check-label" for="q4c">C) Faz o MySQL funcionar automaticamente.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4d" value="D"><label class="form-check-label" for="q4d">D) Impede o uso de encapsulamento.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q4" id="q4e" value="E"><label class="form-check-label" for="q4e">E) O projeto deixa de precisar compilar.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q4')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q4')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q4-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q4-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="q5h">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q5" aria-expanded="false" aria-controls="q5">
+                Questão 5 — Por que é importante compartilhar o mesmo repositório entre as telas?
+              </button>
+            </h2>
+            <div id="q5" class="accordion-collapse collapse" aria-labelledby="q5h" data-bs-parent="#quizAccordion">
+              <div class="accordion-body">
+                <form data-quiz="q5" class="quiz-form">
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5a" value="A"><label class="form-check-label" for="q5a">A) Para cada tela ter uma lista diferente e não misturar dados.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5b" value="B"><label class="form-check-label" for="q5b">B) Para todas as telas enxergarem os mesmos dados (consistência do sistema).</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5c" value="C"><label class="form-check-label" for="q5c">C) Para não precisar de namespace.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5d" value="D"><label class="form-check-label" for="q5d">D) Porque o DataGridView exige 2 listas.</label></div>
+                  <div class="form-check quiz-option"><input class="form-check-input" type="radio" name="q5" id="q5e" value="E"><label class="form-check-label" for="q5e">E) Para substituir o construtor da classe Produto.</label></div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-gray" onclick="quizSubmit('q5')"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="quizReveal('q5')"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+                  </div>
+                  <div class="quiz-feedback alert alert-info border mt-3" id="q5-feedback"></div>
+                  <div class="quiz-answer alert alert-light border mt-2" id="q5-answer"><strong>Gabarito:</strong> Alternativa <strong>B</strong>.</div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert alert-light border mt-4" role="alert" id="quiz-score" style="display:none;"></div>
+      </div>
+    </div>
+
+
+    <!-- Checklist -->
+    <div class="card mb-4" id="checklist">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <h2 class="h4 section-title mb-0">7) Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="checklistReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar</button>
+            <button class="btn btn-sm btn-gray" onclick="checklistSave()"><i class="bi bi-save me-1"></i>Salvar</button>
+          </div>
+        </div>
+
+        <p class="text-secondary">Marque conforme você avança. Você pode salvar no navegador (localStorage).</p>
+
+        <div class="mb-3">
+          <div class="progress" role="progressbar" aria-label="Progresso do capítulo" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="checkProgress" class="progress-bar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklistBox">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck1"><label class="form-check-label" for="ck1">Entendi o que é <strong>namespace</strong> e o papel do <code>using</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck2"><label class="form-check-label" for="ck2">Criei as pastas: <code>Models</code>, <code>Data</code>, <code>Services</code>, <code>Views</code>, <code>Utils</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck3"><label class="form-check-label" for="ck3">Ajustei namespaces para ficarem alinhados às pastas (ex.: <code>LanchoneteApp.Data</code>).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck4"><label class="form-check-label" for="ck4">Implementei <code>ProdutoRepository</code> com lista interna encapsulada e métodos (<code>Add</code>, <code>GetAll</code>, <code>GetEstoqueBaixo</code>).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck5"><label class="form-check-label" for="ck5">Implementei <code>ProdutoService</code> e movi validações/fluxos para ele.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck6"><label class="form-check-label" for="ck6">Atualizei <code>FrmProdutos</code> para usar o Service + Repository (sem lista solta).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck7"><label class="form-check-label" for="ck7">Criei <code>FrmMenu</code> (tela inicial) e <code>FrmEstoqueBaixo</code> (relatório).</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck8"><label class="form-check-label" for="ck8">Configurei o <code>Program.cs</code> para iniciar em <code>FrmMenu</code>.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck9"><label class="form-check-label" for="ck9">Finalize a <strong>Entrega 1</strong> com evidências (prints/vídeo) e README.</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="ck10"><label class="form-check-label" for="ck10">Respondi ao questionário e revisei meus erros.</label></div>
+        </div>
+
+        <div class="alert alert-success border mt-4" role="alert">
+          <div class="fw-semibold"><i class="bi bi-trophy me-1"></i>Fim do 1º Bimestre</div>
+          <div class="small">Parabéns! Você fechou o bimestre com uma base organizada. No Capítulo 05 vamos entrar em <strong>Herança</strong> e <strong>sobrescrita</strong>.</div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar ao Cap. 03</a>
+          <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Início</a>
+          <a class="btn btn-gray" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Ir para o Capítulo 05</a>
+          <button class="btn btn-outline-secondary" onclick="window.scrollTo({top:0,behavior:'smooth'});"><i class="bi bi-arrow-up me-1"></i>Topo</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="py-4 mb-5 text-secondary small">
+      <div class="d-flex flex-wrap justify-content-between gap-2 border-top pt-3">
+        <div><strong>PP-DS-NOVA</strong> • Capítulo 04</div>
+        <div><i class="bi bi-laptop me-1"></i>Visual Studio 2022 • C# • Windows Forms</div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- Bootstrap Bundle (includes Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // -----------------------------
+    // Quiz engine (interativo)
+    // -----------------------------
+    const QUIZ_KEY = 'pp-ds-nova-cap04-quiz';
+    const quizAnswers = { q1:'B', q2:'B', q3:'B', q4:'B', q5:'B' };
+
+    function getSelected(qid){
+      const checked = document.querySelector(`input[name="${qid}"]:checked`);
+      return checked ? checked.value : null;
+    }
+
+    function quizSubmit(qid){
+      const sel = getSelected(qid);
+      const fb = document.getElementById(`${qid}-feedback`);
+      if(!sel){
+        fb.className = 'quiz-feedback alert alert-warning border mt-3';
+        fb.textContent = 'Selecione uma alternativa antes de enviar.';
+        fb.style.display = 'block';
+        return;
+      }
+
+      const ok = sel === quizAnswers[qid];
+      fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+      fb.innerHTML = ok
+        ? `<strong>Correto!</strong> Você escolheu ${sel}.`
+        : `<strong>Incorreto.</strong> Você escolheu ${sel}. Revise o capítulo e, se precisar, use “Ver Gabarito”.`;
+      fb.style.display = 'block';
+
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      store[qid] = { selected: sel, correct: ok };
+      localStorage.setItem(QUIZ_KEY, JSON.stringify(store));
+    }
+
+    function quizReveal(qid){
+      document.getElementById(`${qid}-answer`).style.display = 'block';
+    }
+
+    function quizReset(){
+      localStorage.removeItem(QUIZ_KEY);
+      document.querySelectorAll('.quiz-form').forEach(f => f.reset());
+      document.querySelectorAll('.quiz-feedback').forEach(x => { x.style.display='none'; x.textContent=''; });
+      document.querySelectorAll('.quiz-answer').forEach(x => x.style.display='none');
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'none';
+      score.textContent = '';
+    }
+
+    function quizShowScore(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      const total = Object.keys(quizAnswers).length;
+      let correct = 0;
+      for(const qid of Object.keys(quizAnswers)){
+        if(store[qid]?.correct) correct++;
+      }
+      const score = document.getElementById('quiz-score');
+      score.style.display = 'block';
+      score.innerHTML = `<div class="fw-semibold"><i class="bi bi-bar-chart me-1"></i>Sua pontuação (salva neste navegador)</div>
+                         <div class="small">Você acertou <strong>${correct}</strong> de <strong>${total}</strong> questões.</div>`;
+    }
+
+    function quizLoad(){
+      const store = JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}');
+      for(const [qid, data] of Object.entries(store)){
+        const radio = document.querySelector(`input[name="${qid}"][value="${data.selected}"]`);
+        if(radio) radio.checked = true;
+        if(data.selected){
+          const fb = document.getElementById(`${qid}-feedback`);
+          const ok = data.correct;
+          fb.className = `quiz-feedback alert ${ok ? 'alert-success' : 'alert-danger'} border mt-3`;
+          fb.innerHTML = ok
+            ? `<strong>Correto!</strong> Você escolheu ${data.selected}.`
+            : `<strong>Incorreto.</strong> Você escolheu ${data.selected}.`;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    // -----------------------------
+    // Checklist engine (interativo)
+    // -----------------------------
+    const CHECK_KEY = 'pp-ds-nova-cap04-checklist';
+
+    function checklistUpdate(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const done = checks.filter(c => c.checked).length;
+      const total = checks.length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('checkProgress');
+      bar.style.width = pct + '%';
+      bar.textContent = pct + '%';
+      bar.classList.toggle('bg-success', pct === 100);
+    }
+
+    function checklistSave(){
+      const checks = [...document.querySelectorAll('#checklistBox input[type="checkbox"]')];
+      const state = {};
+      checks.forEach(c => state[c.id] = c.checked);
+      localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+
+      const toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0 position-fixed bottom-0 end-0 m-3';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','assertive');
+      toast.setAttribute('aria-atomic','true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi bi-save me-1"></i>Checklist salvo neste navegador.</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>`;
+      document.body.appendChild(toast);
+      const t = new bootstrap.Toast(toast, { delay: 2000 });
+      t.show();
+      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function checklistReset(){
+      localStorage.removeItem(CHECK_KEY);
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.checked = false);
+      checklistUpdate();
+    }
+
+    function checklistLoad(){
+      const state = JSON.parse(localStorage.getItem(CHECK_KEY) || '{}');
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => {
+        if(state[c.id] !== undefined) c.checked = state[c.id];
+      });
+      checklistUpdate();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      quizLoad();
+      checklistLoad();
+      document.querySelectorAll('#checklistBox input[type="checkbox"]').forEach(c => c.addEventListener('change', checklistUpdate));
+    });
+  </script>
+
+</body>
+</html>
