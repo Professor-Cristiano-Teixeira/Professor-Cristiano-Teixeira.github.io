@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 09 — Programação Web 2 | POO em PHP: Classes, Objetos, Atributos e Métodos</title>
+  <meta name="description" content="Capítulo 09 da apostila de Programação Web 2. Programação Orientada a Objetos (POO) em PHP aplicada ao projeto da lanchonete: classes, objetos, atributos, métodos, namespaces e autoload."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body id="top">
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+      <div class="menu" id="mainMenu">
+        <a class="secondary" href="index.html">Início</a>
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+        <div class="menu-gap"></div>
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo02.html">Capítulo 02 <span class="pill">B1</span></a>
+            <a href="capitulo03.html">Capítulo 03 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo05.html">Capítulo 05 <span class="pill">B2</span></a>
+            <a href="capitulo06.html">Capítulo 06 <span class="pill">B2</span></a>
+            <a href="capitulo07.html">Capítulo 07 <span class="pill">B2</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo09.html">Capítulo 09 <span class="pill">B3</span></a>
+            <a href="capitulo10.html">Capítulo 10 <span class="pill">B3</span></a>
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+            <a href="capitulo15.html">Capítulo 15 <span class="pill">B4</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 09 — POO em PHP: Classes, Objetos, Atributos e Métodos</h1>
+        <p class="subtitle">
+          Modele o domínio da <strong>lanchonete</strong> com <strong>classes e objetos</strong> (Item e Categoria), usando
+          <strong>namespaces</strong> e um <strong>autoload</strong> simples. Prepare o terreno para a separação em camadas.
+        </p>
+        <div class="badges">
+          <span class="badge">Bimestre 3</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): Modelos OOP + Demo integrando DAO</span>
+        </div>
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo08.html">← Cap. 08</a>
+          <a class="btn primary" href="capitulo10.html">Cap. 10 →</a>
+          <a class="btn ghost" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+    <div class="card" aria-labelledby="aprend">
+      <div class="content">
+        <h2 id="aprend">Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Explicar os conceitos de <strong>classe</strong>, <strong>objeto</strong>, <strong>atributo</strong> e <strong>método</strong> no PHP.</li>
+          <li>Criar classes de domínio (<strong>Categoria</strong> e <strong>Item</strong>) com construtor e <em>getters/setters</em> tipados.</li>
+          <li>Organizar o projeto com <strong>namespaces</strong> (<code>App\Model</code>) e <strong>autoload</strong> simples.</li>
+          <li>Integrar DAOs existentes para retornar <strong>objetos</strong> (e não só arrays) com métodos auxiliares <em>fromArray/toArray</em>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Conhecer a sintaxe de classes em PHP: <code>class</code>, visibilidade (<code>public</code>/<code>private</code>), <code>__construct</code>.</li>
+                <li>Aplicar tipagem em propriedades e parâmetros (ex.: <code>int</code>, <code>string</code>, <code>float</code>).</li>
+                <li>Usar <strong>namespaces</strong> e <strong>autoload</strong> para carregar classes automaticamente.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Representar <strong>Categoria</strong> e <strong>Item</strong> como objetos com regras simples (ex.: preço &gt; 0).</li>
+                <li>Refatorar DAOs para hidratar objetos (<em>hydration</em>) a partir de linhas do banco.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> No catálogo e nos CRUDs, passando a manipular instâncias de <em>Item</em> e <em>Categoria</em> em vez de arrays “soltos”.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) Classe e Objeto</h3>
+          <p>
+            Uma <strong>classe</strong> descreve um tipo com <em>atributos</em> (dados) e <em>métodos</em> (comportamentos).
+            Um <strong>objeto</strong> é uma instância dessa classe em execução (com valores reais).
+          </p>
+
+          <h3>2) Visibilidade e tipagem</h3>
+          <p>
+            Use <code>private</code> para proteger atributos (encapsulamento) e <em>getters/setters</em> para acesso controlado.
+            Tipos em propriedades/métodos ajudam a evitar erros (ex.: <code>float $preco</code>).
+          </p>
+
+          <h3>3) Namespaces e Autoload</h3>
+          <p>
+            <strong>Namespaces</strong> organizam classes (ex.: <code>App\Model\Item</code>). O <strong>autoload</strong> carrega arquivos de classe automaticamente
+            quando o nome é usado, evitando <code>require</code> repetidos.
+          </p>
+
+          <div class="sep"></div>
+          <h3>Pesquisas complementares sugeridas</h3>
+          <ul>
+            <li>Convenção PSR-4 de autoload (estrutura de pastas e mapeamento de namespaces).</li>
+            <li>Métodos especiais em PHP: <code>__construct</code>, <code>__toString</code>, <code>__get/__set</code> (quando usar).</li>
+            <li>Vantagens do encapsulamento e do “Tell, Don’t Ask” (evitar expor estado sem necessidade).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — Modelando Categoria e Item + Autoload</h2>
+
+          <h3>Estrutura de pastas (lembrando)</h3>
+          <pre><code class="hl">
+htdocs/
+└── lanchonete/
+    ├── public/
+    │   ├── catalogo_db.php
+    │   ├── poo_demo.php            <span class="c"># (novo) demonstração</span>
+    │   └── ...                    
+    ├── src/
+    │   ├── App/
+    │   │   ├── Autoload.php       <span class="c"># (novo)</span>
+    │   │   └── ...                
+    │   └── Model/
+    │       ├── Categoria.php      <span class="c"># (novo)</span>
+    │       └── Item.php           <span class="c"># (novo)</span>
+    ├── src/DAO/
+    │   └── ItemDAO_OO.php         <span class="c"># (novo, opcional)</span>
+    └── config/
+        └── db.php
+          </code></pre>
+
+          <h3>1) Autoload simples — <code>src/App/Autoload.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- src/App/Autoload.php --&gt;</span>
+&lt;?php
+<span class="k">spl_autoload_register</span>(function(<span class="a">$fqcn</span>){
+  <span class="c">// Carrega apenas classes do namespace "App\"</span>
+  <span class="k">if</span>(<span class="a">$fqcn</span> === <span class="k">null</span> || <span class="k">strpos</span>(<span class="a">$fqcn</span>, <span class="s">'App\\'</span>) !== 0){ <span class="k">return</span>; }
+  <span class="a">$baseDir</span> = __DIR__.<span class="s">'/../'</span>;        <span class="c">// aponta para "src/"</span>
+  <span class="a">$relPath</span> = <span class="k">str_replace</span>(<span class="s">'App\\'</span>, <span class="s">''</span>, <span class="a">$fqcn</span>);
+  <span class="a">$relPath</span> = <span class="k">str_replace</span>(<span class="s">'\\'</span>, <span class="s">'/'</span>, <span class="a">$relPath</span>);
+  <span class="a">$file</span> = <span class="a">$baseDir</span>.<span class="a">$relPath</span>.<span class="s">'.php'</span>;
+  <span class="k">if</span>(<span class="k">is_file</span>(<span class="a">$file</span>)){ <span class="k">require_once</span> <span class="a">$file</span>; }
+});
+          </code></pre>
+
+          <h3>2) Classe <code>Categoria</code> — <code>src/Model/Categoria.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- src/Model/Categoria.php --&gt;</span>
+&lt;?php
+<span class="k">namespace</span> App\Model;
+
+<span class="k">class</span> <span class="f">Categoria</span> {
+  <span class="k">private</span> ?int <span class="a">$id</span>;
+  <span class="k">private</span> string <span class="a">$nome</span>;
+
+  <span class="k">public function</span> __construct(?int <span class="a">$id</span>, string <span class="a">$nome</span>){
+    <span class="k">$this</span>-&gt;setId(<span class="a">$id</span>);
+    <span class="k">$this</span>-&gt;setNome(<span class="a">$nome</span>);
+  }
+
+  <span class="k">public function</span> <span class="f">getId</span>(): ?int { <span class="k">return</span> <span class="k">$this</span>-&gt;id; }
+  <span class="k">public function</span> <span class="f">getNome</span>(): string { <span class="k">return</span> <span class="k">$this</span>-&gt;nome; }
+
+  <span class="k">public function</span> <span class="f">setId</span>(?int <span class="a">$id</span>): void { <span class="k">$this</span>-&gt;id = <span class="a">$id</span>; }
+  <span class="k">public function</span> <span class="f">setNome</span>(string <span class="a">$nome</span>): void {
+    <span class="a">$nome</span> = <span class="k">trim</span>(<span class="a">$nome</span>);
+    <span class="k">if</span>(<span class="k">mb_strlen</span>(<span class="a">$nome</span>) &lt; 3){ <span class="k">throw new</span> \InvalidArgumentException(<span class="s">'Nome da categoria muito curto'</span>); }
+    <span class="k">$this</span>-&gt;nome = <span class="a">$nome</span>;
+  }
+
+  <span class="k">public static function</span> <span class="f">fromArray</span>(array <span class="a">$row</span>): self {
+    <span class="k">return new</span> self(
+      isset(<span class="a">$row</span>[<span class="s">'id'</span>]) ? (int)<span class="a">$row</span>[<span class="s">'id'</span>] : <span class="k">null</span>,
+      (string)(<span class="a">$row</span>[<span class="s">'nome'</span>] ?? <span class="s">''</span>)
+    );
+  }
+
+  <span class="k">public function</span> <span class="f">toArray</span>(): array {
+    <span class="k">return</span> [<span class="s">'id'</span>=&gt;<span class="k">$this</span>-&gt;id, <span class="s">'nome'</span>=&gt;<span class="k">$this</span>-&gt;nome];
+  }
+}
+          </code></pre>
+
+          <h3>3) Classe <code>Item</code> — <code>src/Model/Item.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- src/Model/Item.php --&gt;</span>
+&lt;?php
+<span class="k">namespace</span> App\Model;
+
+<span class="k">class</span> <span class="f">Item</span> {
+  <span class="k">private</span> ?int <span class="a">$id</span>;
+  <span class="k">private</span> string <span class="a">$nome</span>;
+  <span class="k">private</span> float <span class="a">$preco</span>;
+  <span class="k">private</span> bool <span class="a">$popular</span>;
+  <span class="k">private</span> Categoria <span class="a">$categoria</span>;
+
+  <span class="k">public function</span> __construct(?int <span class="a">$id</span>, string <span class="a">$nome</span>, float <span class="a">$preco</span>, Categoria <span class="a">$categoria</span>, bool <span class="a">$popular</span>=<span class="k">false</span>){
+    <span class="k">$this</span>-&gt;setId(<span class="a">$id</span>);
+    <span class="k">$this</span>-&gt;setNome(<span class="a">$nome</span>);
+    <span class="k">$this</span>-&gt;setPreco(<span class="a">$preco</span>);
+    <span class="k">$this</span>-&gt;setCategoria(<span class="a">$categoria</span>);
+    <span class="k">$this</span>-&gt;popular = <span class="a">$popular</span>;
+  }
+
+  <span class="k">public function</span> <span class="f">getId</span>(): ?int { <span class="k">return</span> <span class="k">$this</span>-&gt;id; }
+  <span class="k">public function</span> <span class="f">getNome</span>(): string { <span class="k">return</span> <span class="k">$this</span>-&gt;nome; }
+  <span class="k">public function</span> <span class="f">getPreco</span>(): float { <span class="k">return</span> <span class="k">$this</span>-&gt;preco; }
+  <span class="k">public function</span> <span class="f">isPopular</span>(): bool { <span class="k">return</span> <span class="k">$this</span>-&gt;popular; }
+  <span class="k">public function</span> <span class="f">getCategoria</span>(): Categoria { <span class="k">return</span> <span class="k">$this</span>-&gt;categoria; }
+
+  <span class="k">public function</span> <span class="f">setId</span>(?int <span class="a">$id</span>): void { <span class="k">$this</span>-&gt;id = <span class="a">$id</span>; }
+  <span class="k">public function</span> <span class="f">setNome</span>(string <span class="a">$nome</span>): void {
+    <span class="a">$nome</span> = <span class="k">trim</span>(<span class="a">$nome</span>);
+    <span class="k">if</span>(<span class="k">mb_strlen</span>(<span class="a">$nome</span>) &lt; 3){ <span class="k">throw new</span> \InvalidArgumentException(<span class="s">'Nome do item muito curto'</span>); }
+    <span class="k">$this</span>-&gt;nome = <span class="a">$nome</span>;
+  }
+  <span class="k">public function</span> <span class="f">setPreco</span>(float <span class="a">$preco</span>): void {
+    <span class="k">if</span>(<span class="a">$preco</span> &lt;= 0){ <span class="k">throw new</span> \InvalidArgumentException(<span class="s">'Preço deve ser &gt; 0'</span>); }
+    <span class="k">$this</span>-&gt;preco = <span class="a">$preco</span>;
+  }
+  <span class="k">public function</span> <span class="f">setCategoria</span>(Categoria <span class="a">$c</span>): void { <span class="k">$this</span>-&gt;categoria = <span class="a">$c</span>; }
+  <span class="k">public function</span> <span class="f">setPopular</span>(bool <span class="a">$p</span>): void { <span class="k">$this</span>-&gt;popular = <span class="a">$p</span>; }
+
+  <span class="k">public static function</span> <span class="f">fromArray</span>(array <span class="a">$row</span>): self {
+    <span class="a">$cat</span> = <span class="k">new</span> Categoria(
+      isset(<span class="a">$row</span>[<span class="s">'categoria_id'</span>]) ? (int)<span class="a">$row</span>[<span class="s">'categoria_id'</span>] : <span class="k">null</span>,
+      (string)(<span class="a">$row</span>[<span class="s">'categoria'</span>] ?? <span class="a">$row</span>[<span class="s">'nome_categoria'</span>] ?? <span class="s">'(sem categoria)'</span>)
+    );
+    <span class="k">return new</span> self(
+      isset(<span class="a">$row</span>[<span class="s">'id'</span>]) ? (int)<span class="a">$row</span>[<span class="s">'id'</span>] : <span class="k">null</span>,
+      (string)(<span class="a">$row</span>[<span class="s">'nome'</span>] ?? <span class="s">''</span>),
+      (float)(<span class="a">$row</span>[<span class="s">'preco'</span>] ?? 0),
+      <span class="a">$cat</span>,
+      (bool)((int)(<span class="a">$row</span>[<span class="s">'popular'</span>] ?? 0))
+    );
+  }
+
+  <span class="k">public function</span> <span class="f">toArray</span>(): array {
+    <span class="k">return</span> [
+      <span class="s">'id'</span>=&gt;<span class="k">$this</span>-&gt;id,
+      <span class="s">'nome'</span>=&gt;<span class="k">$this</span>-&gt;nome,
+      <span class="s">'preco'</span>=&gt;<span class="k">$this</span>-&gt;preco,
+      <span class="s">'popular'</span>=&gt;(<span class="k">$this</span>-&gt;popular ? 1 : 0),
+      <span class="s">'categoria_id'</span>=&gt;<span class="k">$this</span>-&gt;categoria-&gt;getId()
+    ];
+  }
+}
+          </code></pre>
+
+          <h3>4) DAO que retorna objetos — <code>src/DAO/ItemDAO_OO.php</code> (opcional)</h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- src/DAO/ItemDAO_OO.php --&gt;</span>
+&lt;?php
+<span class="k">declare</span>(strict_types=1);
+
+<span class="k">use</span> App\Model\Item;
+<span class="k">use</span> App\Model\Categoria;
+
+<span class="k">class</span> <span class="f">ItemDAO_OO</span> {
+  <span class="k">private</span> PDO <span class="a">$pdo</span>;
+  <span class="k">public function</span> __construct(PDO <span class="a">$pdo</span>){ <span class="k">$this</span>-&gt;pdo = <span class="a">$pdo</span>; }
+
+  <span class="k">private function</span> <span class="f">hydrate</span>(array <span class="a">$row</span>): Item { <span class="k">return</span> Item::fromArray(<span class="a">$row</span>); }
+
+  <span class="k">public function</span> <span class="f">listar</span>(): array {
+    <span class="a">$sql</span> = <span class="s">"SELECT i.id,i.nome,i.preco,i.popular,i.categoria_id,c.nome AS categoria
+             FROM item i JOIN categoria c ON c.id=i.categoria_id ORDER BY c.nome,i.nome"</span>;
+    <span class="a">$rows</span> = <span class="k">$this</span>-&gt;pdo-&gt;query(<span class="a">$sql</span>)-&gt;fetchAll();
+    <span class="a">$objs</span> = [];
+    <span class="k">foreach</span>(<span class="a">$rows</span> as <span class="a">$r</span>){ <span class="a">$objs</span>[] = <span class="k">$this</span>-&gt;hydrate(<span class="a">$r</span>); }
+    <span class="k">return</span> <span class="a">$objs</span>;
+  }
+
+  <span class="k">public function</span> <span class="f">buscarPorId</span>(int <span class="a">$id</span>): ?Item {
+    <span class="a">$st</span> = <span class="k">$this</span>-&gt;pdo-&gt;prepare(<span class="s">"SELECT i.id,i.nome,i.preco,i.popular,i.categoria_id,c.nome AS categoria
+           FROM item i JOIN categoria c ON c.id=i.categoria_id WHERE i.id=:id"</span>);
+    <span class="a">$st</span>-&gt;execute([<span class="s">':id'</span>=&gt;<span class="a">$id</span>]);
+    <span class="a">$r</span> = <span class="a">$st</span>-&gt;fetch();
+    <span class="k">return</span> <span class="a">$r</span> ? <span class="k">$this</span>-&gt;hydrate(<span class="a">$r</span>) : <span class="k">null</span>;
+  }
+}
+          </code></pre>
+
+          <h3>5) Demo pública — <code>public/poo_demo.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- public/poo_demo.php --&gt;</span>
+&lt;?php
+require_once __DIR__.<span class="s">'/../config/db.php'</span>;
+require_once __DIR__.<span class="s">'/../src/App/Autoload.php'</span>;
+require_once __DIR__.<span class="s">'/../src/DAO/ItemDAO_OO.php'</span>;
+
+<span class="k">use</span> App\Model\Item;
+<span class="k">use</span> App\Model\Categoria;
+
+<span class="k">function</span> <span class="f">esc</span>(<span class="a">$v</span>){ <span class="k">return</span> htmlspecialchars((string)<span class="a">$v</span>, ENT_QUOTES, <span class="s">'UTF-8'</span>); }
+<span class="k">function</span> <span class="f">preco</span>(<span class="a">$n</span>){ <span class="k">return</span> <span class="s">'R$ '</span>.number_format((float)<span class="a">$n</span>,2,<span class="s">","</span>,<span class="s">"."</span>); }
+
+<span class="k">try</span>{
+  <span class="a">$pdo</span> = pdo();
+  <span class="a">$dao</span> = <span class="k">new</span> ItemDAO_OO(<span class="a">$pdo</span>);
+  <span class="a">$itens</span> = <span class="a">$dao</span>-&gt;listar();
+} <span class="k">catch</span>(Throwable <span class="a">$e</span>){
+  http_response_code(500); <span class="k">exit</span>(<span class="s">'Erro: '</span>.<span class="a">$e</span>-&gt;getMessage());
+}
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;&lt;meta charset="utf-8"/&gt;&lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+&lt;title&gt;POO Demo — Lanchonete&lt;/title&gt;
+&lt;style&gt;
+  body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#fafafa;color:#1b1b1b}
+  header{background:#c62828;color:#fff;padding:14px 18px}
+  main{max-width:1000px;margin:0 auto;padding:18px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .card{background:#fff;border:1px solid #eee;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .price{font-weight:700;color:#2e7d32}
+  @media (max-width:768px){.grid{grid-template-columns:1fr}}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;POO — Itens como Objetos&lt;/h1&gt;&lt;/header&gt;
+  &lt;main&gt;
+    &lt;p&gt;&lt;a href="catalogo_db.php"&gt;← Catálogo&lt;/a&gt;&lt;/p&gt;
+    &lt;div class="grid"&gt;
+      &lt;?php <span class="k">foreach</span>(<span class="a">$itens</span> as <span class="a">$it</span>): ?&gt;
+        &lt;div class="card"&gt;
+          &lt;h3&gt;&lt;?= esc(<span class="a">$it</span>-&gt;getNome()) ?&gt; &lt;small&gt;(&lt;?= esc(<span class="a">$it</span>-&gt;getCategoria()-&gt;getNome()) ?&gt;)&lt;/small&gt;&lt;/h3&gt;
+          &lt;p class="price"&gt;&lt;?= preco(<span class="a">$it</span>-&gt;getPreco()) ?&gt;&lt;/p&gt;
+          &lt;small&gt;Popular: &lt;?= <span class="a">$it</span>-&gt;isPopular() ? <span class="s">'Sim'</span> : <span class="s">'Não'</span> ?&gt;&lt;/small&gt;
+        &lt;/div&gt;
+      &lt;?php <span class="k">endforeach</span>; ?&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+
+          <div class="note small">
+            <strong>Resumo:</strong> Criamos classes de domínio (<em>Categoria</em> e <em>Item</em>), configuramos um <em>autoload</em> simples com namespaces e
+            demonstramos como hidratar objetos vindos do banco, preparando o caminho para camadas (Cap. 10).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades propostas -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>Método de domínio:</strong> adicione em <code>Item</code> o método <code>getPrecoFormatado()</code> que retorna o preço já formatado (R$).</li>
+            <li><strong>Valor-objeto:</strong> crie uma classe simples <code>Dinheiro</code> (valor em <code>float</code> + método <code>formatar()</code>) e use-a dentro de <code>Item</code>.</li>
+            <li><strong>DAO OO:</strong> refatore o <code>BebidaDAO</code> do Cap. 06 para retornar <code>Item</code> (objetos) ao invés de arrays.</li>
+          </ol>
+          <p class="small muted">Dica: mantenha validações no construtor/setters (ex.: nome com tamanho mínimo, preço &gt; 0).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap9Checklist">
+            <li><label><input type="checkbox" data-k="autoload"> Criei o <code>Autoload.php</code> e testei o carregamento automático</label></li>
+            <li><label><input type="checkbox" data-k="categoria"> Implementei <code>App\Model\Categoria</code> com getters/setters e validação</label></li>
+            <li><label><input type="checkbox" data-k="item"> Implementei <code>App\Model\Item</code> com relação a <code>Categoria</code></label></li>
+            <li><label><input type="checkbox" data-k="dao"> Adaptei um DAO para retornar <strong>objetos</strong> (hidratação)</label></li>
+            <li><label><input type="checkbox" data-k="demo"> Testei a <code>public/poo_demo.php</code> renderizando itens como objetos</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn ghost" href="capitulo08.html">← Cap. 08</a>
+            <a class="btn primary" href="capitulo10.html">Cap. 10 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 09</h2>
+
+          <!-- Q1 -->
+          <div class="mcq" data-id="q1" data-answer="b">
+            <h4>1) Em POO, uma classe define:</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Apenas dados sem comportamento</label>
+              <label><input type="radio" name="q1" value="b"> Um tipo com atributos (dados) e métodos (comportamentos)</label>
+              <label><input type="radio" name="q1" value="c"> Somente funções</label>
+              <label><input type="radio" name="q1" value="d"> Apenas um arquivo PHP</label>
+              <label><input type="radio" name="q1" value="e"> Um registro do banco</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="mcq" data-id="q2" data-answer="a">
+            <h4>2) O que é encapsulamento?</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> Esconder detalhes internos e expor apenas o necessário</label>
+              <label><input type="radio" name="q2" value="b"> Colocar todo código em um arquivo só</label>
+              <label><input type="radio" name="q2" value="c"> Rodar o PHP no navegador</label>
+              <label><input type="radio" name="q2" value="d"> Usar apenas variáveis públicas</label>
+              <label><input type="radio" name="q2" value="e"> Evitar o uso de classes</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="mcq" data-id="q3" data-answer="e">
+            <h4>3) Qual é a função do autoload?</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> Compilar o PHP</label>
+              <label><input type="radio" name="q3" value="b"> Minificar CSS/JS</label>
+              <label><input type="radio" name="q3" value="c"> Substituir o servidor web</label>
+              <label><input type="radio" name="q3" value="d"> Apagar arquivos não usados</label>
+              <label><input type="radio" name="q3" value="e"> Carregar automaticamente o arquivo da classe quando ela é utilizada</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="mcq" data-id="q4" data-answer="c">
+            <h4>4) Em <code>namespace App\Model;</code>, o nome totalmente qualificado da classe <code>Item</code> é:</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> <code>Item</code></label>
+              <label><input type="radio" name="q4" value="b"> <code>App\Item</code></label>
+              <label><input type="radio" name="q4" value="c"> <code>App\Model\Item</code></label>
+              <label><input type="radio" name="q4" value="d"> <code>\Model\App\Item</code></label>
+              <label><input type="radio" name="q4" value="e"> <code>Model\App\Item</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="mcq" data-id="q5" data-answer="d">
+            <h4>5) Sobre tipagem em propriedades/métodos, escolha a correta:</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> Tipos não podem ser usados em PHP</label>
+              <label><input type="radio" name="q5" value="b"> Tipos só existem para variáveis locais</label>
+              <label><input type="radio" name="q5" value="c"> Tipos atrapalham e devem ser evitados</label>
+              <label><input type="radio" name="q5" value="d"> Tipos ajudam a detectar erros e documentar intenções</label>
+              <label><input type="radio" name="q5" value="e"> Tipos são iguais a comentários</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <!-- Q6 -->
+          <div class="mcq" data-id="q6" data-answer="a">
+            <h4>6) Para construir um <em>Item</em> válido, uma boa regra é:</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> Garantir que o preço seja &gt; 0 no setter</label>
+              <label><input type="radio" name="q6" value="b"> Permitir nome vazio e preço negativo</label>
+              <label><input type="radio" name="q6" value="c"> Não verificar nada (deixa para o HTML)</label>
+              <label><input type="radio" name="q6" value="d"> Exigir apenas categoria sem nome</label>
+              <label><input type="radio" name="q6" value="e"> Usar apenas propriedades públicas</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 10</strong>, vamos estruturar o projeto em <strong>camadas</strong> (DAO, Serviços/BO e Controladores),
+             aplicando regras de negócio e deixando a base pronta para autenticação e pedidos.</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo10.html">Capítulo 10 →</a>
+            <a class="btn ghost" href="capitulo08.html">← Capítulo 08</a>
+            <a class="btn ghost" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 09</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo08.html">Cap. 08</a>
+          <a href="capitulo10.html">Cap. 10</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Navbar mobile toggle =====
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // ===== Dropdown de capítulos =====
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // ===== Download deste capítulo como HTML =====
+    const downloadBtn = document.getElementById('downloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', () => {
+        const doctype = '<!DOCTYPE html>\\n';
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'capitulo09.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ===== Checklist com persistência local =====
+    (function(){
+      const list = document.getElementById('cap9Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap9_checklist';
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            const k = cb.dataset.k;
+            cb.checked = !!data[k];
+          });
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.dataset.k] = cb.checked; });
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+      const clearBtn = document.getElementById('clearChecklist');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          localStorage.removeItem(KEY);
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+      }
+      load();
+    })();
+
+    // ===== MCQ Interativo =====
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const qid = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+        const name = qid;
+
+        const sendBtn = box.querySelector('.send');
+        if(sendBtn){
+          sendBtn.addEventListener('click', ()=>{
+            const choice = box.querySelector(`input[name="${name}"]:checked`);
+            if(!choice){
+              feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+              feedback.className = 'feedback err';
+              return;
+            }
+            const got = (choice.value || '').trim().toLowerCase();
+            if(got === answer){
+              feedback.textContent = '✔ Resposta correta!';
+              feedback.className = 'feedback ok';
+            }else{
+              feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+              feedback.className = 'feedback err';
+            }
+          });
+        }
+
+        const keyBtn = box.querySelector('.key');
+        if(keyBtn){
+          keyBtn.addEventListener('click', ()=>{
+            answerEl.style.display = answerEl.style.display === 'block' ? 'none' : 'block';
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

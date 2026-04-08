@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 06 — Programação Web 2 | CRUD (Bebidas) com Prepared, Validação e Prevenção de SQLi/XSS</title>
+  <meta name="description" content="Capítulo 06 da apostila de Programação Web 2. CRUD completo de Bebidas em PHP + MySQL, usando PDO, validação, sanitização e prevenção de SQL Injection e XSS."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body id="top">
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html" aria-label="Voltar à página inicial">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+      <div class="menu" id="mainMenu">
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+        <div class="menu-gap"></div>
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo02.html">Capítulo 02 <span class="pill">B1</span></a>
+            <a href="capitulo03.html">Capítulo 03 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo05.html">Capítulo 05 <span class="pill">B2</span></a>
+            <a href="capitulo06.html">Capítulo 06 <span class="pill">B2</span></a>
+            <a href="capitulo07.html">Capítulo 07 <span class="pill">B2</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo09.html">Capítulo 09 <span class="pill">B3</span></a>
+            <a href="capitulo10.html">Capítulo 10 <span class="pill">B3</span></a>
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+            <a href="capitulo15.html">Capítulo 15 <span class="pill">B4</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 06 — CRUD (Bebidas) com Prepared, Validação e Prevenção de SQLi/XSS</h1>
+        <p class="subtitle">
+          Implemente um <strong>CRUD completo</strong> de <strong>Bebidas</strong> usando <strong>PDO</strong> (prepared statements),
+          validação no servidor e <strong>escape</strong> correto no HTML.
+        </p>
+        <div class="badges">
+          <span class="badge">Bimestre 2</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): CRUD de Bebidas funcional</span>
+        </div>
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo05.html">← Cap. 05</a>
+          <a class="btn primary" href="capitulo07.html">Cap. 07 →</a>
+          <a class="btn dark" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="content">
+        <h2 id="aprend">Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Construir páginas de <strong>listar, criar, editar e excluir</strong> (CRUD) com PHP + MySQL (PDO).</li>
+          <li>Aplicar <strong>validações</strong> e <strong>mensagens de erro</strong> no servidor.</li>
+          <li>Usar <strong>prepared statements</strong> e <strong>escape de saída</strong> para evitar SQL Injection e XSS.</li>
+          <li>Organizar o código em <strong>DAO</strong> simples e reutilizar utilitários (flash e CSRF opcional).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Mapear o CRUD para a tabela <code>item</code> (filtrando a categoria “Bebidas”).</li>
+                <li>Escrever <strong>INSERT/UPDATE/DELETE</strong> parametrizados.</li>
+                <li>Implementar <strong>validações</strong> de nome, preço e categoria.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Proteger saídas com <code>htmlspecialchars()</code>.</li>
+                <li>Organizar o projeto em <code>config/</code>, <code>src/DAO/</code> e <code>public/</code>.</li>
+                <li>(Opcional) Adicionar token <strong>CSRF</strong> e mensagens <strong>flash</strong>.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> Um CRUD de <em>Bebidas</em> na lanchonete: listar, buscar, criar, editar e excluir itens da categoria “Bebidas”.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+          <h3>1) CRUD e Prepared Statements</h3>
+          <p>CRUD são operações básicas de dados: <strong>Create</strong> (INSERT), <strong>Read</strong> (SELECT), <strong>Update</strong> (UPDATE) e <strong>Delete</strong> (DELETE).
+          Em PHP (PDO), sempre use <strong>prepared statements</strong> (<code>prepare()</code> + <code>execute()</code> com parâmetros) para evitar <em>SQL Injection</em>.</p>
+
+          <h3>2) Validação e Sanitização</h3>
+          <ul>
+            <li>Valide no servidor: tamanho de nome, formato e faixas de <strong>preço</strong>, existência da <strong>categoria</strong>.</li>
+            <li>Ao imprimir no HTML, faça <strong>escape</strong> com <code>htmlspecialchars()</code> para evitar <em>XSS</em>.</li>
+          </ul>
+
+          <h3>3) Organização mínima</h3>
+          <p>Separe conexão (<code>config/db.php</code>), acesso a dados (<code>src/DAO</code>) e páginas públicas (<code>public/</code>).
+          Isso facilita manutenção e evolução (Cap. 10 — camadas mais formais).</p>
+
+          <div class="sep"></div>
+          <h3>Pesquisas complementares sugeridas</h3>
+          <ul>
+            <li>Diferença entre <code>bindValue</code> e <code>execute</code> com array de parâmetros.</li>
+            <li>Tratamento de erros: <code>try/catch</code>, códigos de status HTTP e mensagens amigáveis.</li>
+            <li>Princípios de UX em formulários (feedback de sucesso/erro, preservação de dados ao falhar).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — CRUD de Bebidas (usando tabela <code>item</code>)</h2>
+
+          <h3>Contexto</h3>
+          <p>Usaremos as tabelas do Cap. 05 (<code>categoria</code>, <code>item</code>). Para “Bebidas”, vamos usar o <strong>id</strong> da categoria correspondente.</p>
+
+          <h3>1) Garanta a categoria “Bebidas” e obtenha o ID</h3>
+          <pre><code>
+-- Já inserimos no Cap. 05: ('Bebidas','Lanches','Sobremesas')
+SELECT id, nome FROM categoria WHERE nome = 'Bebidas';
+-- Anote o id retornado (ex.: 1). Usaremos como categoria padrão para o CRUD de bebidas.
+          </code></pre>
+
+          <h3>2) DAO para Bebidas — <code>src/DAO/BebidaDAO.php</code></h3>
+          <pre><code>
+&lt;!-- src/DAO/BebidaDAO.php --&gt;
+&lt;?php
+declare(strict_types=1);
+
+class BebidaDAO {
+  private PDO $pdo;
+  private int $bebidasCatId;
+  public function __construct(PDO $pdo, int $bebidasCatId){
+    $this-&gt;pdo = $pdo;
+    $this-&gt;bebidasCatId = $bebidasCatId;
+  }
+
+  public function listar(?string $q=null): array {
+    $sql = "SELECT i.id,i.nome,i.preco,i.popular,c.nome AS categoria
+            FROM item i JOIN categoria c ON c.id=i.categoria_id
+            WHERE i.categoria_id=:cid";
+    $params = [':cid'=&gt;$this-&gt;bebidasCatId];
+    if($q){
+      $sql .= " AND i.nome LIKE :q";
+      $params[':q'] = '%'.$q.'%';
+    }
+    $sql .= " ORDER BY i.nome";
+    $st = $this-&gt;pdo-&gt;prepare($sql);
+    $st-&gt;execute($params);
+    return $st-&gt;fetchAll();
+  }
+
+  public function buscarPorId(int $id): ?array {
+    $sql = "SELECT id,nome,preco,popular FROM item WHERE id=:id AND categoria_id=:cid";
+    $st = $this-&gt;pdo-&gt;prepare($sql);
+    $st-&gt;execute([':id'=&gt;$id, ':cid'=&gt;$this-&gt;bebidasCatId]);
+    $r = $st-&gt;fetch();
+    return $r ?: null;
+  }
+
+  public function criar(string $nome, float $preco, int $popular=0): int {
+    $sql = "INSERT INTO item (nome,preco,categoria_id,popular) VALUES (:n,:p,:cid,:pop)";
+    $st = $this-&gt;pdo-&gt;prepare($sql);
+    $st-&gt;execute([':n'=&gt;$nome, ':p'=&gt;$preco, ':cid'=&gt;$this-&gt;bebidasCatId, ':pop'=&gt;$popular]);
+    return (int)$this-&gt;pdo-&gt;lastInsertId();
+  }
+
+  public function atualizar(int $id, string $nome, float $preco, int $popular=0): bool {
+    $sql = "UPDATE item SET nome=:n, preco=:p, popular=:pop WHERE id=:id AND categoria_id=:cid";
+    $st = $this-&gt;pdo-&gt;prepare($sql);
+    return $st-&gt;execute([':n'=&gt;$nome, ':p'=&gt;$preco, ':pop'=&gt;$popular, ':id'=&gt;$id, ':cid'=&gt;$this-&gt;bebidasCatId]);
+  }
+
+  public function excluir(int $id): bool {
+    $sql = "DELETE FROM item WHERE id=:id AND categoria_id=:cid";
+    $st = $this-&gt;pdo-&gt;prepare($sql);
+    return $st-&gt;execute([':id'=&gt;$id, ':cid'=&gt;$this-&gt;bebidasCatId]);
+  }
+}
+          </code></pre>
+
+          <h3>3) Utilitários (opcional) — Flash e CSRF</h3>
+          <pre><code>
+&lt;!-- src/App/Flash.php --&gt;
+&lt;?php
+class Flash {
+  public static function start(){ if(session_status()!==PHP_SESSION_ACTIVE) session_start(); }
+  public static function set(string $msg, string $type='ok'){ self::start(); $_SESSION['flash']=['m'=&gt;$msg,'t'=&gt;$type]; }
+  public static function get(): ?array {
+    self::start(); $f = $_SESSION['flash'] ?? null; unset($_SESSION['flash']); return $f;
+  }
+}
+          </code></pre>
+          <pre><code>
+&lt;!-- src/App/Csrf.php --&gt;
+&lt;?php
+class Csrf {
+  public static function start(){ if(session_status()!==PHP_SESSION_ACTIVE) session_start(); }
+  public static function token(): string {
+    self::start(); if(empty($_SESSION['csrf'])) $_SESSION['csrf']=bin2hex(random_bytes(16)); return $_SESSION['csrf'];
+  }
+  public static function check(string $t): bool {
+    self::start(); return hash_equals($_SESSION['csrf'] ?? '', $t);
+  }
+}
+          </code></pre>
+
+          <h3>4) Listagem de bebidas — <code>public/bebidas_index.php</code></h3>
+          <pre><code>
+&lt;!-- public/bebidas_index.php --&gt;
+&lt;?php
+require_once __DIR__.'/../config/db.php';
+require_once __DIR__.'/../src/DAO/BebidaDAO.php';
+require_once __DIR__.'/../src/App/Flash.php';
+
+function esc($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+function preco($n){ return 'R$ '.number_format((float)$n,2,',','.'); }
+
+try{
+  $pdo = pdo();
+  // Descobrir o id da categoria 'Bebidas'
+  $rid = $pdo-&gt;query("SELECT id FROM categoria WHERE nome='Bebidas'")-&gt;fetch();
+  if(!$rid){ throw new RuntimeException('Categoria "Bebidas" não encontrada.'); }
+  $dao = new BebidaDAO($pdo, (int)$rid['id']);
+
+  $q = filter_input(INPUT_GET,'q',FILTER_SANITIZE_SPECIAL_CHARS) ?: '';
+  $itens = $dao-&gt;listar($q ?: null);
+  $flash = Flash::get();
+}catch(Throwable $e){
+  http_response_code(500);
+  die('Erro: '.$e-&gt;getMessage());
+}
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8"/&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+&lt;title&gt;Bebidas — CRUD&lt;/title&gt;
+&lt;style&gt;
+  body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#fafafa;color:#1b1b1b}
+  header{background:#c62828;color:#fff;padding:14px 18px}
+  main{max-width:1000px;margin:0 auto;padding:18px}
+  .top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  form.filters{display:flex;gap:8px;flex-wrap:wrap}
+  .flash{padding:10px;border-radius:8px;margin:10px 0}
+  .flash.ok{background:#e8f5e9;border:1px solid #c8e6c9}
+  .flash.err{background:#ffebee;border:1px solid #ffcdd2}
+  table{border-collapse:collapse;width:100%;margin-top:12px}
+  th,td{border:1px solid #eee;padding:8px}
+  th{background:#f7f7f7}
+  .actions a,.actions button{background:#424242;color:#fff;border:0;border-radius:6px;padding:6px 10px;margin-right:6px;text-decoration:none;cursor:pointer}
+  .actions a:hover{filter:brightness(.95)}
+  .danger{background:#b71c1c}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header&gt;&lt;h1&gt;Bebidas — CRUD&lt;/h1&gt;&lt;/header&gt;
+&lt;main&gt;
+
+  &lt;div class="top"&gt;
+    &lt;form method="get" action="bebidas_index.php" class="filters"&gt;
+      &lt;input type="text" name="q" placeholder="Buscar por nome..." value="&lt;?= esc($q) ?&gt;"/&gt;
+      &lt;button type="submit"&gt;Buscar&lt;/button&gt;
+      &lt;a href="bebidas_index.php"&gt;Limpar&lt;/a&gt;
+    &lt;/form&gt;
+    &lt;div class="actions"&gt;
+      &lt;a href="bebidas_form.php"&gt;+ Nova Bebida&lt;/a&gt;
+      &lt;a href="catalogo_db.php"&gt;← Catálogo&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;?php if($flash): ?&gt;
+    &lt;div class="flash &lt;?= esc($flash['t']) ?&gt;"&gt;&lt;?= esc($flash['m']) ?&gt;&lt;/div&gt;
+  &lt;?php endif; ?&gt;
+
+  &lt;table&gt;
+    &lt;thead&gt;&lt;tr&gt;&lt;th&gt;#&lt;/th&gt;&lt;th&gt;Nome&lt;/th&gt;&lt;th&gt;Preço&lt;/th&gt;&lt;th&gt;Popular&lt;/th&gt;&lt;th&gt;Ações&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;?php foreach($itens as $i): ?&gt;
+        &lt;tr&gt;
+          &lt;td&gt;&lt;?= (int)$i['id'] ?&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;?= esc($i['nome']) ?&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;?= preco($i['preco']) ?&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;?= (int)$i['popular'] ? 'Sim' : 'Não' ?&gt;&lt;/td&gt;
+          &lt;td class="actions"&gt;
+            &lt;a href="bebidas_form.php?id=&lt;?= (int)$i['id'] ?&gt;"&gt;Editar&lt;/a&gt;
+            &lt;form method="post" action="bebidas_delete.php" style="display:inline"&gt;
+              &lt;input type="hidden" name="id" value="&lt;?= (int)$i['id'] ?&gt;"/&gt;
+              &lt;button class="danger" type="submit"&gt;Excluir&lt;/button&gt;
+            &lt;/form&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;?php endforeach; ?&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+
+  &lt;p&gt;&lt;small&gt;Total: &lt;strong&gt;&lt;?= count($itens) ?&gt;&lt;/strong&gt; registro(s).&lt;/small&gt;&lt;/p&gt;
+&lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+
+          <h3>5) Formulário (criar/editar) — <code>public/bebidas_form.php</code></h3>
+          <pre><code>
+&lt;!-- public/bebidas_form.php --&gt;
+&lt;?php
+require_once __DIR__.'/../config/db.php';
+require_once __DIR__.'/../src/DAO/BebidaDAO.php';
+require_once __DIR__.'/../src/App/Csrf.php';
+
+function esc($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+
+try{
+  $pdo = pdo();
+  $rid = $pdo-&gt;query("SELECT id FROM categoria WHERE nome='Bebidas'")-&gt;fetch();
+  if(!$rid){ throw new RuntimeException('Categoria "Bebidas" não encontrada.'); }
+  $dao = new BebidaDAO($pdo, (int)$rid['id']);
+
+  $id = filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
+  $editando = $id ? true : false;
+  $dados = ['nome'=&gt;'','preco'=&gt;'','popular'=&gt;0];
+  if($editando){
+    $item = $dao-&gt;buscarPorId((int)$id);
+    if(!$item){ http_response_code(404); die('Bebida não encontrada.'); }
+    $dados = $item;
+  }
+  $csrf = Csrf::token();
+}catch(Throwable $e){
+  http_response_code(500);
+  die('Erro: '.$e-&gt;getMessage());
+}
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8"/&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+&lt;title&gt;&lt;?= $editando?'Editar':'Nova' ?&gt; Bebida&lt;/title&gt;
+&lt;style&gt;
+  body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#fafafa;color:#1b1b1b}
+  header{background:#c62828;color:#fff;padding:14px 18px}
+  main{max-width:680px;margin:0 auto;padding:18px}
+  form{display:grid;gap:10px}
+  input,select,button{padding:10px;border-radius:8px;border:1px solid #ddd}
+  .row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{background:#424242;color:#fff;border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
+  a.btn{display:inline-block;text-decoration:none;text-align:center}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header&gt;&lt;h1&gt;&lt;?= $editando?'Editar':'Nova' ?&gt; Bebida&lt;/h1&gt;&lt;/header&gt;
+&lt;main&gt;
+  &lt;form method="post" action="bebidas_save.php"&gt;
+    &lt;input type="hidden" name="csrf" value="&lt;?= esc($csrf) ?&gt;"/&gt;
+    &lt;?php if($editando): ?&gt;&lt;input type="hidden" name="id" value="&lt;?= (int)$id ?&gt;"/&gt;&lt;?php endif; ?&gt;
+
+    &lt;label&gt;Nome
+      &lt;input type="text" name="nome" maxlength="80" required value="&lt;?= esc($dados['nome']) ?&gt;"/&gt;
+    &lt;/label&gt;
+
+    &lt;div class="row"&gt;
+      &lt;label&gt;Preço (R$)
+        &lt;input type="number" step="0.01" min="0.01" name="preco" required
+               value="&lt;?= $dados['preco']!==''?esc($dados['preco']):'' ?&gt;"/&gt;
+      &lt;/label&gt;
+      &lt;label&gt;Popular
+        &lt;select name="popular"&gt;
+          &lt;option value="0" &lt;?= (int)$dados['popular']? '':'selected' ?&gt;&gt;Não&lt;/option&gt;
+          &lt;option value="1" &lt;?= (int)$dados['popular']? 'selected':'' ?&gt;&gt;Sim&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/label&gt;
+    &lt;/div&gt;
+
+    &lt;div class="actions"&gt;
+      &lt;button class="btn" type="submit"&gt;&lt;?= $editando?'Salvar alterações':'Criar bebida' ?&gt;&lt;/button&gt;
+      &lt;a class="btn" href="bebidas_index.php"&gt;Cancelar&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+&lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+
+          <h3>6) Salvar (create/update) — <code>public/bebidas_save.php</code></h3>
+          <pre><code>
+&lt;!-- public/bebidas_save.php --&gt;
+&lt;?php
+require_once __DIR__.'/../config/db.php';
+require_once __DIR__.'/../src/DAO/BebidaDAO.php';
+require_once __DIR__.'/../src/App/Flash.php';
+require_once __DIR__.'/../src/App/Csrf.php';
+
+function redirect($to){ header('Location: '.$to); exit; }
+
+try{
+  if(($_SERVER['REQUEST_METHOD'] ?? '')!=='POST'){ http_response_code(405); exit('Método não permitido'); }
+  $csrf = (string)($_POST['csrf'] ?? '');
+  if(!Csrf::check($csrf)){ Flash::set('CSRF inválido. Recarregue o formulário.','err'); redirect('bebidas_index.php'); }
+
+  $pdo = pdo();
+  $rid = $pdo-&gt;query("SELECT id FROM categoria WHERE nome='Bebidas'")-&gt;fetch();
+  if(!$rid){ throw new RuntimeException('Categoria "Bebidas" não encontrada.'); }
+  $dao = new BebidaDAO($pdo, (int)$rid['id']);
+
+  $id = filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);
+  $nome = trim((string)($_POST['nome'] ?? ''));
+  $preco = (string)($_POST['preco'] ?? '');
+  $popular = (int)($_POST['popular'] ?? 0);
+
+  // Validações
+  $erros = [];
+  if(mb_strlen($nome) &lt; 3 || mb_strlen($nome) &gt; 80){ $erros[]='Nome deve ter entre 3 e 80 caracteres.'; }
+  $preco = str_replace(',','.', $preco);
+  if(!is_numeric($preco) || (float)$preco &lt;= 0){ $erros[]='Preço deve ser número positivo.'; }
+  if($popular!==0 && $popular!==1){ $erros[]='Valor de "popular" inválido.'; }
+
+  if($erros){
+    Flash::set('Falha na validação: '.implode(' ', $erros),'err');
+    redirect('bebidas_index.php');
+  }
+
+  if($id){
+    $ok = $dao-&gt;atualizar((int)$id, $nome, (float)$preco, $popular);
+    Flash::set($ok?'Bebida atualizada com sucesso.':'Nenhuma alteração aplicada.');
+  }else{
+    $novoId = $dao-&gt;criar($nome,(float)$preco,$popular);
+    Flash::set('Bebida criada (ID '.$novoId.').');
+  }
+  redirect('bebidas_index.php');
+
+}catch(Throwable $e){
+  Flash::set('Erro ao salvar: '.$e-&gt;getMessage(),'err');
+  redirect('bebidas_index.php');
+}
+          </code></pre>
+
+          <h3>7) Excluir (delete) — <code>public/bebidas_delete.php</code></h3>
+          <pre><code>
+&lt;!-- public/bebidas_delete.php --&gt;
+&lt;?php
+require_once __DIR__.'/../config/db.php';
+require_once __DIR__.'/../src/DAO/BebidaDAO.php';
+require_once __DIR__.'/../src/App/Flash.php';
+
+function redirect($to){ header('Location: '.$to); exit; }
+
+try{
+  if(($_SERVER['REQUEST_METHOD'] ?? '')!=='POST'){ http_response_code(405); exit('Método não permitido'); }
+  $id = filter_input(INPUT_POST,'id',FILTER_VALIDATE_INT);
+  if(!$id){ Flash::set('ID inválido.','err'); redirect('bebidas_index.php'); }
+
+  $pdo = pdo();
+  $rid = $pdo-&gt;query("SELECT id FROM categoria WHERE nome='Bebidas'")-&gt;fetch();
+  if(!$rid){ throw new RuntimeException('Categoria "Bebidas" não encontrada.'); }
+  $dao = new BebidaDAO($pdo, (int)$rid['id']);
+
+  $ok = $dao-&gt;excluir((int)$id);
+  Flash::set($ok?'Bebida excluída.':'Não foi possível excluir.','ok');
+  redirect('bebidas_index.php');
+
+}catch(Throwable $e){
+  Flash::set('Erro ao excluir: '.$e-&gt;getMessage(),'err');
+  redirect('bebidas_index.php');
+}
+          </code></pre>
+
+          <div class="note small">
+            <strong>Resumo:</strong> Implementamos um CRUD completo de Bebidas com <em>prepared statements</em>, validações e <em>escape</em> na saída.
+            Em breve (Cap. 07), incluiremos paginação e busca mais rica, além de CRUD de Categorias.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades propostas -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>CRUD de Lanches:</strong> replique o CRUD de Bebidas para a categoria “Lanches” (novo DAO ou parametrização por categoria).</li>
+            <li><strong>Validação avançada:</strong> garanta <em>nome único</em> entre bebidas (coluna <code>UNIQUE</code> + tratamento do erro no PHP).</li>
+            <li><strong>UX & Paginação:</strong> adicione paginação (LIMIT/OFFSET), destaque do termo buscado e mensagens mais detalhadas de erro/sucesso.</li>
+          </ol>
+          <p class="small muted">Dica: evite repetir código — extraia utilitários e padronize seu estilo de mensagens (flash).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap6Checklist">
+            <li><label><input type="checkbox" data-k="dao"> Criei o <code>BebidaDAO</code> com métodos listar/buscar/criar/atualizar/excluir</label></li>
+            <li><label><input type="checkbox" data-k="list"> Implementei a listagem com busca e ações (editar/excluir)</label></li>
+            <li><label><input type="checkbox" data-k="form"> Criei o formulário de criar/editar com validações</label></li>
+            <li><label><input type="checkbox" data-k="security"> Usei <em>prepared statements</em> e <code>htmlspecialchars</code> na saída</label></li>
+            <li><label><input type="checkbox" data-k="extras"> (Opcional) Adicionei CSRF e mensagens flash</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn ghost" href="capitulo05.html">← Cap. 05</a>
+            <a class="btn primary" href="capitulo07.html">Cap. 07 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 06</h2>
+
+          <!-- Q1 -->
+          <div class="mcq" data-id="q1" data-answer="b">
+            <h4>1) O que previne SQL Injection ao passar dados do formulário para a consulta?</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Concatenar diretamente os valores no SQL</label>
+              <label><input type="radio" name="q1" value="b"> Usar <strong>prepared statements</strong> com parâmetros</label>
+              <label><input type="radio" name="q1" value="c"> Converter o texto para maiúsculas</label>
+              <label><input type="radio" name="q1" value="d"> Remover espaços do input</label>
+              <label><input type="radio" name="q1" value="e"> Usar <code>echo</code> para ver o SQL</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="mcq" data-id="q2" data-answer="e">
+            <h4>2) Para evitar XSS ao exibir o nome da bebida no HTML, usamos:</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> <code>print_r()</code></label>
+              <label><input type="radio" name="q2" value="b"> <code>var_dump()</code></label>
+              <label><input type="radio" name="q2" value="c"> <code>strip_tags()</code> sem mais nada</label>
+              <label><input type="radio" name="q2" value="d"> <code>json_encode()</code></label>
+              <label><input type="radio" name="q2" value="e"> <code>htmlspecialchars()</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="mcq" data-id="q3" data-answer="c">
+            <h4>3) Em um <code>UPDATE</code> de bebidas, qual condição ajuda a garantir que você não atualize outro item de outra categoria?</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> <code>WHERE id = :id</code></label>
+              <label><input type="radio" name="q3" value="b"> <code>WHERE categoria = 'Bebidas'</code></label>
+              <label><input type="radio" name="q3" value="c"> <code>WHERE id = :id AND categoria_id = :cid</code></label>
+              <label><input type="radio" name="q3" value="d"> <code>WHERE nome LIKE :q</code></label>
+              <label><input type="radio" name="q3" value="e"> <code>WHERE preco > 0</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="mcq" data-id="q4" data-answer="a">
+            <h4>4) Qual validação faz sentido para o campo “preço”?</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> Ser um número &gt; 0</label>
+              <label><input type="radio" name="q4" value="b"> Ter mais de 80 caracteres</label>
+              <label><input type="radio" name="q4" value="c"> Conter apenas letras</label>
+              <label><input type="radio" name="q4" value="d"> Aceitar valores negativos</label>
+              <label><input type="radio" name="q4" value="e"> Ser sempre inteiro</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="mcq" data-id="q5" data-answer="d">
+            <h4>5) Escolha a melhor descrição para “sanitização de saída”:</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> Alterar o banco para UTF-8</label>
+              <label><input type="radio" name="q5" value="b"> Excluir espaços em branco ao salvar</label>
+              <label><input type="radio" name="q5" value="c"> Salvar sempre em minúsculas</label>
+              <label><input type="radio" name="q5" value="d"> Converter caracteres especiais ao exibir no HTML (ex.: <code>htmlspecialchars</code>)</label>
+              <label><input type="radio" name="q5" value="e"> Remover todos os acentos antes de salvar</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <!-- Q6 -->
+          <div class="mcq" data-id="q6" data-answer="b">
+            <h4>6) Em qual momento é mais adequado validar os dados enviados no formulário?</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> Apenas no lado do cliente (JavaScript)</label>
+              <label><input type="radio" name="q6" value="b"> No servidor (PHP), mesmo que haja validação no cliente</label>
+              <label><input type="radio" name="q6" value="c"> Nunca, confie no usuário</label>
+              <label><input type="radio" name="q6" value="d"> Só após salvar no banco</label>
+              <label><input type="radio" name="q6" value="e"> Apenas em produção</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 07</strong>, vamos refinar o catálogo com <strong>paginação</strong>, <strong>busca</strong> e mais
+            <strong>sanitização</strong>, além de um CRUD de <strong>Categorias</strong> para completar o módulo.</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo07.html">Ir para o Capítulo 07 →</a>
+            <a class="btn ghost" href="capitulo05.html">← Voltar ao Capítulo 05</a>
+            <a class="btn dark" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 06</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo05.html">Cap. 05</a>
+          <a href="capitulo07.html">Cap. 07</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar mobile toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const toggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Download este capítulo como HTML
+    const downloadBtn = document.getElementById('downloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', () => {
+        const doctype = '<!DOCTYPE html>\n';
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'capitulo06.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // Checklist persistência local
+    (function(){
+      const list = document.getElementById('cap6Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap6_checklist';
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = !!data[cb.dataset.k];
+          });
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.dataset.k] = cb.checked; });
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+      const clearBtn = document.getElementById('clearChecklist');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          localStorage.removeItem(KEY);
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+      }
+      load();
+    })();
+
+    // MCQ Interativo
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const qid = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+        const name = qid;
+
+        const sendBtn = box.querySelector('.send');
+        if(sendBtn){
+          sendBtn.addEventListener('click', ()=>{
+            const choice = box.querySelector(`input[name="${name}"]:checked`);
+            if(!choice){
+              feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+              feedback.className = 'feedback err';
+              return;
+            }
+            const got = (choice.value || '').trim().toLowerCase();
+            if(got === answer){
+              feedback.textContent = '✔ Resposta correta!';
+              feedback.className = 'feedback ok';
+            }else{
+              feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+              feedback.className = 'feedback err';
+            }
+          });
+        }
+
+        const keyBtn = box.querySelector('.key');
+        if(keyBtn){
+          keyBtn.addEventListener('click', ()=>{
+            answerEl.style.display = answerEl.style.display === 'block' ? 'none' : 'block';
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

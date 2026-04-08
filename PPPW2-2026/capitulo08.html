@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 08 — Programação Web 2 | Entrega B2: Catálogo Integrado com CRUDs, Paginação, Busca e Segurança</title>
+  <meta name="description" content="Capítulo 08 da apostila de Programação Web 2. Entrega do 2º bimestre: integração de CRUDs (Bebidas e Categorias), catálogo via MySQL, paginação, busca e checklist de segurança."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body id="top">
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html" title="Voltar ao índice">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+      <div class="menu" id="mainMenu">
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#entrega">Entrega B2</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+        <div class="menu-gap"></div>
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo02.html">Capítulo 02 <span class="pill">B1</span></a>
+            <a href="capitulo03.html">Capítulo 03 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo05.html">Capítulo 05 <span class="pill">B2</span></a>
+            <a href="capitulo06.html">Capítulo 06 <span class="pill">B2</span></a>
+            <a href="capitulo07.html">Capítulo 07 <span class="pill">B2</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo09.html">Capítulo 09 <span class="pill">B3</span></a>
+            <a href="capitulo10.html">Capítulo 10 <span class="pill">B3</span></a>
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+            <a href="capitulo15.html">Capítulo 15 <span class="pill">B4</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 08 — Entrega B2: Catálogo Integrado com CRUDs, Paginação, Busca e Segurança</h1>
+        <p class="subtitle">
+          Consolide o módulo de <strong>persistência</strong> em MySQL integrando os CRUDs de <strong>Bebidas</strong> e <strong>Categorias</strong>,
+          aplicando <strong>paginação</strong>, <strong>busca</strong> e um <strong>checklist de segurança</strong> (prepared, escape, CSRF).
+        </p>
+        <div class="badges">
+          <span class="badge">Bimestre 2</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega: Integração CRUDs + Catálogo</span>
+        </div>
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo07.html">← Cap. 07</a>
+          <a class="btn primary" href="capitulo09.html">Cap. 09 →</a>
+          <a class="btn ghost" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+    <div class="card" aria-labelledby="aprend">
+      <div class="content">
+        <h2 id="aprend">Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Integrar os CRUDs (Bebidas e Categorias) em um fluxo administrativo simples.</li>
+          <li>Exibir o catálogo público com dados do banco, <strong>paginação</strong> e <strong>busca</strong>.</li>
+          <li>Garantir <strong>segurança básica</strong>: consultas parametrizadas, escape na saída e CSRF em formulários.</li>
+          <li>Entregar um pacote funcional com script SQL e instruções de execução.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Criar uma <strong>home administrativa</strong> que aponte para os CRUDs.</li>
+                <li>Centralizar utilitários (escape, preço, flash, CSRF) e aplicar em todas as páginas.</li>
+                <li>Atualizar o catálogo público para permitir <strong>“Adicionar ao carrinho (DB)”</strong> com preço vindo do servidor.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Revisar <strong>prepared statements</strong> e <strong>sanitização</strong> (XSS/SQLi) no projeto.</li>
+                <li>Preparar o pacote de <strong>entrega B2</strong> com rubrica e checklist.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> Integração do admin (CRUDs) com o catálogo público e o carrinho, usando dados reais do MySQL.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) Centralização de utilitários</h3>
+          <p>Para reduzir repetição e aumentar consistência, centralize funções comuns (escape, formatação de preço, flash, CSRF) em <code>src/App/</code>.</p>
+          <pre><code>&lt;!-- src/App/Util.php --&gt;
+&lt;?php
+namespace App;
+class Util{
+  public static function esc($v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+  public static function preco($n): string { return 'R$ '.number_format((float)$n,2,',','.'); }
+}
+          </code></pre>
+
+          <h3>2) “Fonte de verdade” no servidor</h3>
+          <p>Em vez de confiar no preço enviado pelo cliente, recupere o item pelo <code>id</code> no banco antes de adicionar ao carrinho.</p>
+
+          <div class="sep"></div>
+          <h3>Pesquisas complementares sugeridas</h3>
+          <ul>
+            <li>Arquitetura em camadas (DAO/Serviço/Controlador) e vantagens da separação de responsabilidades.</li>
+            <li>Erros e exceções no PDO (códigos SQLSTATE) e como exibir mensagens amigáveis ao usuário.</li>
+            <li>Práticas de UX em telas administrativas: mensagens, navegação e confirmações.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — Integração Admin + Catálogo + Carrinho (DB)</h2>
+
+          <h3>1) Home administrativa simples — <code>public/admin/index.php</code></h3>
+          <pre><code>&lt;!-- public/admin/index.php --&gt;
+&lt;?php ?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;&lt;head&gt;
+  &lt;meta charset="utf-8"/&gt;&lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+  &lt;title&gt;Admin — Lanchonete&lt;/title&gt;
+  &lt;style&gt;
+    body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#fafafa;color:#1b1b1b}
+    header{background:#c62828;color:#fff;padding:14px 18px}
+    main{max-width:720px;margin:0 auto;padding:18px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    a.card{display:block;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;text-decoration:none;color:#1b1b1b;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    a.card:hover{border-color:#ddd}
+  &lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;Admin — Lanchonete&lt;/h1&gt;&lt;/header&gt;
+  &lt;main&gt;
+    &lt;div class="grid"&gt;
+      &lt;a class="card" href="../bebidas_index.php"&gt;Bebidas (CRUD)&lt;/a&gt;
+      &lt;a class="card" href="../categorias_index.php"&gt;Categorias (CRUD)&lt;/a&gt;
+      &lt;a class="card" href="../catalogo_db.php"&gt;Catálogo Público&lt;/a&gt;
+      &lt;a class="card" href="../carrinho.php"&gt;Carrinho&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+&lt;/body&gt;&lt;/html&gt;
+          </code></pre>
+
+          <h3>2) Atualize o catálogo para “adicionar ao carrinho (DB)”</h3>
+          <p>No <code>catalogo_db.php</code>, inclua um formulário “Adicionar” que envia apenas o <code>id</code> do item:</p>
+          <pre><code>&lt;!-- (trecho) em public/catalogo_db.php --&gt;
+&lt;form method="post" action="add_carrinho_db.php"&gt;
+  &lt;input type="hidden" name="id" value="&lt;?= (int)$i['id'] ?&gt;"/&gt;
+  &lt;input type="number" name="qtd" min="1" value="1" style="width:80px"/&gt;
+  &lt;button type="submit"&gt;Adicionar&lt;/button&gt;
+&lt;/form&gt;
+          </code></pre>
+
+          <h3>3) Endpoint seguro — <code>public/add_carrinho_db.php</code></h3>
+          <pre><code>&lt;!-- public/add_carrinho_db.php --&gt;
+&lt;?php
+require_once __DIR__.'/../config/db.php';
+require_once __DIR__.'/../src/App/SessionCart.php';
+use App\SessionCart;
+
+if(($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'){ http_response_code(405); exit('Método não permitido'); }
+
+$id  = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+$qtd = max(1, (int)($_POST['qtd'] ?? 1));
+
+if(!$id){ header('Location: catalogo_db.php'); exit; }
+
+try{
+  $pdo = pdo();
+  $st = $pdo-&gt;prepare("SELECT i.id,i.nome,i.preco FROM item i WHERE i.id=:id");
+  $st-&gt;execute([':id'=&gt;$id]);
+  $it = $st-&gt;fetch();
+  if(!$it){ header('Location: catalogo_db.php'); exit; }
+
+  SessionCart::start();
+  SessionCart::add((string)$it['id'], (string)$it['nome'], (float)$it['preco'], $qtd);
+  header('Location: carrinho.php');
+} catch(Throwable $e){
+  http_response_code(500); exit('Erro ao adicionar: '.$e-&gt;getMessage());
+}
+          </code></pre>
+
+          <h3>4) Unifique utilitários (importação nos CRUDs)</h3>
+          <p>Adapte seus arquivos para reutilizar utilitários centralizados como <code>App\Util::esc()</code> e <code>App\Util::preco()</code>.</p>
+
+          <h3>5) Checklist de segurança aplicado</h3>
+          <ul>
+            <li><strong>SQLi:</strong> toda consulta/alteração usa <em>prepared statements</em> (sem concatenação direta).</li>
+            <li><strong>XSS:</strong> textos exibidos no HTML passam por <code>htmlspecialchars</code>.</li>
+            <li><strong>CSRF:</strong> formulários sensíveis (criar/editar/excluir) usam token de CSRF.</li>
+            <li><strong>Método HTTP:</strong> ações de escrita usam <strong>POST</strong>; listagens/filtragem usam <strong>GET</strong>.</li>
+          </ul>
+
+          <div class="note small">
+            <strong>Resumo:</strong> Integramos Admin e Catálogo, reforçando segurança e boas práticas de UX.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades propostas -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>Export CSV:</strong> crie <code>public/export_itens.php</code> que exporta o catálogo atual (com filtros) em CSV (use <code>fputcsv</code>).</li>
+            <li><strong>Relatório simples:</strong> crie uma página <code>public/relatorio_categoria.php</code> que conta itens por categoria (<code>COUNT(*)</code> + <code>GROUP BY</code>).</li>
+            <li><strong>Confirmação de exclusão:</strong> adicione uma tela intermediária (GET) antes do POST de exclusão nos CRUDs.</li>
+          </ol>
+          <p class="small muted">Dica: mantenha os arquivos organizados em <code>config/</code>, <code>src/DAO/</code>, <code>src/App/</code> e <code>public/</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Entrega B2 -->
+    <section id="entrega">
+      <div class="card">
+        <div class="content">
+          <h2>Entrega B2 — Catálogo Integrado (Cap. 05–08)</h2>
+          <p><strong>Objetivo:</strong> Entregar um sistema funcional da lanchonete com os seguintes requisitos:</p>
+          <ul>
+            <li><strong>Banco</strong> (MySQL): schema com <code>categoria</code>, <code>item</code> e dados iniciais.</li>
+            <li><strong>Admin:</strong> CRUD de Categorias e de Bebidas (com validação, mensagens e proteção CSRF).</li>
+            <li><strong>Catálogo público:</strong> listagem paginada, busca e <strong>adicionar ao carrinho</strong> com preço vindo do banco.</li>
+            <li><strong>Segurança básica:</strong> SQL parametrizado, <em>escape</em> de saída e métodos HTTP adequados.</li>
+          </ul>
+
+          <h3>Rubrica (critérios de avaliação)</h3>
+          <ul>
+            <li><strong>Funcionalidade</strong> (40%): CRUDs, catálogo e carrinho funcionando sem erros.</li>
+            <li><strong>Organização</strong> (25%): separação de camadas/arquivos, nomes claros, reutilização de utilitários.</li>
+            <li><strong>Segurança</strong> (25%): uso consistente de prepared, escape, CSRF e métodos corretos.</li>
+            <li><strong>Documentação</strong> (10%): README com instruções de instalação e <em>dump</em> SQL.</li>
+          </ul>
+
+          <h3>Instruções de entrega</h3>
+          <ul>
+            <li>Suba um <strong>.zip</strong> ou repositório com as pastas do projeto (<code>lanchonete/</code>), incluindo <code>README.md</code> e <code>script.sql</code>.</li>
+            <li>No README, inclua: requisitos, passo a passo de importação do banco, URLs de acesso e usuários (se houver).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno (B2)</h2>
+          <ul class="checklist" id="cap8Checklist">
+            <li><label><input type="checkbox" data-k="admin"> Criei a home do admin com links para CRUDs</label></li>
+            <li><label><input type="checkbox" data-k="catalogo"> Atualizei o catálogo com busca, paginação e “Adicionar ao carrinho (DB)”</label></li>
+            <li><label><input type="checkbox" data-k="security"> Apliquei prepared, escape e CSRF onde necessário</label></li>
+            <li><label><input type="checkbox" data-k="doc"> Escrevi um README claro + incluí o script SQL</label></li>
+            <li><label><input type="checkbox" data-k="entrega"> Compactei e entreguei o projeto conforme orientações</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn ghost" href="capitulo07.html">← Cap. 07</a>
+            <a class="btn ghost" href="capitulo09.html">Cap. 09 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 08</h2>
+
+          <div class="mcq" data-id="q1" data-answer="b">
+            <h4>1) Para garantir o preço correto ao adicionar ao carrinho, a melhor prática é:</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Confiar no valor enviado em um input hidden</label>
+              <label><input type="radio" name="q1" value="b"> Buscar o item por ID no banco e usar o preço do servidor</label>
+              <label><input type="radio" name="q1" value="c"> Salvar o preço em cookie e ler no servidor</label>
+              <label><input type="radio" name="q1" value="d"> Enviar o preço por GET na URL</label>
+              <label><input type="radio" name="q1" value="e"> Multiplicar o preço por 100 no cliente</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <div class="mcq" data-id="q2" data-answer="e">
+            <h4>2) Em formulários de criação/edição/exclusão no admin, é recomendável:</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> Usar apenas GET</label>
+              <label><input type="radio" name="q2" value="b"> Não validar nada no servidor</label>
+              <label><input type="radio" name="q2" value="c"> Exibir SQL bruto em tela para depurar</label>
+              <label><input type="radio" name="q2" value="d"> Confiar na validação do navegador</label>
+              <label><input type="radio" name="q2" value="e"> Usar POST + CSRF + prepared statements</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <div class="mcq" data-id="q3" data-answer="c">
+            <h4>3) Para prevenir XSS ao exibir o nome de um item, usamos:</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> <code>print_r()</code></label>
+              <label><input type="radio" name="q3" value="b"> <code>strip_tags()</code> isoladamente</label>
+              <label><input type="radio" name="q3" value="c"> <code>htmlspecialchars()</code></label>
+              <label><input type="radio" name="q3" value="d"> <code>base64_encode()</code></label>
+              <label><input type="radio" name="q3" value="e"> <code>nl2br()</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <div class="mcq" data-id="q4" data-answer="a">
+            <h4>4) Qual é a combinação correta para listagem pública com filtros e segurança?</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> GET + prepared em filtros + escape na saída</label>
+              <label><input type="radio" name="q4" value="b"> POST + concatenação de SQL + <code>var_dump()</code> em produção</label>
+              <label><input type="radio" name="q4" value="c"> GET + concatenar termos na query</label>
+              <label><input type="radio" name="q4" value="d"> POST para tudo (inclusive filtros) sem CSRF</label>
+              <label><input type="radio" name="q4" value="e"> Apenas cookies, sem parâmetros</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <div class="mcq" data-id="q5" data-answer="d">
+            <h4>5) Qual arquivo NÃO deve ficar acessível diretamente pelo navegador?</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> <code>public/catalogo_db.php</code></label>
+              <label><input type="radio" name="q5" value="b"> <code>public/carrinho.php</code></label>
+              <label><input type="radio" name="q5" value="c"> <code>public/admin/index.php</code></label>
+              <label><input type="radio" name="q5" value="d"> <code>src/DAO/ItemDAO.php</code></label>
+              <label><input type="radio" name="q5" value="e"> <code>public/add_carrinho_db.php</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <div class="mcq" data-id="q6" data-answer="b">
+            <h4>6) Sobre métodos HTTP, escolha a opção correta:</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> Exclusões devem ser feitas com GET para facilitar</label>
+              <label><input type="radio" name="q6" value="b"> Operações de escrita devem usar POST (ou PUT/DELETE na API)</label>
+              <label><input type="radio" name="q6" value="c"> GET é sempre mais seguro que POST</label>
+              <label><input type="radio" name="q6" value="d"> POST pode ser cacheado e compartilhado</label>
+              <label><input type="radio" name="q6" value="e"> GET altera estado e POST é só leitura</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 09</strong>, iniciaremos <strong>POO em PHP</strong> (classes, objetos, atributos e métodos) para modelar entidades
+             do domínio e preparar a separação formal em camadas.</p>
+          <div class="actions">
+            <a class="btn ghost" href="capitulo09.html">Capítulo 09 →</a>
+            <a class="btn ghost" href="capitulo07.html">← Capítulo 07</a>
+            <a class="btn primary" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 08</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo07.html">Cap. 07</a>
+          <a href="capitulo09.html">Cap. 09</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar mobile toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const toggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Download este capítulo como HTML
+    const downloadBtn = document.getElementById('downloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', () => {
+        const doctype = '<!DOCTYPE html>\n';
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'capitulo08.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // Checklist persistência local
+    (function(){
+      const list = document.getElementById('cap8Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap8_checklist';
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = !!data[cb.dataset.k];
+          });
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.dataset.k] = cb.checked; });
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+      const clearBtn = document.getElementById('clearChecklist');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          localStorage.removeItem(KEY);
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+      }
+      load();
+    })();
+
+    // MCQ Interativo
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const qid = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+        const name = qid;
+
+        const sendBtn = box.querySelector('.send');
+        if(sendBtn){
+          sendBtn.addEventListener('click', ()=>{
+            const choice = box.querySelector(`input[name="${name}"]:checked`);
+            if(!choice){
+              feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+              feedback.className = 'feedback err';
+              return;
+            }
+            const got = (choice.value || '').trim().toLowerCase();
+            if(got === answer){
+              feedback.textContent = '✔ Resposta correta!';
+              feedback.className = 'feedback ok';
+            }else{
+              feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+              feedback.className = 'feedback err';
+            }
+          });
+        }
+
+        const keyBtn = box.querySelector('.key');
+        if(keyBtn){
+          keyBtn.addEventListener('click', ()=>{
+            answerEl.style.display = answerEl.style.display === 'block' ? 'none' : 'block';
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

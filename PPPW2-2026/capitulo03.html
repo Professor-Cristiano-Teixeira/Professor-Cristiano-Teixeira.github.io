@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 03 — Programação Web 2 | HTTP na prática: URL, QueryString, GET/POST e Formulários</title>
+  <meta name="description" content="Capítulo 03 da apostila de Programação Web 2. HTTP na prática: URL, QueryString, métodos GET/POST e formulários. Aplicado ao projeto da lanchonete."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body id="top">
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a href="index.html" class="brand">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+      <div class="menu" id="mainMenu">
+        <a href="index.html" class="secondary">Início</a>
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+        <div class="menu-gap"></div>
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo02.html">Capítulo 02 <span class="pill">B1</span></a>
+            <a href="capitulo03.html">Capítulo 03 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo05.html">Capítulo 05 <span class="pill">B2</span></a>
+            <a href="capitulo06.html">Capítulo 06 <span class="pill">B2</span></a>
+            <a href="capitulo07.html">Capítulo 07 <span class="pill">B2</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo09.html">Capítulo 09 <span class="pill">B3</span></a>
+            <a href="capitulo10.html">Capítulo 10 <span class="pill">B3</span></a>
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+            <a href="capitulo15.html">Capítulo 15 <span class="pill">B4</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 03 — HTTP na prática: URL, QueryString, GET/POST e Formulários</h1>
+        <p class="subtitle">
+          Entenda o ciclo <strong>request/response</strong>, a estrutura de <strong>URL</strong>, como ler parâmetros via
+          <strong>QueryString</strong> e como criar <strong>formulários GET/POST</strong> no projeto da <em>lanchonete</em>.
+        </p>
+        <div class="badges">
+          <span class="badge">Bimestre 1</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): Busca por QueryString + Formulário de Sugestão (POST)</span>
+        </div>
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo02.html">← Cap. 02</a>
+          <a class="btn primary" href="capitulo04.html">Cap. 04 →</a>
+          <a class="btn ghost" href="index.html">Voltar ao índice</a>
+        </div>
+      </div>
+    </div>
+    <div class="card" aria-labelledby="aprend">
+      <div class="content">
+        <h2 id="aprend">Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Identificar partes de uma <strong>URL</strong> e o papel da <strong>QueryString</strong>.</li>
+          <li>Explicar diferenças práticas entre <strong>GET</strong> e <strong>POST</strong> (visibilidade, cache, idempotência).</li>
+          <li>Criar formulários <strong>GET</strong> (busca/filtragem) e <strong>POST</strong> (envio de dados) em PHP.</li>
+          <li>Capturar e validar entradas com <code>filter_input()</code> e imprimir respostas de forma segura.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Compreender a estrutura de uma <strong>URL</strong> (esquema, host, caminho, query, fragment).</li>
+                <li>Reconhecer o fluxo <strong>request/response</strong> entre navegador e servidor web.</li>
+                <li>Diferenciar <strong>GET</strong> e <strong>POST</strong> e quando usar cada um.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Criar <strong>formulários</strong> HTML e tratar dados no PHP.</li>
+                <li>Aplicar <strong>validação e sanitização</strong> simples no servidor.</li>
+                <li>Usar QueryString para <strong>filtros e buscas</strong> no cardápio.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> Implementaremos uma <em>busca por itens</em> via QueryString (GET) e um
+            <em>formulário de sugestão de item</em> (POST) para a lanchonete.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) Estrutura da URL</h3>
+          <p>Uma URL pode ser dividida em partes, por exemplo:
+            <code>https://exemplo.com.br/caminho/pagina.php?cat=Bebidas&amp;q=suco#secao</code></p>
+          <ul>
+            <li><strong>Esquema</strong> (<code>https://</code>) • <strong>Host</strong> (<code>exemplo.com.br</code>)</li>
+            <li><strong>Caminho</strong> (<code>/caminho/pagina.php</code>) • <strong>QueryString</strong> (<code>?cat=Bebidas&amp;q=suco</code>)</li>
+            <li><strong>Fragment</strong> (<code>#secao</code>, interpretado pelo navegador, não chega ao servidor)</li>
+          </ul>
+
+          <h3>2) Request e Response (HTTP)</h3>
+          <p>O navegador envia uma <em>requisição HTTP</em> (<strong>request</strong>) e recebe uma <em>resposta</em> (<strong>response</strong>).
+             Requisições incluem método (GET/POST), caminho e cabeçalhos; respostas incluem <em>status code</em> (ex.: 200, 404) e corpo (HTML/JSON).</p>
+
+          <h3>3) GET vs POST</h3>
+          <ul>
+            <li><strong>GET:</strong> parâmetros vão na URL (QueryString), é mais indicado para <em>consulta/filtro</em>. Em geral é <em>idempotente</em> e pode ser cacheado.</li>
+            <li><strong>POST:</strong> parâmetros vão no corpo da requisição. Use para <em>enviar/criar</em> dados. Não é idempotente por padrão e não fica visível na barra de endereços.</li>
+          </ul>
+
+          <h3>4) Parâmetros no PHP</h3>
+          <p>Em PHP, acessamos parâmetros com <code>$_GET</code> e <code>$_POST</code>.
+             Use preferencialmente <code>filter_input()</code> para validar/sanitizar; e, ao imprimir, use <code>htmlspecialchars()</code>.</p>
+          <pre><code class="hl">
+<span class="k">&lt;?php</span>
+<span class="c">// Lendo GET</span>
+<span class="a">$q</span> = filter_input(INPUT_GET, <span class="s">'q'</span>, FILTER_SANITIZE_SPECIAL_CHARS) ?? <span class="s">''</span>;
+
+<span class="c">// Lendo POST</span>
+<span class="a">$nome</span> = filter_input(INPUT_POST, <span class="s">'nome'</span>, FILTER_SANITIZE_SPECIAL_CHARS);
+
+<span class="c">// Saída segura</span>
+<span class="k">function</span> <span class="f">esc</span>(<span class="a">$v</span>){ <span class="k">return</span> htmlspecialchars((string)<span class="a">$v</span>, ENT_QUOTES, <span class="s">'UTF-8'</span>); }
+          </code></pre>
+
+          <div class="sep"></div>
+          <h3>Pesquisas complementares sugeridas</h3>
+          <ul>
+            <li>Métodos HTTP além de GET/POST (PUT, DELETE) e suas semânticas.</li>
+            <li>Tipos de conteúdo de formulários: <code>application/x-www-form-urlencoded</code> (padrão) e <code>multipart/form-data</code>.</li>
+            <li>O que é <em>idempotência</em> e por que evitar efeitos colaterais em requisições GET.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — Busca (GET) e Sugestão de Item (POST)</h2>
+
+          <h3>Contexto</h3>
+          <p>Neste passo a passo, criaremos duas páginas:</p>
+          <ul>
+            <li><strong>busca.php</strong>: filtra itens do cardápio via <em>QueryString</em> (GET).</li>
+            <li><strong>sugestao.php</strong>: formulário para o usuário sugerir um novo item (POST) com validação simples.</li>
+          </ul>
+
+          <h3>1) Busca por itens (GET) — <code>public/busca.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- public/busca.php --&gt;</span>
+<span class="k">&lt;?php</span>
+  <span class="k">function</span> <span class="f">esc</span>(<span class="a">$v</span>){ <span class="k">return</span> htmlspecialchars((string)<span class="a">$v</span>, ENT_QUOTES, <span class="s">'UTF-8'</span>); }
+
+  <span class="c">// Base de dados em memória (exemplo)</span>
+  <span class="a">$itens</span> = [
+    [<span class="s">'nome'</span>=&gt;<span class="s">'Café expresso'</span>, <span class="s">'preco'</span>=&gt;6.00, <span class="s">'categoria'</span>=&gt;<span class="s">'Bebidas'</span>],
+    [<span class="s">'nome'</span>=&gt;<span class="s">'Cappuccino'</span>,    <span class="s">'preco'</span>=&gt;9.00, <span class="s">'categoria'</span>=&gt;<span class="s">'Bebidas'</span>],
+    [<span class="s">'nome'</span>=&gt;<span class="s">'X-Salada'</span>,      <span class="s">'preco'</span>=&gt;18.90,<span class="s">'categoria'</span>=&gt;<span class="s">'Lanches'</span>],
+    [<span class="s">'nome'</span>=&gt;<span class="s">'Suco de laranja'</span>,<span class="s">'preco'</span>=&gt;9.50, <span class="s">'categoria'</span>=&gt;<span class="s">'Bebidas'</span>],
+    [<span class="s">'nome'</span>=&gt;<span class="s">'Pão de queijo'</span>, <span class="s">'preco'</span>=&gt;5.50, <span class="s">'categoria'</span>=&gt;<span class="s">'Lanches'</span>],
+  ];
+
+  <span class="c">// Lê parâmetro de busca (GET)</span>
+  <span class="a">$q</span> = filter_input(INPUT_GET, <span class="s">'q'</span>, FILTER_SANITIZE_SPECIAL_CHARS) ?? <span class="s">''</span>;
+  <span class="c">// Normaliza para busca case-insensitive</span>
+  <span class="a">$resultado</span> = [];
+  <span class="k">if</span>(<span class="a">$q</span> !== <span class="s">''</span>){
+    <span class="k">foreach</span>(<span class="a">$itens</span> as <span class="a">$i</span>){
+      <span class="k">if</span>(mb_stripos($i[<span class="s">'nome'</span>], <span class="a">$q</span>) !== <span class="k">false</span>){
+        <span class="a">$resultado</span>[] = <span class="a">$i</span>;
+      }
+    }
+  } <span class="k">else</span> {
+    <span class="a">$resultado</span> = <span class="a">$itens</span>; <span class="c">// se vazio, mostra todos</span>
+  }
+<span class="k">?&gt;</span>
+<span class="c">&lt;!-- HTML --&gt;</span>
+<span class="k">&lt;!DOCTYPE html&gt;</span>
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"/&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+  &lt;title&gt;Lanchonete — Busca&lt;/title&gt;
+  &lt;style&gt;
+    body{font-family:Segoe UI,Arial,sans-serif;margin:0;padding:0;background:#fafafa;color:#1b1b1b}
+    header{background:#c62828;color:#fff;padding:14px 18px}
+    main{max-width:960px;margin:0 auto;padding:18px}
+    form{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .card{background:#fff;border:1px solid #eee;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .price{font-weight:700;color:#2e7d32}
+    @media (max-width:768px){.grid{grid-template-columns:1fr}}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;Busca no card&aacute;pio&lt;/h1&gt;&lt;/header&gt;
+  &lt;main&gt;
+
+    &lt;form method="get" action="busca.php"&gt;
+      &lt;input type="text" name="q" placeholder="Pesquisar por nome..." value="&lt;?= esc(<span class="a">$q</span>) ?&gt;" /&gt;
+      &lt;button type="submit"&gt;Buscar&lt;/button&gt;
+      &lt;a href="busca.php"&gt;Limpar&lt;/a&gt;
+    &lt;/form&gt;
+
+    &lt;div class="grid"&gt;
+      &lt;?php <span class="k">foreach</span>(<span class="a">$resultado</span> as <span class="a">$i</span>): ?&gt;
+        &lt;div class="card"&gt;
+          &lt;h3&gt;&lt;?= esc(<span class="a">$i</span>[<span class="s">'nome'</span>]) ?&gt;&lt;/h3&gt;
+          &lt;p class="price"&gt;R$ &lt;?= number_format(<span class="a">$i</span>[<span class="s">'preco'</span>], 2, <span class="s">","</span>, <span class="s">"."</span>) ?&gt;&lt;/p&gt;
+          &lt;small&gt;Categoria: &lt;?= esc(<span class="a">$i</span>[<span class="s">'categoria'</span>]) ?&gt;&lt;/small&gt;
+        &lt;/div&gt;
+      &lt;?php <span class="k">endforeach</span>; ?&gt;
+    &lt;/div&gt;
+
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+
+          <h3>2) Formulário de sugestão (POST) — <code>public/sugestao.php</code></h3>
+          <p>Uma única página que exibe o formulário (GET) e processa os dados (POST), com validação simples.</p>
+          <pre><code class="hl">
+<span class="c">&lt;!-- public/sugestao.php --&gt;</span>
+<span class="k">&lt;?php</span>
+  <span class="k">function</span> <span class="f">esc</span>(<span class="a">$v</span>){ <span class="k">return</span> htmlspecialchars((string)<span class="a">$v</span>, ENT_QUOTES, <span class="s">'UTF-8'</span>); }
+  <span class="a">$categorias</span> = [<span class="s">'Bebidas'</span>, <span class="s">'Lanches'</span>, <span class="s">'Sobremesas'</span>];
+
+  <span class="a">$erros</span> = []; <span class="a">$ok</span> = <span class="k">false</span>;
+  <span class="k">if</span>(<span class="s">'POST'</span> === (<span class="a">$_SERVER</span>[<span class="s">'REQUEST_METHOD'</span>] ?? <span class="s">''</span>)){
+    <span class="a">$nome</span> = trim(filter_input(INPUT_POST, <span class="s">'nome'</span>, FILTER_SANITIZE_SPECIAL_CHARS) ?? <span class="s">''</span>);
+    <span class="a">$preco</span> = str_replace(<span class="s">','</span>, <span class="s">'.'</span>, (string)(<span class="a">$_POST</span>[<span class="s">'preco'</span>] ?? <span class="s">''</span>)); <span class="c">// converte vírgula p/ ponto</span>
+    <span class="a">$categoria</span> = filter_input(INPUT_POST, <span class="s">'categoria'</span>, FILTER_SANITIZE_SPECIAL_CHARS) ?? <span class="s">''</span>;
+    <span class="a">$obs</span> = trim(filter_input(INPUT_POST, <span class="s">'obs'</span>, FILTER_SANITIZE_SPECIAL_CHARS) ?? <span class="s">''</span>);
+
+    <span class="k">if</span>(<span class="a">$nome</span> === <span class="s">''</span> || mb_strlen(<span class="a">$nome</span>) &lt; 3){ <span class="a">$erros</span>[<span class="s">'nome'</span>] = <span class="s">'Informe um nome com pelo menos 3 caracteres.'</span>; }
+    <span class="k">if</span>(!is_numeric(<span class="a">$preco</span>) || (float)<span class="a">$preco</span> &lt;= 0){ <span class="a">$erros</span>[<span class="s">'preco'</span>] = <span class="s">'Preço deve ser um número positivo.'</span>; }
+    <span class="k">if</span>(!in_array(<span class="a">$categoria</span>, <span class="a">$categorias</span>, <span class="k">true</span>)){ <span class="a">$erros</span>[<span class="s">'categoria'</span>] = <span class="s">'Categoria inválida.'</span>; }
+
+    <span class="k">if</span>(empty(<span class="a">$erros</span>)){ <span class="a">$ok</span> = <span class="k">true</span>; }
+  }
+<span class="k">?&gt;</span>
+<span class="c">&lt;!-- HTML --&gt;</span>
+<span class="k">&lt;!DOCTYPE html&gt;</span>
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"/&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+  &lt;title&gt;Lanchonete — Sugest&atilde;o de Item&lt;/title&gt;
+  &lt;style&gt;
+    body{font-family:Segoe UI,Arial,sans-serif;margin:0;padding:0;background:#fafafa;color:#1b1b1b}
+    header{background:#c62828;color:#fff;padding:14px 18px}
+    main{max-width:720px;margin:0 auto;padding:18px}
+    form{display:grid;gap:10px;margin-top:8px}
+    label{font-weight:600}
+    input,select,textarea{padding:10px;border:1px solid #ddd;border-radius:8px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .err{color:#b71c1c;font-size:13px}
+    .ok{background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:10px}
+    .muted{color:#616161}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;Sugerir novo item&lt;/h1&gt;&lt;/header&gt;
+  &lt;main&gt;
+
+    &lt;?php <span class="k">if</span>(<span class="a">$ok</span>): ?&gt;
+      &lt;div class="ok"&gt;
+        &lt;strong&gt;Sugest&atilde;o enviada!&lt;/strong&gt;&lt;br/&gt;
+        Nome: &lt;?= esc(<span class="a">$nome</span>) ?&gt; • Pre&ccedil;o: R$ &lt;?= number_format((float)<span class="a">$preco</span>,2,<span class="s">","</span>,<span class="s">"."</span>) ?&gt; • Categoria: &lt;?= esc(<span class="a">$categoria</span>) ?&gt;&lt;br/&gt;
+        &lt;span class="muted"&gt;Observa&ccedil;&otilde;es:&lt;/span&gt; &lt;?= esc(<span class="a">$obs</span>) ?: <span class="s">'(nenhuma)'</span> ?&gt;
+      &lt;/div&gt;
+    &lt;?php <span class="k">endif</span>; ?&gt;
+
+    &lt;form method="post" action="sugestao.php" novalidate&gt;
+      &lt;div&gt;
+        &lt;label for="nome"&gt;Nome do item&lt;/label&gt;
+        &lt;input type="text" id="nome" name="nome" value="&lt;?= esc(<span class="a">$_POST</span>[<span class="s">'nome'</span>] ?? <span class="s">''</span>) ?&gt;" required/&gt;
+        &lt;?php <span class="k">if</span>(isset(<span class="a">$erros</span>[<span class="s">'nome'</span>])): ?&gt;&lt;div class="err"&gt;&lt;?= esc(<span class="a">$erros</span>[<span class="s">'nome'</span>]) ?&gt;&lt;/div&gt;&lt;?php <span class="k">endif</span>; ?&gt;
+      &lt;/div&gt;
+
+      &lt;div class="row"&gt;
+        &lt;div&gt;
+          &lt;label for="preco"&gt;Pre&ccedil;o (R$)&lt;/label&gt;
+          &lt;input type="number" step="0.01" min="0.01" id="preco" name="preco" value="&lt;?= esc(<span class="a">$_POST</span>[<span class="s">'preco'</span>] ?? <span class="s">''</span>) ?&gt;" required/&gt;
+          &lt;?php <span class="k">if</span>(isset(<span class="a">$erros</span>[<span class="s">'preco'</span>])): ?&gt;&lt;div class="err"&gt;&lt;?= esc(<span class="a">$erros</span>[<span class="s">'preco'</span>]) ?&gt;&lt;/div&gt;&lt;?php <span class="k">endif</span>; ?&gt;
+        &lt;/div&gt;
+        &lt;div&gt;
+          &lt;label for="categoria"&gt;Categoria&lt;/label&gt;
+          &lt;select id="categoria" name="categoria" required&gt;
+            &lt;option value=""&gt;Selecione...&lt;/option&gt;
+            &lt;?php <span class="k">foreach</span>(<span class="a">$categorias</span> as <span class="a">$c</span>): ?&gt;
+              &lt;option value="&lt;?= esc(<span class="a">$c</span>) ?&gt;" &lt;?= ((<span class="a">$_POST</span>[<span class="s">'categoria'</span>] ?? <span class="s">''</span>) === <span class="a">$c</span>) ? <span class="s">'selected'</span> : <span class="s">''</span> ?&gt;&gt;&lt;?= esc(<span class="a">$c</span>) ?&gt;&lt;/option&gt;
+            &lt;?php <span class="k">endforeach</span>; ?&gt;
+          &lt;/select&gt;
+          &lt;?php <span class="k">if</span>(isset(<span class="a">$erros</span>[<span class="s">'categoria'</span>])): ?&gt;&lt;div class="err"&gt;&lt;?= esc(<span class="a">$erros</span>[<span class="s">'categoria'</span>]) ?&gt;&lt;/div&gt;&lt;?php <span class="k">endif</span>; ?&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;label for="obs"&gt;Observa&ccedil;&otilde;es (opcional)&lt;/label&gt;
+        &lt;textarea id="obs" name="obs" rows="3"&gt;&lt;?= esc(<span class="a">$_POST</span>[<span class="s">'obs'</span>] ?? <span class="s">''</span>) ?&gt;&lt;/textarea&gt;
+      &lt;/div&gt;
+
+      &lt;button type="submit"&gt;Enviar sugest&atilde;o&lt;/button&gt;
+    &lt;/form&gt;
+
+    &lt;p class="muted"&gt;&lt;strong&gt;Aten&ccedil;&atilde;o:&lt;/strong&gt; no pr&oacute;ximo cap&iacute;tulo veremos &lt;em&gt;sess&otilde;es&lt;/em&gt; e como proteger formul&aacute;rios com token contra CSRF.&lt;/p&gt;
+
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+
+          <h3>3) Testes</h3>
+          <ol>
+            <li>Acesse <code>http://localhost/lanchonete/public/busca.php</code> e pesquise por “café”, “suco”, etc.</li>
+            <li>Acesse <code>http://localhost/lanchonete/public/sugestao.php</code>, envie dados válidos e inválidos e observe os erros.</li>
+          </ol>
+
+          <div class="note small">
+            <strong>Resumo:</strong> você aplicou QueryString para buscas (GET) e criou um formulário (POST) com
+            validação básica e saída segura.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades propostas -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>Busca avançada:</strong> expanda <code>busca.php</code> para aceitar filtros por <em>categoria</em> e
+                <em>faixa de preço</em> (<code>min</code> e <code>max</code>) via GET.</li>
+            <li><strong>Validações extras:</strong> no <code>sugestao.php</code>, valide tamanho máximo do nome (ex.: 50)
+                e limite de observações (ex.: 200 caracteres).</li>
+            <li><strong>(Opcional) CSV local:</strong> após validar no <code>sugestao.php</code>, grave a sugestão em
+                <code>assets/sugestoes.csv</code> usando <code>fputcsv()</code> e exiba a lista abaixo do formulário.</li>
+          </ol>
+          <p class="small muted">Lembre-se: GET para consultas/links compartilháveis; POST para dados que alteram estado.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap3Checklist">
+            <li><label><input type="checkbox" data-k="busca"> Criei o <code>public/busca.php</code> com filtro via QueryString</label></li>
+            <li><label><input type="checkbox" data-k="form"> Criei o <code>public/sugestao.php</code> (POST) com validação</label></li>
+            <li><label><input type="checkbox" data-k="segura"> Usei <code>filter_input</code> e <code>htmlspecialchars</code> na saída</label></li>
+            <li><label><input type="checkbox" data-k="erros"> Exibo mensagens de erro junto aos campos</label></li>
+            <li><label><input type="checkbox" data-k="extra"> (Opcional) Implementei filtros extras e/ou CSV</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 03</h2>
+
+          <!-- Q1 -->
+          <div class="mcq" data-id="q1" data-answer="d">
+            <h4>1) Em <code>http://localhost/pagina.php?cat=Bebidas&amp;q=suco#topo</code>, qual é a QueryString?</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> <code>http://localhost</code></label>
+              <label><input type="radio" name="q1" value="b"> <code>/pagina.php</code></label>
+              <label><input type="radio" name="q1" value="c"> <code>#topo</code></label>
+              <label><input type="radio" name="q1" value="d"> <code>?cat=Bebidas&amp;q=suco</code></label>
+              <label><input type="radio" name="q1" value="e"> <code>cat=Bebidas&amp;q=suco#topo</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="mcq" data-id="q2" data-answer="b">
+            <h4>2) Qual alternativa descreve melhor quando usar GET e quando usar POST?</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> GET para criar, POST para buscar</label>
+              <label><input type="radio" name="q2" value="b"> GET para consultar/filtrar, POST para enviar/criar</label>
+              <label><input type="radio" name="q2" value="c"> Ambos são equivalentes; escolha é estética</label>
+              <label><input type="radio" name="q2" value="d"> POST é sempre cacheado; GET, nunca</label>
+              <label><input type="radio" name="q2" value="e"> GET é sempre mais seguro que POST</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="mcq" data-id="q3" data-answer="a">
+            <h4>3) No PHP, qual função é indicada para ler e filtrar um parâmetro de formulário?</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> <code>filter_input()</code></label>
+              <label><input type="radio" name="q3" value="b"> <code>strtolower()</code></label>
+              <label><input type="radio" name="q3" value="c"> <code>echo()</code></label>
+              <label><input type="radio" name="q3" value="d"> <code>session_start()</code></label>
+              <label><input type="radio" name="q3" value="e"> <code>count()</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="mcq" data-id="q4" data-answer="c">
+            <h4>4) Ao imprimir valores no HTML que vieram do usuário, é correto usar:</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> <code>print_r()</code> sem tratamento</label>
+              <label><input type="radio" name="q4" value="b"> <code>var_dump()</code> sem tratamento</label>
+              <label><input type="radio" name="q4" value="c"> <code>htmlspecialchars()</code></label>
+              <label><input type="radio" name="q4" value="d"> <code>fopen()</code></label>
+              <label><input type="radio" name="q4" value="e"> <code>exit()</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="mcq" data-id="q5" data-answer="e">
+            <h4>5) Sobre idempotência, assinale a correta:</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> POST é idempotente, GET não</label>
+              <label><input type="radio" name="q5" value="b"> GET sempre altera o estado do servidor</label>
+              <label><input type="radio" name="q5" value="c"> POST nunca altera estado</label>
+              <label><input type="radio" name="q5" value="d"> Nem GET nem POST são idempotentes</label>
+              <label><input type="radio" name="q5" value="e"> GET é, em geral, idempotente; POST, não</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <!-- Q6 -->
+          <div class="mcq" data-id="q6" data-answer="b">
+            <h4>6) O tipo de conteúdo padrão enviado por um formulário POST (sem upload de arquivo) é:</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> <code>multipart/form-data</code></label>
+              <label><input type="radio" name="q6" value="b"> <code>application/x-www-form-urlencoded</code></label>
+              <label><input type="radio" name="q6" value="c"> <code>application/json</code></label>
+              <label><input type="radio" name="q6" value="d"> <code>text/plain</code></label>
+              <label><input type="radio" name="q6" value="e"> <code>text/html</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 04</strong>, veremos <strong>sessões e cookies</strong> para manter estado no servidor (ex.: carrinho),
+             e incluiremos proteção de formulários com <em>token</em> (CSRF) e boas práticas de autenticação básica.</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo04.html">Ir para o Capítulo 04 →</a>
+            <a class="btn ghost" href="capitulo02.html">← Voltar ao Capítulo 02</a>
+            <a class="btn ghost" href="index.html">Voltar ao índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 03</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo02.html">Cap. 02</a>
+          <a href="capitulo04.html">Cap. 04</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Navbar mobile toggle =====
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // ===== Dropdown de capítulos =====
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // ===== Download deste capítulo como HTML =====
+    const downloadBtn = document.getElementById('downloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', () => {
+        const doctype = '<!DOCTYPE html>\\n';
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'capitulo03.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ===== Checklist com persistência local =====
+    (function(){
+      const list = document.getElementById('cap3Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap3_checklist';
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            const k = cb.dataset.k;
+            cb.checked = !!data[k];
+          });
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.dataset.k] = cb.checked; });
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+      const clearBtn = document.getElementById('clearChecklist');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          localStorage.removeItem(KEY);
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+      }
+      load();
+    })();
+
+    // ===== MCQ Interativo =====
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const qid = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+        const name = qid;
+
+        const sendBtn = box.querySelector('.send');
+        if(sendBtn){
+          sendBtn.addEventListener('click', ()=>{
+            const choice = box.querySelector(`input[name="${name}"]:checked`);
+            if(!choice){
+              feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+              feedback.className = 'feedback err';
+              return;
+            }
+            const got = (choice.value || '').trim().toLowerCase();
+            if(got === answer){
+              feedback.textContent = '✔ Resposta correta!';
+              feedback.className = 'feedback ok';
+            }else{
+              feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+              feedback.className = 'feedback err';
+            }
+          });
+        }
+
+        const keyBtn = box.querySelector('.key');
+        if(keyBtn){
+          keyBtn.addEventListener('click', ()=>{
+            answerEl.style.display = answerEl.style.display === 'block' ? 'none' : 'block';
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

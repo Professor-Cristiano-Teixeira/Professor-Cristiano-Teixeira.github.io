@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 11 — Programação Web 2 | Autenticação (Login/Logout), Sessões e Proteção do Admin</title>
+  <meta name="description" content="Capítulo 11 da apostila de Programação Web 2. Autenticação em PHP com password_hash/password_verify, sessões, logout, proteção de rotas administrativas e boas práticas de segurança."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body id="top">
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+      <div class="menu" id="mainMenu">
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+        <div class="menu-gap"></div>
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo02.html">Capítulo 02 <span class="pill">B1</span></a>
+            <a href="capitulo03.html">Capítulo 03 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo05.html">Capítulo 05 <span class="pill">B2</span></a>
+            <a href="capitulo06.html">Capítulo 06 <span class="pill">B2</span></a>
+            <a href="capitulo07.html">Capítulo 07 <span class="pill">B2</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo09.html">Capítulo 09 <span class="pill">B3</span></a>
+            <a href="capitulo10.html">Capítulo 10 <span class="pill">B3</span></a>
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+            <a href="capitulo15.html">Capítulo 15 <span class="pill">B4</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 11 — Autenticação (Login/Logout), Sessões e Proteção do Admin</h1>
+        <p class="subtitle">
+          Implemente <strong>login</strong> e <strong>logout</strong> seguros com <strong>password_hash()/password_verify()</strong>, controle de <strong>sessão</strong>,
+          e <strong>proteja o Admin</strong> com <em>middleware</em> simples de autorização (perfil/role).
+        </p>
+        <div class="badges">
+          <span class="badge">Bimestre 3</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): Autenticação + proteção do Admin</span>
+        </div>
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo10.html">← Cap. 10</a>
+          <a class="btn primary" href="capitulo12.html">Cap. 12 →</a>
+          <a class="btn ghost" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+    <div class="card" aria-labelledby="aprend">
+      <div class="content">
+        <h2 id="aprend">Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Criar tabela de usuários e armazenar senhas com <strong>password_hash</strong>.</li>
+          <li>Implementar <strong>login</strong>, <strong>logout</strong> e <strong>sessões</strong> com segurança básica.</li>
+          <li>Proteger <strong>rotas do Admin</strong> (somente usuários logados / com perfil).</li>
+          <li>Aplicar <strong>boas práticas</strong> (CSRF em formulários sensíveis, cookies de sessão seguros, mensagens flash).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Definir a tabela <code>usuario</code> (email único, senha hash, nome, role).</li>
+                <li>Implementar fluxo de <strong>login</strong> e <strong>logout</strong>.</li>
+                <li>Configurar e usar <strong>sessões</strong> com cuidado.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Aplicar <strong>middleware</strong> de proteção de páginas (role-based).</li>
+                <li>Exibir <strong>mensagens amigáveis</strong> e tratar erros com segurança.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> Proteção do menu <em>Admin</em> (Cap. 08/10), exigindo login para acessar CRUDs e ações administrativas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) Hash de senhas</h3>
+          <p>Senhas nunca devem ser salvas em texto puro. Use <code>password_hash()</code> (padrão <em>bcrypt/argon2i</em> conforme versão do PHP)
+             e valide com <code>password_verify()</code>.</p>
+
+          <h3>2) Sessões</h3>
+          <p><code>session_start()</code> cria/recupera a sessão. Armazene apenas o essencial (ex.: <code>user_id</code>, <code>email</code>, <code>role</code>).
+             Use <strong>regeneração de ID</strong> no login para evitar fixação de sessão.</p>
+
+          <h3>3) Proteção de rotas</h3>
+          <p>Crie funções utilitárias (middleware) para exigir login e, opcionalmente, checar <strong>perfil</strong> (ex.: <code>admin</code>).</p>
+
+          <div class="sep"></div>
+          <h3>Boas práticas</h3>
+          <ul>
+            <li><strong>CSRF</strong> em formulários sensíveis (ex.: logout, alterações de dados).</li>
+            <li><strong>Mensagens genéricas</strong> de erro de login (não revelar se email existe).</li>
+            <li><strong>Cookies de sessão</strong> com <em>HttpOnly</em> e, se possível, <em>Secure</em> (em HTTPS).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — Login/Logout, Sessões e Proteção do Admin</h2>
+
+          <h3>1) Tabela de usuários</h3>
+          <pre><code>CREATE TABLE IF NOT EXISTS usuario (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(80) NOT NULL,
+  email VARCHAR(120) NOT NULL UNIQUE,
+  senha_hash VARCHAR(255) NOT NULL,
+  role ENUM('admin','editor','viewer') NOT NULL DEFAULT 'viewer',
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+          </code></pre>
+
+          <h3>2) Inserir um usuário (gerando hash no PHP)</h3>
+          <pre><code>&lt;?php
+$hash = password_hash('admin123', PASSWORD_DEFAULT);
+echo $hash;
+          </code></pre>
+          <pre><code>INSERT INTO usuario (nome,email,senha_hash,role)
+VALUES ('Administrador','admin@exemplo.com','&lt;COLE_AQUI_O_HASH&gt;','admin');
+          </code></pre>
+
+          <h3>3) Serviço de autenticação — <code>src/Service/AuthService.php</code></h3>
+          <pre><code>&lt;!-- src/Service/AuthService.php --&gt;
+&lt;?php
+declare(strict_types=1);
+
+class AuthService {
+  private PDO $pdo;
+  public function __construct(PDO $pdo){ $this-&gt;pdo = $pdo; }
+
+  public function login(string $email, string $senha): ?array {
+    $email = trim(strtolower($email));
+    $st = $this-&gt;pdo-&gt;prepare("SELECT id,nome,email,senha_hash,role FROM usuario WHERE email=:e");
+    $st-&gt;execute([':e'=&gt;$email]);
+    $u = $st-&gt;fetch();
+    if(!$u){ return null; }
+    if(!password_verify($senha, $u['senha_hash'])){ return null; }
+    return ['id'=&gt;(int)$u['id'],'nome'=&gt;(string)$u['nome'],'email'=&gt;(string)$u['email'],'role'=&gt;(string)$u['role']];
+  }
+}
+          </code></pre>
+
+          <h3>4) Utilitário de sessão/autorização — <code>src/App/Auth.php</code></h3>
+          <pre><code>&lt;!-- src/App/Auth.php --&gt;
+&lt;?php
+class Auth {
+  public static function start(){ if(session_status()!==PHP_SESSION_ACTIVE) session_start(); }
+
+  public static function setUser(array $u): void {
+    self::start();
+    session_regenerate_id(true);
+    $_SESSION['user'] = ['id'=>$u['id'],'nome'=>$u['nome'],'email'=>$u['email'],'role'=>$u['role']];
+  }
+
+  public static function user(): ?array { self::start(); return $_SESSION['user'] ?? null; }
+  public static function check(): bool { return self::user() !== null; }
+  public static function role(): ?string { $u = self::user(); return $u['role'] ?? null; }
+
+  public static function requireLogin(): void {
+    if(!self::check()){ header('Location: /lanchonete/public/login.php'); exit; }
+  }
+
+  public static function requireRole(string $role): void {
+    self::requireLogin();
+    if(self::role()!==$role){ http_response_code(403); exit('Acesso negado'); }
+  }
+
+  public static function logout(): void {
+    self::start();
+    $_SESSION = [];
+    if(ini_get('session.use_cookies')){
+      $params = session_get_cookie_params();
+      setcookie(session_name(), '', time()-42000, $params['path'], $params['domain'], $params['secure']??false, $params['httponly']??true);
+    }
+    session_destroy();
+  }
+}
+          </code></pre>
+
+          <h3>5) Formulário de login — <code>public/login.php</code></h3>
+          <pre><code>&lt;!-- public/login.php --&gt;
+&lt;?php
+require_once __DIR__.'/../config/db.php';
+require_once __DIR__.'/../src/Service/AuthService.php';
+require_once __DIR__.'/../src/App/Auth.php';
+require_once __DIR__.'/../src/App/Flash.php';
+require_once __DIR__.'/../src/App/Csrf.php';
+
+function esc($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+
+$erro = null;
+if(($_SERVER['REQUEST_METHOD'] ?? '')==='POST'){
+  try{
+    if(!Csrf::check((string)($_POST['csrf'] ?? ''))) throw new RuntimeException('CSRF inválido.');
+    $pdo = pdo();
+    $svc = new AuthService($pdo);
+    $u = $svc-&gt;login((string)($_POST['email'] ?? ''),(string)($_POST['senha'] ?? ''));
+    if(!$u){ $erro = 'Credenciais inválidas.'; } else { Auth::setUser($u); header('Location: /lanchonete/public/admin/index.php'); exit; }
+  }catch(Throwable $e){ $erro = 'Erro: '.$e-&gt;getMessage(); }
+}
+$csrf = Csrf::token();
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;&lt;meta charset="utf-8"/&gt;&lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+&lt;title&gt;Login — Lanchonete&lt;/title&gt;
+&lt;style&gt;
+  body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#fafafa;color:#1b1b1b}
+  header{background:#c62828;color:#fff;padding:14px 18px}
+  main{max-width:520px;margin:0 auto;padding:18px}
+  form{display:grid;gap:10px}
+  input,button{padding:10px;border-radius:8px;border:1px solid #ddd}
+  .btn{background:#424242;color:#fff;border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
+  .alert{padding:10px;border-radius:8px;background:#ffebee;border:1px solid #ffcdd2;color:#b71c1c}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;Login&lt;/h1&gt;&lt;/header&gt;
+  &lt;main&gt;
+    &lt;?php if($erro): ?&gt;&lt;div class="alert"&gt;&lt;?= esc($erro) ?&gt;&lt;/div&gt;&lt;?php endif; ?&gt;
+
+    &lt;form method="post" action="login.php"&gt;
+      &lt;input type="hidden" name="csrf" value="&lt;?= esc($csrf) ?&gt;"/&gt;
+      &lt;label&gt;Email
+        &lt;input type="email" name="email" required/&gt;
+      &lt;/label&gt;
+      &lt;label&gt;Senha
+        &lt;input type="password" name="senha" required/&gt;
+      &lt;/label&gt;
+      &lt;button class="btn" type="submit"&gt;Entrar&lt;/button&gt;
+    &lt;/form&gt;
+
+    &lt;p&gt;&lt;small&gt;&lt;a href="catalogo_db.php"&gt;← Voltar ao catálogo&lt;/a&gt;&lt;/small&gt;&lt;/p&gt;
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+
+          <h3>6) Logout — <code>public/logout.php</code></h3>
+          <pre><code>&lt;!-- public/logout.php --&gt;
+&lt;?php
+require_once __DIR__.'/../src/App/Auth.php';
+Auth::logout();
+header('Location: /lanchonete/public/login.php');
+exit;
+          </code></pre>
+
+          <h3>7) Proteger rotas do Admin</h3>
+          <pre><code>&lt;!-- no topo de public/admin/index.php (após o Cap. 08) --&gt;
+&lt;?php
+require_once __DIR__.'/../../src/App/Auth.php';
+Auth::requireLogin();
+// Se quiser restringir a admin:
+/// Auth::requireRole('admin');
+?&gt;
+          </code></pre>
+
+          <h3>8) Exibir usuário atual no topo do Admin (opcional)</h3>
+          <pre><code>&lt;?php $u = Auth::user(); ?&gt;
+&lt;p&gt;&lt;small&gt;Logado como: &lt;strong&gt;&lt;?= htmlspecialchars($u['nome']??'') ?&gt;&lt;/strong&gt; (&lt;?= htmlspecialchars($u['role']??'') ?&gt;) — &lt;a href="/lanchonete/public/logout.php"&gt;Sair&lt;/a&gt;&lt;/small&gt;&lt;/p&gt;
+          </code></pre>
+
+          <div class="note small">
+            <strong>Resumo:</strong> Implementamos <em>login</em>/<em>logout</em> com hash de senha e sessão, criamos um serviço de autenticação e um <em>middleware</em> para proteger páginas do Admin.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades propostas -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>Troca de senha:</strong> crie uma página para o usuário alterar a própria senha (pedindo a senha atual + nova + confirmação).</li>
+            <li><strong>Lembre-me (opcional):</strong> implemente um token persistente (cookie seguro + tabela de tokens) para manter sessão entre visitas.</li>
+            <li><strong>Bloqueio por tentativas:</strong> registre tentativas e imponha “cooldown” após N falhas de login.</li>
+          </ol>
+          <p class="small muted">Dica: mantenha mensagens genéricas em falhas de login (não revele se o email existe).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap11Checklist">
+            <li><label><input type="checkbox" data-k="table"> Criei a tabela <code>usuario</code> com email único e senha hash</label></li>
+            <li><label><input type="checkbox" data-k="login"> Implementei login com <code>password_verify</code> e sessão</label></li>
+            <li><label><input type="checkbox" data-k="logout"> Implementei logout limpando a sessão e cookie</label></li>
+            <li><label><input type="checkbox" data-k="protect"> Protegi páginas do Admin com <em>middleware</em></label></li>
+            <li><label><input type="checkbox" data-k="flash"> Usei mensagens flash para feedback</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn ghost" href="capitulo10.html">← Cap. 10</a>
+            <a class="btn primary" href="capitulo12.html">Cap. 12 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 11</h2>
+
+          <div class="mcq" data-id="q1" data-answer="c">
+            <h4>1) Como as senhas devem ser armazenadas?</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Texto puro no banco</label>
+              <label><input type="radio" name="q1" value="b"> Base64 do texto puro</label>
+              <label><input type="radio" name="q1" value="c"> Usando <code>password_hash()</code> e verificando com <code>password_verify()</code></label>
+              <label><input type="radio" name="q1" value="d"> MD5 sem sal</label>
+              <label><input type="radio" name="q1" value="e"> SHA1 sem sal</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <div class="mcq" data-id="q2" data-answer="b">
+            <h4>2) O que fazer imediatamente após o login com sucesso?</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> Nada</label>
+              <label><input type="radio" name="q2" value="b"> Chamar <code>session_regenerate_id(true)</code></label>
+              <label><input type="radio" name="q2" value="c"> Publicar o ID da sessão na página</label>
+              <label><input type="radio" name="q2" value="d"> Gravar a senha no <code>$_SESSION</code></label>
+              <label><input type="radio" name="q2" value="e"> Enviar a senha por email</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <div class="mcq" data-id="q3" data-answer="a">
+            <h4>3) Qual utilidade do <em>middleware</em> de proteção?</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> Exigir login/perfil antes de acessar páginas</label>
+              <label><input type="radio" name="q3" value="b"> Formatar datas</label>
+              <label><input type="radio" name="q3" value="c"> Compactar imagens</label>
+              <label><input type="radio" name="q3" value="d"> Melhorar a cor do tema</label>
+              <label><input type="radio" name="q3" value="e"> Traduzir textos</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <div class="mcq" data-id="q4" data-answer="d">
+            <h4>4) Qual mensagem é mais segura ao falhar o login?</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> “Email não existe.”</label>
+              <label><input type="radio" name="q4" value="b"> “Senha errada para este email.”</label>
+              <label><input type="radio" name="q4" value="c"> “Conta bloqueada.”</label>
+              <label><input type="radio" name="q4" value="d"> “Credenciais inválidas.”</label>
+              <label><input type="radio" name="q4" value="e"> “Tente novamente com outra conta.”</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <div class="mcq" data-id="q5" data-answer="e">
+            <h4>5) O que NÃO deve ser salvo na sessão?</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> <code>user_id</code></label>
+              <label><input type="radio" name="q5" value="b"> <code>email</code></label>
+              <label><input type="radio" name="q5" value="c"> <code>role</code></label>
+              <label><input type="radio" name="q5" value="d"> <code>nome</code></label>
+              <label><input type="radio" name="q5" value="e"> <code>senha</code> em texto puro</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <div class="mcq" data-id="q6" data-answer="c">
+            <h4>6) Para sair com segurança no logout, além de limpar a sessão, convém:</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> Salvar a senha no cookie</label>
+              <label><input type="radio" name="q6" value="b"> Imprimir o ID da sessão na tela</label>
+              <label><input type="radio" name="q6" value="c"> Invalidar o cookie de sessão e <code>session_destroy()</code></label>
+              <label><input type="radio" name="q6" value="d"> Redirecionar para uma página 404</label>
+              <label><input type="radio" name="q6" value="e"> Fazer nada</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 12</strong>, vamos evoluir a autorização (RBAC simples), aplicar
+             <strong>menus condicionais</strong> ao perfil, e (opcional) implementar “Lembre‑me” com tokens persistentes.</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo12.html">Ir para o Capítulo 12 →</a>
+            <a class="btn ghost" href="capitulo10.html">← Voltar ao Capítulo 10</a>
+            <a class="btn ghost" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 11</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo10.html">Cap. 10</a>
+          <a href="capitulo12.html">Cap. 12</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Navbar mobile toggle =====
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // ===== Dropdown de capítulos =====
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // ===== Download deste capítulo como HTML =====
+    const downloadBtn = document.getElementById('downloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', () => {
+        const doctype = '<!DOCTYPE html>\n';
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'capitulo11.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ===== Checklist com persistência local =====
+    (function(){
+      const list = document.getElementById('cap11Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap11_checklist';
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = !!data[cb.dataset.k];
+          });
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.dataset.k] = cb.checked; });
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+      const clearBtn = document.getElementById('clearChecklist');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          localStorage.removeItem(KEY);
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+      }
+      load();
+    })();
+
+    // ===== MCQ Interativo =====
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const qid = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+        const name = qid;
+
+        const sendBtn = box.querySelector('.send');
+        if(sendBtn){
+          sendBtn.addEventListener('click', ()=>{
+            const choice = box.querySelector(`input[name="${name}"]:checked`);
+            if(!choice){
+              feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+              feedback.className = 'feedback err';
+              return;
+            }
+            const got = (choice.value || '').trim().toLowerCase();
+            if(got === answer){
+              feedback.textContent = '✔ Resposta correta!';
+              feedback.className = 'feedback ok';
+            }else{
+              feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+              feedback.className = 'feedback err';
+            }
+          });
+        }
+
+        const keyBtn = box.querySelector('.key');
+        if(keyBtn){
+          keyBtn.addEventListener('click', ()=>{
+            answerEl.style.display = answerEl.style.display === 'block' ? 'none' : 'block';
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+``

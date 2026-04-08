@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 10 — Programação Web 2 | Arquitetura em Camadas (DAO, Serviços/BO e Controladores)</title>
+  <meta name="description" content="Capítulo 10 da apostila de Programação Web 2. Refatoração para arquitetura em camadas: DAO, Serviços/BO, Controladores, regras de negócio, exceções e transações."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body id="top">
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html" title="Início">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+      <div class="menu" id="mainMenu">
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+        <div class="menu-gap"></div>
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo02.html">Capítulo 02 <span class="pill">B1</span></a>
+            <a href="capitulo03.html">Capítulo 03 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo05.html">Capítulo 05 <span class="pill">B2</span></a>
+            <a href="capitulo06.html">Capítulo 06 <span class="pill">B2</span></a>
+            <a href="capitulo07.html">Capítulo 07 <span class="pill">B2</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo09.html">Capítulo 09 <span class="pill">B3</span></a>
+            <a href="capitulo10.html">Capítulo 10 <span class="pill">B3</span></a>
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+            <a href="capitulo15.html">Capítulo 15 <span class="pill">B4</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 10 — Arquitetura em Camadas (DAO, Serviços/BO e Controladores)</h1>
+        <p class="subtitle">
+          Refatore o projeto para uma arquitetura em <strong>camadas</strong>:
+          <strong>DAO</strong> (acesso a dados), <strong>Serviços/BO</strong> (regras de negócio) e
+          <strong>Controladores</strong> (fluxo web). Trate <em>erros/exceções</em> e use
+          <strong>transações</strong> para operações atômicas.
+        </p>
+        <div class="badges">
+          <span class="badge">Bimestre 3</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): CRUD refatorado em camadas</span>
+        </div>
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo09.html">← Cap. 09</a>
+          <a class="btn primary" href="capitulo11.html">Cap. 11 →</a>
+          <a class="btn ghost" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+    <div class="card" aria-labelledby="aprend">
+      <div class="content">
+        <h2 id="aprend">Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Separar responsabilidades entre <strong>DAO</strong>, <strong>Serviços (BO)</strong> e <strong>Controladores</strong>.</li>
+          <li>Centralizar <strong>regras de negócio</strong> (ex.: validações e políticas) na camada de serviço.</li>
+          <li>Tratar <strong>exceções</strong> e retornar mensagens amigáveis ao usuário.</li>
+          <li>Usar <strong>transações</strong> em operações que exigem atomicidade.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Definir <strong>camadas</strong> e responsabilidades (DAO/Serviço/Controlador).</li>
+                <li>Refatorar CRUDs (Bebidas/Categorias) usando <strong>Serviços</strong>.</li>
+                <li>Implementar <strong>transações</strong> no PDO.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Padronizar <strong>tratamento de erros</strong> e <strong>mensagens</strong> (Flash).</li>
+                <li>(Opcional) Criar um <strong>roteador simples</strong> para controllers.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> Nos CRUDs criados (Cap. 06–08), agora usando Serviços para encapsular regras/validações e Controladores para orquestrar a web.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) Por que camadas?</h3>
+          <p>
+            Separar responsabilidades facilita manutenção, testes e evolução. O <strong>DAO</strong> foca em SQL,
+            o <strong>Serviço/BO</strong> aplica regras e orquestra DAOs, e o <strong>Controlador</strong> mapeia
+            requisições HTTP e respostas (redireciona, envia views).
+          </p>
+
+          <h3>2) Onde ficam as regras de negócio?</h3>
+          <p>
+            Em <strong>Serviços</strong> (Business Objects). Validações (ex.: limites de preço), políticas
+            (ex.: não permitir excluir categoria em uso) e fluxos (ex.: transações) moram aqui.
+          </p>
+
+          <h3>3) Transações</h3>
+          <p>
+            Em operações múltiplas (várias tabelas ou vários updates), use <strong>transações</strong> para garantir
+            <em>tudo-ou-nada</em> com <code>$pdo-&gt;beginTransaction()</code>, <code>commit()</code> e <code>rollBack()</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — DAO ➜ Serviços/BO ➜ Controladores</h2>
+
+          <h3>Estrutura sugerida</h3>
+          <pre><code>htdocs/
+└── lanchonete/
+    ├── public/
+    │   ├── controllers/                 # (novo) controladores HTTP
+    │   │   ├── bebidas_controller.php
+    │   │   └── categorias_controller.php
+    │   ├── bebidas_index.php            # página lista (pode chamar controller)
+    │   ├── bebidas_form.php             # form (view)
+    │   └── ...                          
+    ├── src/
+    │   ├── DAO/
+    │   │   ├── BebidaDAO.php
+    │   │   └── CategoriaDAO.php
+    │   ├── Service/                     # (novo) regras de negócio
+    │   │   ├── BebidaService.php
+    │   │   └── CategoriaService.php
+    │   └── App/
+    │       ├── Flash.php
+    │       ├── Csrf.php
+    │       └── Util.php
+    └── config/
+        └── db.php
+          </code></pre>
+
+          <h3>1) Serviço (BO) para Bebidas — <code>src/Service/BebidaService.php</code></h3>
+          <pre><code>&lt;!-- src/Service/BebidaService.php --&gt;
+&lt;?php
+declare(strict_types=1);
+
+class BebidaService {
+  private PDO $pdo;
+  private BebidaDAO $dao;
+  private int $catId;
+
+  public function __construct(PDO $pdo, BebidaDAO $dao, int $categoriaBebidasId){
+    $this-&gt;pdo = $pdo;
+    $this-&gt;dao = $dao;
+    $this-&gt;catId = $categoriaBebidasId;
+  }
+
+  /** Regras de negócio de criação */
+  public function criar(string $nome, string $precoStr, int $popular=0): int {
+    $nome = trim($nome);
+    $this-&gt;validarNome($nome);
+    $preco = $this-&gt;parsePreco($precoStr);
+    $this-&gt;validarPreco($preco);
+    return $this-&gt;dao-&gt;criar($nome, $preco, $popular);
+  }
+
+  /** Regras de negócio de atualização */
+  public function atualizar(int $id, string $nome, string $precoStr, int $popular=0): bool {
+    if($id &lt;= 0){ throw new InvalidArgumentException('ID inválido.'); }
+    $nome = trim($nome);
+    $this-&gt;validarNome($nome);
+    $preco = $this-&gt;parsePreco($precoStr);
+    $this-&gt;validarPreco($preco);
+    return $this-&gt;dao-&gt;atualizar($id, $nome, $preco, $popular);
+  }
+
+  /** Regras para exclusão */
+  public function excluir(int $id): bool {
+    if($id &lt;= 0){ throw new InvalidArgumentException('ID inválido.'); }
+    return $this-&gt;dao-&gt;excluir($id);
+  }
+
+  /** Busca/lista repassadas ao DAO */
+  public function listar(?string $q=null): array { return $this-&gt;dao-&gt;listar($q); }
+  public function buscarPorId(int $id): ?array { return $this-&gt;dao-&gt;buscarPorId($id); }
+
+  /** Transação de exemplo: reajuste percentual em todas as bebidas */
+  public function reajustarPrecos(float $percent): int {
+    if($percent &lt;= -100){ throw new InvalidArgumentException('Percentual inválido.'); }
+    $this-&gt;pdo-&gt;beginTransaction();
+    try{
+      $atualizados = 0;
+      $rows = $this-&gt;dao-&gt;listar(null);
+      foreach($rows as $r){
+        $novo = round(((float)$r['preco']) * (1 + $percent/100), 2);
+        $this-&gt;validarPreco($novo);
+        $this-&gt;dao-&gt;atualizar((int)$r['id'], (string)$r['nome'], $novo, (int)$r['popular']);
+        $atualizados++;
+      }
+      $this-&gt;pdo-&gt;commit();
+      return $atualizados;
+    }catch(Throwable $e){
+      $this-&gt;pdo-&gt;rollBack();
+      throw $e;
+    }
+  }
+
+  /* ===== Validações (regras) ===== */
+  private function validarNome(string $nome): void {
+    if(mb_strlen($nome) &lt; 3 || mb_strlen($nome) &gt; 80){
+      throw new InvalidArgumentException('Nome deve ter entre 3 e 80 caracteres.');
+    }
+  }
+  private function parsePreco(string $v): float {
+    $v = str_replace(',', '.', $v);
+    if(!is_numeric($v)){ throw new InvalidArgumentException('Preço inválido.'); }
+    return (float)$v;
+  }
+  private function validarPreco(float $n): void {
+    if($n &lt;= 0){ throw new InvalidArgumentException('Preço deve ser &gt; 0.'); }
+  }
+}
+          </code></pre>
+
+          <h3>2) Controlador para Bebidas — <code>public/controllers/bebidas_controller.php</code></h3>
+          <pre><code>&lt;!-- public/controllers/bebidas_controller.php --&gt;
+&lt;?php
+require_once __DIR__.'/../../config/db.php';
+require_once __DIR__.'/../../src/DAO/BebidaDAO.php';
+require_once __DIR__.'/../../src/Service/BebidaService.php';
+require_once __DIR__.'/../../src/App/Flash.php';
+require_once __DIR__.'/../../src/App/Csrf.php';
+
+function redirect(string $to){ header('Location: '.$to); exit; }
+
+try{
+  $pdo = pdo();
+  $rid = $pdo-&gt;query("SELECT id FROM categoria WHERE nome='Bebidas'")-&gt;fetch();
+  if(!$rid){ throw new RuntimeException('Categoria Bebidas não encontrada.'); }
+  $dao = new BebidaDAO($pdo, (int)$rid['id']);
+  $svc = new BebidaService($pdo, $dao, (int)$rid['id']);
+
+  $action = $_GET['a'] ?? $_POST['a'] ?? 'index';
+
+  if($action === 'create' &amp;&amp; ($_SERVER['REQUEST_METHOD'] ?? '')==='POST'){
+    if(!Csrf::check((string)($_POST['csrf'] ?? ''))) throw new RuntimeException('CSRF inválido.');
+    $id = $svc-&gt;criar((string)($_POST['nome']??''),(string)($_POST['preco']??''),(int)($_POST['popular']??0));
+    Flash::set('Bebida criada (ID '.$id.').');
+    redirect('../bebidas_index.php');
+  }
+
+  if($action === 'update' &amp;&amp; ($_SERVER['REQUEST_METHOD'] ?? '')==='POST'){
+    if(!Csrf::check((string)($_POST['csrf'] ?? ''))) throw new RuntimeException('CSRF inválido.');
+    $ok = $svc-&gt;atualizar((int)($_POST['id']??0),(string)($_POST['nome']??''),(string)($_POST['preco']??''),(int)($_POST['popular']??0));
+    Flash::set($ok?'Bebida atualizada.':'Nenhuma alteração aplicada.');
+    redirect('../bebidas_index.php');
+  }
+
+  if($action === 'delete' &amp;&amp; ($_SERVER['REQUEST_METHOD'] ?? '')==='POST'){
+    $ok = $svc-&gt;excluir((int)($_POST['id']??0));
+    Flash::set($ok?'Bebida excluída.':'Não foi possível excluir.');
+    redirect('../bebidas_index.php');
+  }
+
+  if($action === 'reajuste' &amp;&amp; ($_SERVER['REQUEST_METHOD'] ?? '')==='POST'){
+    if(!Csrf::check((string)($_POST['csrf'] ?? ''))) throw new RuntimeException('CSRF inválido.');
+    $n = $svc-&gt;reajustarPrecos((float)($_POST['percent']??0));
+    Flash::set('Preços reajustados em '.$_POST['percent'].'% ('.$n.' item(ns)).');
+    redirect('../bebidas_index.php');
+  }
+
+  // default index: somente exemplo (a listagem continua em ../bebidas_index.php)
+  redirect('../bebidas_index.php');
+
+}catch(Throwable $e){
+  Flash::set('Erro: '.$e-&gt;getMessage(),'err');
+  redirect('../bebidas_index.php');
+}
+          </code></pre>
+
+          <h3>3) Integração na página de lista — adicionando ação de “Reajustar preços”</h3>
+          <pre><code>&lt;!-- (trecho) dentro do topo da página public/bebidas_index.php --&gt;
+&lt;form method="post" action="controllers/bebidas_controller.php?a=reajuste" class="filters" style="gap:8px"&gt;
+  &lt;input type="hidden" name="csrf" value="&lt;?= esc(Csrf::token()) ?&gt;"/&gt;
+  &lt;label&gt;Reajuste (%):&nbsp;
+    &lt;input type="number" step="0.01" name="percent" style="width:120px" placeholder="5" /&gt;
+  &lt;/label&gt;
+  &lt;button type="submit"&gt;Aplicar&lt;/button&gt;
+&lt;/form&gt;
+          </code></pre>
+
+          <h3>4) Serviço para Categorias — regra de <em>unicidade</em> e bloqueio de exclusão</h3>
+          <pre><code>&lt;!-- src/Service/CategoriaService.php --&gt;
+&lt;?php
+declare(strict_types=1);
+
+class CategoriaService {
+  private PDO $pdo;
+  private CategoriaDAO $dao;
+
+  public function __construct(PDO $pdo, CategoriaDAO $dao){
+    $this-&gt;pdo = $pdo;
+    $this-&gt;dao = $dao;
+  }
+
+  public function criar(string $nome): int {
+    $nome = trim($nome);
+    $this-&gt;validarNome($nome);
+    try{
+      return $this-&gt;dao-&gt;criar($nome);
+    }catch(PDOException $e){
+      if($e-&gt;getCode()==='23000'){ throw new RuntimeException('Nome já existente.'); }
+      throw $e;
+    }
+  }
+
+  public function atualizar(int $id, string $nome): bool {
+    if($id &lt;= 0) throw new InvalidArgumentException('ID inválido.');
+    $nome = trim($nome);
+    $this-&gt;validarNome($nome);
+    try{
+      return $this-&gt;dao-&gt;atualizar($id, $nome);
+    }catch(PDOException $e){
+      if($e-&gt;getCode()==='23000'){ throw new RuntimeException('Nome já existente.'); }
+      throw $e;
+    }
+  }
+
+  public function excluir(int $id): bool {
+    if($id &lt;= 0) throw new InvalidArgumentException('ID inválido.');
+    // Bloqueia exclusão se houver itens vinculados
+    $st = $this-&gt;pdo-&gt;prepare("SELECT COUNT(*) t FROM item WHERE categoria_id=:id");
+    $st-&gt;execute([':id'=&gt;$id]);
+    if(((int)$st-&gt;fetch()['t']) &gt; 0){
+      throw new RuntimeException('Não é possível excluir: categoria em uso.');
+    }
+    return $this-&gt;dao-&gt;excluir($id);
+  }
+
+  private function validarNome(string $nome): void {
+    if(mb_strlen($nome) &lt; 3 || mb_strlen($nome) &gt; 60){
+      throw new InvalidArgumentException('Nome deve ter entre 3 e 60 caracteres.');
+    }
+  }
+}
+          </code></pre>
+
+          <h3>5) (Opcional) Roteador simples</h3>
+          <pre><code>&lt;!-- public/index_router.php (opcional) --&gt;
+&lt;?php
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+if($path === '/bebidas' &amp;&amp; ($_GET['a'] ?? '')==='reajuste'){
+  require __DIR__.'/controllers/bebidas_controller.php';
+  exit;
+}
+http_response_code(404);
+echo 'Rota não encontrada';
+          </code></pre>
+
+          <div class="note small">
+            <strong>Resumo:</strong> Centralizamos regras de negócio na camada de <em>Serviços</em>, delegando acesso a dados aos <em>DAOs</em> e
+            deixando os <em>Controladores</em> mais limpos. Também adicionamos um exemplo de <strong>transação</strong> (reajuste de preços).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades propostas -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>Refatoração completa:</strong> mova todas as validações de Bebidas/Categorias para os <em>Serviços</em>.</li>
+            <li><strong>Transação com múltiplas tabelas:</strong> crie uma rotina (em Serviço) que duplique uma categoria e reatribua itens, garantindo atomicidade.</li>
+            <li><strong>Mensagens padrão:</strong> padronize mensagens de erro/sucesso (Flash) nos controladores.</li>
+          </ol>
+          <p class="small muted">Dica: evite acoplamento entre camadas. Controladores só chamam Serviços; Serviços usam DAOs.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap10Checklist">
+            <li><label><input type="checkbox" data-k="layers"> Separei DAO, Serviço/BO e Controlador</label></li>
+            <li><label><input type="checkbox" data-k="rules"> Centralizei validações/regras nos Serviços</label></li>
+            <li><label><input type="checkbox" data-k="errors"> Padronizei erros/exceções e mensagens (Flash)</label></li>
+            <li><label><input type="checkbox" data-k="tx"> Usei transações quando necessário</label></li>
+            <li><label><input type="checkbox" data-k="refactor"> Refatorei os CRUDs existentes para usar os Serviços</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn ghost" href="capitulo09.html">← Cap. 09</a>
+            <a class="btn primary" href="capitulo11.html">Cap. 11 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 10</h2>
+
+          <div class="mcq" data-id="q1" data-answer="b">
+            <h4>1) Em uma arquitetura em camadas, a camada de Serviço/BO deve:</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Enviar HTML para o navegador</label>
+              <label><input type="radio" name="q1" value="b"> Aplicar regras de negócio e orquestrar DAOs</label>
+              <label><input type="radio" name="q1" value="c"> Somente abrir conexões com o banco</label>
+              <label><input type="radio" name="q1" value="d"> Tratar roteamento HTTP</label>
+              <label><input type="radio" name="q1" value="e"> Servir arquivos estáticos</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <div class="mcq" data-id="q2" data-answer="a">
+            <h4>2) Qual é a forma correta de garantir atomicidade em múltiplas atualizações?</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> Usar transações: <code>beginTransaction/commit/rollBack</code></label>
+              <label><input type="radio" name="q2" value="b"> Recarregar a página</label>
+              <label><input type="radio" name="q2" value="c"> Concatenar SQL em uma única string</label>
+              <label><input type="radio" name="q2" value="d"> Usar apenas <code>echo</code> para depurar</label>
+              <label><input type="radio" name="q2" value="e"> Aumentar o timeout da conexão</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <div class="mcq" data-id="q3" data-answer="e">
+            <h4>3) Onde deve ficar a regra “não excluir categoria em uso”?</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> No HTML</label>
+              <label><input type="radio" name="q3" value="b"> No DAO</label>
+              <label><input type="radio" name="q3" value="c"> No roteador</label>
+              <label><input type="radio" name="q3" value="d"> No arquivo CSS</label>
+              <label><input type="radio" name="q3" value="e"> No Serviço/BO</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <div class="mcq" data-id="q4" data-answer="c">
+            <h4>4) Sobre tratamento de erros no controlador, escolha a correta:</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> Exibir o stack trace para o usuário</label>
+              <label><input type="radio" name="q4" value="b"> Ignorar exceções e seguir</label>
+              <label><input type="radio" name="q4" value="c"> Capturar exceção, registrar log e exibir mensagem amigável</label>
+              <label><input type="radio" name="q4" value="d"> Converter toda exceção em 404</label>
+              <label><input type="radio" name="q4" value="e"> Deixar o PHP imprimir o erro padrão</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <div class="mcq" data-id="q5" data-answer="d">
+            <h4>5) Qual benefício principal da camada de Serviços?</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> Deixar o HTML mais bonito</label>
+              <label><input type="radio" name="q5" value="b"> Reduzir tamanho do banco</label>
+              <label><input type="radio" name="q5" value="c"> Substituir completamente o DAO</label>
+              <label><input type="radio" name="q5" value="d"> Centralizar regras e fluxos, reduzindo acoplamento</label>
+              <label><input type="radio" name="q5" value="e"> Acelerar o CSS</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <div class="mcq" data-id="q6" data-answer="a">
+            <h4>6) Em qual camada ficam os <em>prepared statements</em>?</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> DAO</label>
+              <label><input type="radio" name="q6" value="b"> Serviço</label>
+              <label><input type="radio" name="q6" value="c"> Controlador</label>
+              <label><input type="radio" name="q6" value="d"> CSS</label>
+              <label><input type="radio" name="q6" value="e"> HTML</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 11</strong>, implementaremos <strong>autenticação</strong> (login/logout), senhas com <code>password_hash()</code>,
+             autorização básica por perfil e proteção de rotas do Admin.</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo11.html">Ir para o Capítulo 11 →</a>
+            <a class="btn ghost" href="capitulo09.html">← Voltar ao Capítulo 09</a>
+            <a class="btn ghost" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 10</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo09.html">Cap. 09</a>
+          <a href="capitulo11.html">Cap. 11</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Navbar mobile toggle =====
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // ===== Dropdown de capítulos =====
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // ===== Download deste capítulo como HTML =====
+    const downloadBtn = document.getElementById('downloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', () => {
+        const doctype = '<!DOCTYPE html>\\n';
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'capitulo10.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ===== Checklist com persistência local =====
+    (function(){
+      const list = document.getElementById('cap10Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap10_checklist';
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            const k = cb.dataset.k;
+            cb.checked = !!data[k];
+          });
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.dataset.k] = cb.checked; });
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+      const clearBtn = document.getElementById('clearChecklist');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          localStorage.removeItem(KEY);
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+      }
+      load();
+    })();
+
+    // ===== MCQ Interativo =====
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const qid = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+        const name = qid;
+
+        const sendBtn = box.querySelector('.send');
+        if(sendBtn){
+          sendBtn.addEventListener('click', ()=>{
+            const choice = box.querySelector(`input[name="${name}"]:checked`);
+            if(!choice){
+              feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+              feedback.className = 'feedback err';
+              return;
+            }
+            const got = (choice.value || '').trim().toLowerCase();
+            if(got === answer){
+              feedback.textContent = '✔ Resposta correta!';
+              feedback.className = 'feedback ok';
+            }else{
+              feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+              feedback.className = 'feedback err';
+            }
+          });
+        }
+
+        const keyBtn = box.querySelector('.key');
+        if(keyBtn){
+          keyBtn.addEventListener('click', ()=>{
+            answerEl.style.display = answerEl.style.display === 'block' ? 'none' : 'block';
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 13 — Programação Web 2 | Fetch/AJAX e JSON (Comunicação Assíncrona)</title>
+  <meta name="description" content="Capítulo 13 da apostila de Programação Web 2. Comunicação assíncrona com Fetch/AJAX, JSON e endpoints PHP, aplicado ao sistema da lanchonete (carrinho/pedidos) com atualização sem recarregar."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+
+<body id="top">
+  <!-- Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+      <div class="menu" id="mainMenu">
+        <a href="index.html">Início</a>
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 13 — Fetch/AJAX e JSON (Comunicação Assíncrona)</h1>
+        <p class="subtitle">
+          Você vai aprender a fazer o navegador conversar com o servidor <strong>sem recarregar a página</strong> usando
+          <strong>Fetch/AJAX</strong> e <strong>JSON</strong>. Vamos aplicar isso na lanchonete para
+          <strong>adicionar itens ao carrinho</strong> e atualizar totais em tempo real.
+        </p>
+
+        <div class="badges">
+          <span class="badge">Bimestre 4</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): Carrinho/itens via Fetch</span>
+        </div>
+
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo12.html">← Cap. 12</a>
+          <a class="btn primary" href="capitulo14.html">Cap. 14 →</a>
+          <a class="btn ghost" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="content">
+        <h2>Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Explicar o que é <strong>AJAX</strong> e como o <strong>Fetch</strong> envia requisições HTTP.</li>
+          <li>Trocar dados em <strong>JSON</strong> entre front-end e PHP.</li>
+          <li>Criar endpoints PHP que respondem JSON com status HTTP correto.</li>
+          <li>Atualizar partes da tela (carrinho/total) sem recarregar a página.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Compreender o fluxo <strong>cliente → servidor → cliente</strong> com requisições assíncronas.</li>
+                <li>Usar <strong>Fetch</strong> com métodos HTTP (GET/POST) e cabeçalhos.</li>
+                <li>Tratar respostas JSON e atualizar o DOM.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Padronizar respostas com <code>status</code> e mensagens.</li>
+                <li>Implementar endpoint para <strong>adicionar item ao carrinho</strong> via JSON.</li>
+                <li>Aplicar no projeto da lanchonete.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> No catálogo (Cap. 08), vamos trocar o “Adicionar” por POST assíncrono e atualizar o carrinho/total sem recarregar.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) O que é AJAX / Fetch?</h3>
+          <p>
+            AJAX é o nome comum para “fazer requisições ao servidor sem recarregar a página”.
+            Hoje, o jeito mais comum no JavaScript moderno é usar <code>fetch()</code>.
+          </p>
+
+          <h3>2) JSON</h3>
+          <p>
+            JSON é um formato leve para troca de dados. No PHP, usamos <code>json_encode()</code> para responder
+            e <code>json_decode()</code> para interpretar dados recebidos.
+          </p>
+
+          <h3>3) Boas práticas de endpoints</h3>
+          <ul>
+            <li>Definir <code>Content-Type: application/json</code>.</li>
+            <li>Retornar códigos HTTP coerentes (200, 201, 400, 401, 500…).</li>
+            <li>Não retornar HTML; retornar <strong>apenas JSON</strong>.</li>
+            <li>Validar dados no servidor e tratar erros com mensagem clara.</li>
+          </ul>
+
+          <div class="sep"></div>
+          <h3>Pesquisas complementares sugeridas</h3>
+          <ul>
+            <li>Diferença entre <code>fetch()</code> e <code>XMLHttpRequest</code>.</li>
+            <li>O que é CORS e quando ele é necessário.</li>
+            <li>Como usar <code>async/await</code> com fetch.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — Adicionar ao carrinho via Fetch (JSON)</h2>
+
+          <h3>Visão geral</h3>
+          <p>
+            Vamos criar um endpoint <code>public/api/carrinho_add.php</code> que recebe JSON (id e qtd),
+            busca o item no banco (fonte da verdade), adiciona ao carrinho (session) e retorna JSON com o novo total.
+          </p>
+
+          <h3>1) Estrutura de pastas</h3>
+          <pre><code>public/
+  api/
+    carrinho_add.php
+    carrinho_resumo.php
+  assets/
+    app.js
+  catalogo_db.php
+  carrinho.php
+src/
+  App/
+    SessionCart.php
+config/
+  db.php
+          </code></pre>
+
+          <h3>2) Endpoint: adicionar item (POST JSON) — <code>public/api/carrinho_add.php</code></h3>
+          <pre><code>&lt;!-- public/api/carrinho_add.php --&gt;
+&lt;?php
+require_once __DIR__.'/../../config/db.php';
+require_once __DIR__.'/../../src/App/SessionCart.php';
+use App\SessionCart;
+
+header('Content-Type: application/json; charset=utf-8');
+
+if(($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'){
+  http_response_code(405);
+  echo json_encode(['ok'=&gt;false,'error'=&gt;'Método não permitido']);
+  exit;
+}
+
+$raw = file_get_contents('php://input');
+$data = json_decode($raw, true);
+
+$id  = isset($data['id']) ? (int)$data['id'] : 0;
+$qtd = isset($data['qtd']) ? (int)$data['qtd'] : 1;
+$qtd = max(1, $qtd);
+
+if($id &lt;= 0){
+  http_response_code(400);
+  echo json_encode(['ok'=&gt;false,'error'=&gt;'ID inválido']);
+  exit;
+}
+
+try{
+  $pdo = pdo();
+  $st = $pdo-&gt;prepare('SELECT id,nome,preco FROM item WHERE id=:id');
+  $st-&gt;execute([':id'=&gt;$id]);
+  $it = $st-&gt;fetch();
+
+  if(!$it){
+    http_response_code(404);
+    echo json_encode(['ok'=&gt;false,'error'=&gt;'Item não encontrado']);
+    exit;
+  }
+
+  SessionCart::start();
+  SessionCart::add((string)$it['id'], (string)$it['nome'], (float)$it['preco'], $qtd);
+
+  $total = SessionCart::total();
+  $items = SessionCart::items();
+  $count = 0;
+  foreach($items as $x){ $count += (int)$x['qtd']; }
+
+  echo json_encode([
+    'ok'=&gt;true,
+    'message'=&gt;'Item adicionado',
+    'cart'=&gt;[
+      'count'=&gt;$count,
+      'total'=&gt;$total
+    ]
+  ]);
+}catch(Throwable $e){
+  http_response_code(500);
+  echo json_encode(['ok'=&gt;false,'error'=&gt;'Erro no servidor']);
+}
+          </code></pre>
+
+          <h3>3) Endpoint: resumo do carrinho (GET JSON) — <code>public/api/carrinho_resumo.php</code></h3>
+          <pre><code>&lt;!-- public/api/carrinho_resumo.php --&gt;
+&lt;?php
+require_once __DIR__.'/../../src/App/SessionCart.php';
+use App\SessionCart;
+
+header('Content-Type: application/json; charset=utf-8');
+
+SessionCart::start();
+$items = SessionCart::items();
+$total = SessionCart::total();
+$count = 0;
+foreach($items as $x){ $count += (int)$x['qtd']; }
+
+echo json_encode([
+  'ok'=&gt;true,
+  'cart'=&gt;[
+    'count'=&gt;$count,
+    'total'=&gt;$total
+  ]
+]);
+          </code></pre>
+
+          <h3>4) JavaScript (Fetch) — <code>public/assets/app.js</code></h3>
+          <pre><code>&lt;!-- public/assets/app.js --&gt;
+// Utilitário de moeda simples (pt-BR)
+function moedaBR(v){
+  return new Intl.NumberFormat('pt-BR', {style:'currency', currency:'BRL'}).format(v);
+}
+
+// Atualiza “badge” do carrinho no topo (se existir)
+function atualizarResumoCarrinho(cart){
+  const elCount = document.querySelector('[data-cart-count]');
+  const elTotal = document.querySelector('[data-cart-total]');
+  if(elCount) elCount.textContent = cart.count;
+  if(elTotal) elTotal.textContent = moedaBR(cart.total);
+}
+
+// Carrega resumo inicial do carrinho
+async function carregarResumo(){
+  try{
+    const res = await fetch('api/carrinho_resumo.php', {headers:{'Accept':'application/json'}});
+    const json = await res.json();
+    if(json.ok) atualizarResumoCarrinho(json.cart);
+  }catch(e){}
+}
+
+// Handler para botões “Adicionar”
+async function adicionarAoCarrinho(id, qtd=1){
+  const payload = {id:Number(id), qtd:Number(qtd)};
+  const res = await fetch('api/carrinho_add.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body: JSON.stringify(payload)
+  });
+
+  const json = await res.json();
+  if(!json.ok){
+    alert(json.error || 'Falha ao adicionar');
+    return;
+  }
+  atualizarResumoCarrinho(json.cart);
+}
+
+// Liga eventos nos botões com data-add-cart
+function bindBotoes(){
+  document.querySelectorAll('[data-add-cart]').forEach(btn =&gt; {
+    btn.addEventListener('click', async (e) =&gt; {
+      e.preventDefault();
+      const id = btn.getAttribute('data-add-cart');
+      const qtdInputSel = btn.getAttribute('data-qtd-input');
+      let qtd = 1;
+      if(qtdInputSel){
+        const inp = document.querySelector(qtdInputSel);
+        if(inp) qtd = Number(inp.value || 1);
+      }
+      await adicionarAoCarrinho(id, qtd);
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () =&gt; {
+  carregarResumo();
+  bindBotoes();
+});
+          </code></pre>
+
+          <h3>5) Ajuste no catálogo (HTML) — botão “Adicionar” assíncrono</h3>
+          <p>
+            No seu <code>public/catalogo_db.php</code>, troque o form “Adicionar” por um botão com <code>data-add-cart</code>.
+            Inclua também um “resumo do carrinho” no topo.
+          </p>
+          <pre><code>&lt;!-- (trecho) topo de public/catalogo_db.php --&gt;
+&lt;div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"&gt;
+  &lt;div&gt;&lt;a href="carrinho.php"&gt;Carrinho&lt;/a&gt;&lt;/div&gt;
+  &lt;div&gt;
+    Itens: &lt;strong data-cart-count&gt;0&lt;/strong&gt; • Total: &lt;strong data-cart-total&gt;R$ 0,00&lt;/strong&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- inclua o script no final da página --&gt;
+&lt;script src="assets/app.js"&gt;&lt;/script&gt;
+          </code></pre>
+
+          <pre><code>&lt;!-- (trecho) dentro do loop de itens --&gt;
+&lt;input type="number" min="1" value="1" id="qtd-{{ID}}" style="width:70px" /&gt;
+&lt;button data-add-cart="{{ID}}" data-qtd-input="#qtd-{{ID}}"&gt;Adicionar&lt;/button&gt;
+          </code></pre>
+
+          <p class="small muted">
+            Observação: no trecho acima, substitua <code>{{ID}}</code> pelo ID real do item (ex.: <code>&lt;?= (int)$i['id'] ?&gt;</code>) no seu PHP.
+          </p>
+
+          <div class="note small">
+            <strong>Resumo:</strong> Agora seu catálogo adiciona itens ao carrinho via Fetch/JSON e atualiza contagem/total sem recarregar a página.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>Remover via Fetch:</strong> crie <code>api/carrinho_remove.php</code> e um botão “Remover” na tela do carrinho sem reload.</li>
+            <li><strong>Atualizar quantidade via Fetch:</strong> crie <code>api/carrinho_update.php</code> para alterar qtd e recalcular total.</li>
+            <li><strong>Mini-notificações:</strong> substitua <code>alert()</code> por um “toast” simples no canto da tela.</li>
+          </ol>
+          <p class="small muted">Dica: mantenha respostas JSON padronizadas: <code>{ ok, message, error, cart }</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap13Checklist">
+            <li><label><input type="checkbox" data-k="apiadd"> Criei o endpoint <code>api/carrinho_add.php</code> com POST JSON</label></li>
+            <li><label><input type="checkbox" data-k="apires"> Criei o endpoint <code>api/carrinho_resumo.php</code> com GET JSON</label></li>
+            <li><label><input type="checkbox" data-k="fetch"> Implementei Fetch no <code>assets/app.js</code></label></li>
+            <li><label><input type="checkbox" data-k="ui"> Atualizei a UI do catálogo para usar botões assíncronos</label></li>
+            <li><label><input type="checkbox" data-k="safe"> Usei status HTTP e mensagens de erro coerentes</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn ghost" href="capitulo12.html">← Cap. 12</a>
+            <a class="btn primary" href="capitulo14.html">Cap. 14 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 13</h2>
+
+          <div class="mcq" data-id="q1" data-answer="b">
+            <h4>1) Qual é a principal vantagem do Fetch/AJAX?</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Executar PHP no navegador</label>
+              <label><input type="radio" name="q1" value="b"> Atualizar partes da página sem recarregar</label>
+              <label><input type="radio" name="q1" value="c"> Substituir o MySQL</label>
+              <label><input type="radio" name="q1" value="d"> Remover a necessidade de HTML</label>
+              <label><input type="radio" name="q1" value="e"> Garantir segurança automaticamente</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <div class="mcq" data-id="q2" data-answer="a">
+            <h4>2) Para responder JSON em PHP, devemos configurar:</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> <code>Content-Type: application/json</code></label>
+              <label><input type="radio" name="q2" value="b"> <code>Content-Type: text/css</code></label>
+              <label><input type="radio" name="q2" value="c"> <code>Content-Type: image/png</code></label>
+              <label><input type="radio" name="q2" value="d"> <code>Content-Type: application/xml</code></label>
+              <label><input type="radio" name="q2" value="e"> Nenhum header é necessário</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <div class="mcq" data-id="q3" data-answer="e">
+            <h4>3) Qual método JS transforma objeto em JSON para envio no fetch?</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> <code>json_decode()</code></label>
+              <label><input type="radio" name="q3" value="b"> <code>json_encode()</code></label>
+              <label><input type="radio" name="q3" value="c"> <code>parseInt()</code></label>
+              <label><input type="radio" name="q3" value="d"> <code>toString()</code></label>
+              <label><input type="radio" name="q3" value="e"> <code>JSON.stringify()</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <div class="mcq" data-id="q4" data-answer="c">
+            <h4>4) Qual é uma boa prática de endpoint?</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> Retornar HTML e JSON misturados</label>
+              <label><input type="radio" name="q4" value="b"> Sempre responder 200 mesmo com erro</label>
+              <label><input type="radio" name="q4" value="c"> Usar status HTTP e mensagens claras</label>
+              <label><input type="radio" name="q4" value="d"> Não validar dados no servidor</label>
+              <label><input type="radio" name="q4" value="e"> Confiar no preço enviado pelo cliente</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <div class="mcq" data-id="q5" data-answer="b">
+            <h4>5) Ao enviar JSON no fetch, o header mais importante é:</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> <code>Accept: text/html</code></label>
+              <label><input type="radio" name="q5" value="b"> <code>Content-Type: application/json</code></label>
+              <label><input type="radio" name="q5" value="c"> <code>Content-Type: image/jpeg</code></label>
+              <label><input type="radio" name="q5" value="d"> <code>Cookie: none</code></label>
+              <label><input type="radio" name="q5" value="e"> <code>Server: Apache</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <div class="mcq" data-id="q6" data-answer="a">
+            <h4>6) O endpoint deve buscar o preço no banco porque:</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> O cliente pode manipular valores se confiar no HTML</label>
+              <label><input type="radio" name="q6" value="b"> JSON não aceita números</label>
+              <label><input type="radio" name="q6" value="c"> Fetch não funciona com banco</label>
+              <label><input type="radio" name="q6" value="d"> O PHP não lê POST</label>
+              <label><input type="radio" name="q6" value="e"> Sessões não existem</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 14</strong>, vamos criar uma <strong>API REST</strong> simples em PHP (endpoints por rota e método),
+             reutilizando o que você fez com JSON e Fetch.</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo14.html">Ir para o Capítulo 14 →</a>
+            <a class="btn ghost" href="capitulo12.html">← Voltar ao Capítulo 12</a>
+            <a class="btn ghost" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 13</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo12.html">Cap. 12</a>
+          <a href="capitulo14.html">Cap. 14</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar mobile toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    hamburgerBtn?.addEventListener('click', () => {
+      const isOpen = mainMenu.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const toggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Download este capítulo como HTML
+    document.getElementById('downloadBtn')?.addEventListener('click', () => {
+      const doctype = '<!DOCTYPE html>\\n';
+      const html = document.documentElement.outerHTML;
+      const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'capitulo13.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // Checklist persistente
+    (function(){
+      const list = document.getElementById('cap13Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap13_checklist';
+
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = !!data[cb.dataset.k]);
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => data[cb.dataset.k] = cb.checked);
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+
+      document.getElementById('clearChecklist')?.addEventListener('click', ()=>{
+        localStorage.removeItem(KEY);
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      });
+
+      load();
+    })();
+
+    // MCQ interativo
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const id = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+
+        box.querySelector('.send')?.addEventListener('click', ()=>{
+          const choice = box.querySelector(`input[name="${id}"]:checked`);
+          if(!choice){
+            feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+            feedback.className = 'feedback err';
+            return;
+          }
+          const got = (choice.value || '').trim().toLowerCase();
+          if(got === answer){
+            feedback.textContent = '✔ Resposta correta!';
+            feedback.className = 'feedback ok';
+          }else{
+            feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+            feedback.className = 'feedback err';
+          }
+        });
+
+        box.querySelector('.key')?.addEventListener('click', ()=>{
+          answerEl.style.display = (answerEl.style.display === 'block') ? 'none' : 'block';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

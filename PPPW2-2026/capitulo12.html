@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 12 — Programação Web 2 | Autorização (RBAC), Menus Condicionais e “Lembre‑me”</title>
+  <meta name="description" content="Capítulo 12 da apostila de Programação Web 2. Autorização com RBAC simples, menus condicionais por perfil/role e login persistente (lembre-me) com tokens seguros."/>
+  <link rel="stylesheet" href="estilo.css" />
+
+</head>
+
+<body id="top">
+  <!-- Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+      <div class="menu" id="mainMenu">
+        <a href="index.html">Início</a>
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 12 — Autorização (RBAC), Menus Condicionais e “Lembre‑me”</h1>
+        <p class="subtitle">
+          Implemente <strong>RBAC simples</strong> (roles), exiba <strong>menus condicionais</strong> por perfil e habilite
+          <strong>login persistente</strong> (“lembre‑me”) usando tokens seguros.
+        </p>
+
+        <div class="badges">
+          <span class="badge">Bimestre 3</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): RBAC + Lembre‑me funcional</span>
+        </div>
+
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo11.html">← Cap. 11</a>
+          <a class="btn primary" href="capitulo13.html">Cap. 13 →</a>
+          <a class="btn ghost" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="content">
+        <h2>Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Definir e verificar <strong>roles</strong> (ex.: <code>admin</code>, <code>editor</code>, <code>viewer</code>).</li>
+          <li>Mostrar/ocultar <strong>menus</strong> e <strong>ações</strong> conforme o perfil do usuário logado.</li>
+          <li>Implementar <strong>“lembre‑me”</strong> com tokens persistentes (selector + validator) e rotação/revogação segura.</li>
+          <li>Aplicar boas práticas: <strong>cookies HttpOnly/SameSite</strong>, expiração, revogação e proteção contra clonagem.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Usar o campo <code>role</code> de <code>usuario</code> para autorização (RBAC simples).</li>
+                <li>Proteger páginas/rotas por <strong>role</strong> e montar <strong>menus condicionais</strong>.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Implementar o cookie <strong>“lembre‑me”</strong> com <em>selector</em> + <em>validator</em> (hash no banco).</li>
+                <li>Rotacionar e revogar tokens; configurar cookie com <strong>HttpOnly</strong> e <strong>SameSite=Lax</strong>.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> No login (Cap. 11), no Admin (Cap. 08/10) e no cabeçalho do site (menus condicionais).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) RBAC simples (Role-Based Access Control)</h3>
+          <p>Controle de acesso por papéis: cada usuário tem um <strong>role</strong> e determinadas telas/ações exigem determinados papéis.</p>
+
+          <h3>2) Menus condicionais</h3>
+          <p>O menu deve refletir as permissões: exibir Admin apenas quando <code>Auth::check()</code> e, se for o caso, <code>Auth::role() === 'admin'</code>.</p>
+
+          <h3>3) “Lembre‑me” com segurança</h3>
+          <ul>
+            <li>Não salve a senha no cookie; use <strong>tokens</strong> (selector + validator).</li>
+            <li>Guarde apenas o <strong>hash do validator</strong> no banco.</li>
+            <li><strong>Rotacione</strong> o token a cada auto-login e <strong>revogue</strong> no logout.</li>
+            <li>Cookies: <strong>HttpOnly</strong>, <strong>SameSite</strong> e <em>Secure</em> em HTTPS.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — RBAC + Menus Condicionais + “Lembre‑me”</h2>
+
+          <h3>1) Banco — tabela de tokens persistentes</h3>
+          <pre><code>CREATE TABLE IF NOT EXISTS usuario_token (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  selector CHAR(16) NOT NULL UNIQUE,
+  validator_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES usuario(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+          </code></pre>
+
+          <h3>2) Serviço “Lembre‑me” — <code>src/Service/RememberMeService.php</code></h3>
+          <pre><code>&lt;!-- src/Service/RememberMeService.php --&gt;
+&lt;?php
+declare(strict_types=1);
+
+class RememberMeService {
+  private PDO $pdo;
+  private string $cookieName = 'rm_token';
+  private int $days = 30;
+
+  public function __construct(PDO $pdo){ $this-&gt;pdo = $pdo; }
+
+  public function issueCookie(int $userId): void {
+    $selector = bin2hex(random_bytes(8));       // 16 hex
+    $validator = bin2hex(random_bytes(32));     // 64 hex
+    $hash = hash('sha256', $validator);
+    $exp = (new DateTime("+{$this-&gt;days} days"))-&gt;format('Y-m-d H:i:s');
+
+    $st = $this-&gt;pdo-&gt;prepare("INSERT INTO usuario_token(user_id,selector,validator_hash,expires_at) VALUES (:u,:s,:h,:e)");
+    $st-&gt;execute([':u'=&gt;$userId, ':s'=&gt;$selector, ':h'=&gt;$hash, ':e'=&gt;$exp]);
+
+    $value = $selector.':'.$validator;
+    setcookie($this-&gt;cookieName, $value, [
+      'expires'  =&gt; time() + 60*60*24*$this-&gt;days,
+      'path'     =&gt; '/lanchonete',
+      'secure'   =&gt; false,  // true em HTTPS
+      'httponly' =&gt; true,
+      'samesite' =&gt; 'Lax'
+    ]);
+  }
+
+  public function clearCookie(): void {
+    setcookie($this-&gt;cookieName, '', [
+      'expires'  =&gt; time()-3600,
+      'path'     =&gt; '/lanchonete',
+      'secure'   =&gt; false,
+      'httponly' =&gt; true,
+      'samesite' =&gt; 'Lax'
+    ]);
+  }
+
+  public function tryAutoLogin(): ?array {
+    $raw = $_COOKIE[$this-&gt;cookieName] ?? null;
+    if(!$raw || !str_contains($raw, ':')) return null;
+
+    [$selector,$validator] = explode(':', $raw, 2);
+
+    $st = $this-&gt;pdo-&gt;prepare("SELECT user_id, validator_hash, expires_at FROM usuario_token WHERE selector=:s");
+    $st-&gt;execute([':s'=&gt;$selector]);
+    $row = $st-&gt;fetch();
+    if(!$row) return null;
+
+    if(new DateTime($row['expires_at']) &lt; new DateTime()) return null;
+    if(!hash_equals($row['validator_hash'], hash('sha256', $validator))) return null;
+
+    $u = $this-&gt;pdo-&gt;prepare("SELECT id,nome,email,role FROM usuario WHERE id=:id");
+    $u-&gt;execute([':id'=&gt;(int)$row['user_id']]);
+    $user = $u-&gt;fetch();
+    if(!$user) return null;
+
+    // Rotaciona token
+    $this-&gt;revokeBySelector($selector);
+    $this-&gt;issueCookie((int)$row['user_id']);
+
+    return ['id'=>(int)$user['id'],'nome'=>$user['nome'],'email'=>$user['email'],'role'=>$user['role']];
+  }
+
+  public function revokeBySelector(string $selector): void {
+    $st = $this-&gt;pdo-&gt;prepare("DELETE FROM usuario_token WHERE selector=:s");
+    $st-&gt;execute([':s'=&gt;$selector]);
+  }
+
+  public function revokeAll(int $userId): void {
+    $st = $this-&gt;pdo-&gt;prepare("DELETE FROM usuario_token WHERE user_id=:u");
+    $st-&gt;execute([':u'=&gt;$userId]);
+  }
+}
+          </code></pre>
+
+          <h3>3) Ajuste no Login (Cap. 11) — checkbox “Lembre‑me”</h3>
+          <pre><code>&lt;!-- (trecho) public/login.php (form) --&gt;
+&lt;label&gt;
+  &lt;input type="checkbox" name="remember" value="1"/&gt; Manter-me conectado
+&lt;/label&gt;
+          </code></pre>
+
+          <h3>4) No POST do Login: emitir cookie quando marcado</h3>
+          <pre><code>&lt;!-- (trecho) public/login.php (processo POST) --&gt;
+$pdo = pdo();
+$svc = new AuthService($pdo);
+$u = $svc-&gt;login((string)($_POST['email'] ?? ''),(string)($_POST['senha'] ?? ''));
+if($u){
+  Auth::setUser($u);
+  if(($_POST['remember'] ?? '')==='1'){
+    require_once __DIR__.'/../src/Service/RememberMeService.php';
+    (new RememberMeService($pdo))-&gt;issueCookie((int)$u['id']);
+  }
+  header('Location: /lanchonete/public/admin/index.php'); exit;
+}
+          </code></pre>
+
+          <h3>5) Auto-login ao carregar páginas (bootstrap)</h3>
+          <pre><code>&lt;!-- src/App/BootstrapAuth.php (carregado no início das páginas) --&gt;
+&lt;?php
+require_once __DIR__.'/../../config/db.php';
+require_once __DIR__.'/Auth.php';
+require_once __DIR__.'/../Service/RememberMeService.php';
+
+Auth::start();
+if(!Auth::check() &amp;&amp; !empty($_COOKIE['rm_token'])){
+  $pdo = pdo();
+  $rm = new RememberMeService($pdo);
+  $user = $rm-&gt;tryAutoLogin();
+  if($user){ Auth::setUser($user); }
+}
+          </code></pre>
+
+          <h3>6) Menus condicionais (exibir Admin só para logados)</h3>
+          <pre><code>&lt;!-- (trecho) cabeçalho do site --&gt;
+&lt;?php require_once __DIR__.'/../src/App/Auth.php'; $u = Auth::user(); ?&gt;
+&lt;nav&gt;
+  &lt;a href="/lanchonete/public/catalogo_db.php"&gt;Catálogo&lt;/a&gt;
+  &lt;?php if($u): ?&gt;
+    &lt;a href="/lanchonete/public/admin/index.php"&gt;Admin&lt;/a&gt;
+    &lt;small&gt;Logado: &lt;strong&gt;&lt;?= htmlspecialchars($u['nome']) ?&gt;&lt;/strong&gt; (&lt;?= htmlspecialchars($u['role']) ?&gt;)&lt;/small&gt;
+  &lt;?php else: ?&gt;
+    &lt;a href="/lanchonete/public/login.php"&gt;Entrar&lt;/a&gt;
+  &lt;?php endif; ?&gt;
+&lt;/nav&gt;
+          </code></pre>
+
+          <h3>7) Proteção por role (RBAC) — exigir <code>admin</code></h3>
+          <pre><code>&lt;!-- topo de public/admin/index.php --&gt;
+&lt;?php
+require_once __DIR__.'/../../src/App/Auth.php';
+Auth::requireLogin();
+if(Auth::role() !== 'admin'){
+  http_response_code(403);
+  exit('Acesso negado');
+}
+?&gt;
+          </code></pre>
+
+          <h3>8) Logout — limpar sessão e tokens persistentes</h3>
+          <pre><code>&lt;!-- public/logout.php --&gt;
+&lt;?php
+require_once __DIR__.'/../src/App/Auth.php';
+require_once __DIR__.'/../config/db.php';
+require_once __DIR__.'/../src/Service/RememberMeService.php';
+
+$user = Auth::user();
+$pdo = pdo();
+$rm = new RememberMeService($pdo);
+
+if($user){ $rm-&gt;revokeAll((int)$user['id']); }
+$rm-&gt;clearCookie();
+
+Auth::logout();
+header('Location: /lanchonete/public/login.php'); exit;
+          </code></pre>
+
+          <div class="note small">
+            <strong>Resumo:</strong> Você adicionou autorização por papéis (RBAC), menus condicionais por perfil e “lembre‑me” com tokens seguros
+            (selector + validator), incluindo rotação e revogação.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>RBAC granular:</strong> crie um helper <code>can($perm)</code> com mapa simples de permissões por role.</li>
+            <li><strong>Sessões ativas:</strong> tela para revogar tokens por dispositivo (listar tokens por usuário).</li>
+            <li><strong>HTTPS:</strong> em ambiente HTTPS, habilite <code>secure=true</code> e avalie <code>SameSite=Strict</code>.</li>
+          </ol>
+          <p class="small muted">Dica: não dependa apenas do front-end para impedir ações — sempre valide permissões no servidor.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap12Checklist">
+            <li><label><input type="checkbox" data-k="rbac"> Habilitei RBAC e protegi rotas do Admin</label></li>
+            <li><label><input type="checkbox" data-k="menu"> Exibi menus condicionais por perfil</label></li>
+            <li><label><input type="checkbox" data-k="remember"> Implementei “lembre‑me” com selector+validator</label></li>
+            <li><label><input type="checkbox" data-k="rotate"> Rotacionei tokens no auto-login e revoguei no logout</label></li>
+            <li><label><input type="checkbox" data-k="cookie"> Configurei cookie HttpOnly e SameSite adequado</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 12</h2>
+
+          <div class="mcq" data-id="q1" data-answer="d">
+            <h4>1) No “lembre‑me”, por que usar “selector + validator”?</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Para salvar a senha no cookie</label>
+              <label><input type="radio" name="q1" value="b"> Para evitar uso de sessão</label>
+              <label><input type="radio" name="q1" value="c"> Para não precisar de banco de dados</label>
+              <label><input type="radio" name="q1" value="d"> Porque o banco guarda só o hash do validator, reduzindo impacto se vazar</label>
+              <label><input type="radio" name="q1" value="e"> Apenas por performance</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <div class="mcq" data-id="q2" data-answer="a">
+            <h4>2) Qual configuração é recomendada para o cookie do “lembre‑me”?</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> HttpOnly e SameSite=Lax (e Secure em HTTPS)</label>
+              <label><input type="radio" name="q2" value="b"> Apenas Secure</label>
+              <label><input type="radio" name="q2" value="c"> Apenas HttpOnly</label>
+              <label><input type="radio" name="q2" value="d"> Sem restrições</label>
+              <label><input type="radio" name="q2" value="e"> Salvar no localStorage</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <div class="mcq" data-id="q3" data-answer="c">
+            <h4>3) Onde deve ficar a verificação de “role” (RBAC)?</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> No CSS</label>
+              <label><input type="radio" name="q3" value="b"> Só no front-end</label>
+              <label><input type="radio" name="q3" value="c"> No servidor (PHP), antes de executar ações</label>
+              <label><input type="radio" name="q3" value="d"> Só no banco</label>
+              <label><input type="radio" name="q3" value="e"> Não precisa</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <div class="mcq" data-id="q4" data-answer="b">
+            <h4>4) O que fazer com tokens persistentes no logout?</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> Nada</label>
+              <label><input type="radio" name="q4" value="b"> Revogar tokens no banco e limpar o cookie</label>
+              <label><input type="radio" name="q4" value="c"> Apenas limpar o cookie</label>
+              <label><input type="radio" name="q4" value="d"> Guardar o token</label>
+              <label><input type="radio" name="q4" value="e"> Renovar token</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <div class="mcq" data-id="q5" data-answer="e">
+            <h4>5) Qual alternativa NÃO é boa prática para RBAC?</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> Centralizar checagens em helpers</label>
+              <label><input type="radio" name="q5" value="b"> Verificar role no servidor</label>
+              <label><input type="radio" name="q5" value="c"> Menus condicionais por permissão</label>
+              <label><input type="radio" name="q5" value="d"> Bloquear ações no backend</label>
+              <label><input type="radio" name="q5" value="e"> Depender apenas do front-end para bloquear ações</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <div class="mcq" data-id="q6" data-answer="a">
+            <h4>6) Ao validar o token persistente, qual comparação usar?</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> <code>hash_equals()</code></label>
+              <label><input type="radio" name="q6" value="b"> <code>==</code></label>
+              <label><input type="radio" name="q6" value="c"> <code>===</code></label>
+              <label><input type="radio" name="q6" value="d"> Comparar tamanhos</label>
+              <label><input type="radio" name="q6" value="e"> Não comparar</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 13</strong>, avançaremos para comunicação assíncrona com <strong>Fetch/AJAX</strong> e JSON (base para APIs).</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo13.html">Ir para o Capítulo 13 →</a>
+            <a class="btn ghost" href="capitulo11.html">← Voltar ao Capítulo 11</a>
+            <a class="btn ghost" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 12</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo11.html">Cap. 11</a>
+          <a href="capitulo13.html">Cap. 13</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar mobile toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    hamburgerBtn?.addEventListener('click', () => {
+      const isOpen = mainMenu.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const toggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Download este capítulo como HTML
+    document.getElementById('downloadBtn')?.addEventListener('click', () => {
+      const doctype = '<!DOCTYPE html>\\n';
+      const html = document.documentElement.outerHTML;
+      const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'capitulo12.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // Checklist persistente
+    (function(){
+      const list = document.getElementById('cap12Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap12_checklist';
+
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = !!data[cb.dataset.k]);
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => data[cb.dataset.k] = cb.checked);
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+
+      document.getElementById('clearChecklist')?.addEventListener('click', ()=>{
+        localStorage.removeItem(KEY);
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      });
+
+      load();
+    })();
+
+    // MCQ interativo
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const id = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+
+        box.querySelector('.send')?.addEventListener('click', ()=>{
+          const choice = box.querySelector(`input[name="${id}"]:checked`);
+          if(!choice){
+            feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+            feedback.className = 'feedback err';
+            return;
+          }
+          const got = (choice.value || '').trim().toLowerCase();
+          if(got === answer){
+            feedback.textContent = '✔ Resposta correta!';
+            feedback.className = 'feedback ok';
+          }else{
+            feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+            feedback.className = 'feedback err';
+          }
+        });
+
+        box.querySelector('.key')?.addEventListener('click', ()=>{
+          answerEl.style.display = (answerEl.style.display === 'block') ? 'none' : 'block';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

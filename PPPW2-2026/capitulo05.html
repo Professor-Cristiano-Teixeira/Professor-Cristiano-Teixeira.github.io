@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Capítulo 05 — Programação Web 2 | MySQL + PHP (PDO/MySQLi): conexões e queries</title>
+  <meta name="description" content="Capítulo 05 da apostila de Programação Web 2. Conexão ao MySQL via PDO/MySQLi, criação do schema da lanchonete e SELECT com prepared statements."/>
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body id="top">
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html" title="Início">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+      <div class="menu" id="mainMenu">
+        <a href="index.html">Início</a>
+        <a href="#objetivos">Objetivos</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#passoapasso">Passo a Passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#quiz">Questionário</a>
+        <div class="menu-gap"></div>
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo02.html">Capítulo 02 <span class="pill">B1</span></a>
+            <a href="capitulo03.html">Capítulo 03 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo05.html">Capítulo 05 <span class="pill">B2</span></a>
+            <a href="capitulo06.html">Capítulo 06 <span class="pill">B2</span></a>
+            <a href="capitulo07.html">Capítulo 07 <span class="pill">B2</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo09.html">Capítulo 09 <span class="pill">B3</span></a>
+            <a href="capitulo10.html">Capítulo 10 <span class="pill">B3</span></a>
+            <a href="capitulo11.html">Capítulo 11 <span class="pill">B3</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo13.html">Capítulo 13 <span class="pill">B4</span></a>
+            <a href="capitulo14.html">Capítulo 14 <span class="pill">B4</span></a>
+            <a href="capitulo15.html">Capítulo 15 <span class="pill">B4</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Capítulo 05 — MySQL + PHP (PDO/MySQLi): conexões e queries</h1>
+        <p class="subtitle">
+          Conecte o PHP ao <strong>MySQL</strong> no XAMPP, crie o <strong>schema da lanchonete</strong> e realize as primeiras
+          consultas (<em>SELECT</em>) com <strong>prepared statements</strong>.
+        </p>
+        <div class="badges">
+          <span class="badge">Bimestre 2</span>
+          <span class="badge">Carga: ~100 min</span>
+          <span class="badge">Entrega (parcial): Leitura do cardápio via banco</span>
+        </div>
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar este capítulo (HTML)</button>
+          <a class="btn ghost" href="capitulo04.html">← Cap. 04</a>
+          <a class="btn primary" href="capitulo06.html">Cap. 06 →</a>
+          <a class="btn ghost" href="index.html">Índice</a>
+        </div>
+      </div>
+    </div>
+    <div class="card" aria-labelledby="aprend">
+      <div class="content">
+        <h2 id="aprend">Ao final você será capaz de:</h2>
+        <ul class="small">
+          <li>Inicializar o <strong>MySQL</strong> no XAMPP e criar o <strong>banco lanchonete</strong> com tabelas e chaves estrangeiras.</li>
+          <li>Conectar o PHP ao banco usando <strong>PDO</strong> (ou MySQLi) com <em>charset</em> e <em>errmode</em> corretos.</li>
+          <li>Executar <strong>SELECT</strong> simples e <strong>parametrizados</strong> (prevenindo SQL Injection).</li>
+          <li>Listar itens do cardápio vindos do banco e filtrar por termo/categoria (GET).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Objetivos -->
+    <section id="objetivos">
+      <div class="card">
+        <div class="content">
+          <h2>Objetivos de aprendizagem</h2>
+          <div class="grid-2">
+            <div>
+              <ul>
+                <li>Configurar <strong>schema</strong>, tabelas e dados iniciais no MySQL (Workbench ou phpMyAdmin).</li>
+                <li>Entender <strong>DSN</strong>, usuário/senha e <strong>charset</strong> (<code>utf8mb4</code>).</li>
+                <li>Usar <strong>PDO</strong> com <code>ERRMODE_EXCEPTION</code> e <code>FETCH_ASSOC</code>.</li>
+              </ul>
+            </div>
+            <div>
+              <ul>
+                <li>Construir uma página <strong>catalogo_db.php</strong> renderizando dados do MySQL.</li>
+                <li>Aplicar <strong>prepared statements</strong> com <code>LIKE</code> e filtros opcionais.</li>
+                <li>Separar <strong>config</strong> e (opcional) um <strong>DAO</strong> simples para leitura.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note small"><strong>Onde será aplicado:</strong> Transformaremos o cardápio (antes em arrays) para leitura direta do <em>MySQL</em>, preparando o terreno para CRUDs do Cap. 06 e Cap. 07.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conceitos -->
+    <section id="conceitos">
+      <div class="card">
+        <div class="content">
+          <h2>Conceitos fundamentais</h2>
+
+          <h3>1) Driver e DSN (PDO)</h3>
+          <p>
+            Para conectar no MySQL via <strong>PDO</strong>, usamos um <em>DSN</em> (Data Source Name) com host, nome do banco e charset:
+          </p>
+          <pre><code class="hl">
+<span class="k">&lt;?php</span>
+<span class="a">$dsn</span> = <span class="s">"mysql:host=127.0.0.1;dbname=lanchonete;charset=utf8mb4"</span>;
+<span class="a">$user</span> = <span class="s">"root"</span>; <span class="a">$pass</span> = <span class="s">""</span>; <span class="c">// padrão XAMPP: root sem senha (apenas DEV)</span>
+<span class="a">$pdo</span> = <span class="k">new</span> PDO(<span class="a">$dsn</span>, <span class="a">$user</span>, <span class="a">$pass</span>, [
+  PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,
+  PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,
+]);
+          </code></pre>
+          <p class="small muted"><strong>Boa prática:</strong> sempre defina o <code>charset=utf8mb4</code> no DSN e <em>error mode</em> para exceções.</p>
+
+          <h3>2) Prepared Statements</h3>
+          <p>
+            Consultas parametrizadas separam o <strong>SQL</strong> dos <strong>valores</strong>, prevenindo injeção de SQL e erros de formatação:
+          </p>
+          <pre><code class="hl">
+<span class="k">&lt;?php</span>
+<span class="a">$stmt</span> = <span class="a">$pdo</span>-&gt;prepare(<span class="s">"SELECT id, nome FROM categoria WHERE nome LIKE :q"</span>);
+<span class="a">$stmt</span>-&gt;execute([<span class="s">':q'</span> =&gt; <span class="s">'%'</span>.<span class="a">$termo</span>.<span class="s">'%'</span>]);
+<span class="a">$categorias</span> = <span class="a">$stmt</span>-&gt;fetchAll();
+          </code></pre>
+
+          <h3>3) MySQL Workbench / phpMyAdmin</h3>
+          <p>
+            Você pode criar o banco e as tabelas pelo <strong>MySQL Workbench</strong> (modelo SQL) ou via <strong>phpMyAdmin</strong> (XAMPP).
+            Manter <strong>InnoDB</strong> e <strong>UTF8MB4</strong> facilita chaves estrangeiras e caracteres especiais (acentos/emoji).
+          </p>
+
+          <div class="sep"></div>
+          <h3>Pesquisas complementares sugeridas</h3>
+          <ul>
+            <li><code>PDO::prepare</code> vs <code>PDO::query</code>; nomeação de parâmetros (<code>:nome</code>) vs <em>posicionais</em> (<code>?</code>).</li>
+            <li>Escolha de <strong>tipos</strong> (INT, DECIMAL, VARCHAR, TEXT) e <strong>índices</strong> (INDEX, UNIQUE) para performance.</li>
+            <li>Configurações do XAMPP: porta do MySQL (geralmente 3306) e credenciais padrão do ambiente.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passo a passo -->
+    <section id="passoapasso">
+      <div class="card">
+        <div class="content">
+          <h2>Passo a passo — Conexão, schema e SELECT do cardápio</h2>
+
+          <h3>Pré-requisitos</h3>
+          <ul>
+            <li>XAMPP em execução (<strong>MySQL</strong> iniciado).</li>
+            <li>MySQL Workbench (ou phpMyAdmin) disponível.</li>
+            <li>Projeto na pasta <code>htdocs/lanchonete</code> com VS Code.</li>
+          </ul>
+
+          <h3>1) Crie o banco e as tabelas (SQL)</h3>
+          <p>Execute no Workbench (ou no phpMyAdmin &rarr; SQL):</p>
+          <pre><code class="hl">
+<span class="c">-- Schema e tabelas da lanchonete (UTF8MB4 + InnoDB)</span>
+CREATE DATABASE IF NOT EXISTS <span class="a">lanchonete</span> 
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE <span class="a">lanchonete</span>;
+
+CREATE TABLE IF NOT EXISTS <span class="a">categoria</span> (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(60) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS <span class="a">item</span> (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(80) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL,
+  categoria_id INT NOT NULL,
+  popular TINYINT(1) NOT NULL DEFAULT 0,
+  CONSTRAINT fk_item_categoria FOREIGN KEY (categoria_id) REFERENCES categoria(id)
+) ENGINE=InnoDB;
+
+<span class="c">-- Dados iniciais</span>
+INSERT IGNORE INTO categoria (nome) VALUES ('Bebidas'),('Lanches'),('Sobremesas');
+
+INSERT IGNORE INTO item (nome,preco,categoria_id,popular) VALUES
+ ('Café expresso', 6.00, (SELECT id FROM categoria WHERE nome='Bebidas'), 1),
+ ('Cappuccino',    9.00, (SELECT id FROM categoria WHERE nome='Bebidas'), 0),
+ ('Suco de laranja',9.50,(SELECT id FROM categoria WHERE nome='Bebidas'), 1),
+ ('Pão de queijo', 5.50, (SELECT id FROM categoria WHERE nome='Lanches'), 0),
+ ('X-Salada',     18.90, (SELECT id FROM categoria WHERE nome='Lanches'), 1),
+ ('Bolo de chocolate',7.50,(SELECT id FROM categoria WHERE nome='Sobremesas'), 0);
+          </code></pre>
+
+          <h3>2) Crie a conexão (PDO) — <code>config/db.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- config/db.php --&gt;</span>
+<span class="k">&lt;?php</span>
+<span class="k">declare</span>(strict_types=1);
+
+<span class="k">function</span> <span class="f">pdo</span>(): PDO {
+  <span class="a">$host</span> = <span class="s">'127.0.0.1'</span>; <span class="a">$db</span> = <span class="s">'lanchonete'</span>;
+  <span class="a">$user</span> = <span class="s">'root'</span>; <span class="a">$pass</span> = <span class="s">''</span>; <span class="c">// XAMPP: root sem senha (apenas DEV)</span>
+  <span class="a">$dsn</span>  = <span class="s">"mysql:host={$host};dbname={$db};charset=utf8mb4"</span>;
+  <span class="k">return</span> <span class="k">new</span> PDO(<span class="a">$dsn</span>, <span class="a">$user</span>, <span class="a">$pass</span>, [
+    PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES =&gt; false
+  ]);
+}
+          </code></pre>
+
+          <h3>3) DAO simples (opcional) — <code>src/DAO/ItemDAO.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- src/DAO/ItemDAO.php --&gt;</span>
+<span class="k">&lt;?php</span>
+<span class="k">declare</span>(strict_types=1);
+
+<span class="k">class</span> <span class="f">ItemDAO</span> {
+  <span class="k">private</span> PDO <span class="a">$pdo</span>;
+  <span class="k">public function</span> __construct(PDO <span class="a">$pdo</span>){ <span class="k">$this</span>-&gt;pdo = <span class="a">$pdo</span>; }
+
+  <span class="k">public function</span> <span class="f">buscar</span>(?<span class="k">string</span> <span class="a">$q</span>, ?<span class="k">int</span> <span class="a">$categoriaId</span>): array {
+    <span class="a">$sql</span> = <span class="s">"SELECT i.id,i.nome,i.preco,i.popular,c.nome AS categoria
+            FROM item i
+            JOIN categoria c ON c.id=i.categoria_id
+            WHERE 1=1"</span>;
+    <span class="a">$params</span> = [];
+    <span class="k">if</span>(<span class="a">$q</span>){ <span class="a">$sql</span> .= <span class="s">" AND i.nome LIKE :q"</span>; <span class="a">$params</span>[<span class="s">':q'</span>] = <span class="s">'%'</span>.<span class="a">$q</span>.<span class="s">'%'</span>; }
+    <span class="k">if</span>(<span class="a">$categoriaId</span>){ <span class="a">$sql</span> .= <span class="s">" AND i.categoria_id = :cid"</span>; <span class="a">$params</span>[<span class="s">':cid'</span>] = <span class="a">$categoriaId</span>; }
+    <span class="a">$sql</span> .= <span class="s">" ORDER BY c.nome, i.nome"</span>;
+
+    <span class="a">$stmt</span> = <span class="k">$this</span>-&gt;pdo-&gt;prepare(<span class="a">$sql</span>);
+    <span class="a">$stmt</span>-&gt;execute(<span class="a">$params</span>);
+    <span class="k">return</span> <span class="a">$stmt</span>-&gt;fetchAll();
+  }
+
+  <span class="k">public function</span> <span class="f">listarCategorias</span>(): array {
+    <span class="a">$sql</span> = <span class="s">"SELECT id, nome FROM categoria ORDER BY nome"</span>;
+    <span class="k">return</span> <span class="k">$this</span>-&gt;pdo-&gt;query(<span class="a">$sql</span>)-&gt;fetchAll();
+  }
+}
+          </code></pre>
+
+          <h3>4) Página do catálogo (via banco) — <code>public/catalogo_db.php</code></h3>
+          <pre><code class="hl">
+<span class="c">&lt;!-- public/catalogo_db.php --&gt;</span>
+<span class="k">&lt;?php</span>
+require_once __DIR__.<span class="s">'/../config/db.php'</span>;
+require_once __DIR__.<span class="s">'/../src/DAO/ItemDAO.php'</span>;
+
+<span class="k">function</span> <span class="f">esc</span>(<span class="a">$v</span>){ <span class="k">return</span> htmlspecialchars((string)<span class="a">$v</span>, ENT_QUOTES, <span class="s">'UTF-8'</span>); }
+<span class="k">function</span> <span class="f">preco</span>(<span class="a">$n</span>){ <span class="k">return</span> <span class="s">'R$ '</span>.number_format((float)<span class="a">$n</span>,2,<span class="s">","</span>,<span class="s">"."</span>); }
+
+<span class="k">try</span>{
+  <span class="a">$pdo</span> = pdo();
+  <span class="a">$dao</span> = <span class="k">new</span> ItemDAO(<span class="a">$pdo</span>);
+  <span class="a">$q</span> = filter_input(INPUT_GET, <span class="s">'q'</span>, FILTER_SANITIZE_SPECIAL_CHARS) ?: <span class="s">''</span>;
+  <span class="a">$cid</span> = filter_input(INPUT_GET, <span class="s">'cat'</span>, FILTER_VALIDATE_INT) ?: <span class="k">null</span>;
+
+  <span class="a">$categorias</span> = <span class="a">$dao</span>-&gt;listarCategorias();
+  <span class="a">$itens</span> = <span class="a">$dao</span>-&gt;buscar(<span class="a">$q</span>, <span class="a">$cid</span>);
+}<span class="k">catch</span>(Throwable <span class="a">$e</span>){
+  http_response_code(500);
+  die(<span class="s">'Erro de conexão/consulta ao banco: '</span>.<span class="a">$e</span>-&gt;getMessage());
+}
+<span class="k">?&gt;</span>
+<span class="k">&lt;!DOCTYPE html&gt;</span>
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"/&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;
+  &lt;title&gt;Lanchonete — Cat&aacute;logo (Banco)&lt;/title&gt;
+  &lt;style&gt;
+    body{font-family:Segoe UI,Arial,sans-serif;margin:0;padding:0;background:#fafafa;color:#1b1b1b}
+    header{background:#c62828;color:#fff;padding:14px 18px}
+    main{max-width:1000px;margin:0 auto;padding:18px}
+    form.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .card{background:#fff;border:1px solid #eee;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .price{font-weight:700;color:#2e7d32}
+    .badge{font-size:12px;background:#ffe0b2;border-radius:999px;padding:2px 8px;margin-left:6px}
+    @media (max-width:768px){.grid{grid-template-columns:1fr}}
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;Cat&aacute;logo (dados do MySQL)&lt;/h1&gt;&lt;/header&gt;
+  &lt;main&gt;
+
+    &lt;form method="get" class="filters" action="catalogo_db.php"&gt;
+      &lt;input type="text" name="q" placeholder="Buscar por nome..." value="&lt;?= esc(<span class="a">$q</span>) ?&gt;"/&gt;
+      &lt;select name="cat"&gt;
+        &lt;option value=""&gt;Todas as categorias&lt;/option&gt;
+        &lt;?php <span class="k">foreach</span>(<span class="a">$categorias</span> as <span class="a">$c</span>): ?&gt;
+          &lt;option value="&lt;?= (int)<span class="a">$c</span>[<span class="s">'id'</span>] ?&gt;" &lt;?= (<span class="a">$cid</span>==<span class="a">$c</span>[<span class="s">'id'</span>])?<span class="s">'selected'</span>:<span class="s">''</span> ?&gt;&gt;&lt;?= esc(<span class="a">$c</span>[<span class="s">'nome'</span>]) ?&gt;&lt;/option&gt;
+        &lt;?php <span class="k">endforeach</span>; ?&gt;
+      &lt;/select&gt;
+      &lt;button type="submit"&gt;Filtrar&lt;/button&gt;
+      &lt;a href="catalogo_db.php"&gt;Limpar&lt;/a&gt;
+    &lt;/form&gt;
+
+    &lt;div class="grid"&gt;
+      &lt;?php <span class="k">foreach</span>(<span class="a">$itens</span> as <span class="a">$i</span>): ?&gt;
+        &lt;div class="card"&gt;
+          &lt;h3&gt;&lt;?= esc(<span class="a">$i</span>[<span class="s">'nome'</span>]) ?&gt;
+            &lt;?php <span class="k">if</span>((int)<span class="a">$i</span>[<span class="s">'popular'</span>]): ?&gt;
+              &lt;span class="badge"&gt;Popular&lt;/span&gt;
+            &lt;?php <span class="k">endif</span>; ?&gt;
+          &lt;/h3&gt;
+          &lt;p class="price"&gt;&lt;?= preco(<span class="a">$i</span>[<span class="s">'preco'</span>]) ?&gt;&lt;/p&gt;
+          &lt;small&gt;Categoria: &lt;?= esc(<span class="a">$i</span>[<span class="s">'categoria'</span>]) ?&gt;&lt;/small&gt;
+        &lt;/div&gt;
+      &lt;?php <span class="k">endforeach</span>; ?&gt;
+    &lt;/div&gt;
+
+    &lt;p&gt;&lt;small&gt;Total: &lt;strong&gt;&lt;?= count(<span class="a">$itens</span>) ?&gt;&lt;/strong&gt; registro(s).&lt;/small&gt;&lt;/p&gt;
+
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+
+          <h3>5) Teste</h3>
+          <ol>
+            <li>Abra: <code>http://localhost/lanchonete/public/catalogo_db.php</code>.</li>
+            <li>Busque por “café” ou filtre por categoria para ver o <em>prepared statement</em> em ação.</li>
+          </ol>
+
+          <div class="note small">
+            <strong>Resumo:</strong> criamos o schema no MySQL, configuramos a conexão com PDO, executamos consultas com <em>prepared</em> e renderizamos o cardápio diretamente do banco.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atividades propostas -->
+    <section id="atividades">
+      <div class="card">
+        <div class="content">
+          <h2>Atividades práticas (para concluir na aula seguinte)</h2>
+          <ol>
+            <li><strong>Listar categorias:</strong> crie <code>public/categorias.php</code> para listar todas as categorias a partir do banco.</li>
+            <li><strong>Detalhe do item:</strong> crie <code>public/item.php?id=...</code> que mostra detalhes (nome, preço, categoria) de um item via SELECT parametrizado.</li>
+            <li><strong>Paginação (básica):</strong> adicione <code>LIMIT</code> e <code>OFFSET</code> em <code>catalogo_db.php</code> com links <em>Anterior/Próxima</em>.</li>
+          </ol>
+          <p class="small muted">Dica: sempre use <strong>prepared statements</strong> para parâmetros de entrada; nunca concatene valores diretamente no SQL.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno</h2>
+          <ul class="checklist" id="cap5Checklist">
+            <li><label><input type="checkbox" data-k="schema"> Criei o banco e as tabelas com UTF8MB4</label></li>
+            <li><label><input type="checkbox" data-k="conn"> Configurei <code>config/db.php</code> com PDO e testei a conexão</label></li>
+            <li><label><input type="checkbox" data-k="select"> Listei itens do cardápio via <code>SELECT</code> no MySQL</label></li>
+            <li><label><input type="checkbox" data-k="prepared"> Usei <em>prepared statements</em> para filtros (q/categoria)</label></li>
+            <li><label><input type="checkbox" data-k="activities"> Entreguei pelo menos 2 atividades propostas</label></li>
+          </ul>
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn ghost" href="capitulo04.html">← Cap. 04</a>
+            <a class="btn primary" href="capitulo06.html">Cap. 06 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questionário -->
+    <section id="quiz">
+      <div class="card">
+        <div class="content">
+          <h2>Questionário — Revisão do Capítulo 05</h2>
+
+          <!-- Q1 -->
+          <div class="mcq" data-id="q1" data-answer="c">
+            <h4>1) Qual DSN está correto para conectar ao MySQL “lanchonete” em localhost com UTF8MB4?</h4>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> <code>mysql://localhost/lanchonete?charset=utf8mb4</code></label>
+              <label><input type="radio" name="q1" value="b"> <code>pdo:mysql:dbname=lanchonete;host=127.0.0.1</code></label>
+              <label><input type="radio" name="q1" value="c"> <code>mysql:host=127.0.0.1;dbname=lanchonete;charset=utf8mb4</code></label>
+              <label><input type="radio" name="q1" value="d"> <code>mysql:host=127.0.0.1:lanchonete</code></label>
+              <label><input type="radio" name="q1" value="e"> <code>mysql:dbname=utf8mb4;lanchonete@127.0.0.1</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (C)</div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="mcq" data-id="q2" data-answer="e">
+            <h4>2) No XAMPP (padrão de desenvolvimento), as credenciais mais comuns do MySQL são:</h4>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> <code>admin / admin</code></label>
+              <label><input type="radio" name="q2" value="b"> <code>root / root</code></label>
+              <label><input type="radio" name="q2" value="c"> <code>user / 123456</code></label>
+              <label><input type="radio" name="q2" value="d"> <code>mysql / mysql</code></label>
+              <label><input type="radio" name="q2" value="e"> <code>root / (sem senha)</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="mcq" data-id="q3" data-answer="b">
+            <h4>3) Para que erros SQL gerem exceções em PDO, devemos configurar:</h4>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> <code>PDO::ATTR_DEFAULT_FETCH_MODE</code></label>
+              <label><input type="radio" name="q3" value="b"> <code>PDO::ATTR_ERRMODE = PDO::ERRMODE_EXCEPTION</code></label>
+              <label><input type="radio" name="q3" value="c"> <code>PDO::ATTR_EMULATE_PREPARES = true</code></label>
+              <label><input type="radio" name="q3" value="d"> <code>PDO::NULL_NATURAL</code></label>
+              <label><input type="radio" name="q3" value="e"> <code>PDO::FETCH_OBJ</code></label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (B)</div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="mcq" data-id="q4" data-answer="a">
+            <h4>4) O que é mais indicado para prevenir SQL Injection ao filtrar por nome?</h4>
+            <div class="options">
+              <label><input type="radio" name="q4" value="a"> Usar <strong>prepared statements</strong> com <code>LIKE :q</code></label>
+              <label><input type="radio" name="q4" value="b"> Concatenar a variável direto no SQL</label>
+              <label><input type="radio" name="q4" value="c"> Converter a string para maiúsculas</label>
+              <label><input type="radio" name="q4" value="d"> Usar <code>echo</code> antes do <code>SELECT</code></label>
+              <label><input type="radio" name="q4" value="e"> Remover espaços da entrada</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (A)</div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="mcq" data-id="q5" data-answer="d">
+            <h4>5) Qual combinação é recomendada para suportar acentuação corretamente?</h4>
+            <div class="options">
+              <label><input type="radio" name="q5" value="a"> <code>latin1</code> no banco e <code>UTF-8</code> no PHP</label>
+              <label><input type="radio" name="q5" value="b"> <code>UTF-8</code> no banco e <code>latin1</code> no DSN</label>
+              <label><input type="radio" name="q5" value="c"> Qualquer charset, desde que tenha COLLATE</label>
+              <label><input type="radio" name="q5" value="d"> <code>utf8mb4</code> no banco e <code>charset=utf8mb4</code> no DSN</label>
+              <label><input type="radio" name="q5" value="e"> <code>ascii</code> em tudo</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (D)</div>
+          </div>
+
+          <!-- Q6 -->
+          <div class="mcq" data-id="q6" data-answer="e">
+            <h4>6) Em qual engine do MySQL é mais comum trabalhar com chaves estrangeiras?</h4>
+            <div class="options">
+              <label><input type="radio" name="q6" value="a"> MyISAM</label>
+              <label><input type="radio" name="q6" value="b"> MEMORY</label>
+              <label><input type="radio" name="q6" value="c"> CSV</label>
+              <label><input type="radio" name="q6" value="d"> ARCHIVE</label>
+              <label><input type="radio" name="q6" value="e"> InnoDB</label>
+            </div>
+            <div class="actions">
+              <button class="btn dark send">Enviar resposta</button>
+              <button class="btn ghost key">Ver gabarito</button>
+            </div>
+            <div class="feedback"></div>
+            <div class="answer small"><strong>Gabarito:</strong> (E)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximos passos -->
+    <section id="proximos">
+      <div class="card">
+        <div class="content">
+          <h2>Próximos passos</h2>
+          <p>No <strong>Capítulo 06</strong>, você implementará um <strong>CRUD completo de Bebidas</strong> usando
+            <em>prepared statements</em>, validação, feedback ao usuário e boas práticas anti-SQLi/XSS.</p>
+          <div class="actions">
+            <a class="btn primary" href="capitulo06.html">Ir para o Capítulo 06 →</a>
+            <a class="btn ghost" href="capitulo04.html">← Voltar ao Capítulo 04</a>
+            <a class="btn ghost" href="index.html">Índice</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Capítulo 05</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="capitulo04.html">Cap. 04</a>
+          <a href="capitulo06.html">Cap. 06</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Navbar mobile toggle =====
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // ===== Dropdown de capítulos =====
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // ===== Download deste capítulo como HTML =====
+    const downloadBtn = document.getElementById('downloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', () => {
+        const doctype = '<!DOCTYPE html>\\n';
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'capitulo05.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ===== Checklist com persistência local =====
+    (function(){
+      const list = document.getElementById('cap5Checklist');
+      if(!list) return;
+      const KEY = 'pw2_cap5_checklist';
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            const k = cb.dataset.k;
+            cb.checked = !!data[k];
+          });
+        }catch(e){}
+      }
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.dataset.k] = cb.checked; });
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      list.addEventListener('change', save);
+      const clearBtn = document.getElementById('clearChecklist');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          localStorage.removeItem(KEY);
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        });
+      }
+      load();
+    })();
+
+    // ===== MCQ Interativo =====
+    (function(){
+      document.querySelectorAll('.mcq').forEach(box => {
+        const qid = box.dataset.id;
+        const answer = (box.dataset.answer || '').trim().toLowerCase();
+        const feedback = box.querySelector('.feedback');
+        const answerEl = box.querySelector('.answer');
+        const name = qid;
+
+        const sendBtn = box.querySelector('.send');
+        if(sendBtn){
+          sendBtn.addEventListener('click', ()=>{
+            const choice = box.querySelector(`input[name="${name}"]:checked`);
+            if(!choice){
+              feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+              feedback.className = 'feedback err';
+              return;
+            }
+            const got = (choice.value || '').trim().toLowerCase();
+            if(got === answer){
+              feedback.textContent = '✔ Resposta correta!';
+              feedback.className = 'feedback ok';
+            }else{
+              feedback.textContent = '✖ Resposta incorreta. Tente novamente.';
+              feedback.className = 'feedback err';
+            }
+          });
+        }
+
+        const keyBtn = box.querySelector('.key');
+        if(keyBtn){
+          keyBtn.addEventListener('click', ()=>{
+            answerEl.style.display = answerEl.style.display === 'block' ? 'none' : 'block';
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

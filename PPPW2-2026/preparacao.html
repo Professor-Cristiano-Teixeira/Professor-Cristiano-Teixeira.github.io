@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Preparação do Ambiente — XAMPP no Windows | Programação Web 2</title>
+  <meta name="description" content="Passo a passo para preparar o ambiente no Windows: instalar XAMPP, configurar Apache/MySQL, criar pasta do projeto em htdocs e testar localhost/phpMyAdmin."/>
+  <style>
+    :root{
+      --red-700:#c62828;
+      --red-800:#b71c1c;
+      --gray-900:#212121;
+      --gray-800:#424242;
+      --gray-700:#616161;
+      --gray-200:#eeeeee;
+      --gray-100:#f5f5f5;
+      --text:#1b1b1b;
+      --link:#0b57d0;
+      --maxw:1180px;
+      --radius:12px;
+      --shadow:0 6px 20px rgba(0,0,0,.08);
+      --shadow-sm:0 2px 8px rgba(0,0,0,.06);
+      --code-bg:#0f172a;
+      --code-fg:#e2e8f0;
+      --ok:#1b5e20;
+      --err:#b71c1c;
+      --warn:#f57c00;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#fff;color:var(--text);font:16px/1.6 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    a{color:var(--link);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* ===== Navbar (padrão da apostila) ===== */
+    header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid var(--gray-200)}
+    .nav{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 20px}
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--red-800)}
+    .brand .logo{
+      width:36px;height:36px;border-radius:8px;
+      background:linear-gradient(135deg,var(--red-700),var(--red-800));
+      display:inline-flex;align-items:center;justify-content:center;color:#fff;
+      font-weight:700;box-shadow:var(--shadow-sm)
+    }
+    .brand span{font-weight:700;font-size:18px;letter-spacing:.2px}
+
+    .menu{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .menu a,.menu button{
+      appearance:none;border:0;background:var(--red-700);color:#fff;text-decoration:none;
+      padding:10px 14px;border-radius:10px;font-weight:600;transition:.2s ease;cursor:pointer
+    }
+    .menu a:hover,.menu button:hover{background:var(--red-800)}
+    .hamburger{
+      display:none;background:var(--red-700);color:#fff;border:0;border-radius:10px;
+      padding:10px 12px;font-weight:700;cursor:pointer
+    }
+    .hamburger:focus{outline:3px solid #ffcccb;outline-offset:2px}
+
+    .dropdown{position:relative}
+    .dropdown-toggle{
+      cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+      background:var(--red-700);color:#fff;border-radius:10px;padding:10px 14px;border:0
+    }
+    .dropdown-menu{
+      position:absolute;right:0;top:calc(100% + 8px);min-width:320px;max-height:70vh;overflow:auto;
+      background:#fff;border:1px solid var(--gray-200);border-radius:12px;box-shadow:var(--shadow);
+      padding:10px;display:none
+    }
+    .dropdown.open .dropdown-menu{display:block}
+    .dropdown-menu a{
+      display:flex;align-items:center;justify-content:space-between;
+      background:transparent;border-radius:8px;padding:8px 10px;margin:2px 0;
+      color:var(--text);font-weight:500;border:1px solid transparent
+    }
+    .dropdown-menu a:hover{background:var(--gray-100);border-color:var(--gray-200)}
+    .pill{font-size:12px;color:#fff;background:var(--red-700);padding:2px 8px;border-radius:999px}
+
+    /* ===== Layout (padrão da apostila) ===== */
+    .hero{max-width:var(--maxw);margin:22px auto;padding:18px 20px 0 20px;
+      display:grid;grid-template-columns:1.15fr .85fr;gap:24px}
+    .card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card .content{padding:22px}
+
+    h1{margin:0 0 6px 0;font-size:28px;line-height:1.25}
+    h2{margin:0 0 10px 0;font-size:22px}
+    h3{margin:14px 0 6px 0;font-size:18px}
+    h4{margin:12px 0 6px 0;font-size:16px}
+    .subtitle{color:var(--gray-700);margin-top:0}
+
+    .badges{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 6px 0}
+    .badge{background:var(--gray-100);border:1px solid var(--gray-200);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
+
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .btn{
+      appearance:none;border:0;border-radius:10px;padding:10px 14px;font-weight:700;
+      cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px
+    }
+    .btn.dark{background:var(--gray-800);color:#fff}
+    .btn.dark:hover{filter:brightness(.95)}
+    .btn.primary{background:var(--red-700);color:#fff}
+    .btn.primary:hover{background:var(--red-800)}
+    .btn.ghost{background:transparent;border:2px solid var(--gray-800);color:var(--gray-800)}
+    .btn.ghost:hover{background:var(--gray-100)}
+
+    .muted{color:var(--gray-700)}
+    .small{font-size:13px}
+    main{max-width:var(--maxw);margin:0 auto;padding:8px 20px 40px 20px}
+    section{margin-top:24px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .note{border-left:4px solid var(--red-700);background:#fff6f6;padding:10px 12px;border-radius:8px}
+    .okbox{border-left:4px solid var(--ok);background:#f1fff4;padding:10px 12px;border-radius:8px}
+    .warnbox{border-left:4px solid var(--warn);background:#fff8e1;padding:10px 12px;border-radius:8px}
+
+    /* ===== Code blocks ===== */
+    pre{background:var(--code-bg);color:var(--code-fg);padding:14px;border-radius:10px;overflow:auto;border:1px solid #0b1220;margin:10px 0}
+    code{font-family:Consolas,"Cascadia Code",Menlo,Monaco,"Courier New",monospace;font-size:14px;white-space:pre}
+
+    /* ===== Checklist ===== */
+    .checklist{border:1px solid var(--gray-200);border-radius:10px;padding:12px;background:#fff;box-shadow:var(--shadow-sm)}
+    .checklist li{margin:6px 0;list-style:none}
+    .checklist input[type="checkbox"]{margin-right:8px;transform:scale(1.15)}
+    .progress{
+      height:10px;background:var(--gray-200);border-radius:999px;overflow:hidden;margin-top:10px
+    }
+    .progress > div{height:100%;width:0%;background:var(--red-700);transition:width .2s ease}
+
+    .sep{height:1px;background:var(--gray-200);margin:14px 0}
+
+    footer{border-top:1px solid var(--gray-200);padding:18px 20px;background:#fff;color:var(--gray-700)}
+    .nav-footer{display:flex;gap:10px;flex-wrap:wrap}
+
+    /* ===== Responsivo ===== */
+    @media (max-width:1024px){.hero{grid-template-columns:1fr}}
+    @media (max-width:768px){
+      .menu{display:none;width:100%;flex-direction:column;align-items:stretch;padding:10px 0}
+      .menu a,.menu button{border-radius:8px;justify-content:center}
+      .hamburger{display:inline-flex}
+      .menu.show{display:flex}
+      .grid-2{grid-template-columns:1fr}
+      .dropdown-menu{position:static;box-shadow:none;border-radius:10px;border:1px dashed var(--gray-200);max-height:unset}
+    }
+  </style>
+</head>
+
+<body id="top">
+  <!-- Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <a class="brand" href="index.html">
+        <span class="logo" aria-hidden="true">PW2</span>
+        <span>Programação Web 2</span>
+      </a>
+
+      <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+      <div class="menu" id="mainMenu">
+        <a href="index.html">Início</a>
+        <a href="#baixar">Baixar XAMPP</a>
+        <a href="#instalar">Instalar</a>
+        <a href="#testar">Testar</a>
+        <a href="#problemas">Problemas comuns</a>
+        <a href="#checklist">Checklist</a>
+
+        <div class="dropdown" id="chaptersDropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+          <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+            <a href="capitulo01.html">Capítulo 01 <span class="pill">B1</span></a>
+            <a href="capitulo04.html">Capítulo 04 <span class="pill">B1</span></a>
+            <a href="capitulo08.html">Capítulo 08 <span class="pill">B2</span></a>
+            <a href="capitulo12.html">Capítulo 12 <span class="pill">B3</span></a>
+            <a href="capitulo16.html">Capítulo 16 <span class="pill">B4</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card">
+      <div class="content">
+        <h1>Preparação do Ambiente (Windows) — XAMPP + PHP + MySQL</h1>
+        <p class="subtitle">
+          Siga este passo a passo para configurar o seu computador em casa e conseguir executar os exercícios da apostila:
+          instalar o <strong>XAMPP</strong>, iniciar <strong>Apache</strong> e <strong>MySQL/MariaDB</strong>, criar a pasta do projeto em
+          <code>htdocs</code>, e testar <code>localhost</code>.
+        </p>
+
+        <div class="badges">
+          <span class="badge">Windows 10/11</span>
+          <span class="badge">Tempo: ~20–40 min</span>
+          <span class="badge">Pré-requisito: navegador + editor</span>
+        </div>
+
+        <div class="actions">
+          <button class="btn dark" id="downloadBtn">⬇ Baixar esta página (HTML)</button>
+          <a class="btn primary" href="https://www.apachefriends.org/download.html" target="_blank" rel="noopener noreferrer">⬇ Download XAMPP (oficial)</a>
+          <a class="btn ghost" href="index.html">↩ Voltar ao Índice</a>
+        </div>
+
+        <p class="small muted" style="margin-top:10px">
+          Dica: esta página usa o link oficial do Apache Friends para download do XAMPP.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="content">
+        <h2>Antes de começar</h2>
+        <ul class="small">
+          <li>Tenha um editor (ex.: VS Code) e um navegador (Chrome/Edge/Firefox).</li>
+          <li>Use uma pasta de projeto dentro de <code>C:\xampp\htdocs\</code> (padrão do XAMPP).</li>
+          <li>Se aparecer pergunta do Firewall do Windows, permita o Apache (rede privada).</li>
+        </ul>
+        <div class="warnbox small">
+          <strong>Importante:</strong> XAMPP é indicado para desenvolvimento local (seu computador). Evite expor portas na internet (port forwarding).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Baixar -->
+    <section id="baixar">
+      <div class="card">
+        <div class="content">
+          <h2>1) Baixar o XAMPP (link oficial)</h2>
+          <ol>
+            <li>Acesse a página oficial de downloads do XAMPP.</li>
+            <li>Baixe a versão para Windows (64-bit) indicada no site.</li>
+            <li>Guarde o instalador na pasta “Downloads”.</li>
+          </ol>
+
+          <div class="actions">
+            <a class="btn primary" href="https://www.apachefriends.org/download.html" target="_blank" rel="noopener noreferrer">Abrir Downloads do XAMPP</a>
+          </div>
+
+          <div class="note small">
+            O XAMPP é um pacote que inclui Apache, MariaDB (MySQL), PHP, phpMyAdmin e outros componentes, e o download é feito no site oficial do Apache Friends.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instalar -->
+    <section id="instalar">
+      <div class="card">
+        <div class="content">
+          <h2>2) Instalar o XAMPP no Windows</h2>
+
+          <h3>Passo a passo recomendado</h3>
+          <ol>
+            <li>Execute o instalador do XAMPP (duplo clique no arquivo baixado).</li>
+            <li>Se o Windows pedir permissão, clique em <strong>Sim</strong> (UAC).</li>
+            <li>Componentes: mantenha o padrão (Apache, MySQL/MariaDB, PHP, phpMyAdmin).</li>
+            <li>Pasta de instalação: use <code>C:\xampp</code> (recomendado).</li>
+            <li>Conclua a instalação e abra o <strong>XAMPP Control Panel</strong>.</li>
+          </ol>
+
+          <div class="okbox small">
+            Em muitos PCs, durante a instalação/início do Apache, o Windows pode pedir permissão no Firewall — clique em <strong>Allow access / Permitir acesso</strong> (rede privada).
+          </div>
+
+          <h3>Iniciar Apache e MySQL (MariaDB)</h3>
+          <ol>
+            <li>No XAMPP Control Panel, clique em <strong>Start</strong> no <strong>Apache</strong>.</li>
+            <li>Clique em <strong>Start</strong> no <strong>MySQL</strong>.</li>
+            <li>Se ambos ficarem com indicador “running”, está ok.</li>
+          </ol>
+
+          <p class="small muted">
+            Portas padrão comuns: Apache usa 80/443; MySQL usa 3306 (podem variar se houver conflito). 
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testar -->
+    <section id="testar">
+      <div class="card">
+        <div class="content">
+          <h2>3) Testar se está funcionando</h2>
+
+          <h3>3.1) Teste do Apache (servidor web)</h3>
+          <ol>
+            <li>Abra o navegador e acesse: <code>http://localhost/</code></li>
+            <li>Você deve ver a página inicial do XAMPP (ou dashboard).</li>
+          </ol>
+
+          <h3>3.2) Teste do phpMyAdmin (banco)</h3>
+          <ol>
+            <li>Acesse: <code>http://localhost/phpmyadmin/</code></li>
+            <li>Se abrir, o MySQL/MariaDB está funcionando.</li>
+          </ol>
+
+          <h3>3.3) Criar pasta do projeto no htdocs</h3>
+          <p>Crie a pasta do seu projeto dentro de:</p>
+          <pre><code>C:\xampp\htdocs\lanchonete</code></pre>
+
+          <p>Crie um arquivo para teste:</p>
+          <pre><code>C:\xampp\htdocs\lanchonete\index.php</code></pre>
+
+          <p>Conteúdo de teste (PHP):</p>
+          <pre><code>&lt;?php
+echo "Olá! XAMPP está funcionando.";
+?&gt;</code></pre>
+
+          <p>Agora acesse no navegador:</p>
+          <pre><code>http://localhost/lanchonete/</code></pre>
+
+          <div class="okbox small">
+            Se você viu a mensagem no navegador, seu ambiente está pronto para seguir a apostila.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Configurações úteis -->
+    <section id="config">
+      <div class="card">
+        <div class="content">
+          <h2>4) Configurações úteis (recomendadas)</h2>
+
+          <h3>4.1) Executar o XAMPP Control Panel como Administrador (se der erro)</h3>
+          <ol>
+            <li>Feche o XAMPP Control Panel.</li>
+            <li>Procure “XAMPP Control Panel” no menu iniciar.</li>
+            <li>Clique com o botão direito → <strong>Executar como administrador</strong>.</li>
+          </ol>
+
+          <h3>4.2) Editor de código</h3>
+          <ul>
+            <li>Recomendado: Visual Studio Code (ou qualquer editor que você prefira).</li>
+            <li>Abra a pasta <code>C:\xampp\htdocs\lanchonete</code> no seu editor.</li>
+          </ul>
+
+          <h3>4.3) Organização de arquivos</h3>
+          <p class="small muted">Sugestão para acompanhar a apostila:</p>
+          <pre><code>C:\xampp\htdocs\lanchonete\
+  public\
+  src\
+  assets\
+  database\
+  README.md</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problemas comuns -->
+    <section id="problemas">
+      <div class="card">
+        <div class="content">
+          <h2>5) Problemas comuns (e como resolver)</h2>
+
+          <h3>5.1) Apache não inicia (porta 80 ocupada)</h3>
+          <p>
+            Isso acontece quando outro serviço está usando a porta 80 (frequente em Windows com IIS/World Wide Web Publishing Service).
+          </p>
+
+          <h4>Solução A — desativar IIS (mais comum)</h4>
+          <ol>
+            <li>Abra “Ativar ou desativar recursos do Windows”.</li>
+            <li>Desmarque <strong>Internet Information Services (IIS)</strong> / <strong>World Wide Web Services</strong> (se estiver ativo).</li>
+            <li>Reinicie o PC e tente iniciar Apache novamente.</li>
+          </ol>
+
+          <h4>Solução B — mudar a porta do Apache (alternativa rápida)</h4>
+          <ol>
+            <li>No XAMPP Control Panel: Apache → <strong>Config</strong> → <strong>httpd.conf</strong></li>
+            <li>Procure por <code>Listen 80</code> e troque para <code>Listen 8080</code></li>
+            <li>Procure por <code>ServerName localhost:80</code> e troque para <code>ServerName localhost:8080</code></li>
+            <li>Salve, reinicie Apache e acesse <code>http://localhost:8080/</code></li>
+          </ol>
+
+          <div class="warnbox small">
+            Se mudar para 8080, lembre que o endereço terá “:8080” nas URLs.
+          </div>
+
+          <div class="sep"></div>
+
+          <h3>5.2) Firewall bloqueando Apache</h3>
+          <ol>
+            <li>Quando o Windows perguntar, clique em <strong>Permitir acesso</strong> para o Apache.</li>
+            <li>Preferencialmente, marque apenas <strong>Rede privada</strong>.</li>
+          </ol>
+
+          <div class="sep"></div>
+
+          <h3>5.3) phpMyAdmin abre, mas mostra aviso de root sem senha</h3>
+          <p class="small">
+            Em ambiente local (somente no seu PC), é comum o root não ter senha por padrão.
+            Se você quiser “endurecer” mesmo em casa, crie uma senha e ajuste o phpMyAdmin.
+          </p>
+
+          <div class="sep"></div>
+
+          <h3>5.4) Instalador reclama de dependências (Visual C++ Runtime)</h3>
+          <p>
+            Se o Windows reclamar de “Visual C++ Runtime”/“MSVC”, instale o pacote mais recente do Visual C++ Redistributable (v14) pela Microsoft.
+          </p>
+          <div class="actions">
+            <a class="btn ghost" href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank" rel="noopener noreferrer">
+              Abrir página oficial do VC++ Redistributable (Microsoft)
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section id="checklist">
+      <div class="card">
+        <div class="content">
+          <h2>Checklist do aluno (Preparação concluída)</h2>
+
+          <ul class="checklist" id="prepChecklist">
+            <li><label><input type="checkbox" data-k="download"> Baixei o XAMPP pelo site oficial</label></li>
+            <li><label><input type="checkbox" data-k="install"> Instalei em <code>C:\xampp</code></label></li>
+            <li><label><input type="checkbox" data-k="start"> Iniciei Apache e MySQL no XAMPP Control Panel</label></li>
+            <li><label><input type="checkbox" data-k="localhost"> Acessei <code>http://localhost/</code> e abriu</label></li>
+            <li><label><input type="checkbox" data-k="phpmyadmin"> Acessei <code>http://localhost/phpmyadmin/</code> e abriu</label></li>
+            <li><label><input type="checkbox" data-k="project"> Criei <code>C:\xampp\htdocs\lanchonete</code> com <code>index.php</code></label></li>
+            <li><label><input type="checkbox" data-k="test"> Testei <code>http://localhost/lanchonete/</code> e funcionou</label></li>
+          </ul>
+
+          <div class="progress" aria-label="Progresso do checklist">
+            <div id="progressBar"></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn dark" id="clearChecklist">Limpar checklist</button>
+            <a class="btn primary" href="capitulo01.html">Ir para o Capítulo 01</a>
+            <a class="btn ghost" href="index.html">Voltar ao Índice</a>
+          </div>
+
+          <p class="small muted" style="margin-top:10px">
+            Se algum item não funcionar, volte na seção “Problemas comuns” e siga as soluções.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer>
+    <div style="max-width:var(--maxw);margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© Programação Web 2 — Preparação do Ambiente (Windows)</div>
+        <div class="nav-footer">
+          <a href="#top">▲ Topo</a>
+          <a href="index.html">Índice</a>
+          <a href="capitulo01.html">Cap. 01</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Navbar mobile toggle =====
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    hamburgerBtn?.addEventListener('click', () => {
+      const isOpen = mainMenu.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // ===== Dropdown capítulos =====
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const toggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // ===== Download desta página como HTML =====
+    document.getElementById('downloadBtn')?.addEventListener('click', () => {
+      const doctype = '<!DOCTYPE html>\\n';
+      const html = document.documentElement.outerHTML;
+      const blob = new Blob([doctype + html], {type: 'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'preparacao.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // ===== Checklist com persistência + barra de progresso =====
+    (function(){
+      const list = document.getElementById('prepChecklist');
+      const bar = document.getElementById('progressBar');
+      if(!list || !bar) return;
+
+      const KEY = 'pw2_preparacao_checklist';
+
+      function calcProgress(){
+        const cbs = Array.from(list.querySelectorAll('input[type="checkbox"]'));
+        const total = cbs.length;
+        const done = cbs.filter(cb => cb.checked).length;
+        const pct = total ? Math.round((done/total)*100) : 0;
+        bar.style.width = pct + '%';
+      }
+
+      function load(){
+        try{
+          const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+          list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = !!data[cb.dataset.k]);
+        }catch(e){}
+        calcProgress();
+      }
+
+      function save(){
+        const data = {};
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => data[cb.dataset.k] = cb.checked);
+        localStorage.setItem(KEY, JSON.stringify(data));
+        calcProgress();
+      }
+
+      list.addEventListener('change', save);
+
+      document.getElementById('clearChecklist')?.addEventListener('click', ()=>{
+        localStorage.removeItem(KEY);
+        list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        calcProgress();
+      });
+
+      load();
+    })();
+  </script>
+</body>
+</html>
