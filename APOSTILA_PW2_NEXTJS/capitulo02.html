@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 02 — Componentes, Props, Estado e Eventos</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --pw-red:#b30000;            /* menus em vermelho */
+      --pw-red-dark:#8f0000;
+      --pw-gray:#3f3f3f;           /* botões destaque em cinza escuro */
+      --pw-gray-dark:#2f2f2f;
+      --pw-bg:#ffffff;             /* tema claro */
+      --pw-muted:#6c757d;
+      --pw-border:#e9ecef;
+      --pw-link:#b30000;
+      --code-bg:#1e1e1e;           /* VSCode-like */
+    }
+
+    body{ background:var(--pw-bg); }
+    a{ color:var(--pw-link); }
+    a:hover{ color:var(--pw-red-dark); }
+
+    /* Navbar */
+    .navbar-pw{ background:var(--pw-red); }
+    .navbar-pw .navbar-brand,
+    .navbar-pw .nav-link,
+    .navbar-pw .navbar-toggler{ color:#fff; }
+    .navbar-pw .nav-link:hover,
+    .navbar-pw .nav-link:focus{ color:#ffe6e6; }
+    .navbar-pw .dropdown-item:active{ background:var(--pw-red); }
+
+    /* Buttons */
+    .btn-pw{
+      background:var(--pw-gray);
+      border-color:var(--pw-gray);
+      color:#fff;
+    }
+    .btn-pw:hover,
+    .btn-pw:focus{
+      background:var(--pw-gray-dark);
+      border-color:var(--pw-gray-dark);
+      color:#fff;
+    }
+
+    /* Sections */
+    .chapter-hero{
+      background:linear-gradient(180deg, rgba(179,0,0,.08), rgba(179,0,0,0));
+      border-bottom:1px solid var(--pw-border);
+    }
+
+    .card-soft{
+      border:1px solid var(--pw-border);
+      border-radius:14px;
+    }
+
+    /* Code blocks */
+    pre[class*="language-"]{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 8px 26px rgba(0,0,0,.10);
+      margin: .75rem 0 1rem;
+    }
+    code[class*="language-"]{ font-size: .92rem; }
+    pre{ background: var(--code-bg) !important; }
+
+    /* Quiz */
+    .quiz-card{ border:1px solid var(--pw-border); border-radius:14px; }
+    .quiz-feedback{ min-height: 42px; }
+
+    /* Checklist */
+    .checklist-item{ border:1px solid var(--pw-border); border-radius:12px; padding:10px 12px; }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:10px; z-index:2000; }
+  </style>
+</head>
+<body>
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- NAVBAR (responsiva com hamburguer) -->
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>APOSTILA PW II
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(1) brightness(2);"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html#sumario"><i class="bi bi-list-check me-1"></i>Sumário</a></li>
+
+          <!-- Dropdown com capítulos -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book me-1"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">1º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Setup do projeto</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Componentes, Props, Estado e Eventos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Listas/Condicional + Grid Bootstrap</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Rotas e Navegação (Next.js)</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">2º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Bootstrap avançado e customização</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Formulários e validação</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Consumo de API + estados assíncronos</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Testes (Jest + RTL)</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">3º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — SSG, SSR e hidratação</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Rotas dinâmicas com SSG</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — SSR para dados variáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Hidratação e interatividade</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">4º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Testes de interface (RTL avançado)</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Builds e releases (Next.js)</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Docker e conteinerização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto final integrador</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="#questionario"><i class="bi bi-ui-checks me-1"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-link" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 2 — Componentes, Props, Estado e Eventos (Lista de Bebidas + “Adicionar ao carrinho”)</h1>
+          <p class="mb-2"><strong>Carga:</strong> 2 aulas × 100 min</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Sistema da Lanchonete (Admin) iniciado no Cap. 1</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Next.js (App Router) + React, Bootstrap 5 + Bootstrap Icons, Git</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2">
+            <li>Entender e aplicar JSX, componentes funcionais, props e estado (useState).</li>
+            <li>Lidar com eventos (clique, mudança de estado) e composição de componentes.</li>
+            <li>Renderizar uma lista de produtos (bebidas) com cards e botão “Adicionar ao carrinho” (estado local da página).</li>
+            <li>Praticar commits organizados e manter padrão de código com ESLint/Prettier.</li>
+          </ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades trabalhadas</strong></p>
+            <ul class="mb-0 small">
+              <li><strong>Competências:</strong> (1) Elaborar interfaces web; (2) Aplicar práticas de desenvolvimento de sistemas.</li>
+              <li><strong>Habilidades:</strong> 1.1 (SPAs com framework frontend), 1.2 (Framework CSS), 1.3 (interação), 4 (versionamento e boas práticas iniciais).</li>
+            </ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo01.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 01</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 2)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <p class="mb-2"><strong>Aula 1 (140 min) — Teoria + Componentes e Props + Estrutura da Lista</strong></p>
+          <p class="mb-1">Teoria (35–45 min): JSX, componentes funcionais, props, eventos.</p>
+          <p class="mb-3">Prática (85–95 min): Criar fonte de dados de bebidas, ProductCard e renderizar a lista na página /cardápio.</p>
+          <p class="mb-2"><strong>Aula 2 (140 min) — Estado e Interação + Feedback Visual</strong></p>
+          <p class="mb-1">Teoria (20–30 min): useState, estado local, elevação de estado (visão geral), boas práticas de handlers.</p>
+          <p class="mb-3">Prática (100–110 min): Adicionar estado do carrinho na página, botão “Adicionar”, alerta de sucesso e botão flutuante com contador.</p>
+          <p class="mb-0"><strong>Entrega rápida (10 min):</strong> Print da listagem de bebidas + print do alerta/contador após adicionar itens, com link do repositório.</p>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+
+        <h3 class="h5 fw-bold mt-4">1) JSX e Componentes</h3>
+        <ul>
+          <li>JSX é uma sintaxe parecida com HTML usada dentro do JavaScript para descrever a UI. Por baixo, ele vira chamadas React.createElement.</li>
+          <li>Componente funcional é uma função que recebe props e retorna JSX. Ex.:</li>
+        </ul>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>function Titulo({ texto }) {
+    return (
+    &lt;h1&gt;{texto}&lt;/h1&gt;
+    );
+}</code></pre>
+        <ul>
+          <li>Composição: montar a tela combinando componentes menores (reutilizáveis).</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">2) Props (Propriedades)</h3>
+        <ul>
+          <li>Props são somente leitura (imutáveis para o componente filho).</li>
+          <li>Passamos dados e funções para componentes via props:</li>
+        </ul>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>&lt;ProductCard item={bebida} onAdd={() =&gt; handleAdd(bebida)} /&gt;</code></pre>
+        <ul>
+          <li>Desestruturação ajuda a escrever menos: function ProductCard({ item, onAdd }) { ... }.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">3) Estado (useState)</h3>
+        <ul>
+          <li>Estado guarda informações que mudam ao longo do tempo (ex.: contador do carrinho).</li>
+          <li>const [valor, setValor] = useState(estadoInicial);</li>
+          <li>Atualizações de estado disparam re-render. O novo valor deve ser calculado a partir do anterior quando depender dele:</li>
+        </ul>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>setContador((anterior) =&gt; anterior + 1);</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4) Eventos</h3>
+        <ul>
+          <li>Eventos são funções que rodam em resposta a ações do usuário (onClick, onChange, etc.):</li>
+        </ul>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>&lt;button onClick={handleClick}&gt;Adicionar&lt;/button&gt;</code></pre>
+        <ul>
+          <li>Não invoque a função diretamente no JSX (não use handleClick() sem necessidade); passe a referência: onClick={handleClick} ou onClick={() =&gt; handleClick(id)}.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">5) Elevação de Estado (visão geral)</h3>
+        <ul>
+          <li>Quando vários componentes precisam do mesmo estado, suba o estado para o ancestral comum e passe props para os filhos (tema aprofundado nos próximos capítulos).</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">6) Client Components no Next.js</h3>
+        <ul>
+          <li>Componentes que usam estado e efeitos (como useState) precisam declarar no topo:</li>
+        </ul>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>'use client';</code></pre>
+        <p class="mb-0">Isso indica ao Next.js que o componente roda no cliente (navegador).</p>
+      </section>
+
+      <!-- Questionário (transformado em múltipla escolha dinâmico) -->
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+
+        <div class="vstack gap-3" id="quizContainer">
+
+          <div class="quiz-card bg-white p-4" data-qid="q1" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">1. O que é JSX?</h3>
+              <span class="badge text-bg-light border">Questão 1/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1A" value="A"><label class="form-check-label" for="q1A">Uma linguagem de programação que substitui o JavaScript no React.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1B" value="B"><label class="form-check-label" for="q1B">Uma sintaxe semelhante a HTML usada dentro do JavaScript para descrever interfaces. É transformada em chamadas de funções do React.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1C" value="C"><label class="form-check-label" for="q1C">Um arquivo CSS padrão usado para estilos globais.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1D" value="D"><label class="form-check-label" for="q1D">Um banco de dados embutido do Next.js para armazenar componentes.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1E" value="E"><label class="form-check-label" for="q1E">Um comando do Git para criar branches.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q1')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q1')" disabled id="btnKey-q1">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q1" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q2" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">2. Qual a diferença entre props e estado?</h3>
+              <span class="badge text-bg-light border">Questão 2/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2A" value="A"><label class="form-check-label" for="q2A">Props e estado são a mesma coisa; apenas nomes diferentes.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2B" value="B"><label class="form-check-label" for="q2B">Props são sempre mutáveis, e estado é sempre imutável.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2C" value="C"><label class="form-check-label" for="q2C">Props são valores fornecidos de fora (somente leitura para o componente). Estado é interno ao componente e mutável via setState.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2D" value="D"><label class="form-check-label" for="q2D">Estado é passado do pai para o filho, e props ficam apenas no pai.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2E" value="E"><label class="form-check-label" for="q2E">Props existem só no Next.js; estado existe só no React puro.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q2')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q2')" disabled id="btnKey-q2">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q2" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q3" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">3. Por que não devemos modificar props dentro do componente?</h3>
+              <span class="badge text-bg-light border">Questão 3/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3A" value="A"><label class="form-check-label" for="q3A">Porque o JavaScript não permite alterar objetos recebidos por parâmetros.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3B" value="B"><label class="form-check-label" for="q3B">Porque alterar props melhora a performance e evita re-render.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3C" value="C"><label class="form-check-label" for="q3C">Porque props só funcionam em componentes de classe, não em funcionais.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3D" value="D"><label class="form-check-label" for="q3D">Props são imutáveis para garantir previsibilidade e fluxo de dados unidirecional.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3E" value="E"><label class="form-check-label" for="q3E">Porque props são sempre números e não podem mudar.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q3')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q3')" disabled id="btnKey-q3">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q3" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q4" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">4. Como declarar e atualizar um estado num componente funcional?</h3>
+              <span class="badge text-bg-light border">Questão 4/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4A" value="A"><label class="form-check-label" for="q4A">const [valor, setValor] = useState(inicial); e atualizar com setValor(novoValor) ou setValor(prev =&gt; prev + 1).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4B" value="B"><label class="form-check-label" for="q4B">Criando uma variável global e incrementando com ++.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4C" value="C"><label class="form-check-label" for="q4C">Chamando git commit -m para salvar o estado.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4D" value="D"><label class="form-check-label" for="q4D">Colocando o valor dentro de props e alterando no filho.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4E" value="E"><label class="form-check-label" for="q4E">Somente usando useEffect para alterar valores na UI.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q4')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q4')" disabled id="btnKey-q4">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q4" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q5" data-correct="E">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">5. Quando usar uma função de atualização baseada no valor anterior (setX(prev =&gt; ...))?</h3>
+              <span class="badge text-bg-light border">Questão 5/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5A" value="A"><label class="form-check-label" for="q5A">Quando o valor não muda nunca e precisa ficar fixo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5B" value="B"><label class="form-check-label" for="q5B">Somente quando usamos Bootstrap Icons.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5C" value="C"><label class="form-check-label" for="q5C">Apenas em componentes de servidor (Server Components).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5D" value="D"><label class="form-check-label" for="q5D">Quando queremos evitar que a UI re-renderize.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5E" value="E"><label class="form-check-label" for="q5E">Quando o novo valor depende do anterior (ex.: contadores), para evitar condições de corrida.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q5')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q5')" disabled id="btnKey-q5">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q5" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q6" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">6. Como passamos uma função via props e por quê?</h3>
+              <span class="badge text-bg-light border">Questão 6/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6A" value="A"><label class="form-check-label" for="q6A">onAdd={handleAdd}. Isso faz o filho modificar diretamente o estado do pai sem avisar.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6B" value="B"><label class="form-check-label" for="q6B">onAdd={handleAdd}. Isso permite que o filho notifique o pai sobre eventos sem conhecer a lógica interna do pai.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6C" value="C"><label class="form-check-label" for="q6C">onAdd="handleAdd". Isso executa automaticamente a função ao carregar a página.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6D" value="D"><label class="form-check-label" for="q6D">Passamos função apenas via CSS, usando classes do Bootstrap.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6E" value="E"><label class="form-check-label" for="q6E">Não é possível passar função via props; apenas valores primitivos.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q6')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q6')" disabled id="btnKey-q6">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q6" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q7" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">7. Para que serve a diretiva 'use client' no Next.js?</h3>
+              <span class="badge text-bg-light border">Questão 7/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7A" value="A"><label class="form-check-label" for="q7A">Para importar o Bootstrap automaticamente sem instalar pacotes.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7B" value="B"><label class="form-check-label" for="q7B">Para tornar o componente um Server Component obrigatório.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7C" value="C"><label class="form-check-label" for="q7C">Marca o componente para execução no cliente (necessário para useState, useEffect e interação).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7D" value="D"><label class="form-check-label" for="q7D">Para desativar o roteamento por pastas no App Router.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7E" value="E"><label class="form-check-label" for="q7E">Para gerar páginas SSG automaticamente no build.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q7')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q7')" disabled id="btnKey-q7">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q7" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q8" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">8. Dê um exemplo de evento em React e como ligá-lo a um botão.</h3>
+              <span class="badge text-bg-light border">Questão 8/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8A" value="A"><label class="form-check-label" for="q8A">onClick={handleClick} em &lt;button&gt; para reagir a cliques.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8B" value="B"><label class="form-check-label" for="q8B">className="handleClick" em &lt;button&gt; para disparar clique.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8C" value="C"><label class="form-check-label" for="q8C">import handleClick from 'bootstrap' para eventos.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8D" value="D"><label class="form-check-label" for="q8D">onCommit={handleClick} para reagir a commits do Git.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8E" value="E"><label class="form-check-label" for="q8E">href={handleClick} em &lt;a&gt; para reagir a cliques.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q8')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q8')" disabled id="btnKey-q8">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q8" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q9" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">9. O que é composição de componentes e por que é útil?</h3>
+              <span class="badge text-bg-light border">Questão 9/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9A" value="A"><label class="form-check-label" for="q9A">Copiar e colar o mesmo componente em vários arquivos sem reutilizar.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9B" value="B"><label class="form-check-label" for="q9B">Remover componentes pequenos para usar apenas uma tela gigante.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9C" value="C"><label class="form-check-label" for="q9C">Unir CSS e JS em um único arquivo para reduzir imports.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9D" value="D"><label class="form-check-label" for="q9D">Combinar componentes menores para formar UIs maiores; promove reuso, clareza e manutenção.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9E" value="E"><label class="form-check-label" for="q9E">Executar vários scripts npm ao mesmo tempo para criar a interface.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q9')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q9')" disabled id="btnKey-q9">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q9" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q10" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">10. Cite uma boa prática para mensagens de commit.</h3>
+              <span class="badge text-bg-light border">Questão 10/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10A" value="A"><label class="form-check-label" for="q10A">Escrever mensagens muito longas com várias linhas e sem verbo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10B" value="B"><label class="form-check-label" for="q10B">Usar o imperativo curto e descritivo (ex.: feat: listar bebidas com card e botão adicionar).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10C" value="C"><label class="form-check-label" for="q10C">Usar apenas emojis e nenhum texto.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10D" value="D"><label class="form-check-label" for="q10D">Sempre escrever “update” independentemente da mudança.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10E" value="E"><label class="form-check-label" for="q10E">Colocar a mensagem dentro do .gitignore para o Git ler automaticamente.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q10')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q10')" disabled id="btnKey-q10">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q10" aria-live="polite"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — “Lista de Bebidas” com Cards e Botão “Adicionar”</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Exibir uma lista de bebidas usando cards do Bootstrap e permitir “Adicionar ao carrinho” com estado local na página /cardapio. Mostraremos um alerta de sucesso e um contador em um botão flutuante.</p>
+
+        <h3 class="h5 fw-bold mt-4">0) Estrutura de pastas (revisão)</h3>
+        <ul>
+          <li>app/ (App Router)</li>
+          <li>components/ (componentes reutilizáveis)</li>
+          <li>data/ (dados estáticos para simulação neste capítulo) ← vamos criar</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">1) Criar a fonte de dados das bebidas</h3>
+        <p class="mb-1">Crie data/bebidas.js:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// data/bebidas.js
+export const bebidas = [
+{
+id: 'refri-cola-350',
+nome: 'Refrigerante Cola',
+preco: 7.0,
+volume: '350 ml',
+disponivel: true,
+destaque: true,
+icone: 'bi-cup-straw',
+},
+{
+id: 'refri-limao-350',
+nome: 'Refrigerante Limão',
+preco: 7.0,
+volume: '350 ml',
+disponivel: true,
+destaque: false,
+icone: 'bi-cup-straw',
+},
+{
+id: 'suco-laranja-300',
+nome: 'Suco de Laranja',
+preco: 9.5,
+volume: '300 ml',
+disponivel: true,
+destaque: false,
+icone: 'bi-cup-straw',
+},
+{
+id: 'suco-uva-300',
+nome: 'Suco de Uva',
+preco: 9.5,
+volume: '300 ml',
+disponivel: false,
+destaque: false,
+icone: 'bi-cup-straw',
+},
+{
+id: 'milkshake-choc-400',
+nome: 'Milk-shake de Chocolate',
+preco: 14.0,
+volume: '400 ml',
+disponivel: true,
+destaque: true,
+icone: 'bi-cup-straw',
+},
+{
+id: 'agua-500',
+nome: 'Água Mineral',
+preco: 4.0,
+volume: '500 ml',
+disponivel: true,
+destaque: false,
+icone: 'bi-droplet',
+},
+];</code></pre>
+
+        <p class="mb-0">Dica: Por enquanto usamos dados estáticos. No 2º bimestre faremos API e fetch.</p>
+
+        <h3 class="h5 fw-bold mt-4">2) Criar o componente ProductCard</h3>
+        <p class="mb-1">Crie components/ProductCard.jsx:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// components/ProductCard.jsx
+'use client';
+
+export default function ProductCard({ item, onAdd }) {
+const { nome, preco, volume, disponivel, destaque, icone } = item;
+
+return (
+&lt;div className="card h-100 shadow-sm"&gt;
+&lt;div className="card-body d-flex flex-column"&gt;
+&lt;div className="d-flex justify-content-between align-items-start mb-2"&gt;
+&lt;h5 className="card-title mb-0"&gt;
+&lt;i className={`bi ${icone} me-2`}&gt;&lt;/i&gt;
+{nome}
+&lt;/h5&gt;
+{destaque &amp;&amp; &lt;span className="badge bg-warning text-dark"&gt;Destaque&lt;/span&gt;}
+&lt;/div&gt;
+
+&lt;p className="card-text text-muted mb-1"&gt;{volume}&lt;/p&gt;
+&lt;p className="card-text fw-semibold mb-3"&gt;R$ {preco.toFixed(2)}&lt;/p&gt;
+
+{!disponivel &amp;&amp; (
+&lt;div className="alert alert-secondary py-1 mb-3" role="alert"&gt;
+Indisponível no momento
+&lt;/div&gt;
+)}
+
+&lt;div className="mt-auto d-grid"&gt;
+&lt;button
+className="btn btn-primary"
+disabled={!disponivel}
+onClick={() =&gt; onAdd(item)}
+aria-label={`Adicionar ${nome} ao carrinho`}
+&gt;
+&lt;i className="bi bi-cart-plus me-2"&gt;&lt;/i&gt;
+Adicionar
+&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+);
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">3) Criar o botão flutuante do carrinho (contador)</h3>
+        <p class="mb-1">Crie components/FloatingCartButton.jsx:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// components/FloatingCartButton.jsx
+'use client';
+
+export default function FloatingCartButton({ count = 0, onClick }) {
+return (
+&lt;button
+type="button"
+className="btn btn-success position-fixed"
+style={{ right: '1rem', bottom: '1rem', zIndex: 1030 }}
+onClick={onClick}
+aria-label={`Carrinho com ${count} item(s)`}
+title="Abrir carrinho (em breve)"
+&gt;
+&lt;i className="bi bi-cart3 me-2"&gt;&lt;/i&gt;
+&lt;span&gt;Carrinho&lt;/span&gt;
+&lt;span className="badge bg-light text-success ms-2"&gt;{count}&lt;/span&gt;
+&lt;/button&gt;
+);
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4) Implementar a página /cardapio com estado e alerta</h3>
+        <p class="mb-1">Edite/crie app/cardapio/page.jsx:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// app/cardapio/page.jsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { bebidas } from '@/data/bebidas';
+import ProductCard from '@/components/ProductCard';
+import FloatingCartButton from '@/components/FloatingCartButton';
+
+export default function CardapioPage() {
+const [cartCount, setCartCount] = useState(0);
+const [alerta, setAlerta] = useState(null); // { tipo: 'success' | 'danger', texto: string }
+
+function handleAdd(item) {
+setCartCount((prev) =&gt; prev + 1);
+setAlerta({ tipo: 'success', texto: `${item.nome} adicionado ao carrinho!` });
+}
+
+// Fecha o alerta automaticamente após 2s
+useEffect(() =&gt; {
+if (!alerta) return;
+const id = setTimeout(() =&gt; setAlerta(null), 2000);
+return () =&gt; clearTimeout(id);
+}, [alerta]);
+
+return (
+&lt;&gt;
+&lt;header className="mb-4"&gt;
+&lt;h1 className="h3 mb-1"&gt;Cardápio — Bebidas&lt;/h1&gt;
+&lt;p className="text-muted"&gt;Escolha sua bebida e adicione ao carrinho.&lt;/p&gt;
+&lt;/header&gt;
+
+{alerta &amp;&amp; (
+&lt;div
+className={`alert alert-${alerta.tipo} alert-dismissible fade show`}
+role="alert"
+&gt;
+&lt;i className="bi bi-check-circle me-2"&gt;&lt;/i&gt;
+{alerta.texto}
+&lt;button
+type="button"
+className="btn-close"
+onClick={() =&gt; setAlerta(null)}
+aria-label="Fechar"
+&gt;&lt;/button&gt;
+&lt;/div&gt;
+)}
+
+&lt;div className="row g-4"&gt;
+{bebidas.map((item) =&gt; (
+&lt;div className="col-12 col-sm-6 col-lg-4" key={item.id}&gt;
+&lt;ProductCard item={item} onAdd={handleAdd} /&gt;
+&lt;/div&gt;
+))}
+&lt;/div&gt;
+
+&lt;FloatingCartButton
+count={cartCount}
+onClick={() =&gt; {
+setAlerta({ tipo: 'info', texto: 'Carrinho: recurso em desenvolvimento.' });
+}}
+/&gt;
+&lt;/&gt;
+);
+}</code></pre>
+
+        <p class="mb-0">Acessibilidade: usamos aria-label nos botões e permitimos fechar o alerta com btn-close.</p>
+
+        <h3 class="h5 fw-bold mt-4">5) Testar e versionar (Git)</h3>
+        <ul>
+          <li>Rode: npm run dev e acesse /cardapio.</li>
+          <li>Verifique: cards, botão “Adicionar”, alerta e botão flutuante com contador.</li>
+        </ul>
+        <p class="mb-2">Commits sugeridos (exemplos):</p>
+        <ul>
+          <li>feat: adicionar dataset de bebidas</li>
+          <li>feat: criar ProductCard com botão adicionar</li>
+          <li>feat: implementar estado do carrinho e alerta</li>
+          <li>feat: adicionar botão flutuante com contador</li>
+          <li>style: ajustar espaçamentos e títulos no cardápio</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">6) Checklist de verificação (Cap. 2)</h3>
+        <ul>
+          <li>data/bebidas.js criado com 5–6 itens.</li>
+          <li>ProductCard renderiza nome, preço, volume e botão.</li>
+          <li>Itens indisponíveis mostram aviso e botão desabilitado.</li>
+          <li>CardapioPage controla estado do carrinho (useState).</li>
+          <li>Alerta aparece ao adicionar e fecha sozinho em ~2s.</li>
+          <li>Botão flutuante mostra contador dinâmico.</li>
+          <li>Commits claros e frequentes.</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> aplicar o mesmo padrão do passo a passo em novas partes do sistema.</p>
+        <ol class="mt-3">
+          <li><strong>Listagem de Lanches</strong>
+            <ul>
+              <li>Crie data/lanches.js (similar a bebidas.js) com 6 itens.</li>
+              <li>Crie app/lanches/page.jsx reutilizando ProductCard.</li>
+              <li>Diferencie com ícone (bi-egg-fried, bi-burger etc.) e alguns itens indisponíveis.</li>
+            </ul>
+          </li>
+          <li><strong>Listagem de Sobremesas</strong>
+            <ul>
+              <li>Crie data/sobremesas.js e app/sobremesas/page.jsx.</li>
+              <li>Inclua preços variados e badge de “Destaque” em 2 itens.</li>
+              <li>Adapte o título para “Cardápio — Sobremesas”.</li>
+            </ul>
+          </li>
+          <li><strong>Contador por item (desafio leve)</strong>
+            <ul>
+              <li>Em vez de apenas cartCount, crie um estado por item (ex.: objeto {[id]: quantidade} ou array).</li>
+              <li>No ProductCard, adicione botões + e − para ajustar a quantidade do item antes de adicionar.</li>
+              <li>Bônus: desabilite − quando a quantidade for 0.</li>
+            </ul>
+          </li>
+          <li><strong>Filtro simples por texto (desafio extra)</strong>
+            <ul>
+              <li>Adicione um campo de busca acima da lista para filtrar por nome.</li>
+              <li>A busca deve ser case-insensitive e atualizar a lista em tempo real.</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="mb-2"><strong>Critérios de avaliação sugeridos (10 pts):</strong></p>
+        <ul>
+          <li>Reuso de ProductCard e organização por páginas — 3 pts</li>
+          <li>Estado correto (contador global e/ou por item) — 3 pts</li>
+          <li>Feedback visual (alerta/btn desabilitado/ícones) — 2 pts</li>
+          <li>Responsividade e classes Bootstrap adequadas — 2 pts</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul>
+          <li>“React useState exemplos práticos”</li>
+          <li>“Eventos em React: onClick, onChange”</li>
+          <li>“Composição de componentes em React”</li>
+          <li>“Bootstrap 5 Cards e utilitários (spacing, display)”</li>
+          <li>“Bootstrap 5 Alerts e botões”</li>
+          <li>“Next.js App Router e componentes de cliente (‘use client’)”</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 2</h2>
+        <ul>
+          <li>Página /cardapio listando bebidas com cards e botão “Adicionar”.</li>
+          <li>Estado local controlando o contador do carrinho, alerta de sucesso e botão flutuante.</li>
+          <li>Commits que mostrem a evolução por partes.</li>
+          <li>(Atividades): páginas /lanches e /sobremesas ou, ao menos, uma delas com os mesmos padrões.</li>
+        </ul>
+      </section>
+
+      <!-- Checklist interativo (texto mantido) -->
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2 text-danger"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">Baseado em “6) Checklist de verificação (Cap. 2)”. O progresso fica salvo neste navegador.</p>
+
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-danger" id="chkProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="vstack gap-2" id="checklistItems">
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="1"><span>data/bebidas.js criado com 5–6 itens.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="2"><span>ProductCard renderiza nome, preço, volume e botão.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="3"><span>Itens indisponíveis mostram aviso e botão desabilitado.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="4"><span>CardapioPage controla estado do carrinho (useState).</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="5"><span>Alerta aparece ao adicionar e fecha sozinho em ~2s.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="6"><span>Botão flutuante mostra contador dinâmico.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="7"><span>Commits claros e frequentes.</span></label>
+          </div>
+        </div>
+      </section>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo01.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 01</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 03</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="small text-muted">
+          <i class="bi bi-journal-code me-1"></i> Capítulo 02 — Apostila PW II
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-pw" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+          <a class="btn btn-sm btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 03</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // ===== Questionário dinâmico =====
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    // ===== Checklist (salvo no localStorage) =====
+    const CHECKLIST_KEY = 'pw2_cap02_checklist_v1';
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', pct);
+      text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    loadChecklist();
+  </script>
+</body>
+</html>

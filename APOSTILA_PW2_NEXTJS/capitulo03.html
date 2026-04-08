@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 03 — Listas, Condicionais e Grid do Bootstrap</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --pw-red:#b30000;            /* menus em vermelho */
+      --pw-red-dark:#8f0000;
+      --pw-gray:#3f3f3f;           /* botões destaque em cinza escuro */
+      --pw-gray-dark:#2f2f2f;
+      --pw-bg:#ffffff;             /* tema claro */
+      --pw-muted:#6c757d;
+      --pw-border:#e9ecef;
+      --pw-link:#b30000;
+      --code-bg:#1e1e1e;           /* VSCode-like */
+    }
+
+    body{ background:var(--pw-bg); }
+    a{ color:var(--pw-link); }
+    a:hover{ color:var(--pw-red-dark); }
+
+    /* Navbar */
+    .navbar-pw{ background:var(--pw-red); }
+    .navbar-pw .navbar-brand,
+    .navbar-pw .nav-link,
+    .navbar-pw .navbar-toggler{ color:#fff; }
+    .navbar-pw .nav-link:hover,
+    .navbar-pw .nav-link:focus{ color:#ffe6e6; }
+    .navbar-pw .dropdown-item:active{ background:var(--pw-red); }
+
+    /* Buttons */
+    .btn-pw{
+      background:var(--pw-gray);
+      border-color:var(--pw-gray);
+      color:#fff;
+    }
+    .btn-pw:hover,
+    .btn-pw:focus{
+      background:var(--pw-gray-dark);
+      border-color:var(--pw-gray-dark);
+      color:#fff;
+    }
+
+    /* Sections */
+    .chapter-hero{
+      background:linear-gradient(180deg, rgba(179,0,0,.08), rgba(179,0,0,0));
+      border-bottom:1px solid var(--pw-border);
+    }
+
+    .card-soft{
+      border:1px solid var(--pw-border);
+      border-radius:14px;
+    }
+
+    /* Code blocks */
+    pre[class*="language-"]{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 8px 26px rgba(0,0,0,.10);
+      margin: .75rem 0 1rem;
+    }
+    code[class*="language-"]{ font-size: .92rem; }
+    pre{ background: var(--code-bg) !important; }
+
+    /* Quiz */
+    .quiz-card{ border:1px solid var(--pw-border); border-radius:14px; }
+    .quiz-feedback{ min-height: 42px; }
+
+    /* Checklist */
+    .checklist-item{ border:1px solid var(--pw-border); border-radius:12px; padding:10px 12px; }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:10px; z-index:2000; }
+  </style>
+</head>
+<body>
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- NAVBAR (responsiva com hamburguer) -->
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>APOSTILA PW II
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(1) brightness(2);"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html#sumario"><i class="bi bi-list-check me-1"></i>Sumário</a></li>
+
+          <!-- Dropdown com capítulos -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book me-1"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">1º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Setup do projeto</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Componentes, Props, Estado e Eventos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Listas/Condicional + Grid Bootstrap</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Rotas e Navegação (Next.js)</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">2º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Bootstrap avançado e customização</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Formulários e validação</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Consumo de API + estados assíncronos</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Testes (Jest + RTL)</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">3º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — SSG, SSR e hidratação</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Rotas dinâmicas com SSG</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — SSR para dados variáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Hidratação e interatividade</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">4º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Testes de interface (RTL avançado)</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Builds e releases (Next.js)</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Docker e conteinerização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto final integrador</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="#questionario"><i class="bi bi-ui-checks me-1"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-link" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 3 — Listas, Condicionais e Grid do Bootstrap (Catálogo com Filtro por Categoria)</h1>
+          <p class="mb-2"><strong>Carga:</strong> 2 aulas × 140 min</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Sistema da Lanchonete (Admin) iniciado nos Cap. 1–2</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Next.js (App Router) + React, Bootstrap 5 + Bootstrap Icons, Git</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2">
+            <li>Renderizar listas em React com map e chaves (keys) estáveis.</li>
+            <li>Aplicar renderização condicional (&amp;&amp;, ternário, early return).</li>
+            <li>Construir um catálogo responsivo com Grid do Bootstrap (container/row/col).</li>
+            <li>Implementar filtros de categoria (todas, bebidas, lanches, sobremesas) e exibir/ocultar esgotados.</li>
+            <li>Melhorar a experiência com badges, estados vazios e acessibilidade básica.</li>
+          </ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>🎯 Competências e Habilidades trabalhadas</strong></p>
+            <ul class="mb-0 small">
+              <li><strong>Competências:</strong> (1) Elaborar interfaces web; (2) Aplicar práticas de desenvolvimento de sistemas.</li>
+              <li><strong>Habilidades:</strong> 1.1 (SPAs com framework frontend), 1.2 (Framework CSS), 1.3 (Interação/reatividade), 4 (versionamento e boas práticas).</li>
+            </ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 02</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">📆 Plano de Aula (Capítulo 3)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <p class="mb-2"><strong>Aula 1 (140 min) — Teoria + Dataset Unificado + Filtros (UI)</strong></p>
+          <p class="mb-1">Teoria (35–45 min): Listas e chaves, condicionais em JSX, Grid do Bootstrap (breakpoints, colunas, gutters) e acessibilidade mínima.</p>
+          <p class="mb-3">Prática (85–95 min): Criar dataset unificado (itens do cardápio), componente de filtros de categoria e adaptar o ProductCard para todas as categorias.</p>
+          <p class="mb-2"><strong>Aula 2 (140 min) — Filtragem, Ordenação, Estado Vazio + UX</strong></p>
+          <p class="mb-1">Teoria (20–30 min): Boas práticas de derived state, empty state e badges informativos.</p>
+          <p class="mb-3">Prática (100–110 min): Implementar filtragem com estado, ordenar por destaque/nome, mostrar/ocultar esgotados, exibir mensagem de lista vazia e revisar responsividade.</p>
+          <p class="mb-0"><strong>Entrega rápida (10 min):</strong> Print do cardápio filtrado em cada categoria + print do estado “nenhum item encontrado”.</p>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🧠 Parte Teórica (explicação do conteúdo)</h2>
+
+        <h3 class="h5 fw-bold mt-4">1) Renderização de listas e keys</h3>
+        <ul>
+          <li>Para mostrar uma lista em React usamos array.map(item =&gt; &lt;Componente key={...} /&gt;).</li>
+          <li>A key deve ser estável e única por item (ex.: id do produto). Evite usar o índice do array, pois causa problemas em reordenação/remoções.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">2) Renderização condicional em JSX</h3>
+        <ul>
+          <li>Curto-circuito (&amp;&amp;): condicao &amp;&amp; &lt;Componente /&gt;</li>
+          <li>Ternário: condicao ? &lt;A /&gt; : &lt;B /&gt;</li>
+          <li>Early return: retornar antes do JSX principal se uma condição falhar (bom para estados vazios ou erros).</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">3) Grid do Bootstrap (responsividade)</h3>
+        <ul>
+          <li>Estrutura: .container → .row → .col-*.</li>
+          <li>Quebras (breakpoints): col- (xs), col-sm-, col-md-, col-lg-, col-xl-.</li>
+          <li>Ex.: col-12 col-sm-6 col-lg-4 faz 1 coluna no mobile, 2 no sm e 3 no lg.</li>
+          <li>Gutters (espaços): g-3, g-4 etc.</li>
+          <li>Utilitários: my-4, d-flex, justify-content-between, etc.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">4) Componentização e reuso</h3>
+        <ul>
+          <li>Quebre a UI em peças reutilizáveis: ProductCard, CategoryFilters.</li>
+          <li>Deixe dados e estado no componente pai quando vários filhos dependem deles (elevação de estado).</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">5) Acessibilidade mínima</h3>
+        <ul>
+          <li>Para grupos de botões toggle, use aria-pressed e o elemento &lt;button&gt; (não um &lt;a&gt;).</li>
+          <li>Ao ocultar itens, mantenha feedback na tela (ex.: “Nenhum item encontrado.”).</li>
+          <li>Ícones com suporte a leitores: aria-label, title e texto visível quando fizer sentido.</li>
+        </ul>
+      </section>
+
+      <!-- Questionário (transformado em múltipla escolha dinâmico) -->
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">✅ Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+
+        <div class="vstack gap-3" id="quizContainer">
+
+          <!-- Q1 -->
+          <div class="quiz-card bg-white p-4" data-qid="q1" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">1. Por que a key em listas deve ser estável e única?</h3>
+              <span class="badge text-bg-light border">Questão 1/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1A" value="A"><label class="form-check-label" for="q1A">Para o React identificar corretamente cada item entre renderizações e aplicar atualizações sem bugs, principalmente em reordenação/remoções.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1B" value="B"><label class="form-check-label" for="q1B">Para permitir que o Bootstrap aplique o Grid automaticamente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1C" value="C"><label class="form-check-label" for="q1C">Para que o JavaScript desative o Strict Mode do React.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1D" value="D"><label class="form-check-label" for="q1D">Para impedir que o array.map seja executado no cliente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1E" value="E"><label class="form-check-label" for="q1E">Para transformar automaticamente o componente em Server Component.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q1')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q1')" disabled id="btnKey-q1">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q1" aria-live="polite"></div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="quiz-card bg-white p-4" data-qid="q2" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">2. Quando usar &amp;&amp; vs operador ternário em JSX?</h3>
+              <span class="badge text-bg-light border">Questão 2/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2A" value="A"><label class="form-check-label" for="q2A">&amp;&amp; quando há dois caminhos; ternário quando renderiza só se for verdadeiro.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2B" value="B"><label class="form-check-label" for="q2B">Sempre usar ternário; &amp;&amp; não funciona em JSX.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2C" value="C"><label class="form-check-label" for="q2C">&amp;&amp; é útil quando renderiza algo somente se a condição for verdadeira; ternário é útil quando há dois caminhos (A ou B).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2D" value="D"><label class="form-check-label" for="q2D">Usar &amp;&amp; apenas com strings; ternário apenas com números.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2E" value="E"><label class="form-check-label" for="q2E">O React exige if/else; &amp;&amp; e ternário são inválidos.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q2')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q2')" disabled id="btnKey-q2">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q2" aria-live="polite"></div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="quiz-card bg-white p-4" data-qid="q3" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">3. Explique por que não é recomendado usar o índice do array como key.</h3>
+              <span class="badge text-bg-light border">Questão 3/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3A" value="A"><label class="form-check-label" for="q3A">Porque o índice deixa o CSS do Bootstrap mais lento.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3B" value="B"><label class="form-check-label" for="q3B">O índice muda quando a lista é reordenada/removida, causando reuso incorreto de DOM e estados internos.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3C" value="C"><label class="form-check-label" for="q3C">Porque o React não aceita números como key.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3D" value="D"><label class="form-check-label" for="q3D">Porque o índice é obrigatório em listas estáticas.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3E" value="E"><label class="form-check-label" for="q3E">Porque o Next.js converte índices em rotas automaticamente.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q3')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q3')" disabled id="btnKey-q3">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q3" aria-live="polite"></div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="quiz-card bg-white p-4" data-qid="q4" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">4. Qual a função dos breakpoints (col-sm-, col-md-, etc.) no Bootstrap?</h3>
+              <span class="badge text-bg-light border">Questão 4/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4A" value="A"><label class="form-check-label" for="q4A">Definir o tipo de banco de dados usado no projeto.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4B" value="B"><label class="form-check-label" for="q4B">Controlar o versionamento do Git para cada tela.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4C" value="C"><label class="form-check-label" for="q4C">Desativar a responsividade do site quando necessário.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4D" value="D"><label class="form-check-label" for="q4D">Definir quantas colunas o elemento ocupa em diferentes larguras de tela, garantindo responsividade.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4E" value="E"><label class="form-check-label" for="q4E">Trocar automaticamente de CSR para SSR em telas menores.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q4')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q4')" disabled id="btnKey-q4">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q4" aria-live="polite"></div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="quiz-card bg-white p-4" data-qid="q5" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">5. Cite dois utilitários do Bootstrap e sua função.</h3>
+              <span class="badge text-bg-light border">Questão 5/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5A" value="A"><label class="form-check-label" for="q5A">g-4 (gutter de 1.5rem entre colunas), my-4 (margem vertical), d-flex (display flex).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5B" value="B"><label class="form-check-label" for="q5B">useState (estado) e useEffect (efeito) — utilitários do Bootstrap.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5C" value="C"><label class="form-check-label" for="q5C">git add e git commit — utilitários do Bootstrap.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5D" value="D"><label class="form-check-label" for="q5D">map e filter — utilitários do Bootstrap.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5E" value="E"><label class="form-check-label" for="q5E">layout.jsx e page.jsx — utilitários do Bootstrap.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q5')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q5')" disabled id="btnKey-q5">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q5" aria-live="polite"></div>
+          </div>
+
+          <!-- Q6 -->
+          <div class="quiz-card bg-white p-4" data-qid="q6" data-correct="E">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">6. O que é estado derivado (derived state) e qual cuidado tomar?</h3>
+              <span class="badge text-bg-light border">Questão 6/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6A" value="A"><label class="form-check-label" for="q6A">É o estado salvo no Git; cuidado para não esquecer de dar push.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6B" value="B"><label class="form-check-label" for="q6B">É uma variável global do Bootstrap; cuidado para não mudar o tema.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6C" value="C"><label class="form-check-label" for="q6C">É um estado que sempre deve ser salvo em localStorage; cuidado para não duplicar.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6D" value="D"><label class="form-check-label" for="q6D">É um estado vindo do servidor (SSR); cuidado para não hidratar.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6E" value="E"><label class="form-check-label" for="q6E">É um valor computado a partir de outros estados/props. Cuidado para não duplicar fonte de verdade, calcule no render quando possível.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q6')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q6')" disabled id="btnKey-q6">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q6" aria-live="polite"></div>
+          </div>
+
+          <!-- Q7 -->
+          <div class="quiz-card bg-white p-4" data-qid="q7" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">7. Como melhorar a UX quando um filtro não encontra itens?</h3>
+              <span class="badge text-bg-light border">Questão 7/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7A" value="A"><label class="form-check-label" for="q7A">Deixar a tela vazia sem mensagem, para “não poluir” a interface.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7B" value="B"><label class="form-check-label" for="q7B">Exibir uma mensagem amigável (“Nenhum item encontrado.”) e uma ação (limpar filtros).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7C" value="C"><label class="form-check-label" for="q7C">Remover permanentemente os itens do dataset para não aparecerem mais.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7D" value="D"><label class="form-check-label" for="q7D">Forçar refresh completo da página a cada mudança de filtro.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7E" value="E"><label class="form-check-label" for="q7E">Desativar o Grid do Bootstrap quando a lista estiver vazia.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q7')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q7')" disabled id="btnKey-q7">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q7" aria-live="polite"></div>
+          </div>
+
+          <!-- Q8 -->
+          <div class="quiz-card bg-white p-4" data-qid="q8" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">8. Quando “elevar o estado” para um componente pai?</h3>
+              <span class="badge text-bg-light border">Questão 8/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8A" value="A"><label class="form-check-label" for="q8A">Quando apenas um filho usa o estado e ninguém mais precisa dele.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8B" value="B"><label class="form-check-label" for="q8B">Quando queremos evitar passar props, então movemos tudo para o CSS.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8C" value="C"><label class="form-check-label" for="q8C">Quando o estado é fixo e nunca muda.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8D" value="D"><label class="form-check-label" for="q8D">Quando dois ou mais filhos precisam compartilhar/atualizar o mesmo estado (ex.: filtros e lista de produtos).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8E" value="E"><label class="form-check-label" for="q8E">Somente quando usamos SSR no Next.js.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q8')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q8')" disabled id="btnKey-q8">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q8" aria-live="polite"></div>
+          </div>
+
+          <!-- Q9 -->
+          <div class="quiz-card bg-white p-4" data-qid="q9" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">9. Qual a vantagem de ordenar por “destaque” antes de exibir a lista?</h3>
+              <span class="badge text-bg-light border">Questão 9/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9A" value="A"><label class="form-check-label" for="q9A">Prioriza itens importantes/curados, melhorando a descoberta e a experiência do usuário.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9B" value="B"><label class="form-check-label" for="q9B">Remove a necessidade de usar keys na lista.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9C" value="C"><label class="form-check-label" for="q9C">Impede que itens indisponíveis sejam exibidos, mesmo com “Mostrar esgotados”.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9D" value="D"><label class="form-check-label" for="q9D">Faz o React renderizar mais rápido em todos os casos.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9E" value="E"><label class="form-check-label" for="q9E">Substitui a necessidade de usar Grid do Bootstrap.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q9')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q9')" disabled id="btnKey-q9">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q9" aria-live="polite"></div>
+          </div>
+
+          <!-- Q10 -->
+          <div class="quiz-card bg-white p-4" data-qid="q10" data-correct="E">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">10. Como sinalizar um botão-toggle ativo para acessibilidade?</h3>
+              <span class="badge text-bg-light border">Questão 10/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10A" value="A"><label class="form-check-label" for="q10A">Usando apenas cor, sem atributos ARIA, para não “poluir” o HTML.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10B" value="B"><label class="form-check-label" for="q10B">Usando href="#" no botão e removendo foco do teclado.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10C" value="C"><label class="form-check-label" for="q10C">Colocando o texto do botão em itálico para indicar que está ativo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10D" value="D"><label class="form-check-label" for="q10D">Usando apenas title="ativo" sem alterar o estado do componente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10E" value="E"><label class="form-check-label" for="q10E">Usar aria-pressed={true|false} e a classe visual active ou variação de estilo correspondente.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q10')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q10')" disabled id="btnKey-q10">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q10" aria-live="polite"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">🛠️ Passo a Passo — Catálogo com Filtro por Categoria e Esgotados</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Unificar os itens do cardápio em um só dataset, criar filtros de categoria, permitir mostrar/ocultar esgotados e renderizar a grade responsiva com Bootstrap.</p>
+        <p class="mb-0">Observação: Manteremos o ProductCard do Cap. 2, adaptando para funcionar com todas as categorias (campos opcionais como volume ou descricao).</p>
+
+        <h3 class="h5 fw-bold mt-4">1) Criar dataset unificado de itens</h3>
+        <p class="mb-1">Crie data/itens.js:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// data/itens.js
+export const itens = [
+// BEBIDAS
+{ id: 'refri-cola-350', nome: 'Refrigerante Cola', preco: 7.0, categoria: 'bebida', volume: '350 ml', disponivel: true, destaque: true, icone: 'bi-cup-straw' },
+{ id: 'suco-laranja-300', nome: 'Suco de Laranja', preco: 9.5, categoria: 'bebida', volume: '300 ml', disponivel: true, destaque: false, icone: 'bi-cup-straw' },
+{ id: 'agua-500', nome: 'Água Mineral', preco: 4.0, categoria: 'bebida', volume: '500 ml', disponivel: true, destaque: false, icone: 'bi-droplet' },
+
+// LANCHES
+{ id: 'xburger', nome: 'X-Burger', preco: 18.0, categoria: 'lanche', descricao: 'Pão, hambúrguer, queijo e molho da casa.', disponivel: true, destaque: true, icone: 'bi-egg-fried' },
+{ id: 'xsalada', nome: 'X-Salada', preco: 19.5, categoria: 'lanche', descricao: 'Hambúrguer com alface e tomate.', disponivel: true, destaque: false, icone: 'bi-egg-fried' },
+{ id: 'combo-classico', nome: 'Combo Clássico', preco: 27.9, categoria: 'lanche', descricao: 'X-Burger + Batata P + Refri 350ml.', disponivel: false, destaque: false, icone: 'bi-egg-fried' },
+
+// SOBREMESAS
+{ id: 'petit-gateau', nome: 'Petit Gâteau', preco: 16.0, categoria: 'sobremesa', descricao: 'Bolo quente com sorvete de creme.', disponivel: true, destaque: true, icone: 'bi-ice-cream' },
+{ id: 'sorvete-morango', nome: 'Sorvete Morango', preco: 10.0, categoria: 'sobremesa', descricao: '2 bolas no copo.', disponivel: true, destaque: false, icone: 'bi-ice-cream' },
+{ id: 'mousse-maracuja', nome: 'Mousse de Maracujá', preco: 12.0, categoria: 'sobremesa', descricao: 'Creme leve e aerado.', disponivel: false, destaque: false, icone: 'bi-ice-cream' },
+];
+Mostrar mais linhas</code></pre>
+        <p class="mb-0">Dica: O campo categoria será usado nos filtros.</p>
+
+        <h3 class="h5 fw-bold mt-4">2) Adaptar o ProductCard para múltiplas categorias</h3>
+        <p class="mb-1">Atualize components/ProductCard.jsx (mantendo compatibilidade com bebidas do Cap. 2):</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// components/ProductCard.jsx
+'use client';
+
+const categoriaBadgeClass = (categoria) =&gt; {
+switch (categoria) {
+case 'bebida':
+return 'text-bg-primary';
+case 'lanche':
+return 'text-bg-success';
+case 'sobremesa':
+return 'text-bg-info';
+default:
+return 'text-bg-secondary';
+}
+};
+
+export default function ProductCard({ item, onAdd }) {
+const { nome, preco, volume, descricao, disponivel, destaque, icone, categoria } = item;
+
+return (
+&lt;div className="card h-100 shadow-sm"&gt;
+&lt;div className="card-body d-flex flex-column"&gt;
+&lt;div className="d-flex justify-content-between align-items-start mb-2"&gt;
+&lt;h5 className="card-title mb-0"&gt;
+&lt;i className={`bi ${icone} me-2`}&gt;&lt;/i&gt;
+{nome}
+&lt;/h5&gt;
+&lt;div className="d-flex gap-2"&gt;
+{categoria &amp;&amp; &lt;span className={`badge ${categoriaBadgeClass(categoria)}`}&gt;{categoria}&lt;/span&gt;}
+{destaque &amp;&amp; &lt;span className="badge text-bg-warning text-dark"&gt;destaque&lt;/span&gt;}
+&lt;/div&gt;
+&lt;/div&gt;
+
+{volume &amp;&amp; &lt;p className="card-text text-muted mb-1"&gt;{volume}&lt;/p&gt;}
+{descricao &amp;&amp; &lt;p className="card-text text-muted mb-1"&gt;{descricao}&lt;/p&gt;}
+
+&lt;p className="card-text fw-semibold mb-3"&gt;R$ {preco.toFixed(2)}&lt;/p&gt;
+
+{!disponivel &amp;&amp; (
+&lt;div className="alert alert-secondary py-1 mb-3" role="alert"&gt;
+Indisponível no momento
+&lt;/div&gt;
+)}
+
+&lt;div className="mt-auto d-grid"&gt;
+&lt;button
+className="btn btn-primary"
+disabled={!disponivel}
+onClick={() =&gt; onAdd?.(item)}
+aria-label={`Adicionar ${nome} ao carrinho`}
+&gt;
+&lt;i className="bi bi-cart-plus me-2"&gt;&lt;/i&gt;
+Adicionar
+&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+);
+}
+``
+Mostrar mais linhas</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">3) Criar o componente de filtros por categoria</h3>
+        <p class="mb-1">Crie components/CategoryFilters.jsx:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// components/CategoryFilters.jsx
+'use client';
+
+const labels = {
+todas: 'Todas',
+bebida: 'Bebidas',
+lanche: 'Lanches',
+sobremesa: 'Sobremesas',
+};
+
+export default function CategoryFilters({
+categorias = ['todas', 'bebida', 'lanche', 'sobremesa'],
+selecionada = 'todas',
+onSelecionar,
+contagem = {}, // ex.: { bebida: 3, lanche: 3, sobremesa: 3, todas: 9 }
+mostrarEsgotados = false,
+onToggleEsgotados,
+}) {
+return (
+&lt;div className="d-flex flex-column flex-md-row align-items-md-center gap-3 mb-4"&gt;
+&lt;div className="btn-group" role="group" aria-label="Filtro por categoria"&gt;
+{categorias.map((cat) =&gt; {
+const active = selecionada === cat;
+const count = contagem?.[cat] ?? null;
+return (
+&lt;button
+key={cat}
+type="button"
+className={`btn btn-outline-primary ${active ? 'active' : ''}`}
+aria-pressed={active}
+onClick={() =&gt; onSelecionar?.(cat)}
+title={`Filtrar por ${labels[cat] ?? cat}`}
+&gt;
+{labels[cat] ?? cat}
+{typeof count === 'number' &amp;&amp; (
+&lt;span className="badge text-bg-light ms-2"&gt;{count}&lt;/span&gt;
+)}
+&lt;/button&gt;
+);
+})}
+&lt;/div&gt;
+
+&lt;div className="form-check form-switch ms-md-3"&gt;
+&lt;input
+className="form-check-input"
+type="checkbox"
+id="mostrarEsgotados"
+checked={mostrarEsgotados}
+onChange={(e) =&gt; onToggleEsgotados?.(e.target.checked)}
+/&gt;
+&lt;label className="form-check-label" htmlFor="mostrarEsgotados"&gt;
+Mostrar esgotados
+&lt;/label&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+);
+}
+Mostrar mais linhas</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4) Refatorar a página /cardapio para usar filtros</h3>
+        <p class="mb-1">Edite app/cardapio/page.jsx:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// app/cardapio/page.jsx
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { itens } from '@/data/itens';
+import ProductCard from '@/components/ProductCard';
+import FloatingCartButton from '@/components/FloatingCartButton';
+import CategoryFilters from '@/components/CategoryFilters';
+
+export default function CardapioPage() {
+const [cartCount, setCartCount] = useState(0);
+const [alerta, setAlerta] = useState(null); // { tipo: 'success' | 'info' | 'danger', texto: string }
+const [categoria, setCategoria] = useState('todas');
+const [mostrarEsgotados, setMostrarEsgotados] = useState(false);
+
+// Contagem por categoria (para badges nos filtros)
+const contagem = useMemo(() =&gt; {
+const base = { todas: itens.length, bebida: 0, lanche: 0, sobremesa: 0 };
+for (const it of itens) base[it.categoria] = (base[it.categoria] || 0) + 1;
+return base;
+}, []);
+
+// Lista filtrada e ordenada (derived state calculado no render)
+const listaFiltrada = useMemo(() =&gt; {
+let lista = itens.filter((it) =&gt; categoria === 'todas' || it.categoria === categoria);
+if (!mostrarEsgotados) {
+lista = lista.filter((it) =&gt; it.disponivel);
+}
+// Ordena destaque primeiro e depois por nome
+return lista.sort((a, b) =&gt; {
+if (a.destaque !== b.destaque) return a.destaque ? -1 : 1;
+return a.nome.localeCompare(b.nome, 'pt-BR');
+});
+}, [categoria, mostrarEsgotados]);
+
+function handleAdd(item) {
+setCartCount((prev) =&gt; prev + 1);
+setAlerta({ tipo: 'success', texto: `${item.nome} adicionado ao carrinho!` });
+}
+
+useEffect(() =&gt; {
+if (!alerta) return;
+const id = setTimeout(() =&gt; setAlerta(null), 1800);
+return () =&gt; clearTimeout(id);
+}, [alerta]);
+
+return (
+&lt;&gt;
+&lt;header className="mb-3"&gt;
+&lt;h1 className="h3 mb-1"&gt;Cardápio&lt;/h1&gt;
+&lt;p className="text-muted"&gt;Filtre por categoria e gerencie seu pedido.&lt;/p&gt;
+&lt;/header&gt;
+
+{alerta &amp;&amp; (
+&lt;div className={`alert alert-${alerta.tipo} alert-dismissible fade show`} role="alert"&gt;
+&lt;i className="bi bi-check-circle me-2"&gt;&lt;/i&gt;
+{alerta.texto}
+&lt;button
+type="button"
+className="btn-close"
+onClick={() =&gt; setAlerta(null)}
+aria-label="Fechar"
+&gt;&lt;/button&gt;
+&lt;/div&gt;
+)}
+
+&lt;CategoryFilters
+selecionada={categoria}
+onSelecionar={setCategoria}
+contagem={contagem}
+mostrarEsgotados={mostrarEsgotados}
+onToggleEsgotados={setMostrarEsgotados}
+/&gt;
+
+{/* Estado vazio */}
+{listaFiltrada.length === 0 ? (
+&lt;div className="text-center text-muted my-5"&gt;
+&lt;i className="bi bi-search mb-3" style={{ fontSize: '2rem', display: 'block' }}&gt;&lt;/i&gt;
+&lt;p className="mb-2"&gt;Nenhum item encontrado com os filtros atuais.&lt;/p&gt;
+&lt;button
+className="btn btn-outline-secondary btn-sm"
+onClick={() =&gt; {
+setCategoria('todas');
+setMostrarEsgotados(false);
+}}
+&gt;
+Limpar filtros
+&lt;/button&gt;
+&lt;/div&gt;
+) : (
+&lt;div className="row g-4"&gt;
+{listaFiltrada.map((item) =&gt; (
+&lt;div className="col-12 col-sm-6 col-lg-4" key={item.id}&gt;
+&lt;ProductCard item={item} onAdd={handleAdd} /&gt;
+&lt;/div&gt;
+))}
+&lt;/div&gt;
+)}
+
+&lt;FloatingCartButton
+count={cartCount}
+onClick={() =&gt;
+setAlerta({ tipo: 'info', texto: 'Carrinho: recurso em desenvolvimento.' })
+}
+/&gt;
+&lt;/&gt;
+);
+}
+Mostrar mais linhas</code></pre>
+
+        <p class="mb-2"><strong>Notas de UX:</strong></p>
+        <ul>
+          <li>• Filtros com badges de contagem ajudam a orientar o usuário.</li>
+          <li>• Estado vazio evita tela “fria” quando não há resultados.</li>
+          <li>• Ordenação por destaque melhora descoberta.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">5) Testar e versionar (Git)</h3>
+        <ul>
+          <li>npm run dev → acesse /cardapio.</li>
+          <li>Verifique: filtros alternam categorias, mostrar esgotados exibe itens indisponíveis, grade é responsiva.</li>
+        </ul>
+        <p class="mb-2">Commits sugeridos (exemplos):</p>
+        <ul>
+          <li>feat: criar dataset unificado de itens (bebidas, lanches, sobremesas)</li>
+          <li>feat: adaptar ProductCard para múltiplas categorias</li>
+          <li>feat: implementar CategoryFilters com contagem e switch de esgotados</li>
+          <li>feat: filtrar e ordenar lista no cardápio + empty state</li>
+          <li>style: ajustes de espaçamento e títulos</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">6) Checklist de verificação (Cap. 3)</h3>
+        <ul>
+          <li>data/itens.js criado com itens de 3 categorias.</li>
+          <li>ProductCard exibe badges de categoria e destaque.</li>
+          <li>Filtros por categoria com contagem e switch “Mostrar esgotados”.</li>
+          <li>Lista ordenada com destaque primeiro, depois nome.</li>
+          <li>Estado vazio com botão “Limpar filtros”.</li>
+          <li>Layout responsivo com Grid (col-12 col-sm-6 col-lg-4).</li>
+          <li>Commits claros e frequentes.</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🧪 Atividades Práticas (para desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> ampliar os recursos do catálogo com base no que foi implementado.</p>
+        <ol class="mt-3">
+          <li><strong>Filtro “Promoções da Semana” (flag adicional)</strong>
+            <ul>
+              <li>Adicione um campo booleano promocao em alguns itens.</li>
+              <li>Crie um toggle “Promoções” ao lado dos filtros de categoria.</li>
+              <li>Mostre um badge text-bg-danger nos itens em promoção.</li>
+            </ul>
+          </li>
+          <li><strong>Ordenação por preço (asc/desc)</strong>
+            <ul>
+              <li>Adicione um Dropdown com “Ordenar por: Relevância (padrão), Preço ↑, Preço ↓”.</li>
+              <li>Ajuste a função sort de acordo com a seleção.</li>
+              <li>Bônus: lembre o critério em localStorage.</li>
+            </ul>
+          </li>
+          <li><strong>Favoritos (💛) com persistência local</strong>
+            <ul>
+              <li>Adicione um botão de favorito no ProductCard (ícone bi-heart/bi-heart-fill).</li>
+              <li>Mantenha a lista de favoritos no estado da página e salve em localStorage.</li>
+              <li>Filtre por favoritos em uma aba extra (ex.: “Favoritos”).</li>
+            </ul>
+          </li>
+          <li><strong>Acessibilidade expandida</strong>
+            <ul>
+              <li>Garanta foco visível nos botões de filtro com :focus-visible.</li>
+              <li>Adicione aria-live="polite" na mensagem de alerta e no empty state para leitura por screen readers.</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="mb-2"><strong>Critérios de avaliação (10 pts):</strong></p>
+        <ul>
+          <li>Implementação correta dos filtros/ordenadores — 4 pts</li>
+          <li>Feedbacks visuais (badges, estados, ícones) — 2 pts</li>
+          <li>Responsividade e grid funcionando bem — 2 pts</li>
+          <li>Código organizado e reuso de componentes — 2 pts</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🔎 Pesquisas complementares (sugestões)</h2>
+        <ul>
+          <li>“React: listas e keys (boas práticas)”</li>
+          <li>“Renderização condicional em React (&amp;&amp; e ternário)”</li>
+          <li>“Bootstrap 5 Grid system: container, row, col, gutters”</li>
+          <li>“Bootstrap 5 Buttons, Button group e Switch (form-check form-switch)”</li>
+          <li>“Acessibilidade com aria-pressed e aria-live”</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">📦 Entregáveis ao final do Capítulo 3</h2>
+        <ul>
+          <li>Página /cardapio com filtro por categoria e mostrar/ocultar esgotados.</li>
+          <li>ProductCard adaptado a todas as categorias com badges e estado indisponível.</li>
+          <li>UX com estado vazio e ordenação por destaque.</li>
+          <li>Repositório com commits claros e instruções mínimas no README.</li>
+        </ul>
+      </section>
+
+      <!-- Checklist interativo (texto mantido) -->
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2 text-danger"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">Baseado em “6) Checklist de verificação (Cap. 3)”. O progresso fica salvo neste navegador.</p>
+
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-danger" id="chkProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="vstack gap-2" id="checklistItems">
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="1"><span>data/itens.js criado com itens de 3 categorias.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="2"><span>ProductCard exibe badges de categoria e destaque.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="3"><span>Filtros por categoria com contagem e switch “Mostrar esgotados”.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="4"><span>Lista ordenada com destaque primeiro, depois nome.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="5"><span>Estado vazio com botão “Limpar filtros”.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="6"><span>Layout responsivo com Grid (col-12 col-sm-6 col-lg-4).</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="7"><span>Commits claros e frequentes.</span></label>
+          </div>
+        </div>
+      </section>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 02</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 04</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="small text-muted">
+          <i class="bi bi-journal-code me-1"></i> Capítulo 03 — Apostila PW II
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-pw" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+          <a class="btn btn-sm btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 04</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // ===== Questionário dinâmico =====
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    // ===== Checklist (salvo no localStorage) =====
+    const CHECKLIST_KEY = 'pw2_cap03_checklist_v1';
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', pct);
+      text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    loadChecklist();
+  </script>
+</body>
+</html>
