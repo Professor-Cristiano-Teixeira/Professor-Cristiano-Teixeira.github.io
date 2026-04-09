@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 09 — PW3 Laravel</title>
+  <meta name="description" content="Capítulo 9 — API REST com Laravel (api.php), Resource, Validação e Autenticação por Token (Sanctum)" />
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --pw3-danger: #dc3545;    /* vermelho */
+      --pw3-graybtn: #6c757d;   /* cinza */
+      --pw3-soft: #f8f9fa;      /* fundo suave */
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{
+      background: var(--pw3-graybtn);
+      border-color: var(--pw3-graybtn);
+      color:#fff;
+    }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    .badge-soft{
+      background: rgba(220,53,69,.10);
+      color: #b02a37;
+      border: 1px solid rgba(220,53,69,.18);
+    }
+
+    .toc a{ text-decoration: none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+    .quiz-option:hover{ background: #fdfdfd; }
+    .quiz-feedback{
+      border-radius: .75rem;
+      padding: .75rem;
+      border: 1px dashed var(--pw3-border);
+      background: #fff;
+      display: none;
+    }
+    .quiz-feedback.correct{
+      border-color: rgba(25,135,84,.35);
+      background: rgba(25,135,84,.06);
+      color: #0f5132;
+    }
+    .quiz-feedback.incorrect{
+      border-color: rgba(220,53,69,.35);
+      background: rgba(220,53,69,.06);
+      color: #842029;
+    }
+
+    /* Checklist */
+    .check-item{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+
+    .callout{
+      border: 1px solid var(--pw3-border);
+      border-left: 5px solid rgba(220,53,69,.55);
+      background: #fff;
+      border-radius: .75rem;
+      padding: 1rem;
+    }
+
+    a:focus, button:focus, input:focus{
+      outline: 3px solid rgba(13,110,253,.25);
+      outline-offset: 2px;
+    }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#pw3Offcanvas"
+              aria-controls="pw3Offcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">1º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">2º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">3º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">4º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-pw3 btn-sm" href="capitulo10.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 10)</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="pw3Offcanvas" aria-labelledby="pw3OffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+        <a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+      </div>
+
+      <hr>
+
+      <p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+
+      <div class="accordion" id="accMenu">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m1">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mc1" aria-expanded="false" aria-controls="mc1">1º Bimestre</button>
+          </h2>
+          <div id="mc1" class="accordion-collapse collapse" aria-labelledby="m1" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+              <a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+              <a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+              <a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m2">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mc2" aria-expanded="false" aria-controls="mc2">2º Bimestre</button>
+          </h2>
+          <div id="mc2" class="accordion-collapse collapse" aria-labelledby="m2" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+              <a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+              <a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+              <a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m3">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#mc3" aria-expanded="true" aria-controls="mc3">3º Bimestre</button>
+          </h2>
+          <div id="mc3" class="accordion-collapse collapse show" aria-labelledby="m3" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+              <a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+              <a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+              <a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mc4" aria-expanded="false" aria-controls="mc4">4º Bimestre</button>
+          </h2>
+          <div id="mc4" class="accordion-collapse collapse" aria-labelledby="m4" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+              <a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+              <a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+              <a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="mt-4">
+      <div class="d-grid gap-2">
+        <a class="btn btn-pw3" href="capitulo10.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 10)</a>
+        <a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="container my-4 my-lg-5" id="topo">
+
+    <section class="mb-4">
+      <div class="card">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+            <span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 09</span>
+            <span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+            <span class="badge text-bg-light border"><i class="bi bi-diagram-3 me-1"></i>3º Bimestre</span>
+          </div>
+
+          <h1 class="fw-bold mb-2">Capítulo 9 — API REST (api.php), Resources e Autenticação por Token (Sanctum)</h1>
+
+          <div class="mb-3">
+            <div class="fw-semibold">Formato:</div>
+            <div>· Semana A (100 min): Conceitos de REST + demonstração + criação da primeira API.</div>
+            <div>· Semana B (100 min): Autenticação por token + testes no Postman + atividades correlatas.</div>
+            <div class="mt-2">Contexto do projeto: Sistema da Lanchonete. Vamos expor endpoints REST para Produtos/Pedidos e proteger com tokens.</div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+            <a class="btn btn-outline-secondary" href="capitulo08.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 08)</a>
+            <a class="btn btn-pw3" href="capitulo10.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 10</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sumario-interno" class="mb-4">
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+              <div class="toc d-grid gap-2">
+                <a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos de aprendizagem</a>
+                <a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos e ferramentas</a>
+                <a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Conteúdo teórico (REST, status, versionamento)</a>
+                <a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo (API Produtos + Sanctum)</a>
+                <a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas</a>
+                <a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas complementares</a>
+                <a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário de revisão (dinâmico)</a>
+                <a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist de avaliação (interativo)</a>
+                <a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+              <p class="text-muted mb-0">Mantenha respostas padronizadas em JSON, valide entradas e use tokens para proteger endpoints.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-1" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">1) Objetivos de aprendizagem</h2>
+        <div>Ao final deste capítulo, o(a) aluno(a) será capaz de:</div>
+        <div>· Explicar o conceito de REST e mapear recursos para endpoints.</div>
+        <div>· Criar endpoints no arquivo <code>routes/api.php</code> e retornar JSON consistente.</div>
+        <div>· Usar <code>ApiResource</code> para controlar o formato da resposta.</div>
+        <div>· Validar entrada de dados em endpoints (Form Request ou validate()).</div>
+        <div>· Proteger a API com autenticação por token usando Laravel Sanctum.</div>
+      </div></div>
+    </section>
+
+    <section id="sec-2" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">2) Pré-requisitos e ferramentas</h2>
+        <div>· Projeto Laravel com catálogo (Produto/Categoria) e pedidos (Cap. 6–8).</div>
+        <div>· Postman instalado (usaremos para testar tokens e endpoints).</div>
+        <div>· Ambiente local rodando: <code>php artisan serve</code>.</div>
+      </div></div>
+    </section>
+
+    <section id="sec-3" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">3) Conteúdo teórico</h2>
+
+        <h3 class="h5 fw-bold mt-3">3.1. REST: recursos e verbos HTTP</h3>
+        <p class="mb-2">REST organiza o sistema em <strong>recursos</strong> (ex.: produtos, pedidos). Cada recurso é acessado por uma URL e manipulado com verbos HTTP:</p>
+        <div>· <code>GET /api/produtos</code> (listar)</div>
+        <div>· <code>GET /api/produtos/{id}</code> (detalhar)</div>
+        <div>· <code>POST /api/produtos</code> (criar)</div>
+        <div>· <code>PUT/PATCH /api/produtos/{id}</code> (atualizar)</div>
+        <div>· <code>DELETE /api/produtos/{id}</code> (remover)</div>
+
+        <h3 class="h5 fw-bold mt-4">3.2. Status HTTP e contratos</h3>
+        <p class="mb-2">Status claros facilitam o consumo:</p>
+        <div>· <code>200</code> OK (sucesso)</div>
+        <div>· <code>201</code> Created (criado)</div>
+        <div>· <code>204</code> No Content (removido sem corpo)</div>
+        <div>· <code>401</code> Unauthorized (sem login/token)</div>
+        <div>· <code>403</code> Forbidden (sem permissão)</div>
+        <div>· <code>404</code> Not Found</div>
+        <div>· <code>422</code> Unprocessable Entity (validação)</div>
+
+        <h3 class="h5 fw-bold mt-4">3.3. Versionamento e padronização</h3>
+        <p class="mb-0">Mesmo em projetos pequenos, vale adotar um padrão de resposta (ex.: {message, data, errors}) e pensar em versionar endpoints (ex.: <code>/api/v1</code>) quando o app evoluir.</p>
+
+        <div class="callout mt-4">
+          <div class="fw-semibold"><i class="bi bi-shield-check me-2"></i>Segurança</div>
+          <div class="text-muted">APIs devem validar entrada, proteger endpoints (token) e nunca retornar dados sensíveis (senha, tokens, etc.).</div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="sec-4" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">4) Passo a passo — API de Produtos + Token (Sanctum)</h2>
+        <div class="mb-2">Meta: criar endpoints REST para Produtos e proteger com token.</div>
+
+        <h3 class="h5 fw-bold mt-4">4.1. Instalar e configurar Sanctum</h3>
+        <div>Shell</div>
+        <pre class="language-bash"><code class="language-bash">composer require laravel/sanctum
+php artisan vendor:publish --provider="Laravel\\Sanctum\\SanctumServiceProvider"
+php artisan migrate</code></pre>
+
+        <div class="callout">
+          <div class="fw-semibold"><i class="bi bi-info-circle me-2"></i>Obs.</div>
+          <div class="text-muted">O Sanctum cria uma tabela para armazenar tokens pessoais. Vamos gerar tokens via endpoint de login.</div>
+        </div>
+
+        <h3 class="h5 fw-bold mt-4">4.2. Criar um endpoint de login para gerar token</h3>
+        <div>Crie um controller para autenticação de API:</div>
+        <div>Shell</div>
+        <pre class="language-bash"><code class="language-bash">php artisan make:controller Api/AuthController</code></pre>
+
+        <div>Em <code>app/Http/Controllers/Api/AuthController.php</code>:</div>
+        <div>PHP</div>
+        <pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        $data = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+            'device_name' => 'nullable|string|max:50',
+        ]);
+
+        $user = User::where('email', $data['email'])->first();
+
+        if (!$user || !Hash::check($data['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Credenciais inválidas.'
+            ], 401);
+        }
+
+        $device = $data['device_name'] ?? 'postman';
+        $token = $user->createToken($device)->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login OK',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role ?? null,
+            ]
+        ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logout OK'
+        ], 200);
+    }
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4.3. Criar ApiResource para Produto</h3>
+        <div>Shell</div>
+        <pre class="language-bash"><code class="language-bash">php artisan make:resource ProdutoResource</code></pre>
+
+        <div>Em <code>app/Http/Resources/ProdutoResource.php</code>:</div>
+        <div>PHP</div>
+        <pre class="language-php"><code class="language-php">public function toArray($request)
+{
+    return [
+        'id' => $this->id,
+        'nome' => $this->nome,
+        'preco' => (float) $this->preco,
+        'categoria' => $this->whenLoaded('categoria', function () {
+            return [
+                'id' => $this->categoria->id,
+                'nome' => $this->categoria->nome,
+            ];
+        }),
+        'created_at' => $this->created_at?->toISOString(),
+        'updated_at' => $this->updated_at?->toISOString(),
+    ];
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4.4. Criar controlador de API para Produtos</h3>
+        <div>Shell</div>
+        <pre class="language-bash"><code class="language-bash">php artisan make:controller Api/ProdutoApiController --api</code></pre>
+
+        <div>Em <code>app/Http/Controllers/Api/ProdutoApiController.php</code> (exemplo mínimo):</div>
+        <div>PHP</div>
+        <pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ProdutoResource;
+use App\Models\Produto;
+use Illuminate\Http\Request;
+
+class ProdutoApiController extends Controller
+{
+    public function index()
+    {
+        $produtos = Produto::with('categoria')->orderBy('nome')->paginate(10);
+        return ProdutoResource::collection($produtos);
+    }
+
+    public function show(Produto $produto)
+    {
+        $produto->load('categoria');
+        return new ProdutoResource($produto);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'nome' => 'required|string|max:120',
+            'preco' => 'required|numeric|min:0',
+            'categoria_id' => 'required|exists:categorias,id',
+        ]);
+
+        $produto = Produto::create($data);
+        $produto->load('categoria');
+
+        return (new ProdutoResource($produto))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function update(Request $request, Produto $produto)
+    {
+        $data = $request->validate([
+            'nome' => 'sometimes|required|string|max:120',
+            'preco' => 'sometimes|required|numeric|min:0',
+            'categoria_id' => 'sometimes|required|exists:categorias,id',
+        ]);
+
+        $produto->update($data);
+        $produto->load('categoria');
+
+        return new ProdutoResource($produto);
+    }
+
+    public function destroy(Produto $produto)
+    {
+        $produto->delete();
+        return response()->json(null, 204);
+    }
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4.5. Rotas em routes/api.php (protegidas por Sanctum)</h3>
+        <div>Edite <code>routes/api.php</code>:</div>
+        <div>PHP</div>
+        <pre class="language-php"><code class="language-php">use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProdutoApiController;
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::apiResource('produtos', ProdutoApiController::class);
+});</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4.6. Testes no Postman (passo a passo)</h3>
+        <div class="mb-2">1) Faça login:</div>
+        <div>POST <code>{{baseUrl}}/api/login</code> com body JSON:</div>
+        <div>JSON</div>
+        <pre class="language-json"><code class="language-json">{
+  "email": "seuemail@exemplo.com",
+  "password": "suasenha",
+  "device_name": "postman"
+}</code></pre>
+        <div class="mb-2">Copie o token e configure Authorization → Bearer Token nas próximas requisições.</div>
+        <div class="mb-2">2) Listar produtos:</div>
+        <div>GET <code>{{baseUrl}}/api/produtos</code></div>
+        <div class="mb-2">3) Criar produto:</div>
+        <div>POST <code>{{baseUrl}}/api/produtos</code> com JSON:</div>
+        <div>JSON</div>
+        <pre class="language-json"><code class="language-json">{
+  "nome": "Coxinha",
+  "preco": 7.5,
+  "categoria_id": 1
+}</code></pre>
+
+        <div class="callout mt-3">
+          <div class="fw-semibold"><i class="bi bi-check2-circle me-2"></i>Padrão de retorno</div>
+          <div class="text-muted">Usando Resource, a resposta já vem padronizada e pronta para consumo (inclusive paginada).</div>
+        </div>
+
+        <h3 class="h5 fw-bold mt-4">4.7. Commit no Git</h3>
+        <div>Shell</div>
+        <pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 9: API REST (produtos) + Resource + Sanctum token + Postman"
+git push</code></pre>
+      </div></div>
+    </section>
+
+    <section id="sec-5" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">5) Atividades correlatas</h2>
+        <div class="mb-2">Objetivo: ampliar a API e melhorar segurança e padrões.</div>
+
+        <div class="fw-semibold mt-2">1. API de Pedidos (listar e detalhar)</div>
+        <div>o Criar <code>PedidoResource</code> com itens e produtos.</div>
+        <div>o Usar eager loading (<code>with('itens.produto')</code>) e paginação.</div>
+
+        <div class="fw-semibold mt-3">2. Regras de autorização</div>
+        <div>o Permitir criar/editar produtos apenas para role='gerente'.</div>
+        <div>o Retornar 403 quando o token pertence a atendente.</div>
+
+        <div class="fw-semibold mt-3">3. Padronização de erros</div>
+        <div>o Criar um formato de erro padrão: <code>{message, errors}</code>.</div>
+        <div>o Garantir que 422 sempre retorne errors com nome do campo.</div>
+
+        <div class="callout mt-3">
+          <div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+          <div class="text-muted">Implementar versionamento: mover rotas para <code>/api/v1</code> e manter compatibilidade futura.</div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="sec-6" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">6) Pesquisas complementares</h2>
+        <div>· Diferença entre Sanctum e Passport (cenários de uso).</div>
+        <div>· Autorização com Policies/Gates e middleware customizado.</div>
+        <div>· Boas práticas de paginação e filtros em APIs (q, sort, dir).</div>
+        <div>· Rate limiting no Laravel: <code>throttle</code> e limites por usuário.</div>
+      </div></div>
+    </section>
+
+    <section id="sec-7" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+
+        <div class="mb-4 quiz-question" data-qid="q1" data-answer="B">
+          <div class="fw-semibold mb-2">1. Em REST, qual verbo HTTP é normalmente usado para criar um recurso?</div>
+          <div class="d-grid gap-2">
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="A">A) GET</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="B">B) POST</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="C">C) DELETE</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="D">D) HEAD</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="E">E) TRACE</label>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+            <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+          </div>
+          <div class="quiz-feedback mt-3" aria-live="polite"></div>
+          <hr class="mt-4">
+        </div>
+
+        <div class="mb-4 quiz-question" data-qid="q2" data-answer="E">
+          <div class="fw-semibold mb-2">2. Qual arquivo do Laravel é mais usado para rotas de API?</div>
+          <div class="d-grid gap-2">
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="A">A) routes/console.php</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="B">B) routes/channels.php</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="C">C) routes/auth.php</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="D">D) routes/events.php</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="E">E) routes/api.php</label>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+            <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+          </div>
+          <div class="quiz-feedback mt-3" aria-live="polite"></div>
+          <hr class="mt-4">
+        </div>
+
+        <div class="mb-4 quiz-question" data-qid="q3" data-answer="C">
+          <div class="fw-semibold mb-2">3. Qual status HTTP representa erro de validação no Laravel (JSON)?</div>
+          <div class="d-grid gap-2">
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="A">A) 201</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="B">B) 204</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="C">C) 422</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="D">D) 304</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="E">E) 100</label>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+            <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+          </div>
+          <div class="quiz-feedback mt-3" aria-live="polite"></div>
+          <hr class="mt-4">
+        </div>
+
+        <div class="mb-4 quiz-question" data-qid="q4" data-answer="A">
+          <div class="fw-semibold mb-2">4. Qual é o formato comum do token no header Authorization?</div>
+          <div class="d-grid gap-2">
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="A">A) Bearer &lt;token&gt;</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="B">B) Basic &lt;token&gt;</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="C">C) TokenOnly &lt;token&gt;</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="D">D) Cookie &lt;token&gt;</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="E">E) None</label>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+            <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+          </div>
+          <div class="quiz-feedback mt-3" aria-live="polite"></div>
+          <hr class="mt-4">
+        </div>
+
+        <div class="mb-0 quiz-question" data-qid="q5" data-answer="D">
+          <div class="fw-semibold mb-2">5. Para controlar o formato do JSON de saída em Laravel, usamos frequentemente:</div>
+          <div class="d-grid gap-2">
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="A">A) Migrations</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="B">B) Seeders</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="C">C) Blade</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="D">D) API Resources</label>
+            <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="E">E) Vite</label>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+            <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+          </div>
+          <div class="quiz-feedback mt-3" aria-live="polite"></div>
+        </div>
+
+        <div class="mt-4">
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btnResetQuiz">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário
+          </button>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="sec-8" class="mb-4">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 9)</h2>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+            <div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+          </div>
+          <div class="progress mt-2" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2" id="checklist">
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c1">· Sanctum instalado e migrations executadas.</label>
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c2">· Endpoint /api/login gerando token Bearer.</label>
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c3">· Rotas protegidas com middleware auth:sanctum.</label>
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c4">· ProdutoResource criado e aplicado na API.</label>
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c5">· ProdutoApiController com index/show/store/update/destroy funcionando.</label>
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c6">· Status HTTP corretos (201 no create, 204 no delete, 422 na validação).</label>
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c7">· Postman configurado com Authorization Bearer Token.</label>
+          <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c8">· Commit + push realizados com mensagem descritiva.</label>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="btnResetChecklist">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist
+          </button>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="sec-9" class="mb-5">
+      <div class="card"><div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">9) Entregáveis</h2>
+        <div>1. Repositório com Sanctum, controllers de API, resources e rotas em <code>routes/api.php</code>.</div>
+        <div>2. Coleção Postman exportada em <code>docs/postman/</code> contendo login + produtos (CRUD).</div>
+        <div>3. Prints em <code>docs/</code>: login com token, GET produtos com Bearer, POST produto retornando 201.</div>
+      </div></div>
+    </section>
+
+    <section class="mb-5">
+      <div class="d-flex flex-wrap justify-content-between gap-2">
+        <a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+          <a class="btn btn-pw3" href="capitulo10.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 10</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="py-4 border-top">
+      <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+        <div>
+          <div class="fw-semibold">Apostila PW3 • Laravel</div>
+          <div class="small text-muted">Capítulo 09 • API REST + Sanctum</div>
+        </div>
+        <div class="small text-muted"><i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos</div>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    localStorage.setItem('pw3_last_chapter', 'capitulo09.html');
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Questionário dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap09_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState));
+      }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(saved.result === 'correct'){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else if(saved.result === 'incorrect'){
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        }
+      });
+
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+
+          quizState[qid] = { selected: chosen, submitted: true, result: isCorrect ? 'correct' : 'incorrect' };
+          saveState();
+
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          setFeedback(qEl, isCorrect ? 'correct' : 'incorrect', isCorrect ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap09_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+
+      checks.forEach(ch => { ch.checked = !!state[ch.dataset.key]; });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => ch.addEventListener('change', () => { save(); update(); }));
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>

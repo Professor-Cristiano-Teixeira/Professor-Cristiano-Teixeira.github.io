@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — PW3 Laravel</title>
+  <meta name="description" content="Capítulo 8 — Consumindo APIs Públicas + Postman (ViaCEP, erros, cache e testes)" />
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --pw3-danger: #dc3545;    /* vermelho */
+      --pw3-graybtn: #6c757d;   /* cinza */
+      --pw3-soft: #f8f9fa;      /* fundo suave */
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{
+      background: var(--pw3-graybtn);
+      border-color: var(--pw3-graybtn);
+      color:#fff;
+    }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism (visual VSCode) */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    /* “Meta” do capítulo */
+    .badge-soft{
+      background: rgba(220,53,69,.10);
+      color: #b02a37;
+      border: 1px solid rgba(220,53,69,.18);
+    }
+
+    /* Índice interno */
+    .toc a{ text-decoration: none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+    .quiz-option:hover{ background: #fdfdfd; }
+    .quiz-feedback{
+      border-radius: .75rem;
+      padding: .75rem;
+      border: 1px dashed var(--pw3-border);
+      background: #fff;
+      display: none;
+    }
+    .quiz-feedback.correct{
+      border-color: rgba(25,135,84,.35);
+      background: rgba(25,135,84,.06);
+      color: #0f5132;
+    }
+    .quiz-feedback.incorrect{
+      border-color: rgba(220,53,69,.35);
+      background: rgba(220,53,69,.06);
+      color: #842029;
+    }
+
+    /* Checklist */
+    .check-item{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+
+    /* Callout */
+    .callout{
+      border: 1px solid var(--pw3-border);
+      border-left: 5px solid rgba(220,53,69,.55);
+      background: #fff;
+      border-radius: .75rem;
+      padding: 1rem;
+    }
+
+    /* Toast */
+    .toast-container{ z-index: 1080; }
+
+    /* Acessibilidade: foco visível */
+    a:focus, button:focus, input:focus{
+      outline: 3px solid rgba(13,110,253,.25);
+      outline-offset: 2px;
+    }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR (vermelha) + Offcanvas (hambúrguer) -->
+  <nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#pw3Offcanvas"
+              aria-controls="pw3Offcanvas" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Menu desktop -->
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">1º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+              <li><hr class="dropdown-divider"></li>
+
+              <li><h6 class="dropdown-header">2º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+              <li><hr class="dropdown-divider"></li>
+
+              <li><h6 class="dropdown-header">3º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+              <li><hr class="dropdown-divider"></li>
+
+              <li><h6 class="dropdown-header">4º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-pw3 btn-sm" href="capitulo09.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 09)</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Offcanvas (menu hambúrguer) -->
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="pw3Offcanvas" aria-labelledby="pw3OffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="d-grid gap-2 mb-3">
+        <a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+        <a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+      </div>
+
+      <hr>
+
+      <p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+
+      <div class="accordion" id="accMenu">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m1">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mc1" aria-expanded="false" aria-controls="mc1">
+              1º Bimestre
+            </button>
+          </h2>
+          <div id="mc1" class="accordion-collapse collapse" aria-labelledby="m1" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+              <a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+              <a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+              <a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m2">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#mc2" aria-expanded="true" aria-controls="mc2">
+              2º Bimestre
+            </button>
+          </h2>
+          <div id="mc2" class="accordion-collapse collapse show" aria-labelledby="m2" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+              <a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+              <a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+              <a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m3">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mc3" aria-expanded="false" aria-controls="mc3">
+              3º Bimestre
+            </button>
+          </h2>
+          <div id="mc3" class="accordion-collapse collapse" aria-labelledby="m3" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+              <a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+              <a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+              <a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="m4">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mc4" aria-expanded="false" aria-controls="mc4">
+              4º Bimestre
+            </button>
+          </h2>
+          <div id="mc4" class="accordion-collapse collapse" aria-labelledby="m4" data-bs-parent="#accMenu">
+            <div class="accordion-body d-grid gap-2">
+              <a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+              <a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+              <a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+              <a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="mt-4">
+      <div class="d-grid gap-2">
+        <a class="btn btn-pw3" href="capitulo09.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 09)</a>
+        <a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="pw3Toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong class="me-auto" id="pw3ToastTitle">Mensagem</strong>
+        <small class="text-muted">agora</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+      </div>
+      <div class="toast-body" id="pw3ToastBody">...</div>
+    </div>
+  </div>
+
+  <main class="container my-4 my-lg-5" id="topo">
+
+    <!-- Cabeçalho do capítulo -->
+    <section class="mb-4">
+      <div class="card">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+            <span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 08</span>
+            <span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+          </div>
+
+          <h1 class="fw-bold mb-2">Capítulo 8 — Consumindo APIs Públicas + Postman</h1>
+
+          <div class="mb-3">
+            <div class="fw-semibold">Formato:</div>
+            <div>· Semana A (100 min): Teoria + demonstração + início do passo a passo.</div>
+            <div>· Semana B (100 min): Conclusão do passo a passo + atividades correlatas + revisão.</div>
+            <div class="mt-2">Contexto do projeto: pedidos com AJAX (Cap. 7). Agora vamos integrar uma API pública para preencher endereço de entrega e documentar/testar com Postman.</div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+            <a class="btn btn-outline-secondary" href="capitulo07.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 07)</a>
+            <a class="btn btn-pw3" href="capitulo09.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 09</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sumário interno -->
+    <section id="sumario-interno" class="mb-4">
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+              <div class="toc d-grid gap-2">
+                <a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos de aprendizagem</a>
+                <a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos e ferramentas</a>
+                <a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Conteúdo teórico</a>
+                <a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo guiado (ViaCEP + cache + Postman)</a>
+                <a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas (Semana B)</a>
+                <a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas complementares</a>
+                <a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário de revisão (dinâmico)</a>
+                <a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist de avaliação (interativo)</a>
+                <a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis do capítulo</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+              <p class="text-muted mb-0">
+                Postman ajuda a testar e documentar. No Laravel, use <code>Http::timeout()</code>, tratamento de erro e cache com <code>Cache::remember()</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1) Objetivos -->
+    <section id="sec-1" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">1) Objetivos de aprendizagem</h2>
+          <div>Ao final deste capítulo, o(a) aluno(a) será capaz de:</div>
+          <div>· Consumir uma API pública no Laravel com <code>Http</code> (cliente HTTP do framework).</div>
+          <div>· Tratar erros de rede, timeouts e respostas inválidas.</div>
+          <div>· Usar cache simples para reduzir chamadas repetidas (ex.: CEP consultado várias vezes).</div>
+          <div>· Integrar o consumo da API no front (autopreencher endereço via AJAX).</div>
+          <div>· Criar uma coleção no Postman (com variáveis/ambiente) e salvar exemplos de requisições.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2) Pré-requisitos -->
+    <section id="sec-2" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">2) Pré-requisitos e ferramentas</h2>
+          <div>· Pré-requisitos: Cap. 5 a 7 (autenticação, pedidos e AJAX) funcionando.</div>
+          <div>· Ferramentas: VS Code, Git, MySQL, navegador, Postman (obrigatório neste capítulo).</div>
+          <div>· Recomendado: ter uma tela de “pedido/entrega” ou uma seção de endereço no pedido para o preenchimento via CEP.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3) Teoria -->
+    <section id="sec-3" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">3) Conteúdo teórico</h2>
+
+          <h3 class="h5 fw-bold mt-3">3.1. Consumindo APIs públicas com responsabilidade</h3>
+          <p class="mb-2">
+            Consumir uma API pública significa depender de um serviço externo. Isso exige cuidados: tratar indisponibilidade,
+            validar a resposta, evitar excesso de chamadas e lidar com limites (rate limit). Na prática, isso se resolve com:
+            <strong>timeout</strong>, <strong>retry</strong> (com moderação), <strong>cache</strong> e mensagens amigáveis ao usuário.
+          </p>
+          <p class="mb-0">
+            No Laravel, a classe <code>Http</code> (HTTP Client) facilita requisições e já integra bem com JSON.
+          </p>
+
+          <h3 class="h5 fw-bold mt-4">3.2. Timeouts e tratamento de erro</h3>
+          <p class="mb-2">
+            Um timeout evita que o sistema “trave” esperando uma resposta. Se a API demorar, você retorna uma mensagem clara.
+            Também é importante diferenciar: erro de validação do usuário (ex.: CEP inválido) vs erro externo (API fora do ar).
+          </p>
+          <p class="mb-0">
+            Em APIs, um padrão comum é retornar JSON com <code>message</code> e, se necessário, <code>errors</code>.
+          </p>
+
+          <h3 class="h5 fw-bold mt-4">3.3. Cache: reduzindo chamadas repetidas</h3>
+          <p class="mb-2">
+            Se vários pedidos usam o mesmo CEP, não faz sentido chamar a API toda hora. Um cache curto (ex.: 10 minutos)
+            melhora performance e reduz risco de bloqueio por excesso. O Laravel oferece cache por drivers (file, database, redis).
+          </p>
+          <p class="mb-0">
+            Para nosso cenário didático, usaremos <code>Cache::remember()</code> com o driver padrão.
+          </p>
+
+          <h3 class="h5 fw-bold mt-4">3.4. Postman: testar, documentar e automatizar</h3>
+          <p class="mb-2">
+            O Postman permite testar endpoints rapidamente, salvar coleções e criar ambientes com variáveis.
+            Isso ajuda a documentar o projeto e a verificar se a API está respondendo como esperado.
+          </p>
+          <p class="mb-0">
+            Você pode criar exemplos de requisições (GET/POST) e incluir testes simples (scripts) para validar status e campos.
+          </p>
+
+          <div class="callout mt-4">
+            <div class="fw-semibold"><i class="bi bi-link-45deg me-2"></i>Aplicação no projeto</div>
+            <div class="text-muted">Usaremos a API ViaCEP para buscar endereço pelo CEP e autopreencher campos de entrega no pedido.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4) Passo a passo -->
+    <section id="sec-4" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">4) Passo a passo guiado — ViaCEP + Cache + Postman</h2>
+          <div class="mb-2">Meta: criar endpoint interno no Laravel que consulta ViaCEP e retorna JSON para o front.</div>
+
+          <h3 class="h5 fw-bold mt-4">4.1. Criar rota e controller para consulta de CEP</h3>
+          <div>Crie um controller simples:</div>
+          <div>Shell</div>
+          <pre class="language-bash"><code class="language-bash">php artisan make:controller CepController</code></pre>
+
+          <div>Em <code>routes/web.php</code>, crie uma rota protegida (ou pública, se preferir). Aqui usaremos <code>auth</code>:</div>
+          <div>PHP</div>
+          <pre class="language-php"><code class="language-php">use App\Http\Controllers\CepController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cep/{cep}', [CepController::class, 'show'])->name('cep.show');
+});</code></pre>
+
+          <h3 class="h5 fw-bold mt-4">4.2. Implementar consumo da API ViaCEP com Http + timeout + cache</h3>
+          <div>Edite <code>app/Http/Controllers/CepController.php</code>:</div>
+          <div>PHP</div>
+          <pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+
+class CepController extends Controller
+{
+    public function show(string $cep)
+    {
+        // Normaliza CEP: mantém apenas números
+        $cep = preg_replace('/\D/', '', $cep);
+
+        // Validação simples (CEP brasileiro tem 8 dígitos)
+        if (strlen($cep) !== 8) {
+            return response()->json([
+                'message' => 'CEP inválido. Informe 8 dígitos.',
+                'errors' => ['cep' => ['CEP deve conter 8 números.']]
+            ], 422);
+        }
+
+        $cacheKey = "cep:$cep";
+
+        $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($cep) {
+            // ViaCEP: https://viacep.com.br/ws/{cep}/json/
+            $resp = Http::timeout(3)->acceptJson()
+                ->get("https://viacep.com.br/ws/{$cep}/json/");
+
+            if (!$resp->ok()) {
+                return ['_error' => 'Falha ao consultar serviço de CEP.'];
+            }
+
+            $json = $resp->json();
+
+            // ViaCEP retorna {"erro": true} quando não encontra
+            if (isset($json['erro']) && $json['erro'] === true) {
+                return ['_error' => 'CEP não encontrado.'];
+            }
+
+            return $json;
+        });
+
+        if (isset($data['_error'])) {
+            return response()->json([
+                'message' => $data['_error']
+            ], 404);
+        }
+
+        // Padroniza resposta para o front
+        return response()->json([
+            'message' => 'CEP encontrado!',
+            'cep' => $data['cep'] ?? $cep,
+            'logradouro' => $data['logradouro'] ?? '',
+            'bairro' => $data['bairro'] ?? '',
+            'localidade' => $data['localidade'] ?? '',
+            'uf' => $data['uf'] ?? '',
+            'ibge' => $data['ibge'] ?? null,
+        ], 200);
+    }
+}</code></pre>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold"><i class="bi bi-clock-history me-2"></i>Cache em 10 minutos</div>
+            <div class="text-muted">Isso reduz chamadas repetidas quando vários usuários consultam o mesmo CEP. Ajuste o tempo conforme necessidade.</div>
+          </div>
+
+          <h3 class="h5 fw-bold mt-4">4.3. Criar campos de entrega no pedido (exemplo simples)</h3>
+          <div>
+            Se você ainda não tem campos de entrega, crie colunas no pedido (opcional) ou mantenha apenas no front.
+            Para didática, vamos assumir que a tela de pedido tem um bloco “Entrega” com: CEP, logradouro, bairro, cidade, UF.
+          </div>
+
+          <div>Exemplo de bloco em <code>resources/views/pedidos/edit.blade.php</code>:</div>
+          <div>HTML/Blade</div>
+          <pre class="language-php"><code class="language-php">&lt;div class="card mt-3"&gt;
+  &lt;div class="card-body"&gt;
+    &lt;h5 class="fw-bold"&gt;Entrega&lt;/h5&gt;
+
+    &lt;div class="row g-2"&gt;
+      &lt;div class="col-md-4"&gt;
+        &lt;label class="form-label"&gt;CEP&lt;/label&gt;
+        &lt;input id="cep" class="form-control" placeholder="00000-000"&gt;
+        &lt;div class="form-text"&gt;Digite o CEP e clique em Buscar.&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class="col-md-2 d-flex align-items-end"&gt;
+        &lt;button id="btnBuscarCep" class="btn btn-outline-secondary w-100" type="button"&gt;Buscar&lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;div class="col-md-6"&gt;
+        &lt;label class="form-label"&gt;Logradouro&lt;/label&gt;
+        &lt;input id="logradouro" class="form-control"&gt;
+      &lt;/div&gt;
+
+      &lt;div class="col-md-4"&gt;
+        &lt;label class="form-label"&gt;Bairro&lt;/label&gt;
+        &lt;input id="bairro" class="form-control"&gt;
+      &lt;/div&gt;
+      &lt;div class="col-md-6"&gt;
+        &lt;label class="form-label"&gt;Cidade&lt;/label&gt;
+        &lt;input id="cidade" class="form-control"&gt;
+      &lt;/div&gt;
+      &lt;div class="col-md-2"&gt;
+        &lt;label class="form-label"&gt;UF&lt;/label&gt;
+        &lt;input id="uf" class="form-control" maxlength="2"&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  window.PW3CEP = {
+    urlBase: "{{ url('/cep') }}" // GET /cep/{cep}
+  };
+&lt;/script&gt;</code></pre>
+
+          <h3 class="h5 fw-bold mt-4">4.4. Front-end: buscar CEP via fetch e autopreencher</h3>
+          <div>JavaScript (pode ficar no final da view):</div>
+          <div>JavaScript</div>
+          <pre class="language-javascript"><code class="language-javascript">function showToast(title, body) {
+  const el = document.getElementById('pw3Toast');
+  document.getElementById('pw3ToastTitle').textContent = title;
+  document.getElementById('pw3ToastBody').textContent = body;
+  const toast = bootstrap.Toast.getOrCreateInstance(el, { delay: 2500 });
+  toast.show();
+}
+
+function onlyDigits(v){
+  return (v || '').replace(/\D/g, '');
+}
+
+document.getElementById('btnBuscarCep')?.addEventListener('click', async () =&gt; {
+  const cepEl = document.getElementById('cep');
+  const cep = onlyDigits(cepEl.value);
+
+  try {
+    const resp = await fetch(`${window.PW3CEP.urlBase}/${cep}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      showToast('Erro', data.message || 'Falha ao consultar CEP.');
+      return;
+    }
+
+    document.getElementById('logradouro').value = data.logradouro || '';
+    document.getElementById('bairro').value = data.bairro || '';
+    document.getElementById('cidade').value = data.localidade || '';
+    document.getElementById('uf').value = data.uf || '';
+
+    showToast('Sucesso', data.message);
+  } catch (e) {
+    console.error(e);
+    showToast('Erro', 'Falha de conexão. Verifique servidor e internet.');
+  }
+});</code></pre>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold"><i class="bi bi-shield-check me-2"></i>Boa prática</div>
+            <div class="text-muted">Valide CEP no back (422) e trate no front com mensagens amigáveis. Se a API externa falhar, retorne 404/503 com JSON padronizado.</div>
+          </div>
+
+          <h3 class="h5 fw-bold mt-4">4.5. Testar com Postman (coleção e ambiente)</h3>
+          <div>Passos sugeridos:</div>
+          <div>1) Crie um <strong>Environment</strong> com variável <code>baseUrl</code> = <code>http://127.0.0.1:8000</code>.</div>
+          <div>2) Crie uma <strong>Collection</strong> chamada <strong>Lanchonete PW3</strong>.</div>
+          <div>3) Adicione a requisição <strong>GET {{baseUrl}}/cep/01001000</strong> (exemplo).</div>
+          <div>4) Envie e verifique status 200 e campos (logradouro, bairro, localidade, uf).</div>
+          <div>5) Teste erro: <strong>GET {{baseUrl}}/cep/123</strong> → deve retornar 422.</div>
+          <div>6) Salve exemplos (“Save Response”) na coleção.</div>
+
+          <div class="mt-2">Script de teste simples no Postman (aba Tests):</div>
+          <div>JavaScript</div>
+          <pre class="language-javascript"><code class="language-javascript">pm.test("Status 200", function () {
+  pm.response.to.have.status(200);
+});
+
+pm.test("Tem campos de endereço", function () {
+  const json = pm.response.json();
+  pm.expect(json).to.have.property('logradouro');
+  pm.expect(json).to.have.property('bairro');
+  pm.expect(json).to.have.property('localidade');
+  pm.expect(json).to.have.property('uf');
+});</code></pre>
+
+          <h3 class="h5 fw-bold mt-4">4.6. Commit no Git</h3>
+          <div>Shell</div>
+          <pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 8: consumo ViaCEP + cache + endpoint interno + testes Postman"
+git push</code></pre>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 5) Atividades correlatas -->
+    <section id="sec-5" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">5) Atividades correlatas (para a Semana B)</h2>
+          <div class="mb-2">Objetivo: consolidar consumo de API, cache, UX e Postman. Entrega via repositório (commit + push).</div>
+
+          <div class="fw-semibold mt-2">1. Cachear resposta do CEP por alguns minutos (melhorar)</div>
+          <div>o Ajustar TTL do cache e criar um botão “Limpar cache do CEP” (rota admin/gerente).</div>
+          <div>o Mostrar no JSON um campo <code>cached</code> (true/false) para fins didáticos.</div>
+
+          <div class="fw-semibold mt-3">2. Tratar CEP inválido com mensagens amigáveis</div>
+          <div>o Validar CEP com regex e retornar 422 com errors.</div>
+          <div>o No front, destacar campo CEP e exibir mensagem abaixo do input.</div>
+
+          <div class="fw-semibold mt-3">3. Máscara de CEP no front</div>
+          <div>o Implementar máscara simples: 00000-000 (JS).</div>
+          <div>o Garantir que o back recebe apenas números (normalização).</div>
+
+          <div class="callout mt-3">
+            <div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+            <div class="text-muted">Criar uma coleção Postman completa com rotas de Categoria/Produto/Pedido e exemplos de payloads.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6) Pesquisas -->
+    <section id="sec-6" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">6) Pesquisas complementares (para aprofundar)</h2>
+          <div>· O que é rate limiting e como uma API pública pode limitar chamadas?</div>
+          <div>· Estratégias de cache: quando usar cache em arquivo, database ou Redis.</div>
+          <div>· Boas práticas de consumo de API: timeouts, retries e circuit breaker (conceito).</div>
+          <div>· Postman: variáveis de ambiente, pre-request scripts e como exportar coleção.</div>
+          <div>· Segurança: por que não expor chaves/segredos no front e como usar .env para credenciais.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7) Questionário -->
+    <section id="sec-7" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+
+          <div class="mb-4 quiz-question" data-qid="q1" data-answer="C">
+            <div class="fw-semibold mb-2">1. Qual classe do Laravel facilita chamadas HTTP para consumir APIs?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="A">A) DB</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="B">B) Route</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="C">C) Http</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="D">D) Gate</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q1" value="E">E) Seeder</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q2" data-answer="B">
+            <div class="fw-semibold mb-2">2. Por que definir timeout ao consumir uma API externa?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="A">A) Para aumentar o tamanho do banco.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="B">B) Para evitar que a aplicação fique esperando indefinidamente e trave a experiência.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="C">C) Para desativar validação.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="D">D) Para obrigar retorno em XML.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q2" value="E">E) Para remover CSRF automaticamente.</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q3" data-answer="D">
+            <div class="fw-semibold mb-2">3. Qual benefício principal de usar cache ao consultar CEP?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="A">A) Criar tabelas automaticamente.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="B">B) Substituir autenticação do sistema.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="C">C) Trocar JSON por SOAP.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="D">D) Reduzir chamadas repetidas, melhorar performance e evitar rate limit.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q3" value="E">E) Remover a necessidade de Postman.</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q4" data-answer="A">
+            <div class="fw-semibold mb-2">4. No ViaCEP, qual comportamento indica CEP não encontrado (tipicamente)?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="A">A) Resposta JSON com campo erro=true</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="B">B) Sempre retorna 500</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="C">C) Retorna HTML com login</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="D">D) Retorna apenas XML</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q4" value="E">E) Retorna 201 Created</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q5" data-answer="E">
+            <div class="fw-semibold mb-2">5. Qual ferramenta usamos para testar e documentar requisições HTTP com coleções e ambientes?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="A">A) MySQL Workbench</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="B">B) Composer</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="C">C) Artisan</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="D">D) Vite</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q5" value="E">E) Postman</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q6" data-answer="C">
+            <div class="fw-semibold mb-2">6. Qual status HTTP é adequado para CEP inválido (ex.: menos de 8 dígitos)?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q6" value="A">A) 201</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q6" value="B">B) 304</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q6" value="C">C) 422</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q6" value="D">D) 100</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q6" value="E">E) 204</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q7" data-answer="B">
+            <div class="fw-semibold mb-2">7. Qual método do Laravel ajuda a cachear o resultado de uma função por um tempo?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q7" value="A">A) Route::resource()</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q7" value="B">B) Cache::remember()</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q7" value="C">C) DB::migrate()</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q7" value="D">D) Auth::paginate()</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q7" value="E">E) View::seed()</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q8" data-answer="D">
+            <div class="fw-semibold mb-2">8. Em Postman, para reutilizar a URL base em várias requisições, usamos:</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q8" value="A">A) Apenas o Console</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q8" value="B">B) Apenas o History</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q8" value="C">C) Apenas o Runner</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q8" value="D">D) Environment variables (ex.: {{baseUrl}})</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q8" value="E">E) php artisan serve</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-4 quiz-question" data-qid="q9" data-answer="A">
+            <div class="fw-semibold mb-2">9. O que significa “normalizar” o CEP antes de consultar a API?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q9" value="A">A) Remover caracteres não numéricos e padronizar o formato.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q9" value="B">B) Salvar o CEP como senha do usuário.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q9" value="C">C) Converter JSON em XML.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q9" value="D">D) Criar migrations para CEP.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q9" value="E">E) Desativar cache.</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+            <hr class="mt-4">
+          </div>
+
+          <div class="mb-0 quiz-question" data-qid="q10" data-answer="B">
+            <div class="fw-semibold mb-2">10. No front-end, o que é “autopreencher” endereço pelo CEP?</div>
+            <div class="d-grid gap-2">
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q10" value="A">A) Criar pedidos automaticamente sem usuário.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q10" value="B">B) Buscar dados do endereço via API e preencher campos do formulário automaticamente.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q10" value="C">C) Converter formulário em PDF.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q10" value="D">D) Desativar validação de formulário.</label>
+              <label class="quiz-option"><input class="form-check-input me-2" type="radio" name="q10" value="E">E) Trocar Blade por React automaticamente.</label>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+              <button class="btn btn-outline-secondary btn-sm btn-key" type="button" disabled><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" aria-live="polite"></div>
+          </div>
+
+          <div class="mt-4">
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="btnResetQuiz">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 8) Checklist interativo -->
+    <section id="sec-8" class="mb-4">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 8)</h2>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+              <div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+            </div>
+            <div class="progress mt-2" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2" id="checklist">
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c1">· CepController criado e rota GET /cep/{cep} configurada.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c2">· Consumo ViaCEP com Http::timeout() e acceptJson() implementado.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c3">· Tratamento de CEP inválido com 422 e errors no JSON.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c4">· Tratamento de CEP não encontrado (erro=true) com 404 e message.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c5">· Cache de CEP com Cache::remember() funcionando (TTL definido).</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c6">· Front com fetch para buscar CEP e autopreencher logradouro/bairro/cidade/UF.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c7">· Toast de sucesso/erro exibindo feedback ao usuário.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c8">· Coleção Postman criada com environment (baseUrl) e requisições salvas.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c9">· Testes no Postman (status e campos) configurados e funcionando.</label>
+            <label class="check-item"><input class="form-check-input me-2 check" type="checkbox" data-key="c10">· Commit + push realizados com mensagem descritiva.</label>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="btnResetChecklist">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9) Entregáveis -->
+    <section id="sec-9" class="mb-5">
+      <div class="card">
+        <div class="card-body p-4">
+          <h2 class="h4 fw-bold mb-3">9) Entregáveis do capítulo</h2>
+          <div>1. Repositório com CepController, rota /cep/{cep}, cache e integração no front (autopreenchimento).</div>
+          <div>2. Pasta <code>docs/</code> com prints: (a) Postman retornando 200, (b) Postman retornando 422, (c) tela preenchendo endereço.</div>
+          <div>3. Export da coleção Postman (arquivo .json) salvo no repositório em <code>docs/postman/</code>.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navegação final -->
+    <section class="mb-5">
+      <div class="d-flex flex-wrap justify-content-between gap-2">
+        <a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+          <a class="btn btn-pw3" href="capitulo09.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 09</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="py-4 border-top">
+      <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+        <div>
+          <div class="fw-semibold">Apostila PW3 • Laravel</div>
+          <div class="small text-muted">Capítulo 08 • Consumindo APIs Públicas + Postman</div>
+        </div>
+        <div class="small text-muted">
+          <i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Bootstrap Bundle (com Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // Marcar último capítulo acessado (para aparecer na Home)
+    localStorage.setItem('pw3_last_chapter', 'capitulo08.html');
+
+    // Rolagem suave para âncoras internas
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Questionário dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap08_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState));
+      }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      // Restaurar
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(saved.result === 'correct'){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else if(saved.result === 'incorrect'){
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        }
+      });
+
+      // Eventos
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+
+          quizState[qid] = {
+            selected: chosen,
+            submitted: true,
+            result: isCorrect ? 'correct' : 'incorrect'
+          };
+          saveState();
+
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(isCorrect){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else{
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap08_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+
+      // Restaurar
+      checks.forEach(ch => {
+        const key = ch.dataset.key;
+        ch.checked = !!state[key];
+      });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => {
+        ch.addEventListener('change', () => {
+          save();
+          update();
+        });
+      });
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>
