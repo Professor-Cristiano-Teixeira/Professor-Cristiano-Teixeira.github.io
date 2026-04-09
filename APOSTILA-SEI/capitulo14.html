@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 14 — ESP32 como Servidor Web Simples</title>
+  <meta name="description" content="Capítulo 14 da apostila de Sistemas Embarcados e IoT: ESP32 como Servidor Web Simples." />
+  <style>
+    :root{
+      --red:#00979D;--red2:#005C5F;--dark:#2c3e50;--g1:#e8f4f4;--g2:#7a8f90;
+      --paper:#ffffff;--bg:#f7fbfb;--text:#163233;--muted:#4f6b6c;--line:#d7ecec;
+      --ok:#15803d;--bad:#b91c1c;--warn:#b45309;--r:12px;--sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;--cf:#e2e8f0;--ck:#7dd3fc;--cs:#f9a8d4;--cfu:#86efac;--cc:#94a3b8;--max:1200px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff,#f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12} h2{font-size:28px;margin-top:4px} h3{font-size:22px} h4{font-size:18px}
+    p{margin:8px 0 12px} .subtitle{font-size:18px;color:var(--muted)} .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px}.mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    ul.clean,ol.clean{padding-left:20px}.activities li,.searches li{margin-bottom:10px}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+    th{background:#ecf8f8;color:var(--red2);font-size:14px} tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,monospace;font-size:14px}
+    .hl .k{color:var(--ck)} .hl .s{color:var(--cs)} .hl .f{color:var(--cfu)} .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer;display:inline-block}
+    .btn.red{background:var(--red);color:#fff}.btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}.btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}.hamburger{display:block}
+    }
+    @media(max-width:640px){.meta{grid-template-columns:1fr}.q-actions,.footer-actions{flex-direction:column}progress{width:100%}}
+    @media print{header,.hamburger,.menu,.footer-actions{display:none!important}body{background:#fff}.card,table{box-shadow:none}.wrap{max-width:none;padding:0}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">14</div> Capítulo 14 — ESP32 como Servidor Web Simples</div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+    <nav class="menu" id="menu">
+      <a href="index.html">Home</a>
+      <a href="capitulo13.html">Capítulo 13</a>
+      <a href="capitulo15.html">Capítulo 15</a>
+      <a href="#conceitos">Conceitos</a>
+      <a href="#pratica">Prática</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <article class="card hero-main"><div class="content">
+      <h1>ESP32 como Servidor Web Simples</h1>
+      <p class="subtitle">Bimestre 4 • Capítulo 14 • Hospedando uma página e recebendo comandos pelo navegador</p>
+      <p>Neste capítulo, você vai avançar do simples uso do Wi‑Fi para uma aplicação clássica de IoT educacional: transformar o <strong>ESP32 em um pequeno servidor web</strong>. Isso significa que a própria placa pode responder a requisições HTTP e entregar uma página que será aberta no navegador. A partir dessa página, o usuário pode visualizar informações e até acionar saídas, como um LED.</p>
+      <div class="badge-row">
+        <span class="badge">ESP32 Web Server</span>
+        <span class="badge">HTTP</span>
+        <span class="badge">Navegador</span>
+        <span class="badge">IoT aplicada</span>
+      </div>
+    </div></article>
+    <aside class="card"><div class="content meta">
+      <div class="mini"><strong>Objetivo</strong><span>Entender o papel de um servidor web embarcado e criar uma página simples hospedada no ESP32.</span></div>
+      <div class="mini"><strong>Habilidades</strong><span>Relacionar rede, navegador e hardware, usando o ESP32 para servir páginas e controlar saídas.</span></div>
+      <div class="mini"><strong>Ferramentas</strong><span>ESP32, monitor serial, navegador e simulador compatível com Wi‑Fi/HTTP.</span></div>
+      <div class="mini"><strong>Aulas</strong><span>1 aula para conceitos + 1 aula para prática e atividades derivadas.</span></div>
+    </div></aside>
+  </section>
+
+  <section id="conceitos">
+    <div class="section-title"><h2>1. Conceitos fundamentais</h2><span class="pill">Teoria</span></div>
+    <div class="callout"><strong>Ideia central:</strong> um servidor web embarcado permite que o próprio dispositivo hospede páginas e responda a requisições, aproximando o projeto de aplicações reais de IoT.</div>
+    <div class="grid" style="margin-top:16px">
+      <article class="card"><div class="content"><h3>O que é um servidor web?</h3><p>Um servidor web é um sistema que recebe pedidos de páginas e responde com conteúdos que o navegador consegue exibir. Em um computador comum, isso costuma acontecer em máquinas dedicadas. No caso do ESP32, o próprio microcontrolador pode desempenhar esse papel em projetos pequenos e didáticos.</p><p>Isso é interessante porque mostra que um dispositivo embarcado pode fornecer interface de uso sem depender de um servidor externo tradicional.</p></div></article>
+      <article class="card"><div class="content"><h3>HTTP e navegador</h3><p>Quando digitamos um endereço no navegador, ele envia uma requisição HTTP para o dispositivo que está no IP indicado. Se esse dispositivo for um ESP32 com servidor web ativo, ele responderá com uma página ou com um comando processado pelo seu programa.</p><p>O aluno não precisa dominar todos os detalhes do protocolo agora, mas é importante compreender a ideia de “pedido e resposta”.</p></div></article>
+      <article class="card"><div class="content"><h3>ESP32 como servidor</h3><p>Ao conectar o ESP32 à rede e iniciar um servidor HTTP, a placa passa a “ouvir” requisições em uma porta, normalmente a porta 80. Quando alguém acessa seu endereço IP no navegador, o programa pode responder com HTML simples ou com ações no hardware.</p><p>Esse é um dos exemplos mais visuais da integração entre software, rede e circuito físico.</p></div></article>
+      <article class="card"><div class="content"><h3>HTML simples no microcontrolador</h3><p>Para começar, não é necessário construir páginas complexas. Uma página HTML básica, com título, texto e alguns links ou botões, já é suficiente para demonstrar o conceito. O foco pedagógico está em perceber que o conteúdo exibido no navegador está vindo diretamente do ESP32.</p><p>Mais adiante, esse conteúdo poderá ficar mais interativo.</p></div></article>
+      <article class="card"><div class="content"><h3>Comandos pela URL</h3><p>Uma forma simples de controlar o hardware é usar diferentes caminhos na URL, como <code>/H</code> e <code>/L</code>, para ligar ou desligar um LED. O programa interpreta a requisição e executa a ação correspondente.</p><p>Esse modelo é didático porque mostra claramente a relação entre o endereço acessado e o comportamento do circuito.</p></div></article>
+      <article class="card"><div class="content"><h3>Limites do simulador</h3><p>Em alguns ambientes de simulação, como Wokwi, um servidor HTTP pode exigir recursos específicos de gateway para ser acessado diretamente pelo navegador. Mesmo assim, o conceito continua válido e o código serve como base de estudo para hardware real ou ambientes compatíveis.</p><p>O mais importante, neste momento, é compreender a lógica do servidor e sua estrutura básica.</p></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>2. Elementos do servidor web simples</h2><span class="pill">Leitura orientada</span></div>
+    <article class="card"><div class="content">
+      <table>
+        <thead><tr><th>Elemento</th><th>Função</th><th>Exemplo</th></tr></thead>
+        <tbody>
+          <tr><td>Wi‑Fi</td><td>Conectar o ESP32 à rede</td><td><code>WiFi.begin()</code></td></tr>
+          <tr><td>Servidor</td><td>Receber requisições HTTP</td><td><code>WebServer server(80)</code></td></tr>
+          <tr><td>Rota/URL</td><td>Identificar o pedido feito pelo navegador</td><td><code>/</code>, <code>/H</code>, <code>/L</code></td></tr>
+          <tr><td>Resposta</td><td>Enviar conteúdo ao navegador</td><td>Página HTML simples</td></tr>
+          <tr><td>Saída física</td><td>Executar ação no hardware</td><td>Ligar/desligar LED</td></tr>
+        </tbody>
+      </table>
+    </div></article>
+  </section>
+
+  <section id="pratica">
+    <div class="section-title"><h2>3. Prática guiada — Página web simples para ligar e desligar LED</h2><span class="pill">Passo a passo</span></div>
+    <p class="lead">Nesta prática, você vai criar um pequeno servidor HTTP no ESP32 para exibir uma página no navegador e controlar um LED.</p>
+    <div class="note"><strong>Você vai aplicar:</strong> Wi‑Fi, <code>WebServer</code>, HTML básico, rotas HTTP e controle de saída digital.</div>
+    <div class="tip" style="margin-top:12px"><strong>Dica importante:</strong> em simulação, o acesso via navegador pode depender de gateway específico. Mesmo assim, siga o passo a passo para compreender a lógica e usar depois em ambiente real ou compatível.</div>
+
+    <div class="steps" style="margin-top:16px">
+      <div class="step"><div class="step-num">1</div><div><h4>Prepare o ambiente</h4><p>Abra um projeto com ESP32 em um simulador compatível ou no hardware real. Adicione um LED com resistor a um pino digital, como o pino 5, para servir como saída controlada pela página web.</p><p><strong>Aplicação do conceito:</strong> o navegador não servirá apenas para exibir conteúdo, mas também para influenciar o circuito físico.</p></div></div>
+
+      <div class="step"><div class="step-num">2</div><div><h4>Inclua as bibliotecas necessárias</h4><p>Comece o código com as bibliotecas de Wi‑Fi e servidor web:</p>
+<pre><code class="hl"><span class="k">#include</span> <span class="s">&lt;WiFi.h&gt;</span>
+<span class="k">#include</span> <span class="s">&lt;WebServer.h&gt;</span></code></pre>
+<p><strong>Aplicação do conceito:</strong> uma biblioteca cuida da conectividade e a outra organiza o comportamento do servidor HTTP.</p></div></div>
+
+      <div class="step"><div class="step-num">3</div><div><h4>Defina a rede e crie o servidor</h4><p>Use uma rede adequada ao ambiente de teste. Em simulações compatíveis com Wokwi, um exemplo comum é:</p>
+<pre><code class="hl"><span class="k">const char</span>* ssid = <span class="s">"Wokwi-GUEST"</span>;
+<span class="k">const char</span>* password = <span class="s">""</span>;
+
+WebServer server(80);</code></pre>
+<p><strong>Aplicação do conceito:</strong> o servidor ficará ouvindo requisições HTTP na porta 80.</p></div></div>
+
+      <div class="step"><div class="step-num">4</div><div><h4>Crie as rotas principais</h4><p>Organize o comportamento da página e dos comandos:</p>
+<pre><code class="hl"><span class="k">void</span> <span class="f">handleRoot</span>() {
+  server.<span class="f">send</span>(200, <span class="s">"text/html"</span>,
+    <span class="s">"&lt;html&gt;&lt;body&gt;&lt;h1&gt;Controle do LED&lt;/h1&gt;"</span>
+    <span class="s">"&lt;p&gt;&lt;a href='/H'&gt;Ligar&lt;/a&gt;&lt;/p&gt;"</span>
+    <span class="s">"&lt;p&gt;&lt;a href='/L'&gt;Desligar&lt;/a&gt;&lt;/p&gt;"</span>
+    <span class="s">"&lt;/body&gt;&lt;/html&gt;"</span>);
+}
+
+<span class="k">void</span> <span class="f">handleOn</span>() {
+  <span class="f">digitalWrite</span>(5, HIGH);
+  server.<span class="f">send</span>(200, <span class="s">"text/html"</span>, <span class="s">"&lt;h1&gt;LED Ligado&lt;/h1&gt;&lt;a href='/'&gt;Voltar&lt;/a&gt;"</span>);
+}
+
+<span class="k">void</span> <span class="f">handleOff</span>() {
+  <span class="f">digitalWrite</span>(5, LOW);
+  server.<span class="f">send</span>(200, <span class="s">"text/html"</span>, <span class="s">"&lt;h1&gt;LED Desligado&lt;/h1&gt;&lt;a href='/'&gt;Voltar&lt;/a&gt;"</span>);
+}</code></pre>
+<p><strong>Aplicação do conceito:</strong> o caminho acessado no navegador decide o que o ESP32 deve fazer.</p></div></div>
+
+      <div class="step"><div class="step-num">5</div><div><h4>Complete o setup()</h4><p>Agora configure a conexão e registre as rotas:</p>
+<pre><code class="hl"><span class="k">void</span> <span class="f">setup</span>() {
+  Serial.<span class="f">begin</span>(115200);
+  <span class="f">pinMode</span>(5, OUTPUT);
+
+  WiFi.<span class="f">begin</span>(ssid, password);
+  <span class="k">while</span> (WiFi.<span class="f">status</span>() != WL_CONNECTED) {
+    <span class="f">delay</span>(500);
+    Serial.<span class="f">print</span>(<span class="s">"."</span>);
+  }
+
+  Serial.<span class="f">println</span>(<span class="s">"\nConectado!"</span>);
+  Serial.<span class="f">println</span>(WiFi.<span class="f">localIP</span>());
+
+  server.<span class="f">on</span>(<span class="s">"/"</span>, handleRoot);
+  server.<span class="f">on</span>(<span class="s">"/H"</span>, handleOn);
+  server.<span class="f">on</span>(<span class="s">"/L"</span>, handleOff);
+  server.<span class="f">begin</span>();
+}</code></pre>
+<p><strong>Aplicação do conceito:</strong> além da conexão Wi‑Fi, o ESP32 agora passa a atender páginas e comandos HTTP.</p></div></div>
+
+      <div class="step"><div class="step-num">6</div><div><h4>Complete o loop()</h4><p>O loop do servidor pode ficar simples:</p>
+<pre><code class="hl"><span class="k">void</span> <span class="f">loop</span>() {
+  server.<span class="f">handleClient</span>();
+}</code></pre>
+<p><strong>Aplicação do conceito:</strong> essa linha mantém o servidor respondendo a clientes que acessam a página.</p></div></div>
+
+      <div class="step"><div class="step-num">7</div><div><h4>Teste no navegador</h4><p>Com a simulação ou o hardware em execução, abra o endereço IP informado no monitor serial. Ao acessar a página inicial, use os links para ligar e desligar o LED.</p><p><strong>Conclusão:</strong> aqui o aluno percebe, na prática, que o ESP32 está servindo uma página e controlando o circuito ao mesmo tempo.</p></div></div>
+    </div>
+
+    <div class="success" style="margin-top:14px"><strong>Resultado esperado:</strong> uma página simples hospedada no ESP32, acessível no navegador, capaz de comandar um LED no circuito.</div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>4. Aplicação futura</h2><span class="pill">Por que isso importa?</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Interfaces locais de controle</h3><p>Com esse modelo, o aluno entende que pode criar pequenas interfaces de controle sem precisar de aplicativo separado. Isso já é um passo importante rumo a sistemas web embarcados.</p></div></article>
+      <article class="card"><div class="content"><h3>Monitoramento em tempo real</h3><p>Nos próximos capítulos, a mesma lógica poderá ser usada para mostrar valores de sensores no navegador, criar botões mais amigáveis e construir aplicações conectadas mais completas.</p></div></article>
+    </div>
+  </section>
+
+  <section id="atividades">
+    <div class="section-title"><h2>5. Atividades sugeridas para o aluno</h2><span class="pill">Prática orientada</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Atividades de continuação</h3><ol class="clean activities"><li><strong>Dois LEDs:</strong> adapte a página para controlar dois LEDs com caminhos diferentes.</li><li><strong>Página personalizada:</strong> troque o texto da página e adicione um título mais descritivo do projeto.</li><li><strong>Botão físico + web:</strong> imagine ou implemente uma versão em que o LED possa ser controlado pelo navegador e por um botão local.</li></ol></div></article>
+      <article class="card"><div class="content"><h3>Desafios de adaptação</h3><ol class="clean activities"><li><strong>Status na página:</strong> mostrar se o LED está ligado ou desligado no conteúdo HTML.</li><li><strong>Rota de sensor:</strong> criar uma nova rota que exiba um valor simples no navegador.</li><li><strong>Registro técnico:</strong> explique, com suas palavras, a diferença entre a página inicial e as rotas que executam comando.</li></ol></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>6. Sugestões de pesquisa complementar</h2><span class="pill">Aprofundamento</span></div>
+    <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise o que é um <strong>servidor HTTP</strong> e como ele responde a requisições de navegador.</li><li>Explore exemplos de <strong>ESP32 Web Server</strong> que controlam LEDs e exibem leituras de sensores.</li><li>Pesquise a diferença entre modos <strong>Station</strong> e <strong>Access Point</strong> em projetos com ESP32.</li><li>Observe exemplos de páginas HTML embarcadas simples e pense como elas poderiam ser melhoradas visualmente.</li></ul></div></article>
+  </section>
+
+  <section id="quiz">
+    <div class="section-title"><h2>7. Questões objetivas de revisão</h2><span class="pill">Quiz interativo</span></div>
+    <p class="lead">Responda uma alternativa por questão. Clique em <strong>Enviar Resposta</strong> para receber feedback e use <strong>Ver Gabarito</strong> quando quiser conferir a resposta correta.</p>
+
+    <div class="quiz-item"><h3>Questão 1</h3><p>Neste capítulo, o ESP32 foi usado principalmente como:</p>
+      <div class="options">
+        <label><input type="radio" name="q1" value="a"> Sensor de temperatura</label>
+        <label><input type="radio" name="q1" value="b"> Servidor web simples</label>
+        <label><input type="radio" name="q1" value="c"> Resistor inteligente</label>
+        <label><input type="radio" name="q1" value="d"> Bateria recarregável</label>
+        <label><input type="radio" name="q1" value="e"> Antena sem programação</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q1','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+      <div id="f_q1" class="feedback"></div><div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 2</h3><p>Qual biblioteca foi usada para trabalhar com o servidor HTTP no exemplo?</p>
+      <div class="options">
+        <label><input type="radio" name="q2" value="a"> Servo.h</label>
+        <label><input type="radio" name="q2" value="b"> WebServer.h</label>
+        <label><input type="radio" name="q2" value="c"> EEPROM.h</label>
+        <label><input type="radio" name="q2" value="d"> String.h</label>
+        <label><input type="radio" name="q2" value="e"> SPI.h</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q2','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+      <div id="f_q2" class="feedback"></div><div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 3</h3><p>No exemplo, o caminho <code>/H</code> foi usado para:</p>
+      <div class="options">
+        <label><input type="radio" name="q3" value="a"> Desligar o Wi‑Fi</label>
+        <label><input type="radio" name="q3" value="b"> Reiniciar o ESP32</label>
+        <label><input type="radio" name="q3" value="c"> Ligar o LED</label>
+        <label><input type="radio" name="q3" value="d"> Ler o sensor analógico</label>
+        <label><input type="radio" name="q3" value="e"> Trocar o IP local</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q3','c')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+      <div id="f_q3" class="feedback"></div><div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 4</h3><p>Qual função mantém o servidor atendendo clientes dentro do <code>loop()</code>?</p>
+      <div class="options">
+        <label><input type="radio" name="q4" value="a"> <code>WiFi.begin()</code></label>
+        <label><input type="radio" name="q4" value="b"> <code>server.handleClient()</code></label>
+        <label><input type="radio" name="q4" value="c"> <code>analogWrite()</code></label>
+        <label><input type="radio" name="q4" value="d"> <code>delayMicroseconds()</code></label>
+        <label><input type="radio" name="q4" value="e"> <code>pinMode()</code></label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q4','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+      <div id="f_q4" class="feedback"></div><div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 5</h3><p>Qual é a principal aprendizagem prática deste capítulo?</p>
+      <div class="options">
+        <label><input type="radio" name="q5" value="a"> Que o ESP32 só serve para Bluetooth.</label>
+        <label><input type="radio" name="q5" value="b"> Que o ESP32 pode hospedar uma página e controlar hardware pelo navegador.</label>
+        <label><input type="radio" name="q5" value="c"> Que páginas web só funcionam em computadores grandes.</label>
+        <label><input type="radio" name="q5" value="d"> Que não é possível usar HTML em sistemas embarcados.</label>
+        <label><input type="radio" name="q5" value="e"> Que o navegador substitui totalmente o código do ESP32.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q5','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+      <div id="f_q5" class="feedback"></div><div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="section-title"><h2>8. Checklist do aluno</h2><span class="pill">Autoavaliação</span></div>
+    <div class="card"><div class="content">
+      <div class="checklist" id="checklistBox">
+        <label class="check-item"><input type="checkbox" data-check="c1"> <span>Entendi o que é um servidor web simples no ESP32.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c2"> <span>Consigo explicar a ideia de requisição e resposta HTTP.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c3"> <span>Entendi como uma rota pode acionar um LED.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c4"> <span>Montei ou observei a prática da página para controlar LED.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c5"> <span>Consigo explicar por que esse capítulo aproxima o projeto da IoT real.</span></label>
+      </div>
+      <div class="progress-wrap"><strong>Progresso:</strong><progress id="progressBar" value="0" max="5"></progress><span id="progressText">0 de 5 itens concluídos</span></div>
+      <div class="footer-actions">
+        <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>9. Fechamento do capítulo</h2><span class="pill">Síntese</span></div>
+    <article class="card"><div class="content"><p>Este capítulo mostrou uma das aplicações mais emblemáticas do ESP32 em IoT educacional: hospedar uma página acessível no navegador e usá-la para interagir com o hardware. Com isso, o aluno percebe que um sistema embarcado pode oferecer interface, receber comandos e responder em rede, tudo dentro do próprio dispositivo. Essa base será essencial para os próximos projetos do curso.</p></div></article>
+  </section>
+
+   <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo13.html">← Capítulo 13/a>
+            <a class="btn red" href="capitulo15.html">Capítulo 15 →</a>
+           
+    </div>
+
+  <footer>
+    <p><strong>Capítulo 14 pronto para uso local.</strong> ESP32 como servidor web simples com teoria, prática, quiz e checklist.</p>
+  <br>&#x1F12F Professor Cristiano Teixeira.
+</footer>
+</main>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menu = document.getElementById('menu');
+  hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+  function verificar(nome, correta){
+    const sel = document.querySelector(`input[name="${nome}"]:checked`);
+    const fb = document.getElementById(`f_${nome}`);
+    if(!sel){ fb.className='feedback warn'; fb.textContent='Selecione uma alternativa antes de enviar.'; return; }
+    if(sel.value===correta){ fb.className='feedback ok'; fb.textContent='Resposta correta! Muito bem.'; }
+    else{ fb.className='feedback bad'; fb.textContent='Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.'; }
+  }
+  function mostrarGabarito(id){ document.getElementById(id).classList.toggle('show'); }
+
+  const checks=document.querySelectorAll('#checklistBox input[type="checkbox"]');
+  const pb=document.getElementById('progressBar');
+  const pt=document.getElementById('progressText');
+  function atualizar(){ let m=0; checks.forEach(c=>{ if(c.checked) m++; }); pb.value=m; pt.textContent=`${m} de ${checks.length} itens concluídos`; }
+  function salvar(){ const dados={}; checks.forEach(c=>dados[c.dataset.check]=c.checked); localStorage.setItem('cap14_checklist', JSON.stringify(dados)); atualizar(); }
+  function carregar(){ const bruto=localStorage.getItem('cap14_checklist'); if(!bruto){ atualizar(); return; } try{ const d=JSON.parse(bruto); checks.forEach(c=>c.checked=!!d[c.dataset.check]); }catch(e){} atualizar(); }
+  function limparChecklist(){ checks.forEach(c=>c.checked=false); localStorage.removeItem('cap14_checklist'); atualizar(); }
+  checks.forEach(c=>c.addEventListener('change', salvar)); carregar();
+</script>
+</body>
+</html>

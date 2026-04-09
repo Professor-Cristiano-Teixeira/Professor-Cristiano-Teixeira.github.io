@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 08 — Projeto Avaliativo do 2º Bimestre</title>
+  <meta name="description" content="Capítulo 08 da apostila de Sistemas Embarcados e IoT: Projeto Avaliativo do 2º Bimestre com Arduino." />
+  <style>
+    :root{
+      --red:#00979D;--red2:#005C5F;--dark:#2c3e50;--g1:#e8f4f4;--g2:#7a8f90;
+      --paper:#ffffff;--bg:#f7fbfb;--text:#163233;--muted:#4f6b6c;--line:#d7ecec;
+      --ok:#15803d;--bad:#b91c1c;--warn:#b45309;--r:12px;--sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;--cf:#e2e8f0;--ck:#7dd3fc;--cs:#f9a8d4;--cfu:#86efac;--cc:#94a3b8;--max:1200px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff,#f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12} h2{font-size:28px;margin-top:4px} h3{font-size:22px} h4{font-size:18px}
+    p{margin:8px 0 12px} .subtitle{font-size:18px;color:var(--muted)} .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px} .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+    .criterion{height:100%}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    ul.clean,ol.clean{padding-left:20px} .activities li,.searches li{margin-bottom:10px}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left} th{background:#ecf8f8;color:var(--red2);font-size:14px} tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,monospace;font-size:14px}
+    .hl .k{color:var(--ck)} .hl .s{color:var(--cs)} .hl .f{color:var(--cfu)} .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer;display:inline-block}
+    .btn.red{background:var(--red);color:#fff}.btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}.btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}.grid,.grid-4{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}.hamburger{display:block}
+    }
+    @media(max-width:640px){.meta{grid-template-columns:1fr}.q-actions,.footer-actions{flex-direction:column}progress{width:100%}}
+    @media print{header,.hamburger,.menu,.footer-actions{display:none!important}body{background:#fff}.card,table{box-shadow:none}.wrap{max-width:none;padding:0}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">08</div> Capítulo 08 — Projeto Avaliativo do 2º Bimestre</div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+    <nav class="menu" id="menu">
+      <a href="index.html">Home</a>
+      <a href="capitulo07.html">Capítulo 7</a>
+      <a href="capitulo09.html">Capítulo 9</a>
+      <a href="#projeto">Projeto</a>
+      <a href="#roteiro">Roteiro</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <article class="card hero-main"><div class="content">
+      <h1>Projeto Avaliativo do 2º Bimestre</h1>
+      <p class="subtitle">Sistema Automatizado Local com Arduino • Integração dos capítulos 5, 6 e 7</p>
+      <p>Neste capítulo, você vai desenvolver um <strong>projeto avaliativo</strong> que integra os conhecimentos do segundo bimestre: <strong>estrutura do programa</strong>, <strong>variáveis e decisões</strong> e <strong>entradas/saídas digitais e analógicas</strong>. A proposta é criar um <strong>sistema automatizado local</strong> com Arduino, em que o circuito responda a uma entrada do usuário ou do ambiente e controle uma saída de forma perceptível.</p>
+      <div class="badge-row">
+        <span class="badge">Projeto avaliativo</span>
+        <span class="badge">2º bimestre</span>
+        <span class="badge">Arduino + Tinkercad</span>
+        <span class="badge">Integração teoria + prática</span>
+      </div>
+    </div></article>
+    <aside class="card"><div class="content meta">
+      <div class="mini"><strong>Produto esperado</strong><span>Protótipo funcional automatizado com entrada, processamento e saída, acompanhado de explicação curta.</span></div>
+      <div class="mini"><strong>Competências mobilizadas</strong><span>Aplicar solução em hardware e software e organizar um protótipo funcional com Arduino.</span></div>
+      <div class="mini"><strong>Tempo sugerido</strong><span>1 aula para planejamento e início + 1 aula para conclusão, testes, ajustes e entrega.</span></div>
+      <div class="mini"><strong>Ferramentas</strong><span>Arduino Uno, LED, botão, potenciômetro, resistor, protoboard, jumpers e Tinkercad.</span></div>
+    </div></aside>
+  </section>
+
+  <section id="projeto">
+    <div class="section-title"><h2>1. Proposta do projeto</h2><span class="pill">Situação-problema</span></div>
+    <div class="callout"><strong>Desafio:</strong> construir um protótipo simples de <strong>automação local</strong> capaz de receber uma entrada, processar essa informação e controlar uma ou mais saídas sem depender de internet ou aplicativos externos.</div>
+    <div class="grid-2" style="margin-top:16px">
+      <article class="card"><div class="content"><h3>Possibilidades de projeto</h3><ul class="clean"><li>Iluminação automática simples</li><li>Mini painel de controle com botão e LED</li><li>Alerta visual com potenciômetro</li><li>Controle manual de intensidade de LED</li><li>Mini semáforo com padrões de tempo</li></ul><p class="lead">O professor pode propor um único tema para toda a turma ou permitir pequenas variações controladas.</p></div></article>
+      <article class="card"><div class="content"><h3>O que o projeto deve demonstrar</h3><ul class="clean"><li>Estrutura básica correta do programa</li><li>Uso de variável e decisão</li><li>Pelo menos uma entrada e uma saída</li><li>Leitura digital ou analógica</li><li>Saída digital ou PWM</li><li>Montagem organizada e explicável</li></ul></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>2. Revisão dos conhecimentos aplicados</h2><span class="pill">Integração do bimestre</span></div>
+    <div class="grid">
+      <article class="card"><div class="content"><h3>2.1 Estrutura do programa</h3><p>O projeto precisa usar corretamente a organização mínima do Arduino, com <code>setup()</code> para configurações iniciais e <code>loop()</code> para o comportamento contínuo do sistema.</p><p>Essa estrutura é a base do funcionamento do microcontrolador durante toda a execução.</p></div></article>
+      <article class="card"><div class="content"><h3>2.2 Variáveis e decisões</h3><p>O protótipo deve guardar leituras ou estados em variáveis e usar estruturas como <code>if / else</code> para decidir o que fazer com base nessas informações.</p><p>É isso que transforma o circuito em um sistema que responde ao que acontece.</p></div></article>
+      <article class="card"><div class="content"><h3>2.3 Entradas e saídas</h3><p>O projeto precisa usar pelo menos uma entrada (como botão ou potenciômetro) e uma saída (como LED), mostrando a relação entre leitura, processamento e ação.</p><p>Se houver PWM, o aluno também demonstra compreensão do controle gradual de saída.</p></div></article>
+    </div>
+  </section>
+
+  <section id="roteiro">
+    <div class="section-title"><h2>3. Roteiro do projeto — modelo-base</h2><span class="pill">Execução orientada</span></div>
+    <p class="lead">O modelo-base sugerido é um <strong>controle local de brilho do LED com potenciômetro</strong>. Ele integra leitura analógica, variável, conversão de valor e saída PWM. Também pode ser adaptado para incluir botão e lógica de ativação.</p>
+    <div class="note"><strong>Objetivo do modelo:</strong> girar o potenciômetro para controlar o brilho de um LED e, opcionalmente, usar um botão para ativar/desativar essa função.</div>
+    <div class="steps" style="margin-top:16px">
+      <div class="step"><div class="step-num">1</div><div><h4>Planeje o circuito</h4><p>Antes de montar, liste os componentes: Arduino, LED, resistor, potenciômetro, protoboard e jumpers. Se quiser ampliar o desafio, inclua também um botão para habilitar o controle de brilho.</p><p><strong>Aplicação pedagógica:</strong> planejar evita ligações por tentativa e erro sem entender o circuito.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div><h4>Monte a saída</h4><p>Conecte o LED em série com o resistor a um pino PWM do Arduino, como o pino 9. Ligue o outro lado ao GND.</p><p><strong>Aplicação do conceito:</strong> essa será a saída controlada pelo programa.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div><h4>Monte a entrada analógica</h4><p>Conecte o potenciômetro ao pino A0 e aos pinos de alimentação adequados. Essa entrada permitirá ler um valor variável, em vez de apenas ligado/desligado.</p><p><strong>Aplicação do conceito:</strong> leitura analógica do ambiente/controle manual.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div><h4>Escreva o código-base</h4><p>Use o seguinte exemplo como ponto de partida:</p>
+<pre><code class="hl"><span class="k">int</span> valor = 0;
+
+<span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(9, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  valor = <span class="f">analogRead</span>(A0);
+  valor = <span class="f">map</span>(valor, 0, 1023, 0, 255);
+  <span class="f">analogWrite</span>(9, valor);
+}</code></pre>
+<p><strong>Aplicação do conceito:</strong> a leitura analógica é convertida em um valor adequado para PWM.</p></div></div>
+      <div class="step"><div class="step-num">5</div><div><h4>Teste e ajuste</h4><p>Inicie a simulação e gire o potenciômetro. Observe o LED variando de brilho. Se não funcionar, confira o pino analógico, o pino PWM e a montagem do LED com resistor.</p><p><strong>Dica de depuração:</strong> revise primeiro o circuito físico e depois compare os pinos do código.</p></div></div>
+      <div class="step"><div class="step-num">6</div><div><h4>Adicione uma pequena autoria</h4><p>Após o modelo-base funcionar, faça uma adaptação: use um botão para permitir ou bloquear o brilho, adicione um segundo LED ou crie um comportamento alternativo em determinadas condições.</p><p><strong>Entrega valorizada:</strong> o aluno que adapta demonstra compreensão mais consistente.</p></div></div>
+      <div class="step"><div class="step-num">7</div><div><h4>Documente o projeto</h4><p>Escreva um registro curto informando: componentes usados, como o circuito foi montado, o que o sistema faz e quais adaptações foram realizadas.</p><p><strong>Entrega mínima:</strong> protótipo funcional + explicação clara do funcionamento.</p></div></div>
+    </div>
+    <div class="success" style="margin-top:14px"><strong>Resultado esperado:</strong> um protótipo local automatizado, com entrada e saída integradas e código coerente com o comportamento observado.</div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>4. Sugestões de variações do projeto</h2><span class="pill">Autoria do aluno</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Variações simples</h3><ol class="clean activities"><li><strong>Ativação por botão:</strong> usar um botão para permitir ou bloquear o controle do brilho.</li><li><strong>Dois LEDs:</strong> um LED controlado pelo potenciômetro e outro indicando um limite.</li><li><strong>Painel de estado:</strong> LED principal + LED indicador ligado/desligado.</li></ol></div></article>
+      <article class="card"><div class="content"><h3>Variações com mais desafio</h3><ol class="clean activities"><li><strong>Mini semáforo local:</strong> usar repetições e tempos diferentes para um padrão automático.</li><li><strong>Lógica com limiar:</strong> acender outro LED quando a leitura passar de determinado valor.</li><li><strong>Dois modos de funcionamento:</strong> manual e automático com seleção por botão.</li></ol></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>5. Critérios de avaliação sugeridos</h2><span class="pill">Rubrica</span></div>
+    <div class="grid-4">
+      <article class="card criterion"><div class="content"><h4>Funcionamento</h4><p>O protótipo executa a função proposta e responde corretamente às entradas.</p></div></article>
+      <article class="card criterion"><div class="content"><h4>Código</h4><p>O programa apresenta estrutura correta, uso coerente de variáveis e lógica apropriada.</p></div></article>
+      <article class="card criterion"><div class="content"><h4>Montagem</h4><p>A organização física do circuito facilita leitura, teste e compreensão da solução.</p></div></article>
+      <article class="card criterion"><div class="content"><h4>Explicação</h4><p>O aluno consegue descrever o circuito, o código e a relação entre entrada e saída.</p></div></article>
+    </div>
+    <article class="card" style="margin-top:16px"><div class="content"><table>
+      <thead><tr><th>Critério</th><th>O que observar</th><th>Nível esperado</th></tr></thead>
+      <tbody>
+        <tr><td>Funcionamento</td><td>Responde à entrada e controla a saída conforme a proposta</td><td>Essencial</td></tr>
+        <tr><td>Estrutura do código</td><td>Uso adequado de setup, loop, variáveis e lógica</td><td>Essencial</td></tr>
+        <tr><td>Montagem</td><td>Prototipação correta e organizada</td><td>Importante</td></tr>
+        <tr><td>Explicação</td><td>Descrição clara do funcionamento</td><td>Importante</td></tr>
+        <tr><td>Autoria</td><td>Adaptação além do modelo-base</td><td>Diferencial</td></tr>
+      </tbody>
+    </table></div></article>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>6. Modelo de documentação curta</h2><span class="pill">Entrega escrita</span></div>
+    <article class="card"><div class="content">
+      <pre><code class="hl"><span class="c">// Modelo de registro do projeto</span>
+<span class="k">Projeto:</span> Sistema automatizado local com Arduino
+<span class="k">Componentes usados:</span> Arduino, LED, resistor, potenciômetro, protoboard, jumpers
+<span class="k">Funcionamento:</span> a leitura da entrada controla a saída do sistema
+<span class="k">Lógica usada:</span> leitura analógica/digital, variável, conversão e comando de saída
+<span class="k">Adaptação realizada:</span> __________________________________
+<span class="k">Dificuldades encontradas:</span> __________________________________
+<span class="k">Como corrigi:</span> __________________________________</code></pre>
+      <p class="lead">Esse modelo ajuda a registrar o processo e valoriza o raciocínio do aluno, não apenas o resultado final.</p>
+    </div></article>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>7. Sugestões de pesquisa complementar</h2><span class="pill">Aprofundamento</span></div>
+    <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise exemplos de <strong>automação local</strong> com Arduino em casas, escolas e laboratórios.</li><li>Explore projetos introdutórios com <strong>botão + LED</strong>, <strong>potenciômetro + LED</strong> e <strong>semáforo</strong> no Tinkercad.</li><li>Pesquise como o PWM é usado para controlar brilho e velocidade em sistemas embarcados.</li><li>Observe como pequenas alterações na lógica do código podem mudar bastante o comportamento de um circuito.</li></ul></div></article>
+  </section>
+
+  <section id="quiz">
+    <div class="section-title"><h2>8. Questões objetivas de revisão</h2><span class="pill">Quiz interativo</span></div>
+    <p class="lead">Estas questões ajudam a revisar os conceitos integrados no projeto avaliativo do 2º bimestre.</p>
+
+    <div class="quiz-item"><h3>Questão 1</h3><p>Qual é o objetivo principal do projeto deste capítulo?</p>
+      <div class="options">
+        <label><input type="radio" name="q1" value="a"> Criar uma aplicação web completa.</label>
+        <label><input type="radio" name="q1" value="b"> Desenvolver um sistema automatizado local com Arduino integrando entrada, processamento e saída.</label>
+        <label><input type="radio" name="q1" value="c"> Substituir todos os componentes físicos por texto.</label>
+        <label><input type="radio" name="q1" value="d"> Configurar Wi‑Fi no ESP32.</label>
+        <label><input type="radio" name="q1" value="e"> Trabalhar apenas teoria, sem prática.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q1','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+      <div id="f_q1" class="feedback"></div><div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 2</h3><p>No modelo-base, qual componente é usado como entrada analógica?</p>
+      <div class="options">
+        <label><input type="radio" name="q2" value="a"> LED</label>
+        <label><input type="radio" name="q2" value="b"> Resistor</label>
+        <label><input type="radio" name="q2" value="c"> Potenciômetro</label>
+        <label><input type="radio" name="q2" value="d"> Shield</label>
+        <label><input type="radio" name="q2" value="e"> Protoboard</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q2','c')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+      <div id="f_q2" class="feedback"></div><div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 3</h3><p>Qual função do Arduino é usada para controlar o brilho do LED com PWM?</p>
+      <div class="options">
+        <label><input type="radio" name="q3" value="a"> digitalRead()</label>
+        <label><input type="radio" name="q3" value="b"> analogRead()</label>
+        <label><input type="radio" name="q3" value="c"> analogWrite()</label>
+        <label><input type="radio" name="q3" value="d"> pinMode()</label>
+        <label><input type="radio" name="q3" value="e"> map()</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q3','c')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+      <div id="f_q3" class="feedback"></div><div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 4</h3><p>Além do funcionamento, qual aspecto também é importante na avaliação?</p>
+      <div class="options">
+        <label><input type="radio" name="q4" value="a"> Quantidade de abas abertas no navegador.</label>
+        <label><input type="radio" name="q4" value="b"> Organização da montagem e clareza da explicação.</label>
+        <label><input type="radio" name="q4" value="c"> Nome do arquivo sem relação com o conteúdo.</label>
+        <label><input type="radio" name="q4" value="d"> Cor do fundo do simulador.</label>
+        <label><input type="radio" name="q4" value="e"> Tempo total de uso do mouse.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q4','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+      <div id="f_q4" class="feedback"></div><div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 5</h3><p>Por que o aluno deve fazer uma pequena adaptação no projeto-base, quando possível?</p>
+      <div class="options">
+        <label><input type="radio" name="q5" value="a"> Porque a montagem-base não pode funcionar.</label>
+        <label><input type="radio" name="q5" value="b"> Porque isso mostra compreensão, autoria e capacidade de aplicar o conteúdo.</label>
+        <label><input type="radio" name="q5" value="c"> Porque o Arduino exige isso para ligar.</label>
+        <label><input type="radio" name="q5" value="d"> Porque elimina a necessidade de documentação.</label>
+        <label><input type="radio" name="q5" value="e"> Porque substitui todos os testes práticos.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q5','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+      <div id="f_q5" class="feedback"></div><div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="section-title"><h2>9. Checklist interativo da entrega</h2><span class="pill">Autoavaliação</span></div>
+    <div class="card"><div class="content">
+      <p class="lead">Use esta lista antes de entregar o projeto. O progresso fica salvo localmente no navegador deste dispositivo.</p>
+      <div class="checklist" id="checklistBox">
+        <label class="check-item"><input type="checkbox" data-check="c1"> <span>Planejei o circuito antes de montar.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c2"> <span>Usei corretamente uma entrada e uma saída no projeto.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c3"> <span>Utilizei estrutura de programa adequada com <code>setup()</code> e <code>loop()</code>.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c4"> <span>Usei variável e lógica de controle no código.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c5"> <span>Meu circuito está funcional no simulador ou no kit físico.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c6"> <span>Minha montagem está organizada e legível.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c7"> <span>Consigo explicar claramente o funcionamento do protótipo.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c8"> <span>Fiz uma adaptação ou melhoria além do modelo-base, se possível.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c9"> <span>Produzi um registro curto da montagem e da lógica do projeto.</span></label>
+      </div>
+      <div class="progress-wrap"><strong>Progresso:</strong><progress id="progressBar" value="0" max="9"></progress><span id="progressText">0 de 9 itens concluídos</span></div>
+      <div class="footer-actions">
+        <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>10. Fechamento do 2º bimestre</h2><span class="pill">Síntese</span></div>
+    <article class="card"><div class="content"><p>Este capítulo fecha o segundo bimestre reunindo programação inicial, lógica de decisão e interação com entradas e saídas em um projeto concreto. Ao concluir essa entrega, o aluno demonstra que já consegue montar um circuito automatizado simples, escrever um programa coerente e relacionar o comportamento observado com a lógica do código. No próximo bimestre, a programação embarcada continuará se expandindo com novos recursos e organização do software.</p></div></article>
+  </section>
+  <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo07.html">← Capítulo 7</a>
+            <a class="btn red" href="capitulo09.html">Capítulo 9 →</a>
+           
+    </div>
+
+  <footer>
+    <p><strong>Capítulo 08 pronto para uso local.</strong> Arquivo HTML independente, com projeto avaliativo, rubrica, quiz interativo, checklist e navegação entre capítulos.</p>
+  <br>&#x1F12F Professor Cristiano Teixeira.
+</footer>
+</main>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menu = document.getElementById('menu');
+  hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+  function verificar(nome, correta){
+    const sel = document.querySelector(`input[name="${nome}"]:checked`);
+    const fb = document.getElementById(`f_${nome}`);
+    if(!sel){ fb.className='feedback warn'; fb.textContent='Selecione uma alternativa antes de enviar.'; return; }
+    if(sel.value===correta){ fb.className='feedback ok'; fb.textContent='Resposta correta! Muito bem.'; }
+    else{ fb.className='feedback bad'; fb.textContent='Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.'; }
+  }
+  function mostrarGabarito(id){ document.getElementById(id).classList.toggle('show'); }
+
+  const checks=document.querySelectorAll('#checklistBox input[type="checkbox"]');
+  const pb=document.getElementById('progressBar');
+  const pt=document.getElementById('progressText');
+  function atualizar(){ let m=0; checks.forEach(c=>{ if(c.checked) m++; }); pb.value=m; pt.textContent=`${m} de ${checks.length} itens concluídos`; }
+  function salvar(){ const dados={}; checks.forEach(c=>dados[c.dataset.check]=c.checked); localStorage.setItem('cap08_checklist', JSON.stringify(dados)); atualizar(); }
+  function carregar(){ const bruto=localStorage.getItem('cap08_checklist'); if(!bruto){ atualizar(); return; } try{ const d=JSON.parse(bruto); checks.forEach(c=>c.checked=!!d[c.dataset.check]); }catch(e){} atualizar(); }
+  function limparChecklist(){ checks.forEach(c=>c.checked=false); localStorage.removeItem('cap08_checklist'); atualizar(); }
+  checks.forEach(c=>c.addEventListener('change', salvar)); carregar();
+</script>
+</body>
+</html>

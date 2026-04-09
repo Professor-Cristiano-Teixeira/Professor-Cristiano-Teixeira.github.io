@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 01 — Introdução aos Sistemas Embarcados e à IoT</title>
+  <meta name="description" content="Capítulo 01 da apostila de Sistemas Embarcados e IoT para Ensino Médio Técnico." />
+  <style>
+    :root{
+      /* Paleta inspirada no Arduino */
+      --red:#00979D;
+      --red2:#005C5F;
+      --dark:#2c3e50;
+      --g1:#e8f4f4;
+      --g2:#7a8f90;
+      --paper:#ffffff;
+      --bg:#f7fbfb;
+      --text:#163233;
+      --muted:#4f6b6c;
+      --line:#d7ecec;
+      --ok:#15803d;
+      --bad:#b91c1c;
+      --warn:#b45309;
+      --r:12px;
+      --sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;
+      --cf:#e2e8f0;
+      --ck:#7dd3fc;
+      --cs:#f9a8d4;
+      --cfu:#86efac;
+      --cc:#94a3b8;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:1200px;margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:1200px;margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff, #f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12}
+    h2{font-size:28px;margin-top:4px}
+    h3{font-size:22px}
+    h4{font-size:18px}
+    p{margin:8px 0 12px}
+    .subtitle{font-size:18px;color:var(--muted)}
+    .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px}
+    .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .concept{height:100%}
+    .concept p:last-child{margin-bottom:0}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .activities li,.searches li{margin-bottom:10px}
+    ul.clean, ol.clean{padding-left:20px}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px}
+    .hl .k{color:var(--ck)}
+    .hl .s{color:var(--cs)}
+    .hl .f{color:var(--cfu)}
+    .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer}
+    .btn.red{background:var(--red);color:#fff}
+    .btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}
+    .btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      .meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}
+      .hamburger{display:block}
+    }
+    @media(max-width:640px){
+      .meta{grid-template-columns:1fr}
+      .q-actions,.footer-actions{flex-direction:column}
+      progress{width:100%}
+    }
+    @media print{
+      header,.hamburger,.menu,.footer-actions,.q-actions button{display:none !important}
+      body{background:#fff}
+      .card{box-shadow:none}
+      .wrap{max-width:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><div class="logo">01</div> Capítulo 01 — Introdução aos Sistemas Embarcados e à IoT</div>
+      <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+      <nav class="menu" id="menu">
+        <a href="index.html">Home</a>
+        <a href="capitulo02.html">Capítulo 2</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#pratica">Passo a passo</a>
+        <a href="#atividades">Atividades</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#checklist">Checklist</a>
+        <!-- <button onclick="window.print()">Imprimir / PDF</button> -->
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <article class="card hero-main">
+        <div class="content">
+          <h1>Introdução aos Sistemas Embarcados e à Internet das Coisas</h1>
+          <p class="subtitle">Bimestre 1 • Capítulo 1 • Ensino Médio Técnico</p>
+          <p>Neste capítulo, você vai entender o que são <strong>sistemas embarcados</strong>, o que é <strong>Internet das Coisas (IoT)</strong> e por que esses conceitos aparecem em objetos do nosso dia a dia. A ideia é construir uma base conceitual clara para as próximas práticas com <strong>Arduino</strong>, <strong>Tinkercad</strong>, <strong>ESP32</strong> e <strong>Wokwi</strong>.</p>
+          <div class="badge-row">
+            <span class="badge">Nível: iniciante</span>
+            <span class="badge">Com prática guiada</span>
+            <span class="badge">Foco em compreensão</span>
+            <span class="badge">Preparação para os próximos capítulos</span>
+          </div>
+        </div>
+      </article>
+      <aside class="card">
+        <div class="content meta">
+          <div class="mini"><strong>Objetivo do capítulo</strong><span>Reconhecer aplicações reais de sistemas embarcados e IoT e se familiarizar com as ferramentas do curso.</span></div>
+          <div class="mini"><strong>Competências relacionadas</strong><span>Identificar componentes de hardware e compreender aplicações simples de sistemas embarcados.</span></div>
+          <div class="mini"><strong>Tempo sugerido</strong><span>1 aula para conceitos + início da exploração; 1 aula para conclusão da prática e atividade derivada.</span></div>
+          <div class="mini"><strong>Ferramenta principal</strong><span>Tinkercad (exploração do ambiente e montagem inicial simples).</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="conceitos">
+      <div class="section-title">
+        <h2>1. Conceitos essenciais</h2>
+        <span class="pill">Base teórica</span>
+      </div>
+      <div class="callout">
+        <strong>Ideia central:</strong> antes de programar e montar circuitos mais completos, você precisa reconhecer o papel de cada parte do sistema: quem percebe informações, quem decide o que fazer e quem executa a ação.
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <article class="card concept"><div class="content"><h3>1.1 O que é um sistema embarcado?</h3><p>Um sistema embarcado é um sistema computacional criado para executar uma função específica dentro de um equipamento. Diferentemente de um computador de uso geral, que serve para muitas tarefas diferentes, o sistema embarcado foi pensado para controlar uma atividade concreta, como medir temperatura, ligar uma lâmpada, abrir uma porta ou tocar um alarme.</p><p>Na prática, isso significa que o processamento está “embutido” no dispositivo. Um microcontrolador recebe informações do ambiente, executa uma lógica programada e controla saídas. Ao longo do curso, essa ideia será aplicada quando você montar circuitos com Arduino e ESP32 para ler botões, sensores e acionar LEDs, buzzers e outros componentes.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.2 O que é Internet das Coisas?</h3><p>Internet das Coisas, ou IoT, é a conexão entre objetos físicos e sistemas digitais por meio da rede. Esses objetos podem coletar dados, enviar informações, receber comandos e interagir com outros dispositivos ou com usuários. Um sensor de temperatura que envia dados para uma página web ou uma lâmpada que pode ser acionada pelo celular são exemplos comuns.</p><p>No curso, a IoT vai aparecer quando os protótipos deixarem de funcionar apenas localmente e passarem a se comunicar em rede, especialmente com o uso do ESP32. Por isso, entender IoT desde agora ajuda a perceber que o circuito não serve só para “acender um LED”, mas pode fazer parte de uma solução maior de automação e monitoramento.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.3 Movimento maker e tinkering</h3><p>O movimento maker valoriza aprender construindo, testando, modificando e melhorando projetos. Já o <em>tinkering</em> é uma abordagem de exploração prática em que a pessoa experimenta, observa o que acontece e refina a solução pouco a pouco. Em vez de esperar dominar toda a teoria antes de tentar, o estudante aprende também a partir da prática e da correção de erros.</p><p>Essa lógica combina muito bem com sistemas embarcados, porque é comum fazer pequenos testes, ajustar conexões, alterar trechos de código e comparar resultados. Nas aulas, isso aparece quando você monta um protótipo, simula, observa, corrige e experimenta novamente até chegar a um funcionamento esperado.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.4 Hardware e software open source</h3><p>Quando dizemos que uma plataforma é <em>open source</em>, significa que sua documentação, seus esquemas ou parte importante de seu desenvolvimento são abertos ao estudo, uso e adaptação. No universo maker, isso facilita o aprendizado, porque há muito material disponível, exemplos prontos, bibliotecas e projetos compartilhados pela comunidade.</p><p>O Arduino é um exemplo muito importante nesse contexto. Ele se tornou popular justamente por tornar a prototipação mais acessível para estudantes, professores e desenvolvedores iniciantes. Durante o curso, essa abertura vai ajudar você a entender melhor os componentes, reaproveitar exemplos e adaptar projetos conforme a necessidade.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.5 Microcontroladores, sensores e atuadores</h3><p>O microcontrolador é o “cérebro” do protótipo. Ele executa o programa e decide o que fazer com base nas entradas recebidas. Sensores são dispositivos que captam informações do ambiente, como luz, temperatura, presença ou toque. Atuadores são os componentes que executam uma ação, como acender um LED, girar um motor ou emitir um som.</p><p>Em outras palavras, um sistema embarcado costuma seguir um fluxo simples: <strong>entrada → processamento → saída</strong>. Por exemplo: um botão é pressionado (entrada), o microcontrolador interpreta esse evento (processamento) e acende um LED (saída). Esse modelo será usado em praticamente todo o restante da disciplina.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.6 IDEs e simuladores</h3><p>IDE é o ambiente de desenvolvimento usado para escrever, organizar, compilar e testar programas. Já os simuladores permitem montar circuitos e observar o comportamento do sistema sem depender imediatamente do hardware físico. Isso é muito útil em contexto escolar, porque acelera a aprendizagem, reduz erros e permite repetir experiências com segurança.</p><p>Neste curso, o Tinkercad será usado nas práticas iniciais com Arduino, enquanto o Wokwi será utilizado em atividades com ESP32 e conectividade. Neste capítulo, o simulador será importante para você se familiarizar com a interface, localizar componentes e compreender a relação entre circuito, código e simulação.</p></div></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>2. Onde isso aparece no cotidiano?</h2>
+        <span class="pill">Aplicação prática</span>
+      </div>
+      <div class="grid-2">
+        <article class="card"><div class="content"><h3>Exemplos de sistemas embarcados</h3><ul class="clean"><li>Micro-ondas com controle de tempo e potência</li><li>Portão automático com sensor e acionamento</li><li>Semáforo programado</li><li>Impressora</li><li>Relógio digital</li><li>Máquina de lavar</li></ul></div></article>
+        <article class="card"><div class="content"><h3>Exemplos de IoT</h3><ul class="clean"><li>Lâmpada inteligente controlada por aplicativo</li><li>Câmera conectada com visualização remota</li><li>Sensor de temperatura que envia dados para a nuvem</li><li>Tomada inteligente</li><li>Estação meteorológica conectada</li><li>Rastreador de localização</li></ul></div></article>
+      </div>
+    </section>
+
+    <section id="pratica">
+      <div class="section-title">
+        <h2>3. Prática guiada — Explorando o Tinkercad e observando um protótipo simples</h2>
+        <span class="pill">Passo a passo</span>
+      </div>
+      <p class="lead">Nesta prática, o objetivo não é aprofundar a programação, mas reconhecer os elementos básicos do ambiente de prototipação e visualizar como um microcontrolador controla um componente simples.</p>
+      <div class="note"><strong>O que você vai aplicar aqui:</strong> microcontrolador, atuador, IDE/simulador e a lógica de que um programa pode controlar um comportamento físico.</div>
+      <div class="steps" style="margin-top:16px">
+        <div class="step"><div class="step-num">1</div><div><h4>Acesse o simulador</h4><p>Abra o <strong>Tinkercad</strong>, entre na área de circuitos e crie um novo projeto. Observe a tela: normalmente você encontrará uma área central de montagem, uma lista de componentes e controles para iniciar a simulação.</p><p><strong>Objetivo pedagógico:</strong> entender que o simulador será o espaço onde você vai montar, testar e corrigir circuitos antes ou junto do uso do kit físico.</p></div></div>
+        <div class="step"><div class="step-num">2</div><div><h4>Localize os componentes principais</h4><p>Na biblioteca de componentes, procure por <strong>Arduino Uno</strong>, <strong>protoboard</strong>, <strong>LED</strong> e <strong>resistor</strong>. Mesmo que você ainda não domine a função de cada peça, já comece a reconhecer seus nomes e formatos.</p><p><strong>Aplicação do conceito:</strong> o Arduino representa o microcontrolador; o LED representa um atuador simples; o resistor será estudado com mais detalhe nos próximos capítulos.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div><h4>Monte um circuito mínimo</h4><p>Arraste um Arduino Uno, um LED e um resistor para a área de trabalho. Faça uma ligação simples do LED a um pino digital e ao GND com o resistor em série. Se o professor preferir, esta etapa pode ser demonstrada primeiro no projetor.</p><p><strong>Observação:</strong> aqui o foco não é decorar a montagem, mas perceber que a saída do microcontrolador pode controlar um componente externo.</p></div></div>
+        <div class="step"><div class="step-num">4</div><div><h4>Abra a área de código</h4><p>Entre no editor de código e observe que existe um espaço para escrever instruções. Em muitos casos, o simulador permite começar com blocos ou texto. Neste curso, a tendência será trabalhar com código em texto, porque ele aproxima o estudante da programação real do microcontrolador.</p><p><strong>Aplicação do conceito:</strong> a IDE é o ambiente em que você transforma a lógica em instruções executáveis.</p></div></div>
+        <div class="step"><div class="step-num">5</div><div><h4>Use um exemplo simples de piscar LED</h4><p>Insira ou observe com o professor um código básico para fazer o LED piscar. O importante, neste momento, é associar a instrução com o comportamento visível na simulação.</p>
+<pre><code class="hl"><span class="c">// Exemplo introdutório: LED piscando</span>
+<span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(13, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  <span class="f">digitalWrite</span>(13, HIGH);
+  <span class="f">delay</span>(1000);
+  <span class="f">digitalWrite</span>(13, LOW);
+  <span class="f">delay</span>(1000);
+}</code></pre>
+<p><strong>Relação com o conteúdo:</strong> esse exemplo mostra um sistema embarcado executando uma função específica. Mais adiante, você vai entender em detalhes cada linha do código.</p></div></div>
+        <div class="step"><div class="step-num">6</div><div><h4>Inicie a simulação e observe</h4><p>Clique para iniciar a simulação. Observe o LED acendendo e apagando em intervalos regulares. Faça anotações simples: qual componente recebe a instrução? qual elemento executa a ação? onde o comportamento foi definido?</p><p><strong>Conclusão:</strong> o sistema embarcado recebe um programa e controla o comportamento do circuito. Essa é a base de toda a disciplina.</p></div></div>
+      </div>
+    </section>
+
+    <section id="atividades">
+      <div class="section-title">
+        <h2>4. Atividades sugeridas para o aluno</h2>
+        <span class="pill">Prática orientada</span>
+      </div>
+      <div class="grid-2">
+        <article class="card"><div class="content"><h3>Atividades de continuação</h3><ol class="clean activities"><li><strong>Classificação de objetos:</strong> escolha 10 objetos do cotidiano e classifique cada um como “sistema embarcado”, “IoT” ou “não se encaixa diretamente nos dois”. Justifique com uma frase.</li><li><strong>Mapa do fluxo:</strong> desenhe um esquema simples com <em>entrada → processamento → saída</em> usando um exemplo, como botão + Arduino + LED.</li><li><strong>Exploração guiada:</strong> no Tinkercad, localize pelo menos 8 componentes diferentes e registre o nome e uma hipótese de uso de cada um.</li></ol></div></article>
+        <article class="card"><div class="content"><h3>Desafios de adaptação</h3><ol class="clean activities"><li><strong>Alterar o intervalo:</strong> mude o valor do <code>delay()</code> e observe o que acontece com o LED.</li><li><strong>Trocar o pino:</strong> tente usar outro pino digital e ajuste o circuito para acompanhar a alteração.</li><li><strong>Dois LEDs:</strong> se o professor autorizar, duplique a saída e tente fazer dois LEDs piscarem no mesmo ritmo.</li></ol></div></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>5. Sugestões de pesquisa complementar</h2>
+        <span class="pill">Aprofundamento</span>
+      </div>
+      <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise a diferença entre <strong>microcontrolador</strong> e <strong>microprocessador</strong>.</li><li>Descubra exemplos de <strong>IoT em residências</strong>, <strong>indústria</strong> e <strong>cidades inteligentes</strong>.</li><li>Pesquise como o <strong>Arduino</strong> ajudou a popularizar a cultura maker.</li><li>Explore imagens e descrições dos principais componentes que aparecem no Tinkercad: Arduino Uno, protoboard, resistor, LED, botão e potenciômetro.</li></ul></div></article>
+    </section>
+
+    <section id="quiz">
+      <div class="section-title">
+        <h2>6. Questões objetivas de revisão</h2>
+        <span class="pill">Quiz interativo</span>
+      </div>
+      <p class="lead">Marque uma alternativa, clique em <strong>Enviar Resposta</strong> para receber feedback e use <strong>Ver Gabarito</strong> quando quiser conferir a resposta correta.</p>
+
+      <div class="quiz-item" data-correct="b">
+        <h3>Questão 1</h3>
+        <p>Qual alternativa define melhor um sistema embarcado?</p>
+        <div class="options">
+          <label><input type="radio" name="q1" value="a"> Um computador usado apenas para navegar na internet.</label>
+          <label><input type="radio" name="q1" value="b"> Um sistema computacional projetado para executar uma função específica dentro de um dispositivo.</label>
+          <label><input type="radio" name="q1" value="c"> Um tipo de rede usada apenas em laboratórios.</label>
+          <label><input type="radio" name="q1" value="d"> Um programa que só funciona em celulares.</label>
+          <label><input type="radio" name="q1" value="e"> Um componente eletrônico que substitui qualquer sensor.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q1','b',this)">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+        <div id="f_q1" class="feedback"></div>
+        <div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>. Um sistema embarcado é feito para executar uma função específica dentro de um equipamento.</div>
+      </div>
+
+      <div class="quiz-item" data-correct="c">
+        <h3>Questão 2</h3>
+        <p>Na IoT, qual característica é essencial?</p>
+        <div class="options">
+          <label><input type="radio" name="q2" value="a"> O dispositivo precisa funcionar sem energia elétrica.</label>
+          <label><input type="radio" name="q2" value="b"> O objeto precisa ter apenas partes mecânicas.</label>
+          <label><input type="radio" name="q2" value="c"> O objeto físico troca dados ou recebe comandos por meio de uma rede.</label>
+          <label><input type="radio" name="q2" value="d"> O sistema não pode usar sensores.</label>
+          <label><input type="radio" name="q2" value="e"> O dispositivo deve ter tela obrigatoriamente.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q2','c',this)">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+        <div id="f_q2" class="feedback"></div>
+        <div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>. Na IoT, o objeto se conecta para trocar dados, enviar informações ou receber comandos.</div>
+      </div>
+
+      <div class="quiz-item" data-correct="d">
+        <h3>Questão 3</h3>
+        <p>Qual conjunto representa corretamente o fluxo básico de muitos sistemas embarcados?</p>
+        <div class="options">
+          <label><input type="radio" name="q3" value="a"> Tela → teclado → gabinete</label>
+          <label><input type="radio" name="q3" value="b"> Cabo → internet → nuvem</label>
+          <label><input type="radio" name="q3" value="c"> Sensor → bateria → chave</label>
+          <label><input type="radio" name="q3" value="d"> Entrada → processamento → saída</label>
+          <label><input type="radio" name="q3" value="e"> Simulador → site → aplicativo</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q3','d',this)">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+        <div id="f_q3" class="feedback"></div>
+        <div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>D</strong>. Muitos protótipos seguem o fluxo entrada, processamento e saída.</div>
+      </div>
+
+      <div class="quiz-item" data-correct="a">
+        <h3>Questão 4</h3>
+        <p>No contexto do curso, qual é o papel principal de um simulador como o Tinkercad?</p>
+        <div class="options">
+          <label><input type="radio" name="q4" value="a"> Permitir testar montagens e observar o comportamento do circuito em um ambiente virtual.</label>
+          <label><input type="radio" name="q4" value="b"> Substituir permanentemente todos os componentes físicos do laboratório.</label>
+          <label><input type="radio" name="q4" value="c"> Fazer o papel de sensor de temperatura.</label>
+          <label><input type="radio" name="q4" value="d"> Conectar automaticamente qualquer projeto à internet.</label>
+          <label><input type="radio" name="q4" value="e"> Eliminar a necessidade de programar.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q4','a',this)">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+        <div id="f_q4" class="feedback"></div>
+        <div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>A</strong>. O simulador ajuda a montar, testar e observar o circuito antes ou junto do uso do hardware físico.</div>
+      </div>
+
+      <div class="quiz-item" data-correct="e">
+        <h3>Questão 5</h3>
+        <p>Qual opção apresenta corretamente um exemplo de atuador?</p>
+        <div class="options">
+          <label><input type="radio" name="q5" value="a"> Sensor de luminosidade</label>
+          <label><input type="radio" name="q5" value="b"> Termistor</label>
+          <label><input type="radio" name="q5" value="c"> Botão</label>
+          <label><input type="radio" name="q5" value="d"> LDR</label>
+          <label><input type="radio" name="q5" value="e"> LED</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q5','e',this)">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+        <div id="f_q5" class="feedback"></div>
+        <div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>E</strong>. O LED executa uma ação visível, portanto funciona como atuador.</div>
+      </div>
+    </section>
+
+    <section id="checklist">
+      <div class="section-title">
+        <h2>7. Checklist interativo do aluno</h2>
+        <span class="pill">Autoavaliação</span>
+      </div>
+      <article class="card">
+        <div class="content">
+          <p class="lead">Marque os itens conforme concluir. O progresso fica salvo localmente no navegador deste dispositivo.</p>
+          <div class="checklist" id="checklistBox">
+            <label class="check-item"><input type="checkbox" data-check="c1"> <span>Entendi, com minhas palavras, o que é um sistema embarcado.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c2"> <span>Consigo explicar a ideia geral de Internet das Coisas.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c3"> <span>Sei diferenciar entrada, processamento e saída em um exemplo simples.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c4"> <span>Reconheço o papel de microcontrolador, sensor e atuador.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c5"> <span>Explorei o Tinkercad e localizei componentes básicos.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c6"> <span>Observei ou reproduzi um exemplo simples de LED controlado pelo microcontrolador.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c7"> <span>Resolvi o quiz de revisão do capítulo.</span></label>
+          </div>
+          <div class="progress-wrap">
+            <strong>Progresso:</strong>
+            <progress id="progressBar" value="0" max="7"></progress>
+            <span id="progressText">0 de 7 itens concluídos</span>
+          </div>
+          <div class="footer-actions">
+            <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+            <button class="btn dark" onclick="window.print()">Imprimir / Salvar PDF</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>8. Fechamento do capítulo</h2>
+        <span class="pill">Síntese</span>
+      </div>
+      <article class="card"><div class="content"><p>Neste primeiro capítulo, você construiu a base conceitual da disciplina. A partir de agora, os próximos conteúdos vão aprofundar a parte elétrica, os componentes e a programação de microcontroladores. Sempre que você voltar a montar um circuito, lembre-se do modelo geral: <strong>algo do ambiente é percebido, o microcontrolador processa a informação e uma ação acontece</strong>.</p><p>Esse raciocínio será retomado continuamente nas práticas com Arduino e, mais adiante, com ESP32 e conectividade.</p></div></article>
+    </section>
+
+    <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn red" href="capitulo02.html">Capítulo 2 →</a>
+           
+    </div>
+
+    <footer>
+      <p><strong>Capítulo 01 pronto para uso local.</strong> Arquivo HTML independente, com teoria, prática guiada, atividades, quiz interativo e checklist.</p><br>
+       <br>&#x1F12F Professor Cristiano Teixeira.
+    </footer>
+  </main>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const menu = document.getElementById('menu');
+    hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+    menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+    function verificar(nomeQuestao, correta, botao){
+      const selecionada = document.querySelector(`input[name="${nomeQuestao}"]:checked`);
+      const feedback = document.getElementById(`f_${nomeQuestao}`);
+      if(!selecionada){
+        feedback.className = 'feedback warn';
+        feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+        return;
+      }
+      if(selecionada.value === correta){
+        feedback.className = 'feedback ok';
+        feedback.textContent = 'Resposta correta! Muito bem.';
+      } else {
+        feedback.className = 'feedback bad';
+        feedback.textContent = 'Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.';
+      }
+    }
+
+    function mostrarGabarito(id){
+      document.getElementById(id).classList.toggle('show');
+    }
+
+    const checks = document.querySelectorAll('#checklistBox input[type="checkbox"]');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    function atualizarProgress(){
+      let marcados = 0;
+      checks.forEach(ch => { if(ch.checked) marcados++; });
+      progressBar.value = marcados;
+      progressText.textContent = `${marcados} de ${checks.length} itens concluídos`;
+    }
+
+    function salvarChecklist(){
+      const dados = {};
+      checks.forEach(ch => { dados[ch.dataset.check] = ch.checked; });
+      localStorage.setItem('cap01_checklist', JSON.stringify(dados));
+      atualizarProgress();
+    }
+
+    function carregarChecklist(){
+      const bruto = localStorage.getItem('cap01_checklist');
+      if(!bruto){ atualizarProgress(); return; }
+      try{
+        const dados = JSON.parse(bruto);
+        checks.forEach(ch => ch.checked = !!dados[ch.dataset.check]);
+      }catch(e){ /* ignora */ }
+      atualizarProgress();
+    }
+
+    function limparChecklist(){
+      checks.forEach(ch => ch.checked = false);
+      localStorage.removeItem('cap01_checklist');
+      atualizarProgress();
+    }
+
+    checks.forEach(ch => ch.addEventListener('change', salvarChecklist));
+    carregarChecklist();
+  </script>
+</body>
+</html>

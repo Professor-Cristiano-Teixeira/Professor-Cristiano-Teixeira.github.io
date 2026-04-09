@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 16 — Projeto Integrador do 4º Bimestre com ESP32</title>
+  <meta name="description" content="Capítulo 16 da apostila de Sistemas Embarcados e IoT: Projeto Integrador do 4º Bimestre com ESP32." />
+  <style>
+    :root{
+      --red:#00979D;--red2:#005C5F;--dark:#2c3e50;--g1:#e8f4f4;--g2:#7a8f90;
+      --paper:#ffffff;--bg:#f7fbfb;--text:#163233;--muted:#4f6b6c;--line:#d7ecec;
+      --ok:#15803d;--bad:#b91c1c;--warn:#b45309;--r:12px;--sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;--cf:#e2e8f0;--ck:#7dd3fc;--cs:#f9a8d4;--cfu:#86efac;--cc:#94a3b8;--max:1200px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff,#f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12} h2{font-size:28px;margin-top:4px} h3{font-size:22px} h4{font-size:18px}
+    p{margin:8px 0 12px} .subtitle{font-size:18px;color:var(--muted)} .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px}.mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left}
+    th{background:#ecf8f8;color:var(--red2)} tr:last-child td{border-bottom:0}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}.hamburger{display:block}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">16</div> Capítulo 16 — Projeto Integrador do 4º Bimestre</div>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav class="menu" id="menu">
+      <a href="index.html">Home</a>
+      <a href="capitulo15.html">Capítulo 15</a>
+      <a href="#projeto">Projeto</a>
+      <a href="#avaliacao">Avaliação</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <article class="card hero-main"><div class="content">
+      <h1>Projeto Integrador — Monitoramento com ESP32</h1>
+      <p class="subtitle">Encerramento do 4º Bimestre • Integração de Wi‑Fi, Servidor Web e Sensor</p>
+      <p>Neste capítulo final do bimestre, você irá desenvolver um <strong>projeto integrador</strong> reunindo todos os conceitos estudados: conexão Wi‑Fi, servidor web no ESP32 e leitura de sensores. O objetivo é construir um sistema funcional de <strong>monitoramento acessível pelo navegador</strong>, simulando aplicações reais de IoT.</p>
+      <div class="badge-row">
+        <span class="badge">Projeto Final</span>
+        <span class="badge">ESP32</span>
+        <span class="badge">IoT</span>
+        <span class="badge">Servidor Web</span>
+      </div>
+    </div></article>
+    <aside class="card"><div class="content meta">
+      <div class="mini"><strong>Entrega</strong><span>Projeto funcional + explicação do funcionamento + registro simples.</span></div>
+      <div class="mini"><strong>Formato</strong><span>Individual ou em dupla, conforme orientação do professor.</span></div>
+      <div class="mini"><strong>Tempo</strong><span>2 aulas para desenvolvimento e ajustes.</span></div>
+      <div class="mini"><strong>Avaliação</strong><span>Funcionamento, organização, clareza e autoria.</span></div>
+    </div></aside>
+  </section>
+
+  <section id="projeto">
+    <div class="section-title"><h2>1. Descrição do projeto</h2><span class="pill">Desafio</span></div>
+    <div class="callout"><strong>Desafio:</strong> criar um sistema com ESP32 que leia um sensor e exiba seus dados em uma página web acessada pelo navegador.</div>
+    <div class="grid-2" style="margin-top:16px">
+      <article class="card"><div class="content"><h3>Requisitos mínimos</h3><ul>
+        <li>ESP32 conectado ao Wi‑Fi</li>
+        <li>Leitura de pelo menos um sensor</li>
+        <li>Servidor web ativo</li>
+        <li>Página exibindo dados do sensor</li>
+        <li>Funcionamento demonstrável</li>
+      </ul></div></article>
+      <article class="card"><div class="content"><h3>Sugestões de sensores</h3><ul>
+        <li>Potenciômetro</li>
+        <li>LDR (sensor de luz)</li>
+        <li>Sensor de temperatura (simulado)</li>
+        <li>Botão como entrada digital</li>
+      </ul></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>2. Orientações de desenvolvimento</h2><span class="pill">Guia</span></div>
+    <article class="card"><div class="content"><ol>
+      <li>Planeje o circuito e o sensor a ser utilizado.</li>
+      <li>Reaproveite o código-base dos capítulos 14 e 15.</li>
+      <li>Crie uma página clara e organizada.</li>
+      <li>Teste o acesso pelo navegador.</li>
+      <li>Prepare-se para explicar o projeto.</li>
+    </ol></div></article>
+  </section>
+
+  <section id="avaliacao">
+    <div class="section-title"><h2>3. Critérios de avaliação</h2><span class="pill">Rubrica</span></div>
+    <article class="card"><div class="content"><table>
+      <thead><tr><th>Critério</th><th>O que será observado</th></tr></thead>
+      <tbody>
+        <tr><td>Funcionamento</td><td>Projeto executa corretamente a proposta</td></tr>
+        <tr><td>Integração</td><td>Uso de Wi‑Fi, servidor e sensor</td></tr>
+        <tr><td>Organização</td><td>Código e montagem claros</td></tr>
+        <tr><td>Explicação</td><td>Aluno consegue explicar o funcionamento</td></tr>
+        <tr><td>Autoria</td><td>Adaptações além do modelo-base</td></tr>
+      </tbody>
+    </table></div></article>
+  </section>
+
+  <section id="checklist">
+    <div class="section-title"><h2>4. Checklist final do aluno</h2><span class="pill">Autoavaliação</span></div>
+    <article class="card"><div class="content">
+      <div class="checklist" id="checklistBox">
+        <label class="check-item"><input type="checkbox" data-check="c1"> <span>O ESP32 conecta corretamente ao Wi‑Fi.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c2"> <span>O sensor está sendo lido corretamente.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c3"> <span>A página web exibe os dados.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c4"> <span>Consigo explicar o funcionamento do projeto.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c5"> <span>Fiz alguma adaptação própria no projeto.</span></label>
+      </div>
+      <div class="progress-wrap"><strong>Progresso:</strong> <progress id="progressBar" value="0" max="5"></progress> <span id="progressText">0 de 5 itens</span></div>
+    </div></article>
+  </section>
+  <div class="footer-actions">
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo15.html">← Capítulo 15/a>
+    </div>
+
+  <footer>
+    <p><strong>Capítulo 16 concluído.</strong> Projeto integrador do 4º bimestre com ESP32 e IoT.</p>
+  <br>&#x1F12F Professor Cristiano Teixeira.
+</footer>
+</main>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menu = document.getElementById('menu');
+  hamburger.addEventListener('click', () => menu.classList.toggle('show'));
+
+  const checks = document.querySelectorAll('#checklistBox input');
+  const pb = document.getElementById('progressBar');
+  const pt = document.getElementById('progressText');
+  function update(){ let m=0; checks.forEach(c=>c.checked && m++); pb.value=m; pt.textContent = `${m} de ${checks.length} itens`; }
+  checks.forEach(c=>c.addEventListener('change', update)); update();
+</script>
+</body>
+</html>

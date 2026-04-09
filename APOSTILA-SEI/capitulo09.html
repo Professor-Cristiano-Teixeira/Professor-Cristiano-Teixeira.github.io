@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 09 — Controle de Tempo em Sistemas Embarcados</title>
+  <meta name="description" content="Capítulo 09 da apostila de Sistemas Embarcados e IoT: Controle de Tempo em Sistemas Embarcados com Arduino." />
+  <style>
+    :root{
+      --red:#00979D;--red2:#005C5F;--dark:#2c3e50;--g1:#e8f4f4;--g2:#7a8f90;
+      --paper:#ffffff;--bg:#f7fbfb;--text:#163233;--muted:#4f6b6c;--line:#d7ecec;
+      --ok:#15803d;--bad:#b91c1c;--warn:#b45309;--r:12px;--sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;--cf:#e2e8f0;--ck:#7dd3fc;--cs:#f9a8d4;--cfu:#86efac;--cc:#94a3b8;--max:1200px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff,#f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12} h2{font-size:28px;margin-top:4px} h3{font-size:22px} h4{font-size:18px}
+    p{margin:8px 0 12px} .subtitle{font-size:18px;color:var(--muted)} .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px} .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    ul.clean,ol.clean{padding-left:20px} .activities li,.searches li{margin-bottom:10px}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left} th{background:#ecf8f8;color:var(--red2);font-size:14px} tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,monospace;font-size:14px}
+    .hl .k{color:var(--ck)} .hl .s{color:var(--cs)} .hl .f{color:var(--cfu)} .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer;display:inline-block}
+    .btn.red{background:var(--red);color:#fff}.btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}.btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}.hamburger{display:block}
+    }
+    @media(max-width:640px){.meta{grid-template-columns:1fr}.q-actions,.footer-actions{flex-direction:column}progress{width:100%}}
+    @media print{header,.hamburger,.menu,.footer-actions{display:none!important}body{background:#fff}.card,table{box-shadow:none}.wrap{max-width:none;padding:0}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">09</div> Capítulo 09 — Controle de Tempo em Sistemas Embarcados</div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+    <nav class="menu" id="menu">
+      <a href="index.html">Home</a>
+      <a href="capitulo08.html">Capítulo 8</a>
+      <a href="capitulo10.html">Capítulo 10</a>
+      <a href="#conceitos">Conceitos</a>
+      <a href="#pratica">Prática</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <article class="card hero-main"><div class="content">
+      <h1>Controle de Tempo em Sistemas Embarcados</h1>
+      <p class="subtitle">Bimestre 3 • Capítulo 9 • Temporização com Arduino</p>
+      <p>Neste capítulo, você vai estudar como o Arduino lida com o <strong>tempo</strong> dentro do programa. Em sistemas embarcados, controlar tempo é essencial para criar comportamentos previsíveis, como piscar LEDs em ritmos específicos, executar ações periódicas e evitar que o programa fique “travado” enquanto espera. Aqui vamos trabalhar principalmente com <strong>delay()</strong>, <strong>delayMicroseconds()</strong>, <strong>millis()</strong> e <strong>micros()</strong>.</p>
+      <div class="badge-row">
+        <span class="badge">Temporização</span>
+        <span class="badge">delay e millis</span>
+        <span class="badge">Arduino + Tinkercad</span>
+        <span class="badge">Breve e aplicado</span>
+      </div>
+    </div></article>
+    <aside class="card"><div class="content meta">
+      <div class="mini"><strong>Objetivo</strong><span>Compreender as formas mais básicas de controlar tempo em programas embarcados.</span></div>
+      <div class="mini"><strong>Habilidades</strong><span>Usar temporização para organizar ações repetidas e comparar espera bloqueante e não bloqueante.</span></div>
+      <div class="mini"><strong>Ferramentas</strong><span>Arduino Uno, LEDs, resistor, protoboard e Tinkercad.</span></div>
+      <div class="mini"><strong>Aulas</strong><span>1 aula para conceito + 1 aula para prática e adaptação.</span></div>
+    </div></aside>
+  </section>
+
+  <section id="conceitos">
+    <div class="section-title"><h2>1. Conceitos fundamentais</h2><span class="pill">Teoria</span></div>
+    <div class="callout"><strong>Ideia central:</strong> controlar tempo significa definir quando algo deve acontecer, por quanto tempo deve durar e com que frequência deve se repetir.</div>
+    <div class="grid" style="margin-top:16px">
+      <article class="card"><div class="content"><h3>delay()</h3><p>A função <code>delay()</code> pausa o programa por um período em milissegundos. Durante essa pausa, o restante do código não continua a ser executado. Por isso, dizemos que é uma espera <strong>bloqueante</strong>.</p><p>Ela é útil em exemplos iniciais, como LED piscando, mas pode se tornar limitada quando o programa precisa fazer mais de uma coisa ao mesmo tempo.</p></div></article>
+      <article class="card"><div class="content"><h3>delayMicroseconds()</h3><p>Essa função faz uma pausa muito curta, medida em microssegundos. É menos comum em atividades iniciais, mas ajuda a mostrar que algumas ações precisam de tempos bem menores do que 1 milissegundo.</p><p>No curso técnico, basta entender que existe essa escala menor e que ela é usada em casos mais específicos.</p></div></article>
+      <article class="card"><div class="content"><h3>millis()</h3><p>A função <code>millis()</code> informa há quanto tempo o programa está rodando, em milissegundos, desde que o Arduino foi iniciado. Isso permite verificar o tempo passado sem interromper totalmente o restante do programa.</p><p>Esse recurso é muito importante porque permite criar comportamentos temporizados sem travar a execução, sendo uma forma mais flexível de controlar ações periódicas.</p></div></article>
+      <article class="card"><div class="content"><h3>micros()</h3><p>A função <code>micros()</code> é parecida com <code>millis()</code>, mas retorna o tempo em microssegundos. Assim como no caso de <code>delayMicroseconds()</code>, seu uso costuma aparecer quando o sistema precisa lidar com tempos muito pequenos.</p><p>Para este capítulo, o mais importante é reconhecer que existe essa função e saber diferenciá-la de <code>millis()</code>.</p></div></article>
+      <article class="card"><div class="content"><h3>Espera bloqueante</h3><p>Uma espera bloqueante acontece quando o programa precisa parar tudo para aguardar um tempo. É o caso de <code>delay()</code>. Enquanto essa espera ocorre, o código não avança para outras verificações ou decisões.</p><p>Isso pode ser aceitável em exercícios simples, mas em projetos mais completos pode atrapalhar bastante.</p></div></article>
+      <article class="card"><div class="content"><h3>Espera não bloqueante</h3><p>Uma espera não bloqueante acontece quando o programa continua funcionando enquanto verifica se já passou o tempo necessário. É o caso mais comum com <code>millis()</code>.</p><p>Essa abordagem é muito útil quando o sistema precisa monitorar entradas e controlar saídas ao mesmo tempo, sem ficar “parado” esperando.</p></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>2. Comparando as abordagens</h2><span class="pill">Leitura orientada</span></div>
+    <article class="card"><div class="content">
+      <table>
+        <thead><tr><th>Função</th><th>Escala de tempo</th><th>Tipo de uso</th><th>Observação</th></tr></thead>
+        <tbody>
+          <tr><td><code>delay()</code></td><td>Milissegundos</td><td>Espera bloqueante</td><td>Simples para começar, mas trava o restante do programa</td></tr>
+          <tr><td><code>delayMicroseconds()</code></td><td>Microssegundos</td><td>Espera bloqueante</td><td>Usada em tempos muito curtos</td></tr>
+          <tr><td><code>millis()</code></td><td>Milissegundos</td><td>Controle não bloqueante</td><td>Mais flexível para projetos maiores</td></tr>
+          <tr><td><code>micros()</code></td><td>Microssegundos</td><td>Controle não bloqueante</td><td>Voltada a medições muito curtas</td></tr>
+        </tbody>
+      </table>
+    </div></article>
+  </section>
+
+  <section id="pratica">
+    <div class="section-title"><h2>3. Prática guiada — Comparando delay() e millis()</h2><span class="pill">Passo a passo</span></div>
+    <p class="lead">Nesta prática, você vai observar a diferença entre um LED piscando com <code>delay()</code> e um LED piscando usando <code>millis()</code>.</p>
+    <div class="note"><strong>Você vai aplicar:</strong> <code>delay()</code>, <code>millis()</code>, comparação de abordagens e organização temporal do programa.</div>
+
+    <div class="steps" style="margin-top:16px">
+      <div class="step"><div class="step-num">1</div><div><h4>Monte o circuito básico</h4><p>No Tinkercad, monte um circuito com Arduino, protoboard, LED, resistor e jumpers. Conecte o LED a um pino digital, como o 13, e ao GND.</p><p><strong>Aplicação do conceito:</strong> o LED servirá como referência visual para o comportamento temporal.</p></div></div>
+
+      <div class="step"><div class="step-num">2</div><div><h4>Teste com delay()</h4><p>Use o código abaixo para fazer o LED piscar com espera bloqueante:</p>
+<pre><code class="hl"><span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(13, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  <span class="f">digitalWrite</span>(13, HIGH);
+  <span class="f">delay</span>(1000);
+  <span class="f">digitalWrite</span>(13, LOW);
+  <span class="f">delay</span>(1000);
+}</code></pre>
+<p>Observe que o LED acende e apaga corretamente, mas o programa para completamente durante cada espera.</p></div></div>
+
+      <div class="step"><div class="step-num">3</div><div><h4>Substitua por millis()</h4><p>Agora experimente um exemplo não bloqueante:</p>
+<pre><code class="hl"><span class="k">unsigned long</span> tempoAnterior = 0;
+<span class="k">const int</span> intervalo = 1000;
+<span class="k">int</span> estadoLED = LOW;
+
+<span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(13, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  <span class="k">unsigned long</span> tempoAtual = <span class="f">millis</span>();
+
+  <span class="k">if</span> (tempoAtual - tempoAnterior >= intervalo) {
+    tempoAnterior = tempoAtual;
+
+    <span class="k">if</span> (estadoLED == LOW) {
+      estadoLED = HIGH;
+    } <span class="k">else</span> {
+      estadoLED = LOW;
+    }
+
+    <span class="f">digitalWrite</span>(13, estadoLED);
+  }
+}</code></pre>
+<p>Neste caso, o LED também pisca, mas o programa não fica totalmente parado enquanto espera o próximo intervalo.</p></div></div>
+
+      <div class="step"><div class="step-num">4</div><div><h4>Compare os resultados</h4><p>Os dois códigos fazem o LED piscar, mas de formas diferentes. Com <code>delay()</code>, o programa “espera parado”. Com <code>millis()</code>, ele continua executando o loop e apenas verifica quando chegou o momento de mudar o estado do LED.</p><p><strong>Conclusão:</strong> para projetos simples, <code>delay()</code> funciona bem; para projetos com mais ações simultâneas, <code>millis()</code> é mais flexível.</p></div></div>
+    </div>
+
+    <div class="success" style="margin-top:14px"><strong>Resultado esperado:</strong> compreender que controlar tempo não é apenas esperar, mas escolher a forma certa de organizar o comportamento do sistema.</div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>4. Aplicação futura</h2><span class="pill">Por que isso importa?</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Projetos com mais de uma tarefa</h3><p>Quando o sistema precisa, por exemplo, piscar um LED e ao mesmo tempo ler um botão, o uso de <code>millis()</code> ajuda muito. Assim, o microcontrolador não fica preso em esperas longas enquanto ignora o restante do circuito.</p></div></article>
+      <article class="card"><div class="content"><h3>Sistemas mais responsivos</h3><p>Controlar tempo sem bloquear o programa torna a resposta do sistema mais rápida e organizada. Isso será útil em projetos com sensores, contadores, automação local e outras situações em que várias coisas precisam acontecer ao mesmo tempo.</p></div></article>
+    </div>
+  </section>
+
+  <section id="atividades">
+    <div class="section-title"><h2>5. Atividades sugeridas para o aluno</h2><span class="pill">Prática orientada</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Atividades de continuação</h3><ol class="clean activities"><li><strong>Dois ritmos:</strong> faça o mesmo LED piscar em dois intervalos diferentes, comparando 500 ms e 1500 ms.</li><li><strong>Dois LEDs:</strong> use dois LEDs com tempos diferentes para observar a necessidade de temporização mais flexível.</li><li><strong>Mapa conceitual:</strong> explique com suas palavras a diferença entre espera bloqueante e não bloqueante.</li></ol></div></article>
+      <article class="card"><div class="content"><h3>Desafios de adaptação</h3><ol class="clean activities"><li><strong>Semáforo simples:</strong> crie uma sequência temporal curta com dois ou três LEDs.</li><li><strong>Botão + tempo:</strong> combine uma leitura de botão com um LED temporizado.</li><li><strong>Registro de comparação:</strong> escreva uma frase comparando quando usar <code>delay()</code> e quando <code>millis()</code> pode ser melhor.</li></ol></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>6. Sugestões de pesquisa complementar</h2><span class="pill">Aprofundamento</span></div>
+    <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise por que exemplos de <strong>blink without delay</strong> são tão usados em Arduino.</li><li>Explore situações em que o programa precisa executar mais de uma ação ao mesmo tempo sem usar sistemas operacionais.</li><li>Pesquise aplicações práticas de <strong>micros()</strong> e <strong>delayMicroseconds()</strong> em projetos embarcados.</li><li>Observe exemplos de temporização em semáforos, alarmes e sistemas de monitoramento.</li></ul></div></article>
+  </section>
+
+  <section id="quiz">
+    <div class="section-title"><h2>7. Questões objetivas de revisão</h2><span class="pill">Quiz interativo</span></div>
+    <p class="lead">Responda uma alternativa por questão. Clique em <strong>Enviar Resposta</strong> para receber feedback e use <strong>Ver Gabarito</strong> quando quiser conferir a resposta correta.</p>
+
+    <div class="quiz-item"><h3>Questão 1</h3><p>Qual função faz uma pausa bloqueante em milissegundos?</p>
+      <div class="options">
+        <label><input type="radio" name="q1" value="a"> millis()</label>
+        <label><input type="radio" name="q1" value="b"> micros()</label>
+        <label><input type="radio" name="q1" value="c"> delay()</label>
+        <label><input type="radio" name="q1" value="d"> pinMode()</label>
+        <label><input type="radio" name="q1" value="e"> analogRead()</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q1','c')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+      <div id="f_q1" class="feedback"></div><div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 2</h3><p>Qual função informa há quanto tempo o programa está rodando em milissegundos?</p>
+      <div class="options">
+        <label><input type="radio" name="q2" value="a"> delay()</label>
+        <label><input type="radio" name="q2" value="b"> millis()</label>
+        <label><input type="radio" name="q2" value="c"> digitalWrite()</label>
+        <label><input type="radio" name="q2" value="d"> loop()</label>
+        <label><input type="radio" name="q2" value="e"> HIGH</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q2','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+      <div id="f_q2" class="feedback"></div><div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 3</h3><p>O que caracteriza uma espera não bloqueante?</p>
+      <div class="options">
+        <label><input type="radio" name="q3" value="a"> O programa para completamente até o tempo acabar.</label>
+        <label><input type="radio" name="q3" value="b"> O programa continua executando enquanto verifica se já chegou o momento da ação.</label>
+        <label><input type="radio" name="q3" value="c"> O LED sempre pisca mais rápido.</label>
+        <label><input type="radio" name="q3" value="d"> O circuito não usa variáveis.</label>
+        <label><input type="radio" name="q3" value="e"> O Arduino desliga sozinho.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q3','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+      <div id="f_q3" class="feedback"></div><div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 4</h3><p>Qual função trabalha com microssegundos?</p>
+      <div class="options">
+        <label><input type="radio" name="q4" value="a"> micros()</label>
+        <label><input type="radio" name="q4" value="b"> delay()</label>
+        <label><input type="radio" name="q4" value="c"> pinMode()</label>
+        <label><input type="radio" name="q4" value="d"> analogWrite()</label>
+        <label><input type="radio" name="q4" value="e"> INPUT</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q4','a')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+      <div id="f_q4" class="feedback"></div><div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>A</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 5</h3><p>Por que <code>millis()</code> costuma ser mais útil em projetos maiores?</p>
+      <div class="options">
+        <label><input type="radio" name="q5" value="a"> Porque substitui todos os sensores.</label>
+        <label><input type="radio" name="q5" value="b"> Porque permite controlar tempo sem travar totalmente o restante do programa.</label>
+        <label><input type="radio" name="q5" value="c"> Porque apaga erros de montagem.</label>
+        <label><input type="radio" name="q5" value="d"> Porque funciona sem energia.</label>
+        <label><input type="radio" name="q5" value="e"> Porque só serve para LED.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q5','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+      <div id="f_q5" class="feedback"></div><div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="section-title"><h2>8. Checklist do aluno</h2><span class="pill">Autoavaliação</span></div>
+    <div class="card"><div class="content">
+      <div class="checklist" id="checklistBox">
+        <label class="check-item"><input type="checkbox" data-check="c1"> <span>Entendi a diferença entre <code>delay()</code> e <code>millis()</code>.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c2"> <span>Consigo explicar o que é uma espera bloqueante.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c3"> <span>Consigo explicar o que é uma espera não bloqueante.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c4"> <span>Montei ou observei o exemplo com LED temporizado.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c5"> <span>Consigo identificar quando <code>millis()</code> pode ser melhor que <code>delay()</code>.</span></label>
+      </div>
+      <div class="progress-wrap"><strong>Progresso:</strong><progress id="progressBar" value="0" max="5"></progress><span id="progressText">0 de 5 itens concluídos</span></div>
+      <div class="footer-actions">
+        <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>9. Fechamento do capítulo</h2><span class="pill">Síntese</span></div>
+    <article class="card"><div class="content"><p>Este capítulo mostrou que controlar tempo em sistemas embarcados é mais do que apenas colocar pausas no programa. Em projetos simples, <code>delay()</code> é útil e fácil de entender. Em sistemas com mais tarefas, <code>millis()</code> permite organizar o comportamento sem travar completamente a execução. Essa diferença será importante nos próximos projetos e capítulos.</p></div></article>
+  </section>
+  <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo08.html">← Capítulo 8</a>
+            <a class="btn red" href="capitulo10.html">Capítulo 10 →</a>
+           
+    </div>
+  <footer>
+    <p><strong>Capítulo 09 pronto para uso local.</strong> Controle de tempo em sistemas embarcados com teoria, prática, quiz e checklist.</p>
+  <br>&#x1F12F Professor Cristiano Teixeira.
+</footer>
+</main>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menu = document.getElementById('menu');
+  hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+  function verificar(nome, correta){
+    const sel = document.querySelector(`input[name="${nome}"]:checked`);
+    const fb = document.getElementById(`f_${nome}`);
+    if(!sel){ fb.className='feedback warn'; fb.textContent='Selecione uma alternativa antes de enviar.'; return; }
+    if(sel.value===correta){ fb.className='feedback ok'; fb.textContent='Resposta correta! Muito bem.'; }
+    else{ fb.className='feedback bad'; fb.textContent='Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.'; }
+  }
+  function mostrarGabarito(id){ document.getElementById(id).classList.toggle('show'); }
+
+  const checks=document.querySelectorAll('#checklistBox input[type="checkbox"]');
+  const pb=document.getElementById('progressBar');
+  const pt=document.getElementById('progressText');
+  function atualizar(){ let m=0; checks.forEach(c=>{ if(c.checked) m++; }); pb.value=m; pt.textContent=`${m} de ${checks.length} itens concluídos`; }
+  function salvar(){ const dados={}; checks.forEach(c=>dados[c.dataset.check]=c.checked); localStorage.setItem('cap09_checklist', JSON.stringify(dados)); atualizar(); }
+  function carregar(){ const bruto=localStorage.getItem('cap09_checklist'); if(!bruto){ atualizar(); return; } try{ const d=JSON.parse(bruto); checks.forEach(c=>c.checked=!!d[c.dataset.check]); }catch(e){} atualizar(); }
+  function limparChecklist(){ checks.forEach(c=>c.checked=false); localStorage.removeItem('cap09_checklist'); atualizar(); }
+  checks.forEach(c=>c.addEventListener('change', salvar)); carregar();
+</script>
+</body>
+</html>

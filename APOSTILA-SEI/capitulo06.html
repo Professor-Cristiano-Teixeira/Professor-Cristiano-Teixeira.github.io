@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 06 — Variáveis, Tipos, Operadores e Estruturas de Controle</title>
+  <meta name="description" content="Capítulo 06 da apostila de Sistemas Embarcados e IoT: Variáveis, Tipos, Operadores e Estruturas de Controle com Arduino." />
+  <style>
+    :root{
+      --red:#00979D;
+      --red2:#005C5F;
+      --dark:#2c3e50;
+      --g1:#e8f4f4;
+      --g2:#7a8f90;
+      --paper:#ffffff;
+      --bg:#f7fbfb;
+      --text:#163233;
+      --muted:#4f6b6c;
+      --line:#d7ecec;
+      --ok:#15803d;
+      --bad:#b91c1c;
+      --warn:#b45309;
+      --r:12px;
+      --sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;
+      --cf:#e2e8f0;
+      --ck:#7dd3fc;
+      --cs:#f9a8d4;
+      --cfu:#86efac;
+      --cc:#94a3b8;
+      --max:1200px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff, #f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12}
+    h2{font-size:28px;margin-top:4px}
+    h3{font-size:22px}
+    h4{font-size:18px}
+    p{margin:8px 0 12px}
+    .subtitle{font-size:18px;color:var(--muted)}
+    .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px}
+    .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .concept{height:100%}
+    .concept p:last-child{margin-bottom:0}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    ul.clean, ol.clean{padding-left:20px}
+    .activities li,.searches li{margin-bottom:10px}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+    th{background:#ecf8f8;color:var(--red2);font-size:14px}
+    tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px}
+    .hl .k{color:var(--ck)}
+    .hl .s{color:var(--cs)}
+    .hl .f{color:var(--cfu)}
+    .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer;display:inline-block}
+    .btn.red{background:var(--red);color:#fff}
+    .btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}
+    .btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}
+      .grid,.grid-4{grid-template-columns:1fr}
+      .meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}
+      .hamburger{display:block}
+    }
+    @media(max-width:640px){
+      .meta{grid-template-columns:1fr}
+      .q-actions,.footer-actions{flex-direction:column}
+      progress{width:100%}
+    }
+    @media print{
+      header,.hamburger,.menu,.footer-actions{display:none !important}
+      body{background:#fff}
+      .card,table{box-shadow:none}
+      .wrap{max-width:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><div class="logo">06</div> Capítulo 06 — Variáveis, Tipos, Operadores e Estruturas de Controle</div>
+      <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+      <nav class="menu" id="menu">
+        <a href="index.html">Home</a>
+        <a href="capitulo05.html">Capítulo 5</a>
+        <a href="capitulo07.html">Capítulo 7</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#pratica">Passo a passo</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#checklist">Checklist</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <article class="card hero-main">
+        <div class="content">
+          <h1>Variáveis, Tipos, Operadores e Estruturas de Controle</h1>
+          <p class="subtitle">Bimestre 2 • Capítulo 6 • Tomando decisões e controlando o comportamento do circuito</p>
+          <p>Neste capítulo, você vai aprofundar a programação de microcontroladores trabalhando com <strong>variáveis</strong>, <strong>tipos de dados</strong>, <strong>operadores</strong> e <strong>estruturas de decisão e repetição</strong>. Esses elementos permitem que o programa deixe de ser apenas uma sequência fixa de ações e passe a tomar decisões, comparar valores, guardar informações e repetir comportamentos de forma mais inteligente.</p>
+          <div class="badge-row">
+            <span class="badge">Programação intermediária inicial</span>
+            <span class="badge">Arduino + Tinkercad</span>
+            <span class="badge">Lógica aplicada ao circuito</span>
+            <span class="badge">Base para projetos maiores</span>
+          </div>
+        </div>
+      </article>
+      <aside class="card">
+        <div class="content meta">
+          <div class="mini"><strong>Objetivo do capítulo</strong><span>Compreender como guardar dados, comparar valores e controlar o fluxo do programa com decisões e repetições.</span></div>
+          <div class="mini"><strong>Habilidades relacionadas</strong><span>Aplicar lógica de programação na construção de comportamentos simples em sistemas embarcados.</span></div>
+          <div class="mini"><strong>Tempo sugerido</strong><span>1 aula para teoria e exemplos + 1 aula para prática guiada e atividade derivada.</span></div>
+          <div class="mini"><strong>Ferramentas</strong><span>Arduino Uno, LEDs, botões, resistor, protoboard e Tinkercad.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="conceitos">
+      <div class="section-title">
+        <h2>1. Conceitos essenciais</h2>
+        <span class="pill">Base teórica</span>
+      </div>
+      <div class="callout"><strong>Ideia central:</strong> a partir deste ponto, o programa começa a “pensar” melhor sobre o que está acontecendo. Ele pode guardar valores, verificar condições e decidir o que fazer com base em entradas e resultados.</div>
+      <div class="grid" style="margin-top:16px">
+        <article class="card concept"><div class="content"><h3>1.1 Variáveis</h3><p>Uma variável é um espaço usado para guardar um valor que pode ser consultado ou alterado durante a execução do programa. Em vez de escrever sempre um número diretamente no código, podemos armazená-lo em uma variável para facilitar a leitura, a organização e futuras mudanças.</p><p>Na prática com Arduino, isso é útil para guardar o estado de um botão, a contagem de repetições, um tempo de espera ou qualquer outro dado necessário ao comportamento do circuito.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.2 Tipos de dados</h3><p>O tipo de dado indica que tipo de valor uma variável vai guardar. Por exemplo, podemos guardar números inteiros, valores com casas decimais, caracteres ou estados verdadeiro/falso. No Arduino, alguns tipos muito comuns são <code>int</code>, <code>float</code>, <code>char</code> e <code>bool</code>.</p><p>Escolher o tipo adequado ajuda o programa a usar a informação da forma correta. Neste capítulo, os exemplos mais comuns serão com <code>int</code> e <code>bool</code>, pois são adequados para contagens e estados simples do circuito.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.3 Operadores aritméticos</h3><p>Operadores aritméticos permitem fazer contas, como somar, subtrair, multiplicar e dividir. Eles são usados quando o programa precisa atualizar valores numéricos, contar eventos ou ajustar tempos e medidas.</p><p>Mesmo em projetos simples, isso já aparece quando queremos aumentar um contador, reduzir um valor ou manipular variáveis ao longo da execução.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.4 Operadores de comparação e lógicos</h3><p>Os operadores de comparação permitem verificar relações entre valores, como “é igual?”, “é maior?”, “é diferente?”. Já os operadores lógicos ajudam a combinar condições, como em “e” ou “ou”. Esses recursos são fundamentais para que o programa tome decisões.</p><p>Por exemplo, um botão pressionado pode gerar uma condição verdadeira; a partir disso, o programa decide se deve acender um LED ou não.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.5 Estruturas de decisão</h3><p>As estruturas de decisão, como <code>if</code> e <code>else</code>, permitem que o programa siga caminhos diferentes conforme uma condição. Isso é essencial para criar comportamento adaptável: se algo acontecer, o circuito faz uma coisa; se não acontecer, faz outra.</p><p>Na prática embarcada, estruturas de decisão aparecem o tempo todo, principalmente quando o sistema precisa reagir a botões, sensores ou estados internos.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.6 Estruturas de repetição</h3><p>As estruturas de repetição permitem executar um bloco de instruções várias vezes. Alguns exemplos comuns são <code>for</code> e <code>while</code>. Elas são úteis quando queremos repetir um padrão de acendimento, contar ciclos ou executar ações até que uma condição mude.</p><p>Embora o próprio <code>loop()</code> já repita o programa, as repetições internas ajudam a controlar sequências mais específicas dentro da lógica do sistema.</p></div></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>2. Resumo rápido dos elementos de programação</h2>
+        <span class="pill">Leitura orientada</span>
+      </div>
+      <article class="card"><div class="content">
+        <table>
+          <thead>
+            <tr><th>Elemento</th><th>Função principal</th><th>Exemplo de uso</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Variável</td><td>Guardar um valor</td><td>Estado do botão</td></tr>
+            <tr><td><code>int</code></td><td>Número inteiro</td><td>Contador</td></tr>
+            <tr><td><code>bool</code></td><td>Verdadeiro ou falso</td><td>Ligado / desligado</td></tr>
+            <tr><td>Operador aritmético</td><td>Fazer conta</td><td><code>contador = contador + 1</code></td></tr>
+            <tr><td>Comparação</td><td>Verificar condição</td><td><code>valor == 1</code></td></tr>
+            <tr><td><code>if / else</code></td><td>Tomar decisão</td><td>Acender ou apagar LED</td></tr>
+            <tr><td><code>for / while</code></td><td>Repetir instruções</td><td>Piscar várias vezes</td></tr>
+          </tbody>
+        </table>
+      </div></article>
+    </section>
+
+    <section id="pratica">
+      <div class="section-title">
+        <h2>3. Prática guiada — Botão controlando LED com variável e decisão</h2>
+        <span class="pill">Passo a passo</span>
+      </div>
+      <p class="lead">Nesta prática, você vai usar uma variável para guardar o estado de um botão e uma estrutura de decisão para controlar um LED com base nessa leitura.</p>
+      <div class="note"><strong>O que você vai aplicar aqui:</strong> variável, tipo de dado, leitura simples, comparação e <code>if / else</code>.</div>
+      <div class="tip" style="margin-top:12px"><strong>Dica importante:</strong> primeiro monte o circuito e depois compare, com calma, os pinos usados no código e na montagem física.</div>
+      <div class="steps" style="margin-top:16px">
+        <div class="step"><div class="step-num">1</div><div><h4>Monte o circuito</h4><p>No Tinkercad, crie um circuito com Arduino Uno, protoboard, um botão, um LED, um resistor para o LED e os jumpers necessários. Ligue o LED a um pino digital de saída e o botão a um pino digital de entrada.</p><p><strong>Aplicação do conceito:</strong> o botão será a entrada; o LED será a saída.</p></div></div>
+        <div class="step"><div class="step-num">2</div><div><h4>Crie uma variável para o botão</h4><p>No código, crie uma variável para guardar o valor lido do botão. Um tipo adequado pode ser <code>int</code> ou <code>bool</code>, dependendo da abordagem didática adotada. Aqui, vamos usar <code>int</code> para facilitar a relação com leitura digital.</p><pre><code class="hl"><span class="k">int</span> estadoBotao = 0;</code></pre><p><strong>Aplicação do conceito:</strong> a variável servirá para armazenar o valor lido no pino do botão.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div><h4>Configure os pinos no setup()</h4><p>Defina o pino do botão como entrada e o do LED como saída:</p><pre><code class="hl"><span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(2, INPUT);
+  <span class="f">pinMode</span>(13, OUTPUT);
+}</code></pre><p><strong>Aplicação do conceito:</strong> o Arduino precisa saber qual pino recebe informação e qual controla um componente.</p></div></div>
+        <div class="step"><div class="step-num">4</div><div><h4>Leia o botão dentro do loop()</h4><p>Agora, dentro do <code>loop()</code>, faça a leitura do botão e guarde o resultado na variável:</p><pre><code class="hl"><span class="k">void</span> <span class="f">loop</span>() {
+  estadoBotao = <span class="f">digitalRead</span>(2);
+}</code></pre><p><strong>Aplicação do conceito:</strong> o valor do botão passa a ser tratado como dado do programa.</p></div></div>
+        <div class="step"><div class="step-num">5</div><div><h4>Use uma decisão para controlar o LED</h4><p>Adicione uma estrutura <code>if / else</code> para verificar o valor lido:</p><pre><code class="hl"><span class="k">int</span> estadoBotao = 0;
+
+<span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(2, INPUT);
+  <span class="f">pinMode</span>(13, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  estadoBotao = <span class="f">digitalRead</span>(2);
+
+  <span class="k">if</span> (estadoBotao == HIGH) {
+    <span class="f">digitalWrite</span>(13, HIGH);
+  } <span class="k">else</span> {
+    <span class="f">digitalWrite</span>(13, LOW);
+  }
+}</code></pre><p><strong>Aplicação do conceito:</strong> se a condição for verdadeira, o LED acende; caso contrário, ele apaga.</p></div></div>
+        <div class="step"><div class="step-num">6</div><div><h4>Teste e observe</h4><p>Inicie a simulação e pressione o botão. Observe o LED respondendo à condição definida no programa. Esse é um dos primeiros exemplos claros em que o código toma uma decisão com base em uma entrada real do circuito.</p><p><strong>Resultado esperado:</strong> botão pressionado → LED aceso; botão solto → LED apagado.</p></div></div>
+      </div>
+      <div class="success" style="margin-top:14px"><strong>Resultado esperado:</strong> um circuito em que a leitura de uma entrada altera o comportamento da saída por meio de decisão lógica.</div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>4. Exemplo simples com repetição</h2>
+        <span class="pill">Ampliação do conceito</span>
+      </div>
+      <article class="card"><div class="content">
+        <p>Além da decisão, o programa também pode repetir uma ação várias vezes de forma controlada. Veja este exemplo com <code>for</code>:</p>
+        <pre><code class="hl"><span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(13, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  <span class="k">for</span> (<span class="k">int</span> i = 0; i &lt; 3; i++) {
+    <span class="f">digitalWrite</span>(13, HIGH);
+    <span class="f">delay</span>(300);
+    <span class="f">digitalWrite</span>(13, LOW);
+    <span class="f">delay</span>(300);
+  }
+
+  <span class="f">delay</span>(1000);
+}</code></pre>
+        <p>Nesse caso, o LED pisca três vezes dentro do <code>for</code> e depois espera um pouco antes de repetir tudo novamente. O importante é perceber que a repetição interna controla um padrão específico dentro do programa.</p>
+      </div></article>
+    </section>
+
+    <section id="atividades">
+      <div class="section-title">
+        <h2>5. Atividades sugeridas para o aluno</h2>
+        <span class="pill">Prática orientada</span>
+      </div>
+      <div class="grid-2">
+        <article class="card"><div class="content"><h3>Atividades de continuação</h3><ol class="clean activities"><li><strong>Dois LEDs com decisão:</strong> use um LED para quando o botão estiver pressionado e outro para quando estiver solto.</li><li><strong>Contador simples:</strong> crie uma variável contador e faça com que ela aumente em determinadas repetições do programa.</li><li><strong>Pisca controlado:</strong> use <code>for</code> para fazer o LED piscar 5 vezes antes de parar por um instante.</li></ol></div></article>
+        <article class="card"><div class="content"><h3>Desafios de adaptação</h3><ol class="clean activities"><li><strong>Dois botões:</strong> planeje um circuito em que um botão acenda o LED e outro o apague.</li><li><strong>Padrão com repetição:</strong> crie uma sequência curta usando <code>for</code> ou <code>while</code> para variar o ritmo do LED.</li><li><strong>Registro de lógica:</strong> explique, com suas palavras, por que a variável do botão é útil no programa.</li></ol></div></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>6. Sugestões de pesquisa complementar</h2>
+        <span class="pill">Aprofundamento</span>
+      </div>
+      <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise a diferença entre os tipos <strong>int</strong>, <strong>float</strong> e <strong>bool</strong> no Arduino.</li><li>Explore exemplos de uso de <strong>if</strong>, <strong>else</strong>, <strong>for</strong> e <strong>while</strong> em projetos simples.</li><li>Pesquise como operadores de comparação e operadores lógicos ajudam o programa a tomar decisões.</li><li>Observe exemplos em que um mesmo circuito muda bastante apenas com alterações na lógica do código.</li></ul></div></article>
+    </section>
+
+    <section id="quiz">
+      <div class="section-title">
+        <h2>7. Questões objetivas de revisão</h2>
+        <span class="pill">Quiz interativo</span>
+      </div>
+      <p class="lead">Responda uma alternativa por questão. Clique em <strong>Enviar Resposta</strong> para receber feedback e use <strong>Ver Gabarito</strong> quando quiser conferir a resposta correta.</p>
+
+      <div class="quiz-item">
+        <h3>Questão 1</h3>
+        <p>Qual é a função principal de uma variável em programação?</p>
+        <div class="options">
+          <label><input type="radio" name="q1" value="a"> Substituir o Arduino.</label>
+          <label><input type="radio" name="q1" value="b"> Guardar um valor que pode ser usado pelo programa.</label>
+          <label><input type="radio" name="q1" value="c"> Desligar automaticamente os LEDs.</label>
+          <label><input type="radio" name="q1" value="d"> Conectar o circuito à internet.</label>
+          <label><input type="radio" name="q1" value="e"> Eliminar a necessidade de botões.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q1','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+        <div id="f_q1" class="feedback"></div>
+        <div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>. Variáveis guardam valores para uso no programa.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 2</h3>
+        <p>Qual estrutura é usada para tomar decisão com base em uma condição?</p>
+        <div class="options">
+          <label><input type="radio" name="q2" value="a"> <code>if / else</code></label>
+          <label><input type="radio" name="q2" value="b"> <code>pinMode()</code></label>
+          <label><input type="radio" name="q2" value="c"> <code>delay()</code></label>
+          <label><input type="radio" name="q2" value="d"> <code>setup()</code></label>
+          <label><input type="radio" name="q2" value="e"> <code>reset()</code></label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q2','a')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+        <div id="f_q2" class="feedback"></div>
+        <div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>A</strong>. <code>if / else</code> decide com base em condição.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 3</h3>
+        <p>Qual tipo de dado é adequado para armazenar um número inteiro?</p>
+        <div class="options">
+          <label><input type="radio" name="q3" value="a"> <code>int</code></label>
+          <label><input type="radio" name="q3" value="b"> <code>bool</code></label>
+          <label><input type="radio" name="q3" value="c"> <code>char</code></label>
+          <label><input type="radio" name="q3" value="d"> <code>void</code></label>
+          <label><input type="radio" name="q3" value="e"> <code>loop</code></label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q3','a')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+        <div id="f_q3" class="feedback"></div>
+        <div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>A</strong>. <code>int</code> é usado para números inteiros.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 4</h3>
+        <p>Em um programa, uma estrutura como <code>for</code> é usada principalmente para:</p>
+        <div class="options">
+          <label><input type="radio" name="q4" value="a"> Configurar pinos uma vez.</label>
+          <label><input type="radio" name="q4" value="b"> Repetir um bloco de instruções.</label>
+          <label><input type="radio" name="q4" value="c"> Apagar o código anterior.</label>
+          <label><input type="radio" name="q4" value="d"> Ler a internet.</label>
+          <label><input type="radio" name="q4" value="e"> Trocar o valor do resistor físico.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q4','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+        <div id="f_q4" class="feedback"></div>
+        <div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>. <code>for</code> é uma estrutura de repetição.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 5</h3>
+        <p>No exemplo do botão controlando LED, por que guardar a leitura em uma variável é útil?</p>
+        <div class="options">
+          <label><input type="radio" name="q5" value="a"> Porque substitui a protoboard.</label>
+          <label><input type="radio" name="q5" value="b"> Porque permite usar e verificar o valor lido de forma organizada no programa.</label>
+          <label><input type="radio" name="q5" value="c"> Porque elimina a necessidade de LED.</label>
+          <label><input type="radio" name="q5" value="d"> Porque impede qualquer erro de montagem automaticamente.</label>
+          <label><input type="radio" name="q5" value="e"> Porque torna o circuito um sistema IoT.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q5','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+        <div id="f_q5" class="feedback"></div>
+        <div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>. A variável organiza o uso da leitura no programa.</div>
+      </div>
+    </section>
+
+    <section id="checklist">
+      <div class="section-title">
+        <h2>8. Checklist interativo do aluno</h2>
+        <span class="pill">Autoavaliação</span>
+      </div>
+      <article class="card">
+        <div class="content">
+          <p class="lead">Marque os itens conforme concluir. O progresso fica salvo localmente no navegador deste dispositivo.</p>
+          <div class="checklist" id="checklistBox">
+            <label class="check-item"><input type="checkbox" data-check="c1"> <span>Entendi a ideia de variável e para que ela serve.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c2"> <span>Consigo reconhecer alguns tipos de dados básicos, como <code>int</code> e <code>bool</code>.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c3"> <span>Entendi o papel de operadores aritméticos e de comparação.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c4"> <span>Consigo explicar, com minhas palavras, como funciona um <code>if / else</code>.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c5"> <span>Entendi o objetivo de uma repetição como <code>for</code> ou <code>while</code>.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c6"> <span>Montei ou observei a prática com botão controlando LED.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c7"> <span>Fiz pelo menos uma adaptação na lógica proposta.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c8"> <span>Resolvi o quiz de revisão deste capítulo.</span></label>
+          </div>
+          <div class="progress-wrap">
+            <strong>Progresso:</strong>
+            <progress id="progressBar" value="0" max="8"></progress>
+            <span id="progressText">0 de 8 itens concluídos</span>
+          </div>
+          <div class="footer-actions">
+            <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>9. Fechamento do capítulo</h2>
+        <span class="pill">Síntese</span>
+      </div>
+      <article class="card"><div class="content"><p>Este capítulo amplia a programação do Arduino, mostrando que o microcontrolador pode guardar informações, comparar valores e decidir o que fazer. A partir daqui, o aluno começa a construir programas menos rígidos e mais inteligentes. Nos próximos capítulos, essa lógica continuará sendo aprofundada para tornar os sistemas embarcados cada vez mais úteis e interativos.</p></div></article>
+    </section>
+
+    <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo05.html">← Capítulo 5</a>
+            <a class="btn red" href="capitulo07.html">Capítulo 7 →</a>
+           
+    </div>
+
+    <footer>
+      <p><strong>Capítulo 06 pronto para uso local.</strong> Arquivo HTML independente, com teoria, prática guiada, atividades, quiz interativo, checklist e navegação entre capítulos.</p>
+    <br>&#x1F12F Professor Cristiano Teixeira.
+  </footer>
+  </main>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const menu = document.getElementById('menu');
+    hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+    menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+    function verificar(nomeQuestao, correta){
+      const selecionada = document.querySelector(`input[name="${nomeQuestao}"]:checked`);
+      const feedback = document.getElementById(`f_${nomeQuestao}`);
+      if(!selecionada){
+        feedback.className = 'feedback warn';
+        feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+        return;
+      }
+      if(selecionada.value === correta){
+        feedback.className = 'feedback ok';
+        feedback.textContent = 'Resposta correta! Muito bem.';
+      } else {
+        feedback.className = 'feedback bad';
+        feedback.textContent = 'Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.';
+      }
+    }
+
+    function mostrarGabarito(id){
+      document.getElementById(id).classList.toggle('show');
+    }
+
+    const checks = document.querySelectorAll('#checklistBox input[type="checkbox"]');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    function atualizarProgress(){
+      let marcados = 0;
+      checks.forEach(ch => { if(ch.checked) marcados++; });
+      progressBar.value = marcados;
+      progressText.textContent = `${marcados} de ${checks.length} itens concluídos`;
+    }
+
+    function salvarChecklist(){
+      const dados = {};
+      checks.forEach(ch => { dados[ch.dataset.check] = ch.checked; });
+      localStorage.setItem('cap06_checklist', JSON.stringify(dados));
+      atualizarProgress();
+    }
+
+    function carregarChecklist(){
+      const bruto = localStorage.getItem('cap06_checklist');
+      if(!bruto){ atualizarProgress(); return; }
+      try{
+        const dados = JSON.parse(bruto);
+        checks.forEach(ch => ch.checked = !!dados[ch.dataset.check]);
+      }catch(e){}
+      atualizarProgress();
+    }
+
+    function limparChecklist(){
+      checks.forEach(ch => ch.checked = false);
+      localStorage.removeItem('cap06_checklist');
+      atualizarProgress();
+    }
+
+    checks.forEach(ch => ch.addEventListener('change', salvarChecklist));
+    carregarChecklist();
+  </script>
+</body>
+</html>

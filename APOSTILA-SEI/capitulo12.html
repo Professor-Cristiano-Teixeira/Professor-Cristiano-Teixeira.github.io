@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 12 — Projeto Avaliativo do 3º Bimestre</title>
+  <meta name="description" content="Capítulo 12 da apostila de Sistemas Embarcados e IoT: Projeto Avaliativo do 3º Bimestre com Arduino." />
+  <style>
+    :root{
+      --red:#00979D;--red2:#005C5F;--dark:#2c3e50;--g1:#e8f4f4;--g2:#7a8f90;
+      --paper:#ffffff;--bg:#f7fbfb;--text:#163233;--muted:#4f6b6c;--line:#d7ecec;
+      --ok:#15803d;--bad:#b91c1c;--warn:#b45309;--r:12px;--sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;--cf:#e2e8f0;--ck:#7dd3fc;--cs:#f9a8d4;--cfu:#86efac;--cc:#94a3b8;--max:1200px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff,#f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12} h2{font-size:28px;margin-top:4px} h3{font-size:22px} h4{font-size:18px}
+    p{margin:8px 0 12px} .subtitle{font-size:18px;color:var(--muted)} .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px} .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+    .criterion{height:100%}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    ul.clean,ol.clean{padding-left:20px} .activities li,.searches li{margin-bottom:10px}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left} th{background:#ecf8f8;color:var(--red2);font-size:14px} tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,monospace;font-size:14px}
+    .hl .k{color:var(--ck)} .hl .s{color:var(--cs)} .hl .f{color:var(--cfu)} .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer;display:inline-block}
+    .btn.red{background:var(--red);color:#fff}.btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}.btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}.grid,.grid-4{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}.hamburger{display:block}
+    }
+    @media(max-width:640px){.meta{grid-template-columns:1fr}.q-actions,.footer-actions{flex-direction:column}progress{width:100%}}
+    @media print{header,.hamburger,.menu,.footer-actions{display:none!important}body{background:#fff}.card,table{box-shadow:none}.wrap{max-width:none;padding:0}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">12</div> Capítulo 12 — Projeto Avaliativo do 3º Bimestre</div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+    <nav class="menu" id="menu">
+      <a href="index.html">Home</a>
+      <a href="capitulo11.html">Capítulo 11</a>
+      <a href="capitulo13.html">Capítulo 13</a>
+      <a href="#projeto">Projeto</a>
+      <a href="#roteiro">Roteiro</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <article class="card hero-main"><div class="content">
+      <h1>Projeto Avaliativo do 3º Bimestre</h1>
+      <p class="subtitle">Sistema Local Temporizado e Modular • Integração dos capítulos 9, 10 e 11</p>
+      <p>Neste capítulo, você vai desenvolver um <strong>projeto avaliativo</strong> que integra os conhecimentos do terceiro bimestre: <strong>controle de tempo</strong>, <strong>uso de funções prontas</strong> e <strong>programação modular</strong>. A proposta é construir um <strong>sistema local temporizado</strong> no Arduino, capaz de executar comportamentos organizados em módulos e com lógica temporal bem definida.</p>
+      <div class="badge-row">
+        <span class="badge">Projeto avaliativo</span>
+        <span class="badge">3º bimestre</span>
+        <span class="badge">Temporização + modularização</span>
+        <span class="badge">Arduino + Tinkercad</span>
+      </div>
+    </div></article>
+    <aside class="card"><div class="content meta">
+      <div class="mini"><strong>Produto esperado</strong><span>Protótipo funcional local com comportamento temporizado, código modular e explicação curta da solução.</span></div>
+      <div class="mini"><strong>Competências mobilizadas</strong><span>Organizar software embarcado em funções, controlar tempo e integrar saídas em um comportamento previsível.</span></div>
+      <div class="mini"><strong>Tempo sugerido</strong><span>1 aula para planejamento e início da montagem + 1 aula para conclusão, ajustes e entrega.</span></div>
+      <div class="mini"><strong>Ferramentas</strong><span>Arduino Uno, LEDs, botão opcional, resistores, protoboard, jumpers e Tinkercad.</span></div>
+    </div></aside>
+  </section>
+
+  <section id="projeto">
+    <div class="section-title"><h2>1. Proposta do projeto</h2><span class="pill">Situação-problema</span></div>
+    <div class="callout"><strong>Desafio:</strong> desenvolver um protótipo local que execute uma <strong>sequência temporizada</strong> com uma ou mais saídas, usando código organizado em funções para tornar o projeto mais claro e fácil de manter.</div>
+    <div class="grid-2" style="margin-top:16px">
+      <article class="card"><div class="content"><h3>Possibilidades de projeto</h3><ul class="clean"><li>Semáforo local temporizado</li><li>Sistema de alerta com sequência de LEDs</li><li>Painel visual com padrões de tempo</li><li>Sequência modular de sinalização</li><li>Alerta acionado por botão com temporização</li></ul><p class="lead">O professor pode escolher uma única proposta ou permitir pequenas adaptações controladas.</p></div></article>
+      <article class="card"><div class="content"><h3>O que o projeto deve demonstrar</h3><ul class="clean"><li>Uso correto de tempo no programa</li><li>Organização modular com funções</li><li>Montagem funcional com uma ou mais saídas</li><li>Leitura clara do circuito e do código</li><li>Capacidade de explicar a lógica temporal</li><li>Possível uso de botão ou condição de ativação</li></ul></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>2. Revisão dos conhecimentos aplicados</h2><span class="pill">Integração do bimestre</span></div>
+    <div class="grid">
+      <article class="card"><div class="content"><h3>2.1 Controle de tempo</h3><p>O projeto precisa usar temporização para definir quando cada ação deve acontecer. Isso pode aparecer com <code>delay()</code> em uma primeira versão ou com abordagem mais organizada quando o projeto exigir mais flexibilidade.</p><p>O importante é que o aluno perceba que o comportamento depende da organização temporal.</p></div></article>
+      <article class="card"><div class="content"><h3>2.2 Funções prontas</h3><p>Durante o desenvolvimento, o programa pode aproveitar funções já conhecidas e comandos que tornam o código mais direto. Isso mostra que programar bem também é saber reutilizar recursos existentes.</p><p>Mesmo quando o foco principal do projeto não é cálculo, a lógica de funções prontas e reaproveitamento continua importante.</p></div></article>
+      <article class="card"><div class="content"><h3>2.3 Programação modular</h3><p>O projeto deve dividir responsabilidades em funções, por exemplo: uma função para acender uma sequência, outra para desligar saídas e outra para executar um padrão. Isso ajuda a transformar um código extenso em um sistema mais organizado.</p><p>Essa organização também facilita a explicação do aluno durante a entrega.</p></div></article>
+    </div>
+  </section>
+
+  <section id="roteiro">
+    <div class="section-title"><h2>3. Roteiro do projeto — modelo-base</h2><span class="pill">Execução orientada</span></div>
+    <p class="lead">O modelo-base sugerido é um <strong>mini semáforo local temporizado</strong>, com três LEDs controlados por funções específicas. É um projeto simples, visual e adequado ao nível técnico, integrando bem os conteúdos do bimestre.</p>
+    <div class="note"><strong>Objetivo do modelo:</strong> acender os LEDs em sequência (verde, amarelo, vermelho) com tempos definidos e código organizado em funções.</div>
+
+    <div class="steps" style="margin-top:16px">
+      <div class="step"><div class="step-num">1</div><div><h4>Planeje a montagem</h4><p>Liste os componentes: Arduino Uno, três LEDs, três resistores, protoboard e jumpers. Se desejar ampliar o desafio, adicione um botão para iniciar ou pausar a sequência.</p><p><strong>Aplicação pedagógica:</strong> o planejamento ajuda a visualizar entradas, saídas e a lógica temporal antes do código.</p></div></div>
+
+      <div class="step"><div class="step-num">2</div><div><h4>Monte os LEDs</h4><p>Conecte os LEDs a três pinos digitais, como 8, 9 e 10, cada um com seu resistor, e ligue os retornos ao GND. Organize o circuito com clareza para facilitar a leitura durante a avaliação.</p><p><strong>Aplicação do conceito:</strong> cada LED representará um estado do sistema.</p></div></div>
+
+      <div class="step"><div class="step-num">3</div><div><h4>Escreva funções para cada estado</h4><p>Crie funções separadas para acender o LED verde, amarelo e vermelho, desligando os demais. Isso deixa o programa modular e muito mais fácil de compreender.</p>
+<pre><code class="hl"><span class="k">void</span> <span class="f">verde</span>() {
+  <span class="f">digitalWrite</span>(8, HIGH);
+  <span class="f">digitalWrite</span>(9, LOW);
+  <span class="f">digitalWrite</span>(10, LOW);
+}
+
+<span class="k">void</span> <span class="f">amarelo</span>() {
+  <span class="f">digitalWrite</span>(8, LOW);
+  <span class="f">digitalWrite</span>(9, HIGH);
+  <span class="f">digitalWrite</span>(10, LOW);
+}
+
+<span class="k">void</span> <span class="f">vermelho</span>() {
+  <span class="f">digitalWrite</span>(8, LOW);
+  <span class="f">digitalWrite</span>(9, LOW);
+  <span class="f">digitalWrite</span>(10, HIGH);
+}</code></pre></div></div>
+
+      <div class="step"><div class="step-num">4</div><div><h4>Monte o programa-base</h4><p>Organize o restante do código:</p>
+<pre><code class="hl"><span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(8, OUTPUT);
+  <span class="f">pinMode</span>(9, OUTPUT);
+  <span class="f">pinMode</span>(10, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">verde</span>() {
+  <span class="f">digitalWrite</span>(8, HIGH);
+  <span class="f">digitalWrite</span>(9, LOW);
+  <span class="f">digitalWrite</span>(10, LOW);
+}
+
+<span class="k">void</span> <span class="f">amarelo</span>() {
+  <span class="f">digitalWrite</span>(8, LOW);
+  <span class="f">digitalWrite</span>(9, HIGH);
+  <span class="f">digitalWrite</span>(10, LOW);
+}
+
+<span class="k">void</span> <span class="f">vermelho</span>() {
+  <span class="f">digitalWrite</span>(8, LOW);
+  <span class="f">digitalWrite</span>(9, LOW);
+  <span class="f">digitalWrite</span>(10, HIGH);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  <span class="f">verde</span>();
+  <span class="f">delay</span>(3000);
+  <span class="f">amarelo</span>();
+  <span class="f">delay</span>(1000);
+  <span class="f">vermelho</span>();
+  <span class="f">delay</span>(3000);
+}</code></pre>
+<p><strong>Aplicação do conceito:</strong> o comportamento temporal está organizado e o código foi dividido em módulos claros.</p></div></div>
+
+      <div class="step"><div class="step-num">5</div><div><h4>Teste e ajuste</h4><p>Inicie a simulação e observe a sequência do semáforo. Se algo não funcionar, revise primeiro a ligação física dos LEDs e depois os pinos definidos no código.</p><p><strong>Dica de depuração:</strong> sempre confira se o pino físico corresponde ao pino definido no programa.</p></div></div>
+
+      <div class="step"><div class="step-num">6</div><div><h4>Adicione autoria</h4><p>Depois que o modelo-base funcionar, faça uma pequena adaptação: incluir um botão para controlar o início da sequência, mudar os tempos, adicionar um LED de pedestre ou criar um estado de alerta piscando.</p><p><strong>Entrega valorizada:</strong> adaptações mostram compreensão e domínio maior do conteúdo.</p></div></div>
+
+      <div class="step"><div class="step-num">7</div><div><h4>Documente a solução</h4><p>Registre os componentes usados, a lógica temporal adotada, as funções criadas e o que acontece em cada parte da sequência. Isso será útil na explicação da entrega.</p></div></div>
+    </div>
+
+    <div class="success" style="margin-top:14px"><strong>Resultado esperado:</strong> um protótipo local temporizado e modular, funcional, organizado e fácil de explicar.</div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>4. Sugestões de variações do projeto</h2><span class="pill">Autoria do aluno</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Variações simples</h3><ol class="clean activities"><li><strong>Semáforo com botão:</strong> usar botão para iniciar ou pausar a sequência.</li><li><strong>Sinalização de pedestre:</strong> adicionar um LED extra para pedestre.</li><li><strong>Alerta piscante:</strong> criar um modo amarelo piscando em determinadas condições.</li></ol></div></article>
+      <article class="card"><div class="content"><h3>Variações com mais desafio</h3><ol class="clean activities"><li><strong>Dois modos:</strong> modo normal e modo noturno com piscadas.</li><li><strong>Padrões modulares:</strong> criar funções extras para cada comportamento do sistema.</li><li><strong>Sequência personalizada:</strong> reorganizar a lógica temporal com base em uma situação simulada.</li></ol></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>5. Critérios de avaliação sugeridos</h2><span class="pill">Rubrica</span></div>
+    <div class="grid-4">
+      <article class="card criterion"><div class="content"><h4>Funcionamento</h4><p>O protótipo executa corretamente a sequência proposta e respeita a lógica temporal definida.</p></div></article>
+      <article class="card criterion"><div class="content"><h4>Modularização</h4><p>O código está dividido em funções com responsabilidades claras e compreensíveis.</p></div></article>
+      <article class="card criterion"><div class="content"><h4>Montagem</h4><p>O circuito está organizado, com boa identificação das saídas e conexões corretas.</p></div></article>
+      <article class="card criterion"><div class="content"><h4>Explicação</h4><p>O aluno consegue explicar como o tempo, as funções e a montagem se relacionam no projeto.</p></div></article>
+    </div>
+    <article class="card" style="margin-top:16px"><div class="content"><table>
+      <thead><tr><th>Critério</th><th>O que observar</th><th>Nível esperado</th></tr></thead>
+      <tbody>
+        <tr><td>Funcionamento</td><td>Sequência temporizada correta</td><td>Essencial</td></tr>
+        <tr><td>Estrutura do código</td><td>Uso de funções e organização modular</td><td>Essencial</td></tr>
+        <tr><td>Montagem</td><td>Circuito limpo, legível e funcional</td><td>Importante</td></tr>
+        <tr><td>Explicação</td><td>Capacidade de descrever o projeto e a lógica</td><td>Importante</td></tr>
+        <tr><td>Autoria</td><td>Adaptação além do modelo-base</td><td>Diferencial</td></tr>
+      </tbody>
+    </table></div></article>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>6. Modelo de documentação curta</h2><span class="pill">Entrega escrita</span></div>
+    <article class="card"><div class="content">
+      <pre><code class="hl"><span class="c">// Modelo de registro do projeto</span>
+<span class="k">Projeto:</span> Sistema local temporizado e modular
+<span class="k">Componentes usados:</span> Arduino, LEDs, resistores, protoboard, jumpers
+<span class="k">Funcionamento:</span> os LEDs executam uma sequência temporal definida
+<span class="k">Funções criadas:</span> __________________________________
+<span class="k">Lógica temporal usada:</span> __________________________________
+<span class="k">Adaptação realizada:</span> __________________________________
+<span class="k">Dificuldades encontradas:</span> __________________________________
+<span class="k">Como corrigi:</span> __________________________________</code></pre>
+      <p class="lead">Esse registro ajuda a valorizar a organização do raciocínio e a compreensão do projeto, além do funcionamento em si.</p>
+    </div></article>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>7. Sugestões de pesquisa complementar</h2><span class="pill">Aprofundamento</span></div>
+    <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise exemplos de <strong>semáforos com Arduino</strong> e compare diferentes formas de organizar o código.</li><li>Explore projetos com <strong>padrões temporizados</strong> usando LEDs e botões.</li><li>Pesquise como a programação modular facilita o crescimento de sistemas embarcados maiores.</li><li>Observe exemplos em que um mesmo projeto é escrito de forma linear e depois reescrito de forma modular.</li></ul></div></article>
+  </section>
+
+  <section id="quiz">
+    <div class="section-title"><h2>8. Questões objetivas de revisão</h2><span class="pill">Quiz interativo</span></div>
+    <p class="lead">Estas questões ajudam a revisar os conceitos integrados no projeto avaliativo do 3º bimestre.</p>
+
+    <div class="quiz-item"><h3>Questão 1</h3><p>Qual é o objetivo principal do projeto deste capítulo?</p>
+      <div class="options">
+        <label><input type="radio" name="q1" value="a"> Criar um aplicativo de celular.</label>
+        <label><input type="radio" name="q1" value="b"> Desenvolver um sistema local temporizado e modular com Arduino.</label>
+        <label><input type="radio" name="q1" value="c"> Configurar acesso à internet.</label>
+        <label><input type="radio" name="q1" value="d"> Trabalhar apenas com texto no Serial Monitor.</label>
+        <label><input type="radio" name="q1" value="e"> Eliminar totalmente o uso de funções.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q1','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+      <div id="f_q1" class="feedback"></div><div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 2</h3><p>No modelo-base, qual projeto foi sugerido?</p>
+      <div class="options">
+        <label><input type="radio" name="q2" value="a"> Dado eletrônico com potenciômetro.</label>
+        <label><input type="radio" name="q2" value="b"> Mini semáforo local temporizado.</label>
+        <label><input type="radio" name="q2" value="c"> Controle Wi‑Fi com ESP32.</label>
+        <label><input type="radio" name="q2" value="d"> Sensor ultrassônico com servo.</label>
+        <label><input type="radio" name="q2" value="e"> Tela LCD com biblioteca avançada.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q2','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+      <div id="f_q2" class="feedback"></div><div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 3</h3><p>Qual aspecto do código é especialmente valorizado neste projeto?</p>
+      <div class="options">
+        <label><input type="radio" name="q3" value="a"> Colocar tudo dentro do loop.</label>
+        <label><input type="radio" name="q3" value="b"> Dividir responsabilidades em funções e organizar a lógica.</label>
+        <label><input type="radio" name="q3" value="c"> Evitar qualquer variável.</label>
+        <label><input type="radio" name="q3" value="d"> Substituir resistores por mais LEDs.</label>
+        <label><input type="radio" name="q3" value="e"> Usar apenas números aleatórios.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q3','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+      <div id="f_q3" class="feedback"></div><div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 4</h3><p>Qual item também faz parte da avaliação além do funcionamento do circuito?</p>
+      <div class="options">
+        <label><input type="radio" name="q4" value="a"> Número de abas abertas no navegador.</label>
+        <label><input type="radio" name="q4" value="b"> Clareza da montagem e capacidade de explicar a lógica do projeto.</label>
+        <label><input type="radio" name="q4" value="c"> Cor do fundo do editor.</label>
+        <label><input type="radio" name="q4" value="d"> Quantidade de cliques no mouse.</label>
+        <label><input type="radio" name="q4" value="e"> Nome do arquivo sem relação com o conteúdo.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q4','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+      <div id="f_q4" class="feedback"></div><div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 5</h3><p>Por que adicionar uma pequena adaptação ao modelo-base pode ser importante?</p>
+      <div class="options">
+        <label><input type="radio" name="q5" value="a"> Porque o circuito só funciona com adaptações.</label>
+        <label><input type="radio" name="q5" value="b"> Porque demonstra autoria, compreensão e capacidade de aplicar o conteúdo.</label>
+        <label><input type="radio" name="q5" value="c"> Porque substitui a necessidade de documentação.</label>
+        <label><input type="radio" name="q5" value="d"> Porque elimina o uso de resistores.</label>
+        <label><input type="radio" name="q5" value="e"> Porque impede erros de montagem automaticamente.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q5','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+      <div id="f_q5" class="feedback"></div><div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="section-title"><h2>9. Checklist interativo da entrega</h2><span class="pill">Autoavaliação</span></div>
+    <div class="card"><div class="content">
+      <p class="lead">Use esta lista antes de entregar o projeto. O progresso fica salvo localmente no navegador deste dispositivo.</p>
+      <div class="checklist" id="checklistBox">
+        <label class="check-item"><input type="checkbox" data-check="c1"> <span>Planejei o circuito e a lógica temporal antes de montar.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c2"> <span>Usei corretamente a temporização no projeto.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c3"> <span>Dividi o código em funções ou módulos com responsabilidades claras.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c4"> <span>Meu circuito está funcional no simulador ou no kit físico.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c5"> <span>Minha montagem está organizada e legível.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c6"> <span>Consigo explicar a lógica do projeto e as funções criadas.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c7"> <span>Fiz uma adaptação além do modelo-base, se possível.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c8"> <span>Produzi um registro curto da solução.</span></label>
+      </div>
+      <div class="progress-wrap"><strong>Progresso:</strong><progress id="progressBar" value="0" max="8"></progress><span id="progressText">0 de 8 itens concluídos</span></div>
+      <div class="footer-actions">
+         <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>10. Fechamento do 3º bimestre</h2><span class="pill">Síntese</span></div>
+    <article class="card"><div class="content"><p>Este capítulo fecha o terceiro bimestre integrando controle de tempo, reaproveitamento de recursos e organização modular em um projeto concreto. Ao concluir essa entrega, o aluno demonstra que consegue estruturar melhor um sistema embarcado local, organizar o código em partes menores e controlar comportamentos temporizados de maneira clara e funcional. Esses conhecimentos servirão de base para a etapa final do curso.</p></div></article>
+  </section>
+
+  <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo11.html">← Capítulo 11/a>
+            <a class="btn red" href="capitulo13.html">Capítulo 13 →</a>
+           
+    </div>
+
+  <footer>
+    <p><strong>Capítulo 12 pronto para uso local.</strong> Projeto avaliativo do 3º bimestre com rubrica, quiz interativo, checklist e navegação entre capítulos.</p>
+  <br>&#x1F12F Professor Cristiano Teixeira.
+</footer>
+</main>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menu = document.getElementById('menu');
+  hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+  function verificar(nome, correta){
+    const sel = document.querySelector(`input[name="${nome}"]:checked`);
+    const fb = document.getElementById(`f_${nome}`);
+    if(!sel){ fb.className='feedback warn'; fb.textContent='Selecione uma alternativa antes de enviar.'; return; }
+    if(sel.value===correta){ fb.className='feedback ok'; fb.textContent='Resposta correta! Muito bem.'; }
+    else{ fb.className='feedback bad'; fb.textContent='Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.'; }
+  }
+  function mostrarGabarito(id){ document.getElementById(id).classList.toggle('show'); }
+
+  const checks=document.querySelectorAll('#checklistBox input[type="checkbox"]');
+  const pb=document.getElementById('progressBar');
+  const pt=document.getElementById('progressText');
+  function atualizar(){ let m=0; checks.forEach(c=>{ if(c.checked) m++; }); pb.value=m; pt.textContent=`${m} de ${checks.length} itens concluídos`; }
+  function salvar(){ const dados={}; checks.forEach(c=>dados[c.dataset.check]=c.checked); localStorage.setItem('cap12_checklist', JSON.stringify(dados)); atualizar(); }
+  function carregar(){ const bruto=localStorage.getItem('cap12_checklist'); if(!bruto){ atualizar(); return; } try{ const d=JSON.parse(bruto); checks.forEach(c=>c.checked=!!d[c.dataset.check]); }catch(e){} atualizar(); }
+  function limparChecklist(){ checks.forEach(c=>c.checked=false); localStorage.removeItem('cap12_checklist'); atualizar(); }
+  checks.forEach(c=>c.addEventListener('change', salvar)); carregar();
+</script>
+</body>
+</html>

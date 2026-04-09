@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 03 — Componentes Eletrônicos e Ferramentas de Prototipação</title>
+  <meta name="description" content="Capítulo 03 da apostila de Sistemas Embarcados e IoT: Componentes Eletrônicos e Ferramentas de Prototipação." />
+  <style>
+    :root{
+      --red:#00979D;
+      --red2:#005C5F;
+      --dark:#2c3e50;
+      --g1:#e8f4f4;
+      --g2:#7a8f90;
+      --paper:#ffffff;
+      --bg:#f7fbfb;
+      --text:#163233;
+      --muted:#4f6b6c;
+      --line:#d7ecec;
+      --ok:#15803d;
+      --bad:#b91c1c;
+      --warn:#b45309;
+      --r:12px;
+      --sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;
+      --cf:#e2e8f0;
+      --ck:#7dd3fc;
+      --cs:#f9a8d4;
+      --cfu:#86efac;
+      --cc:#94a3b8;
+      --max:1200px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff, #f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12}
+    h2{font-size:28px;margin-top:4px}
+    h3{font-size:22px}
+    h4{font-size:18px}
+    p{margin:8px 0 12px}
+    .subtitle{font-size:18px;color:var(--muted)}
+    .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px}
+    .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .concept{height:100%}
+    .concept p:last-child{margin-bottom:0}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .activities li,.searches li{margin-bottom:10px}
+    ul.clean, ol.clean{padding-left:20px}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+    th{background:#ecf8f8;color:var(--red2);font-size:14px}
+    tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px}
+    .hl .k{color:var(--ck)}
+    .hl .s{color:var(--cs)}
+    .hl .f{color:var(--cfu)}
+    .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer}
+    .btn.red{background:var(--red);color:#fff}
+    .btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}
+    .btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      .meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}
+      .hamburger{display:block}
+    }
+    @media(max-width:640px){
+      .meta{grid-template-columns:1fr}
+      .q-actions,.footer-actions{flex-direction:column}
+      progress{width:100%}
+    }
+    @media print{
+      header,.hamburger,.menu,.footer-actions{display:none !important}
+      body{background:#fff}
+      .card,table{box-shadow:none}
+      .wrap{max-width:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><div class="logo">03</div> Capítulo 03 — Componentes Eletrônicos e Ferramentas de Prototipação</div>
+      <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+      <nav class="menu" id="menu">
+        <a href="index.html">Home</a>
+        <a href="capitulo02.html">Capítulo 2</a>
+        <a href="capitulo04.html">Capítulo 4</a>
+        <a href="#conceitos">Conceitos</a>
+        <a href="#pratica">Passo a passo</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#checklist">Checklist</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <article class="card hero-main">
+        <div class="content">
+          <h1>Componentes Eletrônicos e Ferramentas de Prototipação</h1>
+          <p class="subtitle">Bimestre 1 • Capítulo 3 • Reconhecer peças, organizar montagens e evitar erros comuns</p>
+          <p>Neste capítulo, você vai conhecer os principais <strong>componentes eletrônicos</strong> e as <strong>ferramentas de prototipação</strong> usadas nas aulas. O objetivo é desenvolver segurança para identificar peças, entender a função básica de cada uma e montar circuitos com mais organização. Esse conteúdo é importante porque, na prática, muitos erros não acontecem no código, mas sim na escolha ou na ligação incorreta dos componentes.</p>
+          <div class="badge-row">
+            <span class="badge">Nível: iniciante</span>
+            <span class="badge">Reconhecimento + montagem</span>
+            <span class="badge">Tinkercad e kit Arduino</span>
+            <span class="badge">Base para as próximas práticas</span>
+          </div>
+        </div>
+      </article>
+      <aside class="card">
+        <div class="content meta">
+          <div class="mini"><strong>Objetivo do capítulo</strong><span>Identificar os componentes mais usados no curso e montar um circuito simples com protoboard, botão e LED.</span></div>
+          <div class="mini"><strong>Habilidades relacionadas</strong><span>Selecionar componentes de hardware e executar conexões físicas e lógicas em protótipos simples.</span></div>
+          <div class="mini"><strong>Tempo sugerido</strong><span>1 aula para conceitos e reconhecimento + 1 aula para prática, correções e atividade derivada.</span></div>
+          <div class="mini"><strong>Ferramentas principais</strong><span>Protoboard, LEDs, botões, resistores, Arduino Uno e simulador Tinkercad.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="conceitos">
+      <div class="section-title">
+        <h2>1. Conceitos essenciais e componentes principais</h2>
+        <span class="pill">Base teórica</span>
+      </div>
+      <div class="callout">
+        <strong>Ideia central:</strong> montar bem um protótipo significa saber escolher os componentes, reconhecer suas funções e organizar as conexões de forma clara. Isso facilita o teste, a correção e a evolução do projeto.
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <article class="card concept"><div class="content"><h3>1.1 Resistores</h3><p>O resistor é um componente muito comum em circuitos eletrônicos. Sua principal função é controlar a corrente elétrica, ajudando a proteger outros componentes e a ajustar o comportamento do circuito. No capítulo anterior, você já viu que um LED normalmente precisa de um resistor em série para funcionar de forma adequada.</p><p>Neste capítulo, o foco é reconhecer o resistor como componente físico, entender que existem diferentes valores e perceber que sua escolha faz parte da montagem. Em kits educacionais e no Tinkercad, você encontrará resistores em várias faixas de valor para usos diferentes.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.2 Capacitores e indutores</h3><p>Capacitores e indutores são componentes importantes em eletrônica, embora no início do curso eles apareçam mais como reconhecimento do que como aplicação aprofundada. O capacitor armazena energia elétrica temporariamente e costuma ser usado em filtragem, temporização e estabilização. O indutor está relacionado ao comportamento de campos magnéticos e aparece em circuitos que exigem controle específico da corrente e de sinais elétricos.</p><p>Para este momento, o mais importante é saber que esses componentes existem, reconhecer seus nomes e entender que eles têm funções diferentes dos resistores. Em projetos mais avançados, eles ajudam a estabilizar e ajustar o comportamento elétrico do sistema.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.3 Circuitos integrados</h3><p>Um circuito integrado reúne vários elementos eletrônicos em uma única peça. Em vez de montar tudo com componentes separados, muitas funções podem ser organizadas dentro de um encapsulamento menor. Isso torna os circuitos mais compactos e eficientes.</p><p>O próprio microcontrolador presente em uma placa como o Arduino pode ser visto nesse contexto. Ao longo do curso, você vai usar placas e módulos que já possuem circuitos integrados responsáveis por comunicação, processamento e controle de sinais.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.4 Protoboard</h3><p>A protoboard é uma placa de ensaio que permite montar circuitos sem solda. Ela facilita testes, substituição rápida de peças e reorganização do protótipo. Isso é ideal para aprendizagem, porque o aluno pode experimentar, errar, corrigir e montar novamente com mais facilidade.</p><p>Internamente, a protoboard possui trilhas metálicas que conectam determinados furos. Entender essa organização é essencial para não achar que todos os pontos estão isolados ou, ao contrário, que todos estão interligados. Muitos erros de montagem acontecem por falta de leitura correta da protoboard.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.5 LEDs, botões e componentes de interação</h3><p>LEDs e botões são componentes muito usados em prototipação didática. O LED permite visualizar saídas e estados do circuito. O botão, por sua vez, permite gerar uma entrada manual, abrindo ou fechando caminhos elétricos conforme a ação do usuário.</p><p>No contexto do curso, essa dupla é extremamente importante porque permite montar atividades em que o aluno percebe claramente a relação entre entrada, processamento e saída. Um botão pode representar uma decisão do usuário e o LED pode representar a resposta do sistema.</p></div></article>
+        <article class="card concept"><div class="content"><h3>1.6 Placas, módulos, shields e kits</h3><p>Uma <strong>placa</strong> é a base principal do sistema, como o Arduino Uno ou o ESP32. Um <strong>módulo</strong> costuma ser um componente auxiliar já montado para facilitar o uso de sensores, comunicação ou atuadores. Um <strong>shield</strong> é uma placa complementar projetada para ser encaixada sobre outra, ampliando recursos. Já o <strong>kit</strong> reúne peças e acessórios para estudo e prototipação.</p><p>Na prática escolar, esses termos ajudam o aluno a entender como os elementos chegam organizados ao laboratório e como escolher a peça certa para cada atividade.</p></div></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>2. Ferramentas de prototipação e organização da montagem</h2>
+        <span class="pill">Prática de laboratório</span>
+      </div>
+      <div class="grid-2">
+        <article class="card"><div class="content"><h3>Ferramentas mais comuns</h3><ul class="clean"><li>Protoboard</li><li>Jumpers (fios de ligação)</li><li>Placa Arduino</li><li>LEDs e resistores</li><li>Botões</li><li>Simulador Tinkercad</li></ul><p class="lead">Em ambiente físico, podem aparecer ainda cabo USB, fonte e organização em bancadas.</p></div></article>
+        <article class="card"><div class="content"><h3>Boas práticas de montagem</h3><ul class="clean"><li>Organizar o circuito antes de ligar</li><li>Conferir polaridade dos componentes</li><li>Evitar fios desnecessariamente longos</li><li>Separar alimentação e sinais de forma visualmente clara</li><li>Testar uma parte do circuito por vez</li><li>Registrar o que foi montado</li></ul></div></article>
+      </div>
+      <article class="card" style="margin-top:16px">
+        <div class="content">
+          <h3>Resumo rápido dos elementos estudados</h3>
+          <table>
+            <thead>
+              <tr><th>Elemento</th><th>Função principal</th><th>Como aparece no curso</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Resistor</td><td>Controlar corrente</td><td>Proteção do LED e ajustes simples</td></tr>
+              <tr><td>Capacitor</td><td>Armazenar energia temporariamente</td><td>Reconhecimento inicial e leitura de função</td></tr>
+              <tr><td>Indutor</td><td>Relacionar corrente e campo magnético</td><td>Reconhecimento inicial</td></tr>
+              <tr><td>Circuito integrado</td><td>Reunir várias funções em uma peça</td><td>Presente em placas e módulos</td></tr>
+              <tr><td>Protoboard</td><td>Montar circuitos sem solda</td><td>Base de prototipação física e simulada</td></tr>
+              <tr><td>Botão</td><td>Gerar entrada manual</td><td>Atividades com interação do usuário</td></tr>
+              <tr><td>LED</td><td>Mostrar saída/estado</td><td>Atuador visual em várias práticas</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="pratica">
+      <div class="section-title">
+        <h2>3. Prática guiada — Montando um LED com botão na protoboard</h2>
+        <span class="pill">Passo a passo</span>
+      </div>
+      <p class="lead">Nesta prática, você vai organizar um circuito simples na protoboard usando um botão e um LED. O objetivo é treinar leitura da protoboard, posição dos componentes e interpretação das conexões.</p>
+      <div class="note"><strong>O que você vai aplicar aqui:</strong> protoboard, LED, resistor, botão, polaridade e montagem organizada.</div>
+      <div class="tip" style="margin-top:12px"><strong>Dica importante:</strong> nesta etapa o foco principal é entender a parte física da montagem. Mesmo que o circuito ainda seja simples, a organização visual faz muita diferença na hora de encontrar erros.</div>
+      <div class="steps" style="margin-top:16px">
+        <div class="step"><div class="step-num">1</div><div><h4>Abra um novo circuito no Tinkercad</h4><p>Crie um novo circuito e posicione um Arduino Uno, uma protoboard, um LED, um resistor e um botão. Mesmo que o controle por código seja aprofundado mais adiante, vale usar a placa para manter a montagem alinhada ao restante das aulas.</p><p><strong>Objetivo pedagógico:</strong> reconhecer o ambiente e preparar uma montagem organizada.</p></div></div>
+        <div class="step"><div class="step-num">2</div><div><h4>Observe a estrutura da protoboard</h4><p>Antes de ligar qualquer coisa, identifique as linhas de alimentação e as trilhas centrais. Entenda que vários furos estão internamente conectados em grupos. Isso explica por que um componente pode funcionar mesmo sem um fio em cada ponto — ou por que uma ligação aparentemente correta pode não funcionar se estiver em uma trilha errada.</p><p><strong>Aplicação do conceito:</strong> leitura da protoboard evita muitos erros de montagem.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div><h4>Posicione o LED e o resistor</h4><p>Coloque o LED atravessando regiões adequadas da protoboard para que seus terminais não fiquem no mesmo grupo elétrico. Em seguida, posicione o resistor em série com o LED. Lembre-se de respeitar a polaridade do LED.</p><p><strong>Aplicação do conceito:</strong> organização física e função do resistor na proteção do LED.</p></div></div>
+        <div class="step"><div class="step-num">4</div><div><h4>Adicione o botão</h4><p>Posicione o botão de forma que ele atravesse a região central da protoboard, se o modelo exigir isso no simulador. Isso ajuda a separar corretamente os contatos. O botão servirá para abrir ou fechar o caminho elétrico.</p><p><strong>Aplicação do conceito:</strong> o botão representa uma entrada manual e reforça a ideia de circuito aberto e fechado.</p></div></div>
+        <div class="step"><div class="step-num">5</div><div><h4>Faça as conexões com jumpers</h4><p>Use fios curtos e organizados para ligar o circuito. Tente manter uma lógica visual, por exemplo: alimentação de um lado, retorno de outro, componentes centrais bem identificados. Isso ajuda muito na depuração.</p><p><strong>Boas práticas:</strong> evitar cruzamentos excessivos e conexões confusas.</p></div></div>
+        <div class="step"><div class="step-num">6</div><div><h4>Teste o comportamento do botão</h4><p>Inicie a simulação e pressione o botão. Observe quando o LED acende e quando apaga. Se algo não funcionar, revise primeiro a posição física do botão, o LED, o resistor e as trilhas da protoboard antes de supor erro mais complexo.</p><p><strong>Conclusão parcial:</strong> a montagem física correta é tão importante quanto a lógica do circuito.</p></div></div>
+        <div class="step"><div class="step-num">7</div><div><h4>Documente a montagem</h4><p>Faça um pequeno registro do circuito: quais componentes foram usados, onde o botão foi posicionado e o que acontece quando ele é pressionado. Em atividades reais, essa documentação ajuda o aluno e o professor a acompanhar a evolução do protótipo.</p><pre><code class="hl"><span class="c">// Exemplo ilustrativo do que virá nos próximos capítulos</span>
+<span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(2, INPUT);
+  <span class="f">pinMode</span>(13, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  <span class="k">if</span> (<span class="f">digitalRead</span>(2) == HIGH) {
+    <span class="f">digitalWrite</span>(13, HIGH);
+  } <span class="k">else</span> {
+    <span class="f">digitalWrite</span>(13, LOW);
+  }
+}</code></pre>
+<p class="lead">Neste capítulo, o código é apenas uma prévia do que será aprofundado depois. O foco principal continua sendo a montagem correta dos componentes.</p></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>4. Como esse conteúdo será usado nos próximos capítulos?</h2>
+        <span class="pill">Aplicação futura</span>
+      </div>
+      <article class="card">
+        <div class="content">
+          <p>Conhecer os componentes e a protoboard facilita o estudo da programação de microcontroladores, porque o aluno passa a entender melhor o que está sendo controlado pelo software. Quando o curso avançar para <strong>entradas digitais</strong>, <strong>saídas digitais</strong>, <strong>leitura de sensores</strong> e <strong>projetos com Arduino</strong>, a montagem física será parte inseparável do processo.</p>
+          <p>Em outras palavras, o código diz o que fazer, mas os componentes e a protoboard são o meio pelo qual o sistema acontece no mundo físico. Por isso, este capítulo serve como ponte entre teoria elétrica básica e aplicações embarcadas mais completas.</p>
+        </div>
+      </article>
+    </section>
+
+    <section id="atividades">
+      <div class="section-title">
+        <h2>5. Atividades sugeridas para o aluno</h2>
+        <span class="pill">Prática orientada</span>
+      </div>
+      <div class="grid-2">
+        <article class="card"><div class="content"><h3>Atividades de continuação</h3><ol class="clean activities"><li><strong>Mapa da protoboard:</strong> desenhe ou anote como as trilhas internas da protoboard se organizam e explique isso com suas palavras.</li><li><strong>Catálogo rápido de componentes:</strong> separe 8 componentes do kit ou do simulador e registre nome, função e exemplo de uso.</li><li><strong>Botão e LED:</strong> remonte o circuito do passo a passo tentando deixá-lo mais organizado visualmente do que na primeira tentativa.</li></ol></div></article>
+        <article class="card"><div class="content"><h3>Desafios de adaptação</h3><ol class="clean activities"><li><strong>Dois botões:</strong> planeje uma versão com dois botões e um LED, mesmo que a lógica completa ainda seja explorada mais adiante.</li><li><strong>Duas saídas visuais:</strong> monte um circuito com dois LEDs e indique qual seria a função de cada um em um sistema simples.</li><li><strong>Análise de erro:</strong> crie propositalmente uma ligação errada e registre qual foi o problema encontrado e como corrigi-lo.</li></ol></div></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>6. Sugestões de pesquisa complementar</h2>
+        <span class="pill">Aprofundamento</span>
+      </div>
+      <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise como funciona a conexão interna de uma <strong>protoboard</strong> e observe diagramas explicativos.</li><li>Descubra a diferença entre <strong>placa</strong>, <strong>módulo</strong> e <strong>shield</strong> em projetos de Arduino.</li><li>Pesquise exemplos práticos de uso de <strong>capacitores</strong> e <strong>indutores</strong> em circuitos reais.</li><li>Explore como identificar o lado correto de ligação de um <strong>LED</strong> e de outros componentes com polaridade.</li></ul></div></article>
+    </section>
+
+    <section id="quiz">
+      <div class="section-title">
+        <h2>7. Questões objetivas de revisão</h2>
+        <span class="pill">Quiz interativo</span>
+      </div>
+      <p class="lead">Responda uma alternativa por questão. Clique em <strong>Enviar Resposta</strong> para receber feedback e use <strong>Ver Gabarito</strong> quando quiser conferir a resposta correta.</p>
+
+      <div class="quiz-item">
+        <h3>Questão 1</h3>
+        <p>Qual alternativa descreve corretamente a função da protoboard?</p>
+        <div class="options">
+          <label><input type="radio" name="q1" value="a"> Servir como sistema operacional do Arduino.</label>
+          <label><input type="radio" name="q1" value="b"> Permitir a montagem de circuitos sem solda para testes e prototipação.</label>
+          <label><input type="radio" name="q1" value="c"> Armazenar programas do microcontrolador.</label>
+          <label><input type="radio" name="q1" value="d"> Substituir todos os resistores do circuito.</label>
+          <label><input type="radio" name="q1" value="e"> Funcionar apenas como fonte de energia.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q1','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+        <div id="f_q1" class="feedback"></div>
+        <div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>. A protoboard é usada para montar circuitos sem solda.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 2</h3>
+        <p>Qual componente é usado com frequência para gerar uma entrada manual simples ao circuito?</p>
+        <div class="options">
+          <label><input type="radio" name="q2" value="a"> LED</label>
+          <label><input type="radio" name="q2" value="b"> Capacitor</label>
+          <label><input type="radio" name="q2" value="c"> Botão</label>
+          <label><input type="radio" name="q2" value="d"> Indutor</label>
+          <label><input type="radio" name="q2" value="e"> Shield</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q2','c')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+        <div id="f_q2" class="feedback"></div>
+        <div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>. O botão permite uma entrada manual simples.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 3</h3>
+        <p>Qual opção apresenta corretamente uma função do resistor?</p>
+        <div class="options">
+          <label><input type="radio" name="q3" value="a"> Emitir luz para indicar o estado do circuito.</label>
+          <label><input type="radio" name="q3" value="b"> Conectar o projeto à internet.</label>
+          <label><input type="radio" name="q3" value="c"> Controlar ou limitar a corrente elétrica.</label>
+          <label><input type="radio" name="q3" value="d"> Armazenar o código do programa.</label>
+          <label><input type="radio" name="q3" value="e"> Fazer a função do botão.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q3','c')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+        <div id="f_q3" class="feedback"></div>
+        <div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>. O resistor ajuda a controlar a corrente elétrica.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 4</h3>
+        <p>O que melhor descreve um shield no contexto da prototipação com Arduino?</p>
+        <div class="options">
+          <label><input type="radio" name="q4" value="a"> Uma placa complementar que amplia recursos ao ser conectada sobre outra placa.</label>
+          <label><input type="radio" name="q4" value="b"> Um tipo de resistor muito pequeno.</label>
+          <label><input type="radio" name="q4" value="c"> Um botão especial usado apenas em simuladores.</label>
+          <label><input type="radio" name="q4" value="d"> Um nome alternativo para protoboard.</label>
+          <label><input type="radio" name="q4" value="e"> Um cabo de alimentação.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q4','a')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+        <div id="f_q4" class="feedback"></div>
+        <div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>A</strong>. Um shield amplia os recursos de uma placa base.</div>
+      </div>
+
+      <div class="quiz-item">
+        <h3>Questão 5</h3>
+        <p>Por que a organização visual da montagem é importante?</p>
+        <div class="options">
+          <label><input type="radio" name="q5" value="a"> Porque deixa a protoboard mais pesada.</label>
+          <label><input type="radio" name="q5" value="b"> Porque substitui a necessidade de testar o circuito.</label>
+          <label><input type="radio" name="q5" value="c"> Porque ajuda a identificar erros, entender conexões e manter o protótipo legível.</label>
+          <label><input type="radio" name="q5" value="d"> Porque impede qualquer problema elétrico automaticamente.</label>
+          <label><input type="radio" name="q5" value="e"> Porque elimina a necessidade de resistores e LEDs.</label>
+        </div>
+        <div class="q-actions"><button class="btn red" onclick="verificar('q5','c')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+        <div id="f_q5" class="feedback"></div>
+        <div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>C</strong>. Organização facilita leitura, testes e correções.</div>
+      </div>
+    </section>
+
+    <section id="checklist">
+      <div class="section-title">
+        <h2>8. Checklist interativo do aluno</h2>
+        <span class="pill">Autoavaliação</span>
+      </div>
+      <article class="card">
+        <div class="content">
+          <p class="lead">Marque os itens conforme concluir. O progresso fica salvo localmente no navegador deste dispositivo.</p>
+          <div class="checklist" id="checklistBox">
+            <label class="check-item"><input type="checkbox" data-check="c1"> <span>Reconheço a função básica de resistor, capacitor e indutor.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c2"> <span>Consigo explicar o que é uma protoboard e por que ela é importante.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c3"> <span>Entendi a diferença entre placa, módulo, shield e kit.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c4"> <span>Reconheço que LED e botão são componentes importantes de interação.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c5"> <span>Montei ou observei o circuito com protoboard, botão e LED.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c6"> <span>Percebi que a organização visual ajuda a encontrar erros de montagem.</span></label>
+            <label class="check-item"><input type="checkbox" data-check="c7"> <span>Resolvi o quiz de revisão deste capítulo.</span></label>
+          </div>
+          <div class="progress-wrap">
+            <strong>Progresso:</strong>
+            <progress id="progressBar" value="0" max="7"></progress>
+            <span id="progressText">0 de 7 itens concluídos</span>
+            <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+          </div>
+          
+        </div>
+      </article>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>9. Fechamento do capítulo</h2>
+        <span class="pill">Síntese</span>
+      </div>
+      <article class="card"><div class="content"><p>Este capítulo ajudou a transformar nomes de componentes em peças com função e propósito dentro do protótipo. A partir daqui, você passa a entender melhor como escolher resistores, organizar uma protoboard, usar botões e LEDs e reconhecer o papel de placas, módulos e shields. Essa base será essencial para as próximas práticas, nas quais a programação do microcontrolador vai se juntar cada vez mais à montagem física.</p></div></article>
+    </section>
+    <div class="footer-actions">
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo02.html">← Capítulo 2</a>
+            <a class="btn red" href="capitulo04.html">Capítulo 4 →</a>
+            
+    </div>
+    <footer>
+      <p><strong>Capítulo 03 pronto para uso local.</strong> Arquivo HTML independente, com teoria, prática guiada, atividades, quiz interativo, checklist e navegação entre capítulos.</p><br> 
+      &#x1F12F Professor Cristiano Teixeira.
+    </footer>
+  </main>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const menu = document.getElementById('menu');
+    hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+    menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+    function verificar(nomeQuestao, correta){
+      const selecionada = document.querySelector(`input[name="${nomeQuestao}"]:checked`);
+      const feedback = document.getElementById(`f_${nomeQuestao}`);
+      if(!selecionada){
+        feedback.className = 'feedback warn';
+        feedback.textContent = 'Selecione uma alternativa antes de enviar.';
+        return;
+      }
+      if(selecionada.value === correta){
+        feedback.className = 'feedback ok';
+        feedback.textContent = 'Resposta correta! Muito bem.';
+      } else {
+        feedback.className = 'feedback bad';
+        feedback.textContent = 'Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.';
+      }
+    }
+
+    function mostrarGabarito(id){
+      document.getElementById(id).classList.toggle('show');
+    }
+
+    const checks = document.querySelectorAll('#checklistBox input[type="checkbox"]');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    function atualizarProgress(){
+      let marcados = 0;
+      checks.forEach(ch => { if(ch.checked) marcados++; });
+      progressBar.value = marcados;
+      progressText.textContent = `${marcados} de ${checks.length} itens concluídos`;
+    }
+
+    function salvarChecklist(){
+      const dados = {};
+      checks.forEach(ch => { dados[ch.dataset.check] = ch.checked; });
+      localStorage.setItem('cap03_checklist', JSON.stringify(dados));
+      atualizarProgress();
+    }
+
+    function carregarChecklist(){
+      const bruto = localStorage.getItem('cap03_checklist');
+      if(!bruto){ atualizarProgress(); return; }
+      try{
+        const dados = JSON.parse(bruto);
+        checks.forEach(ch => ch.checked = !!dados[ch.dataset.check]);
+      }catch(e){}
+      atualizarProgress();
+    }
+
+    function limparChecklist(){
+      checks.forEach(ch => ch.checked = false);
+      localStorage.removeItem('cap03_checklist');
+      atualizarProgress();
+    }
+
+    checks.forEach(ch => ch.addEventListener('change', salvarChecklist));
+    carregarChecklist();
+  </script>
+</body>
+</html>

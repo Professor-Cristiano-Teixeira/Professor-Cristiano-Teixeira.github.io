@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 10 — Memória e Funções Predefinidas</title>
+  <meta name="description" content="Capítulo 10 da apostila de Sistemas Embarcados e IoT: Memória e Funções Predefinidas com Arduino." />
+  <style>
+    :root{
+      --red:#00979D;--red2:#005C5F;--dark:#2c3e50;--g1:#e8f4f4;--g2:#7a8f90;
+      --paper:#ffffff;--bg:#f7fbfb;--text:#163233;--muted:#4f6b6c;--line:#d7ecec;
+      --ok:#15803d;--bad:#b91c1c;--warn:#b45309;--r:12px;--sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;--cf:#e2e8f0;--ck:#7dd3fc;--cs:#f9a8d4;--cfu:#86efac;--cc:#94a3b8;--max:1200px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff,#f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12} h2{font-size:28px;margin-top:4px} h3{font-size:22px} h4{font-size:18px}
+    p{margin:8px 0 12px} .subtitle{font-size:18px;color:var(--muted)} .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px} .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .step + .step{margin-top:12px}
+    .step-num{min-width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:900;box-shadow:var(--sh)}
+    ul.clean,ol.clean{padding-left:20px} .activities li,.searches li{margin-bottom:10px}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left} th{background:#ecf8f8;color:var(--red2);font-size:14px} tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,monospace;font-size:14px}
+    .hl .k{color:var(--ck)} .hl .s{color:var(--cs)} .hl .f{color:var(--cfu)} .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .options label:hover{background:#f6fbfb;border-color:var(--line)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer;display:inline-block}
+    .btn.red{background:var(--red);color:#fff}.btn.red:hover{background:var(--red2)}
+    .btn.dark{background:var(--dark);color:#fff}.btn.dark:hover{filter:brightness(1.05)}
+    .feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    footer{margin-top:34px;color:var(--muted);font-size:14px}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}.grid,.grid-4{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+      .menu.show{display:flex}.hamburger{display:block}
+    }
+    @media(max-width:640px){.meta{grid-template-columns:1fr}.q-actions,.footer-actions{flex-direction:column}progress{width:100%}}
+    @media print{header,.hamburger,.menu,.footer-actions{display:none!important}body{background:#fff}.card,table{box-shadow:none}.wrap{max-width:none;padding:0}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">10</div> Capítulo 10 — Memória e Funções Predefinidas</div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu">☰</button>
+    <nav class="menu" id="menu">
+      <a href="index.html">Home</a>
+      <a href="capitulo09.html">Capítulo 9</a>
+      <a href="capitulo11.html">Capítulo 11</a>
+      <a href="#conceitos">Conceitos</a>
+      <a href="#pratica">Prática</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <article class="card hero-main"><div class="content">
+      <h1>Memória e Funções Predefinidas</h1>
+      <p class="subtitle">Bimestre 3 • Capítulo 10 • Usando melhor os recursos do microcontrolador</p>
+      <p>Neste capítulo, você vai entender de forma introdutória como a <strong>memória</strong> aparece nos sistemas embarcados e como as <strong>funções predefinidas</strong> ajudam a resolver problemas com mais rapidez. O foco não é aprofundar arquitetura de computadores, mas mostrar que o microcontrolador possui recursos limitados e que o programador precisa usá-los de forma organizada. Também serão exploradas funções matemáticas, números aleatórios e o uso básico de bibliotecas.</p>
+      <div class="badge-row">
+        <span class="badge">Memória básica</span>
+        <span class="badge">Funções prontas</span>
+        <span class="badge">Bibliotecas</span>
+        <span class="badge">Arduino + Tinkercad</span>
+      </div>
+    </div></article>
+    <aside class="card"><div class="content meta">
+      <div class="mini"><strong>Objetivo</strong><span>Entender limites básicos de memória e aplicar funções prontas para tornar o código mais eficiente e expressivo.</span></div>
+      <div class="mini"><strong>Habilidades</strong><span>Escolher recursos adequados, reutilizar funções existentes e organizar melhor a solução.</span></div>
+      <div class="mini"><strong>Ferramentas</strong><span>Arduino Uno, LED, Serial Monitor, potenciômetro e Tinkercad.</span></div>
+      <div class="mini"><strong>Aulas</strong><span>1 aula para conceitos + 1 aula para prática e exercícios derivados.</span></div>
+    </div></aside>
+  </section>
+
+  <section id="conceitos">
+    <div class="section-title"><h2>1. Conceitos fundamentais</h2><span class="pill">Teoria</span></div>
+    <div class="callout"><strong>Ideia central:</strong> em sistemas embarcados, os recursos são menores do que em um computador comum. Por isso, é importante entender que memória é limitada e que reutilizar funções prontas ajuda a programar melhor.</div>
+    <div class="grid" style="margin-top:16px">
+      <article class="card"><div class="content"><h3>Memória física e lógica</h3><p>Quando falamos de memória em microcontroladores, estamos nos referindo ao espaço disponível para guardar programa, dados temporários e informações de execução. Não é necessário aprofundar nomes técnicos neste momento; basta entender que há um limite e que o programa ocupa parte desse recurso.</p><p>Na prática, isso significa evitar exageros, repetir menos código do que o necessário e manter a solução organizada.</p></div></article>
+      <article class="card"><div class="content"><h3>Por que a memória importa?</h3><p>Em projetos pequenos, o aluno talvez não perceba imediatamente esse limite. Mesmo assim, o conceito é importante porque ajuda a entender por que códigos muito desorganizados, repetitivos ou mal planejados podem dificultar a manutenção e o crescimento do projeto.</p><p>Programar bem não é apenas fazer funcionar, mas usar os recursos de forma consciente.</p></div></article>
+      <article class="card"><div class="content"><h3>Funções predefinidas</h3><p>Funções predefinidas são comandos ou rotinas que já existem e podem ser usados diretamente no programa. Em vez de criar tudo do zero, o programador aproveita recursos prontos para fazer cálculos, conversões, manipulação de texto, geração de números aleatórios e muito mais.</p><p>No Arduino, isso torna o aprendizado mais acessível e o código mais limpo.</p></div></article>
+      <article class="card"><div class="content"><h3>Funções matemáticas</h3><p>O ambiente Arduino oferece funções matemáticas úteis, como <code>abs()</code>, <code>min()</code>, <code>max()</code>, <code>constrain()</code> e outras. Elas ajudam a limitar valores, comparar dados e ajustar resultados de sensores ou controles.</p><p>Essas funções são muito úteis quando queremos evitar valores fora de faixa ou escolher entre o maior e o menor valor em uma situação.</p></div></article>
+      <article class="card"><div class="content"><h3>Números aleatórios</h3><p>Em algumas situações, é interessante gerar valores aleatórios para sorteios, simulações ou comportamentos variados. Para isso, o Arduino oferece recursos como <code>random()</code>. Esse tipo de função ajuda a criar saídas menos previsíveis em projetos simples e divertidos.</p><p>No curso, isso pode aparecer em um “dado eletrônico”, em escolhas automáticas ou em testes de comportamento.</p></div></article>
+      <article class="card"><div class="content"><h3>Bibliotecas</h3><p>Bibliotecas são conjuntos de funções prontas organizadas para facilitar o uso de determinados recursos. Em vez de escrever toda a lógica manualmente, o programador pode incluir uma biblioteca já preparada para trabalhar com displays, sensores, comunicação e outros componentes.</p><p>Neste capítulo, basta compreender a ideia geral de que bibliotecas ampliam as capacidades do programa e economizam trabalho.</p></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>2. Resumo rápido dos recursos</h2><span class="pill">Leitura orientada</span></div>
+    <article class="card"><div class="content">
+      <table>
+        <thead><tr><th>Recurso</th><th>Para que serve</th><th>Exemplo de uso</th></tr></thead>
+        <tbody>
+          <tr><td>Memória</td><td>Guardar programa e dados</td><td>Variáveis, estados, valores lidos</td></tr>
+          <tr><td><code>abs()</code></td><td>Valor absoluto</td><td>Evitar resultado negativo</td></tr>
+          <tr><td><code>min()</code> e <code>max()</code></td><td>Comparar valores</td><td>Escolher o menor ou maior</td></tr>
+          <tr><td><code>constrain()</code></td><td>Limitar intervalo</td><td>Manter valor entre limites</td></tr>
+          <tr><td><code>random()</code></td><td>Gerar número aleatório</td><td>Sorteio ou simulação</td></tr>
+          <tr><td>Biblioteca</td><td>Adicionar conjunto de funções</td><td>Display, sensor, comunicação</td></tr>
+        </tbody>
+      </table>
+    </div></article>
+  </section>
+
+  <section id="pratica">
+    <div class="section-title"><h2>3. Prática guiada — Sorteador eletrônico simples</h2><span class="pill">Passo a passo</span></div>
+    <p class="lead">Nesta prática, você vai usar uma função predefinida para gerar um número aleatório e mostrar o resultado no Serial Monitor. Depois, esse valor poderá ser usado para controlar LEDs ou outras ações.</p>
+    <div class="note"><strong>Você vai aplicar:</strong> uso de <code>random()</code>, variáveis, Serial Monitor e organização básica do código.</div>
+
+    <div class="steps" style="margin-top:16px">
+      <div class="step"><div class="step-num">1</div><div><h4>Abra um novo circuito</h4><p>No Tinkercad, crie um circuito com Arduino. Para esta prática, o foco está no código e na exibição do resultado no Serial Monitor, então você pode começar sem componentes adicionais ou acrescentar um LED para usos posteriores.</p><p><strong>Objetivo pedagógico:</strong> mostrar que nem toda prática depende primeiro de um circuito complexo.</p></div></div>
+
+      <div class="step"><div class="step-num">2</div><div><h4>Escreva o código básico</h4><p>Digite o exemplo abaixo:</p>
+<pre><code class="hl"><span class="k">int</span> numero = 0;
+
+<span class="k">void</span> <span class="f">setup</span>() {
+  Serial.<span class="f">begin</span>(9600);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  numero = <span class="f">random</span>(1, 7);
+  Serial.<span class="f">println</span>(numero);
+  <span class="f">delay</span>(1000);
+}</code></pre>
+<p><strong>Aplicação do conceito:</strong> a variável guarda o valor sorteado e a função predefinida gera um número entre 1 e 6.</p></div></div>
+
+      <div class="step"><div class="step-num">3</div><div><h4>Entenda o que está acontecendo</h4><p><code>random(1, 7)</code> gera um valor aleatório a partir de 1 até antes de 7, ou seja, de 1 a 6. Isso é ideal para simular um dado eletrônico. Já <code>Serial.println()</code> envia o valor para o monitor serial, permitindo acompanhar a execução do programa.</p><p><strong>Conclusão parcial:</strong> funções prontas reduzem a quantidade de código que o aluno precisaria criar do zero.</p></div></div>
+
+      <div class="step"><div class="step-num">4</div><div><h4>Teste no simulador</h4><p>Inicie a simulação e abra o Serial Monitor. Observe os números mudando em intervalos regulares. Esse comportamento mostra que o programa pode usar recursos internos prontos para produzir novas respostas a cada ciclo.</p></div></div>
+
+      <div class="step"><div class="step-num">5</div><div><h4>Faça uma adaptação com função matemática</h4><p>Agora experimente usar uma função como <code>constrain()</code> em outra situação. Por exemplo, imagine que um valor vindo de um sensor precise ficar sempre entre 0 e 255 para ser usado com PWM.</p>
+<pre><code class="hl"><span class="k">int</span> valor = 300;
+
+<span class="k">void</span> <span class="f">setup</span>() {
+  Serial.<span class="f">begin</span>(9600);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  valor = <span class="f">constrain</span>(valor, 0, 255);
+  Serial.<span class="f">println</span>(valor);
+  <span class="f">delay</span>(1000);
+}</code></pre>
+<p><strong>Aplicação do conceito:</strong> o valor é limitado automaticamente ao intervalo desejado.</p></div></div>
+    </div>
+
+    <div class="success" style="margin-top:14px"><strong>Resultado esperado:</strong> perceber que funções prontas tornam o código mais simples, legível e reutilizável, além de ajudar no controle de dados e comportamentos.</div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>4. Como isso será usado adiante?</h2><span class="pill">Aplicação futura</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Projetos mais organizados</h3><p>À medida que os projetos crescem, o uso de funções prontas e bibliotecas se torna ainda mais importante. Isso evita repetição desnecessária e ajuda o aluno a construir soluções mais claras e sustentáveis.</p></div></article>
+      <article class="card"><div class="content"><h3>Trabalho com sensores e módulos</h3><p>Quando o curso avançar para conectividade, comunicação e sensores mais completos, as bibliotecas serão um recurso comum. Entender sua lógica desde agora facilita esse caminho.</p></div></article>
+    </div>
+  </section>
+
+  <section id="atividades">
+    <div class="section-title"><h2>5. Atividades sugeridas para o aluno</h2><span class="pill">Prática orientada</span></div>
+    <div class="grid-2">
+      <article class="card"><div class="content"><h3>Atividades de continuação</h3><ol class="clean activities"><li><strong>Dado eletrônico:</strong> use o número aleatório para decidir quantas vezes um LED deve piscar.</li><li><strong>Comparador de valores:</strong> use <code>min()</code> e <code>max()</code> para comparar dois números definidos no programa.</li><li><strong>Limitador:</strong> crie um valor fora da faixa e use <code>constrain()</code> para ajustá-lo ao intervalo correto.</li></ol></div></article>
+      <article class="card"><div class="content"><h3>Desafios de adaptação</h3><ol class="clean activities"><li><strong>Sequência aleatória:</strong> gere números aleatórios e associe cada valor a um LED diferente.</li><li><strong>Biblioteca investigativa:</strong> pesquise uma biblioteca simples do Arduino e registre para que ela serve.</li><li><strong>Registro conceitual:</strong> explique com suas palavras por que reutilizar funções prontas ajuda em sistemas embarcados.</li></ol></div></article>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>6. Sugestões de pesquisa complementar</h2><span class="pill">Aprofundamento</span></div>
+    <article class="card"><div class="content"><ul class="clean searches"><li>Pesquise outras funções matemáticas úteis do Arduino além de <code>min()</code>, <code>max()</code> e <code>constrain()</code>.</li><li>Explore exemplos de uso de <strong>random()</strong> em jogos e simulações simples.</li><li>Pesquise o que são <strong>bibliotecas</strong> no Arduino e como elas ajudam no desenvolvimento.</li><li>Observe exemplos em que um código fica mais claro quando aproveita funções prontas em vez de repetir lógica manualmente.</li></ul></div></article>
+  </section>
+
+  <section id="quiz">
+    <div class="section-title"><h2>7. Questões objetivas de revisão</h2><span class="pill">Quiz interativo</span></div>
+    <p class="lead">Responda uma alternativa por questão. Clique em <strong>Enviar Resposta</strong> para receber feedback e use <strong>Ver Gabarito</strong> quando quiser conferir a resposta correta.</p>
+
+    <div class="quiz-item"><h3>Questão 1</h3><p>Qual é a principal ideia deste capítulo sobre memória?</p>
+      <div class="options">
+        <label><input type="radio" name="q1" value="a"> Que memória em sistemas embarcados é ilimitada.</label>
+        <label><input type="radio" name="q1" value="b"> Que os recursos de memória são limitados e precisam ser usados com organização.</label>
+        <label><input type="radio" name="q1" value="c"> Que memória só existe em computadores grandes.</label>
+        <label><input type="radio" name="q1" value="d"> Que memória serve apenas para internet.</label>
+        <label><input type="radio" name="q1" value="e"> Que memória substitui o circuito físico.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q1','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+      <div id="f_q1" class="feedback"></div><div id="g1" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 2</h3><p>Para que serve uma função predefinida?</p>
+      <div class="options">
+        <label><input type="radio" name="q2" value="a"> Para obrigar o aluno a escrever mais código.</label>
+        <label><input type="radio" name="q2" value="b"> Para oferecer um recurso pronto que pode ser reutilizado no programa.</label>
+        <label><input type="radio" name="q2" value="c"> Para substituir o Arduino físico.</label>
+        <label><input type="radio" name="q2" value="d"> Para desligar automaticamente o circuito.</label>
+        <label><input type="radio" name="q2" value="e"> Para impedir o uso de variáveis.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q2','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+      <div id="f_q2" class="feedback"></div><div id="g2" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 3</h3><p>Qual função é adequada para gerar um número aleatório?</p>
+      <div class="options">
+        <label><input type="radio" name="q3" value="a"> <code>pinMode()</code></label>
+        <label><input type="radio" name="q3" value="b"> <code>random()</code></label>
+        <label><input type="radio" name="q3" value="c"> <code>delay()</code></label>
+        <label><input type="radio" name="q3" value="d"> <code>digitalWrite()</code></label>
+        <label><input type="radio" name="q3" value="e"> <code>LOW</code></label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q3','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g3')">Ver Gabarito</button></div>
+      <div id="f_q3" class="feedback"></div><div id="g3" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 4</h3><p>Qual função pode ser usada para limitar um valor dentro de um intervalo?</p>
+      <div class="options">
+        <label><input type="radio" name="q4" value="a"> <code>constrain()</code></label>
+        <label><input type="radio" name="q4" value="b"> <code>loop()</code></label>
+        <label><input type="radio" name="q4" value="c"> <code>analogRead()</code></label>
+        <label><input type="radio" name="q4" value="d"> <code>Serial.begin()</code></label>
+        <label><input type="radio" name="q4" value="e"> <code>OUTPUT</code></label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q4','a')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g4')">Ver Gabarito</button></div>
+      <div id="f_q4" class="feedback"></div><div id="g4" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>A</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 5</h3><p>O que é uma biblioteca no contexto do Arduino?</p>
+      <div class="options">
+        <label><input type="radio" name="q5" value="a"> Um tipo de memória física do computador.</label>
+        <label><input type="radio" name="q5" value="b"> Um conjunto de funções prontas que amplia as capacidades do programa.</label>
+        <label><input type="radio" name="q5" value="c"> Um resistor especial do kit.</label>
+        <label><input type="radio" name="q5" value="d"> Um sensor que mede tempo.</label>
+        <label><input type="radio" name="q5" value="e"> Um pino digital com nome diferente.</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q5','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g5')">Ver Gabarito</button></div>
+      <div id="f_q5" class="feedback"></div><div id="g5" class="gabarito"><strong>Gabarito:</strong> alternativa <strong>B</strong>.</div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="section-title"><h2>8. Checklist do aluno</h2><span class="pill">Autoavaliação</span></div>
+    <div class="card"><div class="content">
+      <div class="checklist" id="checklistBox">
+        <label class="check-item"><input type="checkbox" data-check="c1"> <span>Entendi que a memória do microcontrolador é limitada.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c2"> <span>Consigo explicar o que são funções predefinidas.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c3"> <span>Consigo usar uma função como <code>random()</code> ou <code>constrain()</code>.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c4"> <span>Entendi a ideia geral de biblioteca no Arduino.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c5"> <span>Montei ou observei a prática do sorteador eletrônico simples.</span></label>
+      </div>
+      <div class="progress-wrap"><strong>Progresso:</strong><progress id="progressBar" value="0" max="5"></progress><span id="progressText">0 de 5 itens concluídos</span></div>
+      <div class="footer-actions">
+        <button class="btn red" onclick="limparChecklist()">Limpar checklist</button>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>9. Fechamento do capítulo</h2><span class="pill">Síntese</span></div>
+    <article class="card"><div class="content"><p>Este capítulo mostrou que programar melhor não significa apenas escrever mais código, mas saber aproveitar recursos já existentes. Entender que a memória é limitada e que funções prontas e bibliotecas ajudam a organizar a solução prepara o aluno para projetos mais completos, eficientes e fáceis de manter.</p></div></article>
+  </section>
+  <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo09.html">← Capítulo 9/a>
+            <a class="btn red" href="capitulo11.html">Capítulo 11 →</a>
+           
+    </div>
+
+  <footer>
+    <p><strong>Capítulo 10 pronto para uso local.</strong> Memória e funções predefinidas com teoria, prática, quiz e checklist.</p>
+  <br>&#x1F12F Professor Cristiano Teixeira.
+</footer>
+</main>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menu = document.getElementById('menu');
+  hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('show')));
+
+  function verificar(nome, correta){
+    const sel = document.querySelector(`input[name="${nome}"]:checked`);
+    const fb = document.getElementById(`f_${nome}`);
+    if(!sel){ fb.className='feedback warn'; fb.textContent='Selecione uma alternativa antes de enviar.'; return; }
+    if(sel.value===correta){ fb.className='feedback ok'; fb.textContent='Resposta correta! Muito bem.'; }
+    else{ fb.className='feedback bad'; fb.textContent='Resposta incorreta. Revise o conteúdo e tente novamente ou consulte o gabarito.'; }
+  }
+  function mostrarGabarito(id){ document.getElementById(id).classList.toggle('show'); }
+
+  const checks=document.querySelectorAll('#checklistBox input[type="checkbox"]');
+  const pb=document.getElementById('progressBar');
+  const pt=document.getElementById('progressText');
+  function atualizar(){ let m=0; checks.forEach(c=>{ if(c.checked) m++; }); pb.value=m; pt.textContent=`${m} de ${checks.length} itens concluídos`; }
+  function salvar(){ const dados={}; checks.forEach(c=>dados[c.dataset.check]=c.checked); localStorage.setItem('cap10_checklist', JSON.stringify(dados)); atualizar(); }
+  function carregar(){ const bruto=localStorage.getItem('cap10_checklist'); if(!bruto){ atualizar(); return; } try{ const d=JSON.parse(bruto); checks.forEach(c=>c.checked=!!d[c.dataset.check]); }catch(e){} atualizar(); }
+  function limparChecklist(){ checks.forEach(c=>c.checked=false); localStorage.removeItem('cap10_checklist'); atualizar(); }
+  checks.forEach(c=>c.addEventListener('change', salvar)); carregar();
+</script>
+</body>
+</html>

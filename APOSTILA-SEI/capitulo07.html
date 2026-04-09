@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capítulo 07 — Entrada e Saída Digital e Analógica</title>
+  <meta name="description" content="Capítulo 07 da apostila de Sistemas Embarcados e IoT: Entrada e Saída Digital e Analógica com Arduino." />
+  <style>
+    :root{
+      --red:#00979D;--red2:#005C5F;--dark:#2c3e50;--g1:#e8f4f4;--g2:#7a8f90;
+      --paper:#ffffff;--bg:#f7fbfb;--text:#163233;--muted:#4f6b6c;--line:#d7ecec;
+      --ok:#15803d;--bad:#b91c1c;--warn:#b45309;--r:12px;--sh:0 4px 14px rgba(0,0,0,.07);
+      --cb:#0f172a;--cf:#e2e8f0;--ck:#7dd3fc;--cs:#f9a8d4;--cfu:#86efac;--cc:#94a3b8;
+      --max:1200px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#007b80;text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:50}
+    .nav{max-width:var(--max);margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--red2);font-weight:800}
+    .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--sh)}
+    .menu{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .menu a,.menu button,.hamburger{background:var(--red);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    .menu a:hover,.menu button:hover,.hamburger:hover{background:var(--red2);text-decoration:none}
+    .hamburger{display:none}
+
+    .wrap{max-width:var(--max);margin:auto;padding:24px 16px 48px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+    .card .content{padding:18px}
+    .hero-main{background:radial-gradient(circle at top right, rgba(0,151,157,.18), transparent 36%), linear-gradient(135deg,#ffffff, #f3fbfb)}
+
+    h1,h2,h3,h4{margin:0 0 10px;color:var(--red2)}
+    h1{font-size:clamp(28px,4vw,42px);line-height:1.12}
+    h2{font-size:28px;margin-top:4px}
+    h3{font-size:22px}
+    h4{font-size:18px}
+    p{margin:8px 0 12px}
+    .subtitle{font-size:18px;color:var(--muted)}
+    .lead{color:var(--muted)}
+    .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .badge{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--g1);color:var(--red2);font-weight:800}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;height:100%}
+    .mini{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini strong{display:block;color:var(--red2);margin-bottom:4px}
+    .mini span{color:var(--muted);font-size:14px}
+
+    section{margin-top:28px;scroll-margin-top:90px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--g1);border:1px solid var(--line);font-size:13px;color:var(--red2);font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .callout{padding:14px 16px;border-left:5px solid var(--red);background:#eefafa;border-radius:10px}
+    .note{padding:12px 14px;border-radius:10px;background:#fff9ed;border:1px solid #f5d7a2;color:#7c4a03}
+    .tip{padding:12px 14px;border-radius:10px;background:#eff8ff;border:1px solid #bfdbfe;color:#1e40af}
+    .success{padding:12px 14px;border-radius:10px;background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}
+
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left}
+    th{background:#ecf8f8;color:var(--red2)}
+    tr:last-child td{border-bottom:0}
+
+    pre{background:var(--cb);color:var(--cf);padding:14px;border-radius:10px;overflow:auto}
+    code{font-family:Consolas,ui-monospace,monospace;font-size:14px}
+    .hl .k{color:var(--ck)}
+    .hl .s{color:var(--cs)}
+    .hl .f{color:var(--cfu)}
+    .hl .c{color:var(--cc)}
+
+    .quiz-item{padding:18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .quiz-item + .quiz-item{margin-top:14px}
+    .options label{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;cursor:pointer}
+    .options label:hover{background:#f6fbfb}
+    .q-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+    .btn{padding:10px 14px;border-radius:8px;font-weight:700;border:0;cursor:pointer}
+    .btn.red{background:var(--red);color:#fff}
+    .btn.dark{background:var(--dark);color:#fff}
+    .feedback{margin-top:12px;padding:12px;border-radius:10px;display:none}
+    .feedback.ok{display:block;background:#ecfdf3;border:1px solid #a7f3d0;color:var(--ok)}
+    .feedback.bad{display:block;background:#fef2f2;border:1px solid #fecaca;color:var(--bad)}
+    .feedback.warn{display:block;background:#fff7ed;border:1px solid #fdba74;color:var(--warn)}
+    .gabarito{display:none;margin-top:10px;padding:12px;border-radius:10px;background:#effafa;border:1px solid var(--line)}
+    .gabarito.show{display:block}
+
+    .checklist{display:grid;gap:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .check-item input{margin-top:3px;accent-color:var(--red)}
+    .progress-wrap{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    progress{width:260px;height:16px;accent-color:var(--red)}
+
+    @media(max-width:960px){
+      .hero,.grid-2{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      .menu{display:none;flex-direction:column;position:absolute;left:16px;right:16px;top:64px;background:#fff;padding:12px;border:1px solid var(--line);border-radius:12px}
+      .menu.show{display:flex}
+      .hamburger{display:block}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="brand"><div class="logo">07</div> Capítulo 07 — Entrada e Saída Digital e Analógica</div>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav class="menu" id="menu">
+      <a href="index.html">Home</a>
+      <a href="capitulo06.html">Capítulo 6</a>
+      <a href="capitulo08.html">Capítulo 8</a>
+      <a href="#conceitos">Conceitos</a>
+      <a href="#pratica">Prática</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <article class="card hero-main"><div class="content">
+      <h1>Entrada e Saída Digital e Analógica</h1>
+      <p class="subtitle">Bimestre 2 • Capítulo 7 • Comunicação do Arduino com o mundo físico</p>
+      <p>Até agora, você trabalhou com decisões e variáveis. Neste capítulo, vamos entender como o Arduino <strong>recebe informações</strong> do ambiente (entradas) e <strong>envia comandos</strong> para atuadores (saídas), tanto no modo <strong>digital</strong> quanto no <strong>analógico</strong>. Isso permite criar sistemas que reagem a sensores e controlam dispositivos de forma gradual.</p>
+      <div class="badge-row">
+        <span class="badge">Entradas e saídas</span>
+        <span class="badge">Digital e analógico</span>
+        <span class="badge">Sensores e atuadores</span>
+        <span class="badge">Base para automação</span>
+      </div>
+    </div></article>
+    <aside class="card"><div class="content meta">
+      <div class="mini"><strong>Objetivo</strong><span>Entender e aplicar entradas e saídas digitais e analógicas no Arduino.</span></div>
+      <div class="mini"><strong>Habilidades</strong><span>Leitura de sensores e controle de atuadores.</span></div>
+      <div class="mini"><strong>Ferramentas</strong><span>Arduino Uno, LED, botão, potenciômetro e Tinkercad.</span></div>
+      <div class="mini"><strong>Aulas</strong><span>2 aulas de 100 minutos.</span></div>
+    </div></aside>
+  </section>
+
+  <section id="conceitos">
+    <div class="section-title"><h2>1. Conceitos fundamentais</h2><span class="pill">Teoria</span></div>
+    <div class="callout"><strong>Ideia central:</strong> entradas permitem que o Arduino perceba o ambiente; saídas permitem que ele atue sobre esse ambiente.</div>
+    <div class="grid" style="margin-top:16px">
+      <article class="card"><div class="content"><h3>Entrada digital</h3><p>Uma entrada digital só possui dois estados possíveis: ligado ou desligado. No Arduino, isso é representado por <code>HIGH</code> ou <code>LOW</code>. Botões e chaves são exemplos clássicos de entradas digitais.</p></div></article>
+      <article class="card"><div class="content"><h3>Saída digital</h3><p>Uma saída digital também trabalha apenas com dois estados. LEDs, relés e buzzer simples podem ser controlados dessa forma, ligando ou desligando conforme o comando do programa.</p></div></article>
+      <article class="card"><div class="content"><h3>Entrada analógica</h3><p>Entradas analógicas permitem ler valores graduais, não apenas dois estados. Um potenciômetro, por exemplo, pode gerar vários níveis diferentes, lidos no Arduino como valores numéricos.</p></div></article>
+      <article class="card"><div class="content"><h3>Saída analógica (PWM)</h3><p>O Arduino simula saídas analógicas usando PWM. Com isso, é possível controlar o brilho de um LED ou a velocidade de um motor variando o sinal enviado.</p></div></article>
+      <article class="card"><div class="content"><h3>Conversão de valores</h3><p>Leituras analógicas costumam variar de 0 a 1023. Muitas vezes, é necessário converter esse valor para outro intervalo, como 0 a 255, para uso em PWM.</p></div></article>
+      <article class="card"><div class="content"><h3>Aplicações práticas</h3><p>Esses conceitos são usados em controles de iluminação, volume, temperatura, velocidade e muitos outros sistemas automatizados.</p></div></article>
+    </div>
+  </section>
+
+  <section id="pratica">
+    <div class="section-title"><h2>2. Prática guiada — Potenciômetro controlando brilho do LED</h2><span class="pill">Passo a passo</span></div>
+    <p class="lead">Nesta prática, um potenciômetro será usado como entrada analógica para controlar o brilho de um LED usando saída PWM.</p>
+    <div class="note"><strong>Você vai aplicar:</strong> <code>analogRead()</code>, <code>analogWrite()</code> e conversão de valores.</div>
+    <ol class="clean">
+      <li>Monte o circuito com Arduino, LED + resistor e potenciômetro.</li>
+      <li>Ligue o potenciômetro ao pino A0 e o LED a um pino PWM (ex: 9).</li>
+      <li>Use o código abaixo:</li>
+    </ol>
+<pre><code class="hl"><span class="k">int</span> valor = 0;
+
+<span class="k">void</span> <span class="f">setup</span>() {
+  <span class="f">pinMode</span>(9, OUTPUT);
+}
+
+<span class="k">void</span> <span class="f">loop</span>() {
+  valor = <span class="f">analogRead</span>(A0);
+  valor = <span class="f">map</span>(valor, 0, 1023, 0, 255);
+  <span class="f">analogWrite</span>(9, valor);
+}</code></pre>
+    <div class="success"><strong>Resultado esperado:</strong> ao girar o potenciômetro, o brilho do LED varia suavemente.</div>
+  </section>
+
+  <section id="quiz">
+    <div class="section-title"><h2>3. Questões objetivas de revisão</h2><span class="pill">Quiz</span></div>
+
+    <div class="quiz-item"><h3>Questão 1</h3><p>Uma entrada digital pode assumir quais valores?</p>
+      <div class="options">
+        <label><input type="radio" name="q1" value="a"> 0 a 1023</label>
+        <label><input type="radio" name="q1" value="b"> HIGH ou LOW</label>
+        <label><input type="radio" name="q1" value="c"> Apenas valores negativos</label>
+        <label><input type="radio" name="q1" value="d"> Apenas valores decimais</label>
+        <label><input type="radio" name="q1" value="e"> Nenhum valor</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q1','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g1')">Ver Gabarito</button></div>
+      <div id="f_q1" class="feedback"></div>
+      <div id="g1" class="gabarito">Resposta correta: alternativa <strong>B</strong>.</div>
+    </div>
+
+    <div class="quiz-item"><h3>Questão 2</h3><p>Qual função é usada para ler uma entrada analógica?</p>
+      <div class="options">
+        <label><input type="radio" name="q2" value="a"> digitalRead()</label>
+        <label><input type="radio" name="q2" value="b"> analogRead()</label>
+        <label><input type="radio" name="q2" value="c"> pinMode()</label>
+        <label><input type="radio" name="q2" value="d"> delay()</label>
+        <label><input type="radio" name="q2" value="e"> setup()</label>
+      </div>
+      <div class="q-actions"><button class="btn red" onclick="verificar('q2','b')">Enviar Resposta</button><button class="btn dark" onclick="mostrarGabarito('g2')">Ver Gabarito</button></div>
+      <div id="f_q2" class="feedback"></div>
+      <div id="g2" class="gabarito">Resposta correta: alternativa <strong>B</strong>.</div>
+    </div>
+  </section>
+
+  <section id="checklist">
+    <div class="section-title"><h2>4. Checklist do aluno</h2><span class="pill">Autoavaliação</span></div>
+    <div class="card"><div class="content">
+      <div class="checklist" id="checklistBox">
+        <label class="check-item"><input type="checkbox" data-check="c1"> <span>Entendi a diferença entre digital e analógico.</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c2"> <span>Consigo usar analogRead().</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c3"> <span>Consigo usar analogWrite() (PWM).</span></label>
+        <label class="check-item"><input type="checkbox" data-check="c4"> <span>Montei a prática do potenciômetro.</span></label>
+      </div>
+      <div class="progress-wrap"><strong>Progresso:</strong><progress id="progressBar" value="0" max="4"></progress><span id="progressText">0 de 4</span></div>
+    </div></div>
+  </section>
+
+  <div class="footer-actions">
+             
+            <a class="btn dark" href="index.html">Voltar para Home</a>
+            <a class="btn dark" href="capitulo06.html">← Capítulo 6</a>
+            <a class="btn red" href="capitulo08.html">Capítulo 8 →</a>
+           
+    </div>
+  <footer>
+    <p><strong>Capítulo 07 pronto para uso local.</strong> Entrada e saída digital e analógica com prática, quiz e checklist.</p>  
+  <br>&#x1F12F Professor Cristiano Teixeira.
+</footer>
+</main>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menu = document.getElementById('menu');
+  hamburger?.addEventListener('click', () => menu.classList.toggle('show'));
+
+  function verificar(nome, correta){
+    const sel = document.querySelector(`input[name="${nome}"]:checked`);
+    const fb = document.getElementById(`f_${nome}`);
+    if(!sel){ fb.className='feedback warn'; fb.textContent='Selecione uma alternativa.'; return; }
+    if(sel.value===correta){ fb.className='feedback ok'; fb.textContent='Resposta correta!'; }
+    else{ fb.className='feedback bad'; fb.textContent='Resposta incorreta.'; }
+  }
+  function mostrarGabarito(id){ document.getElementById(id).classList.toggle('show'); }
+
+  const checks=document.querySelectorAll('#checklistBox input');
+  const pb=document.getElementById('progressBar');
+  const pt=document.getElementById('progressText');
+  function upd(){ let m=0; checks.forEach(c=>c.checked&&m++); pb.value=m; pt.textContent=`${m} de ${checks.length}`; }
+  checks.forEach(c=>c.addEventListener('change',upd)); upd();
+</script>
+</body>
+</html>
