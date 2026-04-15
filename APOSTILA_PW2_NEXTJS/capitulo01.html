@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 01 — Ambiente, Git, Next.js e Bootstrap</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --pw-red:#b30000;            /* menus em vermelho */
+      --pw-red-dark:#8f0000;
+      --pw-gray:#3f3f3f;           /* botões destaque em cinza escuro */
+      --pw-gray-dark:#2f2f2f;
+      --pw-bg:#ffffff;             /* tema claro */
+      --pw-muted:#6c757d;
+      --pw-border:#e9ecef;
+      --pw-link:#b30000;
+      --code-bg:#1e1e1e;           /* VSCode-like */
+    }
+
+    body{ background:var(--pw-bg); }
+    a{ color:var(--pw-link); }
+    a:hover{ color:var(--pw-red-dark); }
+
+    /* Navbar */
+    .navbar-pw{ background:var(--pw-red); }
+    .navbar-pw .navbar-brand,
+    .navbar-pw .nav-link,
+    .navbar-pw .navbar-toggler{ color:#fff; }
+    .navbar-pw .nav-link:hover,
+    .navbar-pw .nav-link:focus{ color:#ffe6e6; }
+    .navbar-pw .dropdown-item:active{ background:var(--pw-red); }
+
+    /* Buttons */
+    .btn-pw{
+      background:var(--pw-gray);
+      border-color:var(--pw-gray);
+      color:#fff;
+    }
+    .btn-pw:hover,
+    .btn-pw:focus{
+      background:var(--pw-gray-dark);
+      border-color:var(--pw-gray-dark);
+      color:#fff;
+    }
+
+    /* Sections */
+    .chapter-hero{
+      background:linear-gradient(180deg, rgba(179,0,0,.08), rgba(179,0,0,0));
+      border-bottom:1px solid var(--pw-border);
+    }
+
+    .card-soft{
+      border:1px solid var(--pw-border);
+      border-radius:14px;
+    }
+
+    /* Code blocks */
+    pre[class*="language-"]{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 8px 26px rgba(0,0,0,.10);
+      margin: .75rem 0 1rem;
+    }
+    code[class*="language-"]{
+      font-size: .92rem;
+    }
+    /* Ensure code block background stays dark */
+    pre{ background: var(--code-bg) !important; }
+
+
+    /* Quiz */
+    .quiz-card{ border:1px solid var(--pw-border); border-radius:14px; }
+    .quiz-feedback{ min-height: 42px; }
+
+    /* Checklist */
+    .checklist-item{ border:1px solid var(--pw-border); border-radius:12px; padding:10px 12px; }
+
+    /* Skip link */
+    .skip-link{
+      position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden;
+    }
+    .skip-link:focus{
+      left:10px; top:10px; width:auto; height:auto; padding:10px 12px;
+      background:#fff; border:2px solid var(--pw-red); border-radius:10px; z-index:2000;
+    }
+  </style>
+</head>
+<body>
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- NAVBAR (responsiva com hamburguer) -->
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>APOSTILA PW II
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(1) brightness(2);"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html#sumario"><i class="bi bi-list-check me-1"></i>Sumário</a></li>
+
+          <!-- Dropdown com capítulos -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book me-1"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">1º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Setup do projeto</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Componentes, Props, Estado e Eventos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Listas/Condicional + Grid Bootstrap</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Rotas e Navegação (Next.js)</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">2º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Bootstrap avançado e customização</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Formulários e validação</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Consumo de API + estados assíncronos</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Testes (Jest + RTL)</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">3º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — SSG, SSR e hidratação</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Rotas dinâmicas com SSG</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — SSR para dados variáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Hidratação e interatividade</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">4º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Testes de interface (RTL avançado)</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Builds e releases (Next.js)</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Docker e conteinerização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto final integrador</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="#questionario"><i class="bi bi-ui-checks me-1"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-link" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 1 — Ambiente, Git, Next.js e Bootstrap (Setup do Projeto)</h1>
+          <p class="mb-2"><strong>Carga:</strong> 2 aulas × 100 min</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Sistema de Lanchonete com um único papel: Administrador (catálogo, cadastro básico e vitrine).</p>
+          <p class="mb-2"><strong>Ferramentas (fixas para a apostila):</strong> VS Code, Node.js (npm), Next.js (React), Bootstrap 5 + Bootstrap Icons, Git (GitHub opcional).</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2">
+            <li>Preparar o ambiente de desenvolvimento.</li>
+            <li>Criar um projeto Next.js com estrutura App Router.</li>
+            <li>Integrar Bootstrap 5 e Bootstrap Icons.</li>
+            <li>Criar layout base (Header, Footer, Navbar, Container) para o projeto da lanchonete.</li>
+            <li>Versionar o código com Git (commits organizados) e aplicar formatação com Prettier/ESLint.</li>
+          </ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades trabalhadas</strong></p>
+            <ul class="mb-0 small">
+              <li><strong>Competências:</strong> (1) Elaborar interfaces web; (2) Aplicar práticas de desenvolvimento de sistemas.</li>
+              <li><strong>Habilidades:</strong> 1.1 (SPAs c/ framework), 1.2 (Framework CSS), 4. (Controle de versão e boas práticas).</li>
+            </ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Voltar para Home</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 1)</h2>
+
+        <div class="row g-3 mt-1">
+          <div class="col-12 col-lg-6">
+            <div class="card-soft bg-white p-4 h-100">
+              <h3 class="h5 fw-bold">Aula 1 (100 min) — Conceitos + Criação do Projeto + Rodar Local</h3>
+              <p class="fw-semibold mb-2">Teoria (30–40 min):</p>
+              <ul>
+                <li>O que é SPA e onde o Next.js se encaixa (SPA + renderização híbrida).</li>
+                <li>Estrutura do App Router (/app): layout.jsx, page.jsx, rotas por pastas.</li>
+                <li>O que é um framework CSS e por que usar Bootstrap (grade, utilitários, componentes).</li>
+                <li>Introdução rápida ao Git (repositório, commit, branch, .gitignore).</li>
+              </ul>
+              <p class="fw-semibold mb-2">Prática (30–40 min):</p>
+              <ul>
+                <li>Verificação do ambiente (Node, npm, VS Code).</li>
+                <li>Criar projeto Next.js.</li>
+                <li>Rodar o servidor de desenvolvimento.</li>
+                <li>Integrar Bootstrap 5 e Bootstrap Icons.</li>
+                <li>Commit inicial com Git.</li>
+              </ul>
+              <p class="fw-semibold mb-2">Entrega rápida (10 min):</p>
+              <p class="mb-0">Screenshot da Home rodando com Bootstrap aplicado (navbar básica visível) + link do repositório local/remoto.</p>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card-soft bg-white p-4 h-100">
+              <h3 class="h5 fw-bold">Aula 2 (100 min) — Layout Base (Header, Navbar, Footer) + Padrões de Código</h3>
+              <p class="fw-semibold mb-2">Teoria (25–35 min):</p>
+              <ul>
+                <li>Bootstrap (Grid, Containers, utilitários de espaçamento, Navbar).</li>
+                <li>Boas práticas de commits (mensagens claras; exemplo de convenção simples).</li>
+                <li>ESLint/Prettier: por que padronizar e como rodar.</li>
+              </ul>
+              <p class="fw-semibold mb-2">Prática (35–55 min):</p>
+              <ul>
+                <li>Criar componentes Header, Footer e BootstrapClient.</li>
+                <li>Montar Navbar responsiva com colapso.</li>
+                <li>Adicionar Container para o conteúdo e uma Home com hero simples.</li>
+                <li>Configurar Prettier (arquivo .prettierrc) e rodar o ESLint.</li>
+              </ul>
+              <p class="fw-semibold mb-2">Entrega rápida (10 min):</p>
+              <p class="mb-0">Página inicial com Header/Footer, Navbar funcional, layout responsivo e commits organizados.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <h3 class="h5 fw-bold">Fazendo o Backup correto:</h3>
+          <pre class="language-bash"><code># Instruções para backup:
+# no inicio da aula copia da rede para local:
+rsync ~/minhapasta/PW2/lachonete-web ~/lanchonete-web
+#
+# no final da aula copia de local para rede:
+rsync ~/lanchonote-web ~/minhapasta/PW2/lachonete-web
+#</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+
+  <h3 class="h5 fw-bold mt-4">1) SPA e Next.js (visão geral)</h3>
+  <p>
+    Antes de escrever qualquer código, é importante entender <strong>o tipo de aplicação</strong> que estamos construindo.
+    Uma <strong>SPA (Single Page Application)</strong> é um modelo no qual o navegador carrega um HTML “base” apenas uma vez
+    e, a partir daí, a navegação e as atualizações de tela acontecem com JavaScript, trocando componentes e dados
+    sem recarregar a página inteira. Isso deixa a experiência mais fluida (menos “pisca”), permite manter estados
+    (como filtros e carrinho) enquanto o usuário navega e reduz a quantidade de requisições de páginas completas.
+  </p>
+  <p>
+    O <strong>React</strong> é uma biblioteca para criar interfaces compondo pequenas partes (componentes).
+    Já o <strong>Next.js</strong> é um framework que “organiza a casa”: ele define uma estrutura de pastas,
+    oferece roteamento pronto, otimiza build e entrega, e possibilita uma <strong>renderização híbrida</strong>.
+    Híbrida significa que, dependendo do que você escrever, a página pode ser:
+  </p>
+  <ul>
+    <li><strong>CSR (Client-Side Rendering)</strong>: a tela é montada no navegador; ótimo para interações e estado local.</li>
+    <li><strong>SSG (Static Site Generation)</strong>: gera HTML no build; ideal para conteúdo estável e rápido.</li>
+    <li><strong>SSR (Server-Side Rendering)</strong>: gera HTML em cada requisição; ideal para dados “ao vivo”.</li>
+  </ul>
+  <p>
+    No <strong>App Router</strong> (pasta <code>/app</code>), o Next.js transforma pastas em rotas.
+    Isso diminui o “trabalho manual” de configurar rotas e ajuda a manter o projeto consistente.
+    Dois arquivos são fundamentais:
+  </p>
+  <ul>
+    <li><code>app/layout.jsx</code>: define o <strong>layout compartilhado</strong> (estrutura comum em todas as páginas).</li>
+    <li><code>app/page.jsx</code>: define o conteúdo da rota raiz <code>/</code> (a Home).</li>
+  </ul>
+  <div class="callout small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      No passo a passo, quando você cria <code>app/layout.jsx</code> e coloca <strong>Header</strong> e <strong>Footer</strong> ali,
+      você está aplicando a ideia de “layout compartilhado”. Em seguida, ao criar <code>app/page.jsx</code>, você define
+      o conteúdo específico da Home. Isso já te dá uma navegação de SPA com estrutura organizada.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">2) Framework CSS: por que Bootstrap 5</h3>
+  <p>
+    Em projetos reais, a maior parte do tempo não está em “inventar” um layout do zero, e sim em <strong>entregar uma interface</strong>
+    que funcione bem em telas diferentes, seja consistente e seja fácil de manter. Um <strong>framework CSS</strong> como o Bootstrap
+    acelera isso porque ele já traz um conjunto de padrões prontos.
+  </p>
+  <p>
+    O Bootstrap 5 entrega três pilares importantes:
+  </p>
+  <ul>
+    <li>
+      <strong>Grid responsivo</strong>: você monta layouts com <code>container</code>, <code>row</code> e <code>col-*</code>,
+      e o conteúdo se adapta automaticamente entre celular, tablet e desktop.
+    </li>
+    <li>
+      <strong>Utilitários</strong>: classes rápidas para espaçamento, alinhamento e display (por exemplo,
+      <code>p-3</code> para padding, <code>m-2</code> para margin, <code>d-flex</code>, <code>gap-2</code> etc.).
+      Isso reduz CSS “manual” e aumenta produtividade.
+    </li>
+    <li>
+      <strong>Componentes</strong>: Navbar, Cards, Buttons, Alerts, Modals, Offcanvas… todos com estilos consistentes.
+      Em muitos casos você só monta a estrutura HTML/JSX e aplica as classes.
+    </li>
+  </ul>
+  <p>
+    Além disso, os <strong>Bootstrap Icons</strong> fornecem ícones vetoriais fáceis de usar com classes <code>bi bi-*</code>.
+    Em um projeto educacional, isso ajuda a reforçar semântica visual (um ícone de carrinho, de lista, de contato)
+    sem depender de imagens externas.
+  </p>
+  <div class="callout small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      No passo a passo, quando você instala <code>bootstrap</code> e <code>bootstrap-icons</code> e depois cria uma Home com
+      <code>container</code>, <code>row</code>, <code>col-md-4</code> e <code>card</code>, você aplica diretamente o grid e os componentes.
+      A Navbar responsiva com <code>navbar-expand-lg</code> e <code>collapse</code> também é um exemplo clássico de componente Bootstrap.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">3) Git (início)</h3>
+  <p>
+    Git é uma ferramenta de <strong>controle de versão</strong>. Pense nele como uma “linha do tempo” do seu projeto.
+    Em vez de salvar arquivos com nomes como <em>projeto-final-versao3</em>, você registra mudanças em etapas chamadas
+    <strong>commits</strong>. Cada commit guarda o estado do código naquele momento e uma mensagem descrevendo o que foi feito.
+  </p>
+  <p>
+    Isso traz benefícios práticos para estudar e trabalhar:
+  </p>
+  <ul>
+    <li><strong>Segurança</strong>: se algo quebrar, você consegue voltar para um ponto que estava funcionando.</li>
+    <li><strong>Organização</strong>: dá para ver o histórico do que foi feito e por quê.</li>
+    <li><strong>Trabalho em etapas</strong>: você implementa pequenas partes, testa e “salva” com commit.</li>
+  </ul>
+  <p>
+    Uma <strong>branch</strong> é uma “linha paralela” de desenvolvimento. Em projetos maiores, você pode criar uma branch para
+    uma funcionalidade (ex.: <code>cap1</code> ou <code>final/cap16</code>), trabalhar sem afetar a principal, e depois juntar.
+    Aqui, já no começo, a disciplina de commits pequenos ajuda a evitar retrabalho.
+  </p>
+  <div class="callout small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      No passo a passo, quando você executa <code>git init</code>, faz <code>git add .</code> e registra um commit como
+      <em>“chore: bootstrap projeto Next.js + Bootstrap para Lanchonete”</em>, você cria o primeiro marco do projeto.
+      Depois, ao criar Header/Footer e fazer novos commits, você pratica a ideia de “pequenas entregas versionadas”.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">4) ESLint &amp; Prettier (padrões de código)</h3>
+  <p>
+    Quando muitas pessoas (ou você mesmo ao longo do tempo) mexem no mesmo projeto, o código pode ficar inconsistente:
+    aspas diferentes, tamanhos de linha, indentação irregular, nomes confusos. Isso dificulta ler e revisar.
+    Para resolver, usamos duas ferramentas complementares:
+  </p>
+  <ul>
+    <li>
+      <strong>ESLint</strong>: procura problemas de qualidade e possíveis bugs (por exemplo, variáveis não usadas,
+      padrões perigosos, regras recomendadas do React/Next).
+    </li>
+    <li>
+      <strong>Prettier</strong>: padroniza a formatação automaticamente (espaços, quebras de linha, aspas, ponto e vírgula).
+      Ele reduz discussões sobre “estilo” e deixa o foco na lógica.
+    </li>
+  </ul>
+  <p>
+    O ganho real é que você passa a <strong>estudar o código com menos distrações</strong>.
+    Quando o arquivo está bem formatado e sem avisos críticos, fica mais fácil identificar conceitos como componentes,
+    props, estado e rotas nos capítulos seguintes.
+  </p>
+  <div class="callout small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      No passo a passo, ao criar o arquivo <code>.prettierrc</code> e rodar <code>npm run lint</code>, você valida que o projeto
+      está seguindo padrões mínimos. Isso evita que pequenos erros (como imports errados ou variáveis não usadas)
+      virem problemas maiores quando você começar a criar páginas e componentes mais complexos.
+    </p>
+  </div>
+
+  </section>
+
+  <!-- Questionário (transformado em múltipla escolha dinâmico) -->
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+
+        <div class="vstack gap-3" id="quizContainer">
+
+          <!-- Q1 -->
+          <div class="quiz-card bg-white p-4" data-qid="q1" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">1. O que caracteriza uma SPA (Single Page Application)?</h3>
+              <span class="badge text-bg-light border"><i class="bi bi-ui-checks me-1"></i>Questão 1/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="q1" id="q1A" value="A">
+                <label class="form-check-label" for="q1A">Sempre recarrega toda a página a cada clique em um link.</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="q1" id="q1B" value="B">
+                <label class="form-check-label" for="q1B">Carrega uma única página base e atualiza o conteúdo dinamicamente via JavaScript sem recarregamentos completos.</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="q1" id="q1C" value="C">
+                <label class="form-check-label" for="q1C">Gera todas as páginas como arquivos HTML estáticos, sem JavaScript.</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="q1" id="q1D" value="D">
+                <label class="form-check-label" for="q1D">Funciona apenas quando o usuário está offline.</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="q1" id="q1E" value="E">
+                <label class="form-check-label" for="q1E">É uma aplicação que não possui rotas nem navegação.</label>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q1')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q1')" disabled id="btnKey-q1">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q1" aria-live="polite"></div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="quiz-card bg-white p-4" data-qid="q2" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">2. Qual a vantagem de usar Next.js em vez de React puro para projetos web maiores?</h3>
+              <span class="badge text-bg-light border">Questão 2/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2A" value="A"><label class="form-check-label" for="q2A">Elimina a necessidade de HTML e CSS no projeto.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2B" value="B"><label class="form-check-label" for="q2B">Substitui completamente o JavaScript por uma linguagem própria.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2C" value="C"><label class="form-check-label" for="q2C">Roteamento baseado em pastas, suporte integrado a CSR/SSG/SSR, convenções de estrutura e build/otimizações prontas.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2D" value="D"><label class="form-check-label" for="q2D">Funciona apenas com Bootstrap, sem suporte a outras bibliotecas CSS.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2E" value="E"><label class="form-check-label" for="q2E">Impede o uso de componentes e hooks do React.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q2')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q2')" disabled id="btnKey-q2">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q2" aria-live="polite"></div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="quiz-card bg-white p-4" data-qid="q3" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">3. No App Router, o que app/layout.jsx e app/page.jsx representam?</h3>
+              <span class="badge text-bg-light border">Questão 3/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3A" value="A"><label class="form-check-label" for="q3A">layout.jsx define a lógica do banco de dados; page.jsx define rotas de API.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3B" value="B"><label class="form-check-label" for="q3B">layout.jsx é obrigatório apenas em apps sem Bootstrap; page.jsx é opcional em todas as rotas.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3C" value="C"><label class="form-check-label" for="q3C">layout.jsx é a página inicial; page.jsx é o layout global.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3D" value="D"><label class="form-check-label" for="q3D">layout.jsx define o layout compartilhado (ex.: navbar/footer); page.jsx é a página principal de uma rota.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3E" value="E"><label class="form-check-label" for="q3E">layout.jsx serve apenas para CSS; page.jsx serve apenas para imagens.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q3')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q3')" disabled id="btnKey-q3">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q3" aria-live="polite"></div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="quiz-card bg-white p-4" data-qid="q4" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">4. Cite dois benefícios de usar Bootstrap 5 em um curso técnico.</h3>
+              <span class="badge text-bg-light border">Questão 4/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4A" value="A"><label class="form-check-label" for="q4A">Grid responsivo e componentes prontos (Navbar, Cards) que aceleram a entrega e padronizam a UI.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4B" value="B"><label class="form-check-label" for="q4B">Substituição completa do JavaScript por classes CSS.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4C" value="C"><label class="form-check-label" for="q4C">Obrigatoriedade de usar apenas páginas estáticas sem componentes.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4D" value="D"><label class="form-check-label" for="q4D">Geração automática de banco de dados e APIs.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4E" value="E"><label class="form-check-label" for="q4E">Redução do HTML para zero (sem necessidade de marcação).</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q4')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q4')" disabled id="btnKey-q4">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q4" aria-live="polite"></div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="quiz-card bg-white p-4" data-qid="q5" data-correct="E">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">5. Para que servem utilitários como p-3 e m-2 no Bootstrap?</h3>
+              <span class="badge text-bg-light border">Questão 5/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5A" value="A"><label class="form-check-label" for="q5A">Definem rotas e navegação da aplicação.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5B" value="B"><label class="form-check-label" for="q5B">Carregam automaticamente o JavaScript do Bootstrap.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5C" value="C"><label class="form-check-label" for="q5C">Criam commits com mensagens padronizadas no Git.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5D" value="D"><label class="form-check-label" for="q5D">Validam formulários sem necessidade de HTML.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5E" value="E"><label class="form-check-label" for="q5E">p-3 aplica padding (espaçamento interno) e m-2 aplica margin (espaçamento externo).</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q5')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q5')" disabled id="btnKey-q5">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q5" aria-live="polite"></div>
+          </div>
+
+          <!-- Q6 -->
+          <div class="quiz-card bg-white p-4" data-qid="q6" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">6. Explique a diferença entre commit e branch.</h3>
+              <span class="badge text-bg-light border">Questão 6/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6A" value="A"><label class="form-check-label" for="q6A">Commit é uma pasta; branch é um arquivo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6B" value="B"><label class="form-check-label" for="q6B">Commit é um registro de alterações com mensagem; branch é uma linha de desenvolvimento separada.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6C" value="C"><label class="form-check-label" for="q6C">Commit serve para apagar histórico; branch serve para travar alterações.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6D" value="D"><label class="form-check-label" for="q6D">Commit só existe no GitHub; branch só existe localmente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6E" value="E"><label class="form-check-label" for="q6E">Commit é um tipo de merge; branch é um tipo de tag.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q6')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q6')" disabled id="btnKey-q6">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q6" aria-live="polite"></div>
+          </div>
+
+          <!-- Q7 -->
+          <div class="quiz-card bg-white p-4" data-qid="q7" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">7. Por que usar Prettier junto do ESLint?</h3>
+              <span class="badge text-bg-light border">Questão 7/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7A" value="A"><label class="form-check-label" for="q7A">Porque ambos servem apenas para rodar o servidor do Next.js.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7B" value="B"><label class="form-check-label" for="q7B">Porque Prettier substitui o Git e faz commits automáticos.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7C" value="C"><label class="form-check-label" for="q7C">Porque ESLint instala o Bootstrap e Prettier instala o React.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7D" value="D"><label class="form-check-label" for="q7D">Prettier cuida da formatação; ESLint aponta problemas de qualidade. Juntos, garantem código limpo e consistente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7E" value="E"><label class="form-check-label" for="q7E">Porque Prettier gera HTML estático e ESLint faz SSR.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q7')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q7')" disabled id="btnKey-q7">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q7" aria-live="polite"></div>
+          </div>
+
+          <!-- Q8 -->
+          <div class="quiz-card bg-white p-4" data-qid="q8" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">8. O que são Bootstrap Icons e por que usá-los?</h3>
+              <span class="badge text-bg-light border">Questão 8/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8A" value="A"><label class="form-check-label" for="q8A">Biblioteca de ícones vetoriais integrada ao Bootstrap, fácil de usar e leve (sem necessidade de imagens externas).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8B" value="B"><label class="form-check-label" for="q8B">Sistema de rotas do Next.js que substitui o App Router.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8C" value="C"><label class="form-check-label" for="q8C">Ferramenta de testes unitários para componentes React.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8D" value="D"><label class="form-check-label" for="q8D">Plugin do VS Code para formatar código automaticamente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8E" value="E"><label class="form-check-label" for="q8E">Tipo de banco de dados usado pelo Next.js para armazenar imagens.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q8')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q8')" disabled id="btnKey-q8">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q8" aria-live="polite"></div>
+          </div>
+
+          <!-- Q9 -->
+          <div class="quiz-card bg-white p-4" data-qid="q9" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">9. Em qual arquivo normalmente importamos o CSS global do Bootstrap no Next.js com App Router?</h3>
+              <span class="badge text-bg-light border">Questão 9/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9A" value="A"><label class="form-check-label" for="q9A">No arquivo app/page.jsx, sempre no final do componente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9B" value="B"><label class="form-check-label" for="q9B">No arquivo components/Header.jsx, junto do Navbar.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9C" value="C"><label class="form-check-label" for="q9C">No app/layout.jsx (antes de renderizar a UI).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9D" value="D"><label class="form-check-label" for="q9D">No .gitignore, para aplicar globalmente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9E" value="E"><label class="form-check-label" for="q9E">No package.json, substituindo o script dev.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q9')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q9')" disabled id="btnKey-q9">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q9" aria-live="polite"></div>
+          </div>
+
+          <!-- Q10 -->
+          <div class="quiz-card bg-white p-4" data-qid="q10" data-correct="E">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">10. Qual é o benefício de uma Navbar com colapso (collapse) no Bootstrap?</h3>
+              <span class="badge text-bg-light border">Questão 10/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10A" value="A"><label class="form-check-label" for="q10A">Permite rodar o projeto sem Node.js instalado.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10B" value="B"><label class="form-check-label" for="q10B">Faz o site ficar mais pesado em telas pequenas.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10C" value="C"><label class="form-check-label" for="q10C">Remove a necessidade de CSS e de Grid.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10D" value="D"><label class="form-check-label" for="q10D">Impede navegação por links em telas menores.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10E" value="E"><label class="form-check-label" for="q10E">Melhor responsividade, pois o menu se adapta e vira um botão em telas menores.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q10')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q10')" disabled id="btnKey-q10">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q10" aria-live="polite"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Projeto Lanchonete (Cap. 1)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong> ter a base do projeto rodando com layout e navegação prontos (Header, Navbar, Footer) e Bootstrap aplicado.</p>
+
+        <h3 class="h5 fw-bold mt-4">0) Pré-requisitos</h3>
+        <ul>
+          <li>Node.js LTS (18.17+ ou 20+).</li>
+        </ul>
+        <p class="mb-1">Shell:</p>
+        <pre class="language-bash"><code>node -v
+npm -v</code></pre>
+        <ul>
+          <li>VS Code com extensões recomendadas: ESLint, Prettier.</li>
+          <li>Git instalado.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">1) Criar o projeto Next.js</h3>
+        <p class="mb-1">No terminal (Linux/Windows/WSL/PowerShell):</p>
+        <p class="mb-1">Shell</p>
+        <pre class="language-bash"><code>npx create-next-app@latest lanchonete-web</code></pre>
+
+        <p class="mb-1">Sugestões nas perguntas (interativa):</p>
+        <ul>
+          <li>TypeScript? Não (para simplificar no ensino médio).</li>
+          <li>ESLint? Sim.</li>
+          <li>Tailwind? Não (usaremos Bootstrap).</li>
+          <li>src/ directory? Não.</li>
+          <li>App Router? Sim.</li>
+          <li>Import alias? Sim → @/*</li>
+        </ul>
+        <p class="mb-1">Entrar na pasta e rodar:</p>
+        <p class="mb-1">Shell</p>
+        <pre class="language-bash"><code>cd lanchonete-web
+npm run dev</code></pre>
+        <p class="mb-0">Acesse http://localhost:3000.</p>
+
+        <h3 class="h5 fw-bold mt-4">2) Instalar Bootstrap 5 e Bootstrap Icons</h3>
+        <p class="mb-1">Shell</p>
+        <pre class="language-bash"><code>npm i bootstrap bootstrap-icons</code></pre>
+        <p class="mb-0">Importante: O CSS do Bootstrap pode ser importado globalmente; o JS do Bootstrap (para menu colapsável, modals etc.) depende do DOM e deve ser carregado no cliente.</p>
+
+        <h3 class="h5 fw-bold mt-4">3) Configurar imports globais no app/layout.jsx</h3>
+        <p class="mb-1">Crie/edite app/layout.jsx:</p>
+        <pre class="language-js"><code>// app/layout.jsx
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import './globals.css';
+import BootstrapClient from '@/components/BootstrapClient';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+export const metadata = {
+  title: 'Lanchonete — Admin',
+  description: 'Sistema de lanchonete (Admin) — Projeto didático',
+};
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="pt-BR"&gt;
+      &lt;body&gt;
+        &lt;Header /&gt;
+        &lt;main className="container my-4"&gt;{children}&lt;/main&gt;
+        &lt;Footer /&gt;
+        {/* Carrega JS do Bootstrap no client */}
+        &lt;BootstrapClient /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+        <p class="mb-1">Crie o componente que carrega o JS do Bootstrap:</p>
+        <pre class="language-js"><code>// components/BootstrapClient.jsx
+'use client';
+
+import { useEffect } from 'react';
+
+export default function BootstrapClient() {
+  useEffect(() =&gt; {
+    // Importa o bundle que inclui Popper.js (necessário para alguns componentes)
+    import('bootstrap/dist/js/bootstrap.bundle.min.js');
+  }, []);
+
+  return null;
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4) Criar o Header com Navbar responsiva</h3>
+        <pre class="language-js"><code>// components/Header.jsx
+'use client';
+
+import Link from 'next/link';
+
+export default function Header() {
+  return (
+    &lt;header&gt;
+      &lt;nav className="navbar navbar-expand-lg navbar-dark bg-dark"&gt;
+        &lt;div className="container"&gt;
+          &lt;Link href="/" className="navbar-brand d-flex align-items-center gap-2"&gt;
+            &lt;i className="bi bi-cup-straw"&gt;&lt;/i&gt;
+            &lt;span&gt;Lanchonete Admin&lt;/span&gt;
+          &lt;/Link&gt;
+
+          &lt;button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Alternar navegação"
+          &gt;
+            &lt;span className="navbar-toggler-icon"&gt;&lt;/span&gt;
+          &lt;/button&gt;
+
+          &lt;div className="collapse navbar-collapse" id="mainNavbar"&gt;
+            &lt;ul className="navbar-nav ms-auto mb-2 mb-lg-0"&gt;
+              &lt;li className="nav-item"&gt;
+                &lt;Link href="/" className="nav-link"&gt;Início&lt;/Link&gt;
+              &lt;/li&gt;
+              &lt;li className="nav-item"&gt;
+                &lt;Link href="/cardapio" className="nav-link"&gt;Cardápio&lt;/Link&gt;
+              &lt;/li&gt;
+              &lt;li className="nav-item"&gt;
+                &lt;Link href="/admin" className="nav-link"&gt;Administração&lt;/Link&gt;
+              &lt;/li&gt;
+              &lt;li className="nav-item"&gt;
+                &lt;Link href="/contato" className="nav-link"&gt;Contato&lt;/Link&gt;
+              &lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/nav&gt;
+    &lt;/header&gt;
+  );
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">5) Criar o Footer</h3>
+        <pre class="language-js"><code>// components/Footer.jsx
+export default function Footer() {
+  return (
+    &lt;footer className="bg-light border-top mt-5"&gt;
+      &lt;div className="container py-3 d-flex flex-column flex-md-row justify-content-between align-items-center"&gt;
+        &lt;small className="text-muted"&gt;
+          © {new Date().getFullYear()} Lanchonete — Projeto Didático
+        &lt;/small&gt;
+        &lt;div className="d-flex align-items-center gap-3"&gt;
+          &lt;a href="https://www.instagram.com" target="_blank" rel="noreferrer" className="text-muted"&gt;
+            &lt;i className="bi bi-instagram"&gt;&lt;/i&gt;
+          &lt;/a&gt;
+          &lt;a href="https://www.facebook.com" target="_blank" rel="noreferrer" className="text-muted"&gt;
+            &lt;i className="bi bi-facebook"&gt;&lt;/i&gt;
+          &lt;/a&gt;
+          &lt;a href="https://wa.me/" target="_blank" rel="noreferrer" className="text-muted"&gt;
+            &lt;i className="bi bi-whatsapp"&gt;&lt;/i&gt;
+          &lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/footer&gt;
+  );
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">6) Criar a Home (hero + cartões de categorias)</h3>
+        <pre class="language-js"><code>// app/page.jsx
+export default function Home() {
+  return (
+    &lt;&gt;
+      &lt;section className="py-5 text-center bg-light rounded-3"&gt;
+        &lt;div className="container"&gt;
+          &lt;h1 className="display-5 fw-bold"&gt;Bem-vindo(a) à Lanchonete&lt;/h1&gt;
+          &lt;p className="lead"&gt;
+            Administre seu cardápio, promoções e pedidos de forma simples.
+          &lt;/p&gt;
+          &lt;a href="/admin" className="btn btn-primary"&gt;
+            Acessar Administração
+          &lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section className="my-5"&gt;
+        &lt;h2 className="h4 mb-4"&gt;Categorias&lt;/h2&gt;
+        &lt;div className="row g-4"&gt;
+          &lt;div className="col-12 col-md-4"&gt;
+            &lt;div className="card h-100"&gt;
+              &lt;div className="card-body"&gt;
+                &lt;h5 className="card-title"&gt;
+                  &lt;i className="bi bi-cup-straw me-2"&gt;&lt;/i&gt;Bebidas
+                &lt;/h5&gt;
+                &lt;p className="card-text"&gt;Refrigerantes, sucos e milk-shakes.&lt;/p&gt;
+                &lt;a href="/cardapio" className="btn btn-outline-primary"&gt;
+                  Ver itens
+                &lt;/a&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;div className="col-12 col-md-4"&gt;
+            &lt;div className="card h-100"&gt;
+              &lt;div className="card-body"&gt;
+                &lt;h5 className="card-title"&gt;
+                  &lt;i className="bi bi-egg-fried me-2"&gt;&lt;/i&gt;Lanches
+                &lt;/h5&gt;
+                &lt;p className="card-text"&gt;Artesanais e combos clássicos.&lt;/p&gt;
+                &lt;a href="/cardapio" className="btn btn-outline-primary"&gt;
+                  Ver itens
+                &lt;/a&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;div className="col-12 col-md-4"&gt;
+            &lt;div className="card h-100"&gt;
+              &lt;div className="card-body"&gt;
+                &lt;h5 className="card-title"&gt;
+                  &lt;i className="bi bi-ice-cream me-2"&gt;&lt;/i&gt;Sobremesas
+                &lt;/h5&gt;
+                &lt;p className="card-text"&gt;Sorvetes e delícias da casa.&lt;/p&gt;
+                &lt;a href="/cardapio" className="btn btn-outline-primary"&gt;
+                  Ver itens
+                &lt;/a&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+        <p class="mb-0"><strong>Dica:</strong> repare no uso de container, row, col-md-4, g-4, btn, card — são classes Bootstrap.</p>
+
+        <h3 class="h5 fw-bold mt-4">7) Criar páginas “vazias” para as rotas do menu (placeholders)</h3>
+        <p class="mb-1">Crie arquivos (podem ser apenas com um &lt;h1&gt; por enquanto):</p>
+        <ul>
+          <li>app/cardapio/page.jsx</li>
+          <li>app/admin/page.jsx</li>
+          <li>app/contato/page.jsx</li>
+        </ul>
+        <p class="mb-1">Exemplo:</p>
+        <pre class="language-js"><code>// app/admin/page.jsx
+ex// app/admin/page.jsx
+export default function AdminPage() {
+  return &lt;h1 className="h3"&gt;Painel do Administrador&lt;/h1&gt;;
+}</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">8) Git — iniciar repositório e versionar</h3>
+        <p class="mb-1">Shell</p>
+        <pre class="language-bash"><code>git init
+git add .
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+git commit -m "chore: bootstrap projeto Next.js + Bootstrap para Lanchonete"
+git branch -M main
+# (Opcional) se tiver repositório remoto:
+# git remote add origin https://github.com/&lt;seu-usuario&gt;/lanchonete-web.git
+# git push -u origin main</code></pre>
+
+        <p class="mb-1"><strong>Sugestão de convenção simples de mensagens:</strong></p>
+        <ul>
+          <li>feat: (nova funcionalidade)</li>
+          <li>fix: (correção)</li>
+          <li>style: (formatação/estilo, sem mudança lógica)</li>
+          <li>chore: (tarefas de manutenção)</li>
+          <li>docs: (documentação)</li>
+          <li>refactor: (refatoração)</li>
+        </ul>
+        <p class="mb-1"><strong>Ex.:</strong></p>
+        <ul>
+          <li>feat: criar Header com Navbar responsiva</li>
+          <li>style: aplicar Prettier e ajustar imports</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">9) Prettier e ESLint (config básica)</h3>
+        <p class="mb-1">Crie .prettierrc na raiz:</p>
+        <p class="mb-1">JSON</p>
+        <pre class="language-json"><code>{
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "es5",
+  "printWidth": 100
+}</code></pre>
+
+        <p class="mb-1">No VS Code, instale Prettier - Code formatter e ative formatar ao salvar (Settings → “Format on Save”).</p>
+
+        <p class="mb-1">Rode o linter:</p>
+        <p class="mb-1">Shell</p>
+        <pre class="language-bash"><code>npm run lint</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">10) Checklist de verificação</h3>
+        <ul>
+          <li>Projeto roda em http://localhost:3000.</li>
+          <li>Navbar colapsa no mobile (ícone do menu funciona).</li>
+          <li>Home com hero e 3 cartões de categorias.</li>
+          <li>Páginas /cardapio, /admin, /contato existem.</li>
+          <li>CSS do Bootstrap e Bootstrap Icons funcionando.</li>
+          <li>Repositório Git com commit inicial e pelo menos 1 commit por parte construída.</li>
+          <li>Prettier formatando ao salvar; ESLint sem erros críticos.</li>
+        </ul>
+
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Sugestões de Atividades Práticas (para fazer por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o que foi visto, preparando terreno para os próximos capítulos.</p>
+        <ol class="mt-3">
+          <li><strong>Página “Sobre” (estática, responsiva)</strong>
+            <ul>
+              <li>Criar app/sobre/page.jsx com texto institucional da lanchonete.</li>
+              <li>Usar grid para colocar uma imagem (pode ser placeholder) ao lado de texto em telas largas (stack em telas pequenas).</li>
+              <li>Adicionar ícones informativos (horário, endereço) com Bootstrap Icons.</li>
+            </ul>
+          </li>
+          <li><strong>Página “Contato” (formulário simples, sem back-end)</strong>
+            <ul>
+              <li>Campos: Nome, E-mail, Mensagem e um botão “Enviar”.</li>
+              <li>Usar classes Bootstrap para formulários (form-control, form-label, btn).</li>
+              <li>Acessibilidade: associar label a id correspondente; usar aria-label quando necessário.</li>
+            </ul>
+          </li>
+          <li><strong>Página “Cardápio” (estrutura inicial)</strong>
+            <ul>
+              <li>Criar um grid responsivo com cards vazios para “Bebidas”, “Lanches” e “Sobremesas”.</li>
+              <li>Cada card deve ter: título, breve descrição e botão “Ver detalhes”.</li>
+              <li>(Nos próximos capítulos, você irá popular com dados e interatividade.)</li>
+            </ul>
+          </li>
+          <li><strong>Componente “Alerta de Promoção”</strong>
+            <ul>
+              <li>Criar um componente components/AlertaPromocao.jsx que usa alert alert-warning do Bootstrap, com ícone (bi-tag) e texto.</li>
+              <li>Exibir o alerta somente na Home.</li>
+            </ul>
+          </li>
+        </ol>
+
+        <h3 class="h5 fw-bold mt-4">Critérios de avaliação sugeridos (rubrica):</h3>
+        <ul>
+          <li>Layout responsivo (Navbar funcional no mobile)</li>
+          <li>Uso correto de Container / Row / Col</li>
+          <li>Organização do código (componentes Header/Footer/Alerta)</li>
+          <li>Uso de Bootstrap Icons e utilitários de espaçamento</li>
+          <li>Git com commits claros e frequentes</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Pesquisas complementares (tópicos sugeridos)</h2>
+        <ul>
+          <li>“Next.js App Router: diferença entre layout.jsx e page.jsx”</li>
+          <li>“Bootstrap 5: Grid e Containers (container, row, col)”</li>
+          <li>“Bootstrap 5: Navbar com collapse e classes de cor”</li>
+          <li>“Bootstrap Icons: como usar ícones via classes bi”</li>
+          <li>“Boas práticas de mensagens de commit (convenção simples)”</li>
+          <li>“ESLint vs Prettier: funções e integração no VS Code”</li>
+        </ul>
+        <p class="mb-0">(Você pode pesquisar esses termos na web e na documentação oficial para aprofundar.)</p>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 1</h2>
+        <ul>
+          <li>Repositório com:
+            <ul>
+              <li>Projeto Next.js rodando com Bootstrap 5 e Bootstrap Icons.</li>
+              <li>Header, Footer, Home com hero e cards.</li>
+              <li>Páginas: /cardapio, /admin, /contato (mesmo que placeholders).</li>
+              <li>.prettierrc e ESLint funcionando.</li>
+              <li>Histórico de commits claros.</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Checklist interativo (texto mantido) -->
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2 text-danger"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">Baseado em “10) Checklist de verificação”. O progresso fica salvo neste navegador.</p>
+
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-danger" id="chkProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="vstack gap-2" id="checklistItems">
+            <label class="checklist-item d-flex gap-2 align-items-start">
+              <input class="form-check-input mt-1" type="checkbox" data-chk="1">
+              <span>Projeto roda em http://localhost:3000.</span>
+            </label>
+            <label class="checklist-item d-flex gap-2 align-items-start">
+              <input class="form-check-input mt-1" type="checkbox" data-chk="2">
+              <span>Navbar colapsa no mobile (ícone do menu funciona).</span>
+            </label>
+            <label class="checklist-item d-flex gap-2 align-items-start">
+              <input class="form-check-input mt-1" type="checkbox" data-chk="3">
+              <span>Home com hero e 3 cartões de categorias.</span>
+            </label>
+            <label class="checklist-item d-flex gap-2 align-items-start">
+              <input class="form-check-input mt-1" type="checkbox" data-chk="4">
+              <span>Páginas /cardapio, /admin, /contato existem.</span>
+            </label>
+            <label class="checklist-item d-flex gap-2 align-items-start">
+              <input class="form-check-input mt-1" type="checkbox" data-chk="5">
+              <span>CSS do Bootstrap e Bootstrap Icons funcionando.</span>
+            </label>
+            <label class="checklist-item d-flex gap-2 align-items-start">
+              <input class="form-check-input mt-1" type="checkbox" data-chk="6">
+              <span>Repositório Git com commit inicial e pelo menos 1 commit por parte construída.</span>
+            </label>
+            <label class="checklist-item d-flex gap-2 align-items-start">
+              <input class="form-check-input mt-1" type="checkbox" data-chk="7">
+              <span>Prettier formatando ao salvar; ESLint sem erros críticos.</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar para Home</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 02</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="small text-muted">
+          <i class="bi bi-journal-code me-1"></i> Capítulo 01 — Apostila PW II
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-pw" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+          <a class="btn btn-sm btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 02</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // ===== Questionário dinâmico =====
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      // habilita o botão "Ver Gabarito"
+      btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      // Marca visualmente a alternativa correta
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    // ===== Checklist (salvo no localStorage) =====
+    const CHECKLIST_KEY = 'pw2_cap01_checklist_v1';
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){
+        // ignore
+      }
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', pct);
+      text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    // listeners
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    // init
+    loadChecklist();
+  </script>
+</body>
+</html>

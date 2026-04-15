@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 11 — SSR (Server Side Rendering) para dados “ao vivo”</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --pw-red:#b30000;            /* menus em vermelho */
+      --pw-red-dark:#8f0000;
+      --pw-gray:#3f3f3f;           /* botões destaque em cinza escuro */
+      --pw-gray-dark:#2f2f2f;
+      --pw-bg:#ffffff;             /* tema claro */
+      --pw-muted:#6c757d;
+      --pw-border:#e9ecef;
+      --pw-link:#b30000;
+      --code-bg:#1e1e1e;           /* VSCode-like */
+    }
+
+    body{ background:var(--pw-bg); }
+    a{ color:var(--pw-link); }
+    a:hover{ color:var(--pw-red-dark); }
+
+    /* Navbar */
+    .navbar-pw{ background:var(--pw-red); }
+    .navbar-pw .navbar-brand,
+    .navbar-pw .nav-link,
+    .navbar-pw .navbar-toggler{ color:#fff; }
+    .navbar-pw .nav-link:hover,
+    .navbar-pw .nav-link:focus{ color:#ffe6e6; }
+    .navbar-pw .dropdown-item:active{ background:var(--pw-red); }
+
+    /* Buttons */
+    .btn-pw{
+      background:var(--pw-gray);
+      border-color:var(--pw-gray);
+      color:#fff;
+    }
+    .btn-pw:hover,
+    .btn-pw:focus{
+      background:var(--pw-gray-dark);
+      border-color:var(--pw-gray-dark);
+      color:#fff;
+    }
+
+    /* Sections */
+    .chapter-hero{
+      background:linear-gradient(180deg, rgba(179,0,0,.08), rgba(179,0,0,0));
+      border-bottom:1px solid var(--pw-border);
+    }
+
+    .card-soft{
+      border:1px solid var(--pw-border);
+      border-radius:14px;
+    }
+
+    /* Code blocks */
+    pre[class*="language-"]{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 8px 26px rgba(0,0,0,.10);
+      margin: .75rem 0 1rem;
+    }
+    code[class*="language-"]{ font-size: .92rem; }
+    pre{ background: var(--code-bg) !important; }
+
+    /* Quiz */
+    .quiz-card{ border:1px solid var(--pw-border); border-radius:14px; }
+    .quiz-feedback{ min-height: 42px; }
+
+    /* Checklist */
+    .checklist-item{ border:1px solid var(--pw-border); border-radius:12px; padding:10px 12px; }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:10px; z-index:2000; }
+  </style>
+</head>
+<body>
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- NAVBAR (responsiva com hamburguer) -->
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>APOSTILA PW II
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(1) brightness(2);"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html#sumario"><i class="bi bi-list-check me-1"></i>Sumário</a></li>
+
+          <!-- Dropdown com capítulos -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book me-1"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">1º/2º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Setup do projeto</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Componentes, Props, Estado e Eventos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Listas/Condicional + Grid Bootstrap</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Rotas e Navegação (Next.js)</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Bootstrap avançado e customização</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Formulários e Validação</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Consumo de API + fetch</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Testes (Jest + RTL)</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — SSG/SSR/Hidratação</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — SSG dinâmico</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — SSR para dados “ao vivo”</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">4º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Hidratação e interatividade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Testes (avançado)</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Builds e releases</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Docker</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto final</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="#questionario"><i class="bi bi-ui-checks me-1"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-link" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 11 — SSR (Server Side Rendering) para dados “ao vivo”<br><small class="fw-normal">Dashboard do Administrador — Pedidos do dia / Estoque simulado</small></h1>
+          <p class="mb-2"><strong>Carga:</strong> 2 aulas × 140 min</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Sistema da Lanchonete (Admin) (Cap. 1–10)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Next.js (App Router) + React, Bootstrap 5 + Bootstrap Icons, Git, Postman</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2">
+            <li>Entender quando e por que usar SSR em vez de SSG/CSR.</li>
+            <li>Implementar páginas SSR que buscam dados “ao vivo” em cada requisição.</li>
+            <li>Controlar cache e revalidação com fetch server: <code>{ cache: 'no-store' }</code>, <code>revalidate: 0</code> e <code>dynamic</code>.</li>
+            <li>Criar uma API <code>/api/pedidos-dia</code> e consumir no servidor e no cliente.</li>
+            <li>Usar botão de atualizar com <code>router.refresh()</code> e medir diferenças de TTFB/FP.</li>
+          </ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>🎯 Competências e Habilidades trabalhadas</strong></p>
+            <ul class="mb-0 small">
+              <li><strong>Competências:</strong> (1) Elaborar interfaces web; (2) Aplicar práticas de desenvolvimento de sistemas.</li>
+              <li><strong>Habilidades:</strong> 1.3 (Renderização híbrida — SSR), 4 (práticas de desenvolvimento: inspeção, testes com Postman).</li>
+            </ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 10</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">📆 Plano de Aula (Capítulo 11)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <p class="mb-2"><strong>Aula 1 (140 min) — Teoria + SSR no Dashboard (dados “do dia”)</strong></p>
+          <p class="mb-1">Teoria (35–45 min): SSR vs SSG vs CSR; caching (<code>no-store</code>, <code>revalidate</code>), Server Components e impacto em TTFB; privacidade (variáveis e segredos no servidor).</p>
+          <p class="mb-3">Prática (85–95 min):
+            <ol class="mb-0">
+              <li>Criar <code>lib/pedidos.js</code> (geração simulada de pedidos do dia).</li>
+              <li>Criar API GET <code>/api/pedidos-dia</code>.</li>
+              <li>Transformar <code>/admin</code> em SSR: KPIs (total, faturamento, ticket médio) e tabela com pedidos recentes.</li>
+            </ol>
+          </p>
+          <p class="mb-2"><strong>Aula 2 (140 min) — Atualização, Medição e UX</strong></p>
+          <p class="mb-1">Teoria (20–30 min): Refresh sem recarregar página (<code>router.refresh()</code>), <code>dynamic='force-dynamic'</code> vs <code>fetch({ cache: 'no-store' })</code>, Edge vs Node runtime (conceito), loading states em SSR.</p>
+          <p class="mb-0">Prática (100–110 min):
+            <ol class="mb-0">
+              <li>Botão “Atualizar dados” (client component) no dashboard.</li>
+              <li>Testar a API no Postman (GET).</li>
+              <li>Medir TTFB com DevTools; comparar com Home (SSG).</li>
+            </ol>
+          </p>
+          <p class="mb-0"><strong>Entrega rápida (10 min):</strong> Print do dashboard com dados + print do Postman (GET) + print do DevTools (TTFB).</p>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🧠 Parte Teórica (explicação do conteúdo)</h2>
+
+  <h3 class="h5 fw-bold mt-4">1) Quando usar SSR?</h3>
+  <p>
+    SSR (Server-Side Rendering) significa que o servidor monta o HTML <strong>no momento da requisição</strong>.
+    Em outras palavras: cada vez que alguém abre a página, o servidor pode executar código, buscar dados
+    e devolver a tela já preenchida com o estado “atual”. Isso contrasta com SSG (HTML gerado no build/ISR)
+    e CSR (HTML simples + JS para montar tudo no navegador).
+  </p>
+  <p>
+    Você escolhe SSR quando o dado precisa ser <strong>do agora</strong> ou quando faz sentido que cada requisição
+    reflita uma fotografia recente do sistema. Exemplos típicos:
+  </p>
+  <ul>
+    <li><strong>Pedidos do dia</strong> (mudam o tempo todo).</li>
+    <li><strong>Fila de atendimento</strong> (estado em andamento muda minuto a minuto).</li>
+    <li><strong>Estoque</strong> (pode variar conforme vendas/baixas).</li>
+    <li><strong>Páginas personalizadas por sessão</strong> (dados do usuário, permissões).</li>
+  </ul>
+  <p>
+    SSR também é útil por segurança: como o código roda no servidor, você pode acessar variáveis de ambiente e segredos
+    (chaves, tokens) sem expor isso no navegador. Isso não significa “segurança completa”, mas reduz o risco de vazamento
+    de credenciais quando comparado a colocar essas chaves no cliente.
+  </p>
+  <p>
+    O trade-off é importante: SSR tende a ter <strong>TTFB maior</strong> do que SSG, porque o servidor precisa trabalhar
+    antes de enviar o primeiro byte (buscar dados, processar e renderizar). Em contrapartida, a página chega com conteúdo
+    completo, o que melhora percepção e evita “tela vazia” no carregamento.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      No passo a passo, o dashboard <code>/admin</code> vira SSR para mostrar KPIs e pedidos do dia que mudam a cada requisição.
+      Você reforça isso com <code>export const dynamic = 'force-dynamic'</code> e <code>revalidate = 0</code> (Etapa 3).
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">2) Cache e controle no App Router</h3>
+  <p>
+    No App Router, o Next.js faz otimizações automaticamente e pode cachear respostas e páginas quando isso é seguro.
+    Em SSR “de verdade”, você quer impedir que dados antigos sejam reaproveitados. Por isso, existe um conjunto de
+    ferramentas para controlar cache e comportamento dinâmico.
+  </p>
+  <p>
+    Existem duas formas comuns de forçar comportamento dinâmico:
+  </p>
+  <ul>
+    <li>
+      <strong>No nível da página</strong>: <code>export const dynamic = 'force-dynamic'</code>.
+      Isso diz ao Next: “não tente transformar esta página em estática”.
+    </li>
+    <li>
+      <strong>No nível do fetch</strong>: <code>fetch(url, { cache: 'no-store' })</code>.
+      Isso diz: “este dado não pode ser cacheado; sempre busque novo”.
+    </li>
+  </ul>
+  <p>
+    O papel de <code>revalidate</code> aqui é o oposto do ISR: quando você define <code>revalidate = 0</code>, você reforça
+    que não existe regeneração estática em intervalos — é sempre novo (ou seja, não há janela de cache estático).
+  </p>
+  <p>
+    Um cuidado didático: “forçar SSR” não significa “sempre rápido”. Se o fetch for lento, a página vai demorar.
+    Por isso, SSR exige atenção em UX: loaders, skeletons (em streaming) e botões de atualização para evitar recarregar
+    o site inteiro.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      A API <code>/api/pedidos-dia</code> é marcada como dinâmica com <code>dynamic = 'force-dynamic'</code> e <code>revalidate = 0</code> (Etapa 2).
+      Já no dashboard <code>/admin</code>, você usa <code>dynamic = 'force-dynamic'</code> para garantir SSR. Opcionalmente, você pode buscar
+      os dados pela própria API usando <code>fetch(..., { cache: 'no-store' })</code> (Etapa 4).
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">3) Server x Client Components (SSR com interatividade)</h3>
+  <p>
+    Um ponto-chave do App Router é que você pode misturar Server e Client Components na mesma página.
+    Isso é o coração da renderização híbrida: o servidor entrega o HTML inicial com dados e o cliente adiciona
+    somente a interatividade necessária.
+  </p>
+  <p>
+    <strong>Server Components</strong> (padrão, sem <code>'use client'</code>) são ideais para:
+  </p>
+  <ul>
+    <li>Buscar dados no servidor (sem expor segredos).</li>
+    <li>Gerar HTML pronto (melhor TTFB/SEO do que CSR puro).</li>
+    <li>Reduzir JavaScript enviado ao cliente (menos hidratação).</li>
+  </ul>
+  <p>
+    <strong>Client Components</strong> são necessários para:
+  </p>
+  <ul>
+    <li>Botões e interações (onClick, useState, useEffect).</li>
+    <li>Atualizações sem refresh total do navegador.</li>
+    <li>Componentes que dependem de APIs do browser (localStorage, window, etc.).</li>
+  </ul>
+  <p>
+    No SSR do dashboard, a página principal (<code>app/admin/page.jsx</code>) pode ser Server Component, e você injeta
+    um pequeno Client Component (o botão “Atualizar”) para pedir ao Next que revalide e renderize de novo.
+    Isso cria uma UX mais suave: você atualiza os dados sem dar F5.
+  </p>
+  <p>
+    O método <code>router.refresh()</code> faz exatamente isso: ele revalida os dados do servidor para a rota atual
+    e re-renderiza a página (mantendo o app rodando). É uma atualização “controlada”, diferente de recarregar o browser.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      Na Etapa 3, o dashboard SSR é um Server Component que gera KPIs e a tabela.
+      Na mesma etapa, você cria <code>RefreshButton</code> como Client Component e, ao clicar, ele chama
+      <code>router.refresh()</code> usando <code>useTransition</code> para mostrar o estado “Atualizando…”.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">4) Medindo na prática (TTFB, First Paint e HTML Response)</h3>
+  <p>
+    A diferença entre SSG e SSR fica muito clara quando você mede. Duas métricas úteis para o aluno são:
+  </p>
+  <ul>
+    <li><strong>TTFB (Time To First Byte)</strong>: tempo até o primeiro byte da resposta chegar.</li>
+    <li><strong>First Paint / LCP</strong>: quando o usuário começa a ver conteúdo e quando o principal conteúdo aparece.</li>
+  </ul>
+  <p>
+    Em geral, páginas SSG têm TTFB menor porque o servidor só entrega arquivo pronto.
+    Já no SSR, o servidor precisa “montar” a resposta, então o TTFB tende a subir.
+    Porém, o HTML do SSR pode vir mais completo (sem depender de fetch no cliente), o que pode melhorar a percepção de
+    carregamento dependendo do caso.
+  </p>
+  <p>
+    Para medir corretamente, use DevTools → Network com <strong>Disable cache</strong> e recarregue.
+    Depois, clique na requisição do documento e observe:
+  </p>
+  <ul>
+    <li>O valor de TTFB (timing da requisição).</li>
+    <li>A aba <em>Response</em> mostrando o HTML já com KPIs/tabela (no caso do SSR).</li>
+  </ul>
+  <p>
+    Essa análise ajuda a tomar decisões conscientes: nem tudo precisa de SSR. Você usa SSR onde o valor do dado “ao vivo”
+    compensa o custo adicional.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      Na Etapa 5, você mede o TTFB do <code>/admin</code> (SSR) e compara com a Home (SSG).
+      No <code>/admin</code>, o HTML de resposta já vem com KPIs e tabela renderizados.
+      Na Home SSG, o HTML tende a chegar ainda mais rápido por ser estático.
+    </p>
+  </div>
+
+  </section>
+
+  <!-- Questionário -->
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">✅ Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+
+        <div class="vstack gap-3" id="quizContainer">
+
+          <div class="quiz-card bg-white p-4" data-qid="q1" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">1. Por que SSR é mais indicado para um “Pedidos do dia” do que SSG?</h3>
+              <span class="badge text-bg-light border">Questão 1/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1A" value="A"><label class="form-check-label" for="q1A">Porque SSR sempre é mais rápido que SSG.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1B" value="B"><label class="form-check-label" for="q1B">Porque os dados mudam com frequência e devem refletir o estado no momento da requisição; SSG gera no build/ISR.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1C" value="C"><label class="form-check-label" for="q1C">Porque SSR desabilita JavaScript no cliente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1D" value="D"><label class="form-check-label" for="q1D">Porque SSG não entrega HTML.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1E" value="E"><label class="form-check-label" for="q1E">Porque CSR exige Postman.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q1')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q1')" disabled id="btnKey-q1">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q1" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q2" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">2. Qual a forma mais direta de impedir cache no fetch do servidor?</h3>
+              <span class="badge text-bg-light border">Questão 2/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2A" value="A"><label class="form-check-label" for="q2A">Usar <code>revalidate = 86400</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2B" value="B"><label class="form-check-label" for="q2B">Definir <code>dynamic = 'force-static'</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2C" value="C"><label class="form-check-label" for="q2C">Usar <code>fetch(url, { cache: 'no-store' })</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2D" value="D"><label class="form-check-label" for="q2D">Habilitar o Service Worker.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2E" value="E"><label class="form-check-label" for="q2E">Usar apenas Client Components.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q2')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q2')" disabled id="btnKey-q2">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q2" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q3" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">3. O que faz <code>export const dynamic = 'force-dynamic'</code> em uma página?</h3>
+              <span class="badge text-bg-light border">Questão 3/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3A" value="A"><label class="form-check-label" for="q3A">Força a página a renderizar dinamicamente em cada requisição (SSR), ignorando otimizações estáticas.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3B" value="B"><label class="form-check-label" for="q3B">Transforma a página em API Route.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3C" value="C"><label class="form-check-label" for="q3C">Desativa JavaScript no cliente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3D" value="D"><label class="form-check-label" for="q3D">Habilita ISR com <code>revalidate</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3E" value="E"><label class="form-check-label" for="q3E">Força CSR sempre.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q3')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q3')" disabled id="btnKey-q3">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q3" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q4" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">4. Quando usar <code>router.refresh()</code> em uma página SSR?</h3>
+              <span class="badge text-bg-light border">Questão 4/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4A" value="A"><label class="form-check-label" for="q4A">Para recarregar todo o app Next (<em>full reload</em>).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4B" value="B"><label class="form-check-label" for="q4B">Apenas para mudar a URL atual.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4C" value="C"><label class="form-check-label" for="q4C">Para invalidar Service Worker.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4D" value="D"><label class="form-check-label" for="q4D">Para revalidar os dados do servidor e re-renderizar o conteúdo sem recarregar a página inteira.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4E" value="E"><label class="form-check-label" for="q4E">Para ativar o modo de desenvolvimento.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q4')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q4')" disabled id="btnKey-q4">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q4" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q5" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">5. Qual a diferença de TTFB entre SSR e SSG em geral?</h3>
+              <span class="badge text-bg-light border">Questão 5/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5A" value="A"><label class="form-check-label" for="q5A">Não há diferença; ambas entregam no mesmo tempo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5B" value="B"><label class="form-check-label" for="q5B">SSR tende a ter TTFB maior (processamento a cada requisição), enquanto SSG entrega HTML estático rapidamente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5C" value="C"><label class="form-check-label" for="q5C">SSG sempre tem TTFB maior que SSR.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5D" value="D"><label class="form-check-label" for="q5D">TTFB depende apenas do CSS.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5E" value="E"><label class="form-check-label" for="q5E">CSR sempre vence em TTFB.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q5')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q5')" disabled id="btnKey-q5">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q5" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q6" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">6. Por que variáveis de ambiente são mais seguras em SSR?</h3>
+              <span class="badge text-bg-light border">Questão 6/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6A" value="A"><label class="form-check-label" for="q6A">Porque ficam no servidor (não expostas ao cliente), acessíveis em Server Components/Route Handlers.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6B" value="B"><label class="form-check-label" for="q6B">Porque são automaticamente criptografadas no HTML.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6C" value="C"><label class="form-check-label" for="q6C">Porque são injetadas no bundle do cliente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6D" value="D"><label class="form-check-label" for="q6D">Porque desativam o DevTools.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6E" value="E"><label class="form-check-label" for="q6E">Porque funcionam só em produção.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q6')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q6')" disabled id="btnKey-q6">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q6" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q7" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">7. Como testar uma API local rapidamente?</h3>
+              <span class="badge text-bg-light border">Questão 7/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7A" value="A"><label class="form-check-label" for="q7A">Executando <code>npm run build</code> toda vez.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7B" value="B"><label class="form-check-label" for="q7B">Escrevendo testes E2E obrigatoriamente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7C" value="C"><label class="form-check-label" for="q7C">Usando Postman: definir método, URL e verificar status + JSON.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7D" value="D"><label class="form-check-label" for="q7D">Apenas abrindo no navegador com método POST.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7E" value="E"><label class="form-check-label" for="q7E">Usando exclusivamente curl com token secreto.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q7')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q7')" disabled id="btnKey-q7">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q7" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q8" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">8. Quando preferir CSR em vez de SSR?</h3>
+              <span class="badge text-bg-light border">Questão 8/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8A" value="A"><label class="form-check-label" for="q8A">Quando a página precisa de HTML pronto para SEO.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8B" value="B"><label class="form-check-label" for="q8B">Quando os dados mudam por minuto e são públicos.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8C" value="C"><label class="form-check-label" for="q8C">Quando queremos acesso a segredos no servidor.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8D" value="D"><label class="form-check-label" for="q8D">Em UIs muito interativas no cliente (ex.: carrinho com muitos estados locais) que não dependem de SEO/HTML pronto.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8E" value="E"><label class="form-check-label" for="q8E">Nunca: CSR não é recomendado.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q8')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q8')" disabled id="btnKey-q8">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q8" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q9" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">9. Qual o impacto de <code>revalidate = 0</code> em uma página?</h3>
+              <span class="badge text-bg-light border">Questão 9/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9A" value="A"><label class="form-check-label" for="q9A">Indica sem ISR (regeneração), reforçando comportamento dinâmico.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9B" value="B"><label class="form-check-label" for="q9B">Habilita SSG com cache agressivo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9C" value="C"><label class="form-check-label" for="q9C">Converte a página em Client Component.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9D" value="D"><label class="form-check-label" for="q9D">Ativa fallback dinâmico para qualquer rota.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9E" value="E"><label class="form-check-label" for="q9E">Remove o HTML da resposta.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q9')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q9')" disabled id="btnKey-q9">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q9" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q10" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">10. É possível combinar SSR e componentes de cliente na mesma página?</h3>
+              <span class="badge text-bg-light border">Questão 10/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10A" value="A"><label class="form-check-label" for="q10A">Não; SSR e Client Components são incompatíveis.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10B" value="B"><label class="form-check-label" for="q10B">Sim. Use Server Components para dados/HTML inicial e Client Components para interações (botões, modais, etc.).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10C" value="C"><label class="form-check-label" for="q10C">Apenas se o projeto estiver em modo CSR puro.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10D" value="D"><label class="form-check-label" for="q10D">Sim, mas somente com <code>getServerSideProps</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10E" value="E"><label class="form-check-label" for="q10E">Apenas usando middleware.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q10')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q10')" disabled id="btnKey-q10">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q10" aria-live="polite"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Passo a passo -->
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">🛠️ Passo a Passo — Dashboard SSR de Pedidos do Dia</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Criar uma experiência SSR para o painel do administrador: KPIs (Total, Faturamento, Ticket médio), tabela de pedidos recentes e um botão de atualizar que dispara <code>router.refresh()</code>.</p>
+
+        <h3 class="h5 fw-bold mt-4">0) Preparação</h3>
+        <ul>
+          <li>Projeto até o Cap. 10 (com <code>/admin</code> já existente).</li>
+          <li>Teremos dados simulados “ao vivo” para efeito de aprendizado.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">1) Gerador de dados “do dia” (server safe)</h3>
+        <p>Crie <code>lib/pedidos.js</code>:</p>
+        <pre class="language-js"><code>// lib/pedidos.js
+// Simulação simples de "pedidos do dia" variando a cada chamada.
+
+const ITENS = [
+  { id: 'xburger', nome: 'X-Burger', preco: 18.0 },
+  { id: 'xsalada', nome: 'X-Salada', preco: 19.5 },
+  { id: 'refri-cola-350', nome: 'Refrigerante Cola 350ml', preco: 7.0 },
+  { id: 'suco-laranja-300', nome: 'Suco de Laranja 300ml', preco: 9.5 },
+  { id: 'petit-gateau', nome: 'Petit Gâteau', preco: 16.0 },
+];
+
+const STATUS = ['recebido', 'em preparo', 'pronto', 'entregue', 'cancelado'];
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pick(arr) {
+  return arr[rand(0, arr.length - 1)];
+}
+
+export function gerarPedidosDoDia(qtde = 8) {
+  const agora = Date.now();
+  const pedidos = Array.from({ length: qtde }).map((_, i) => {
+    const itensCount = rand(1, 3);
+    const itens = Array.from({ length: itensCount }).map(() => {
+      const base = pick(ITENS);
+      const qtd = rand(1, 3);
+      return { id: base.id, nome: base.nome, qtd, preco: base.preco };
+    });
+    const total = itens.reduce((s, it) => s + it.preco * it.qtd, 0);
+    const status = pick(STATUS);
+    const criadoEm = new Date(agora - rand(1, 60) * 60 * 1000); // até 60 min atrás
+    return {
+      id: `PD-${agora.toString(36)}-${i}-${rand(100, 999)}`,
+      itens,
+      total: Number(total.toFixed(2)),
+      status,
+      criadoEm: criadoEm.toISOString(),
+    };
+  });
+  // Ordena do mais recente para o mais antigo
+  pedidos.sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+  return pedidos;
+}
+
+export function calcularKPIs(pedidos) {
+  const totalPedidos = pedidos.length;
+  const faturamento = pedidos.reduce((s, p) => s + p.total, 0);
+  const ticketMedio = totalPedidos ? faturamento / totalPedidos : 0;
+  const emAndamento = pedidos.filter((p) => p.status === 'recebido' || p.status === 'em preparo').length;
+  return {
+    totalPedidos,
+    faturamento: Number(faturamento.toFixed(2)),
+    ticketMedio: Number(ticketMedio.toFixed(2)),
+    emAndamento,
+  };
+}
+</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">2) API “Pedidos do Dia” (GET)</h3>
+        <p>Crie <code>app/api/pedidos-dia/route.js</code>:</p>
+        <pre class="language-js"><code>// app/api/pedidos-dia/route.js
+import { NextResponse } from 'next/server';
+import { gerarPedidosDoDia, calcularKPIs } from '@/lib/pedidos';
+
+export const dynamic = 'force-dynamic'; // sempre dinâmico
+export const revalidate = 0;
+
+export async function GET() {
+  // simula "dados do momento"
+  const pedidos = gerarPedidosDoDia(10);
+  const kpis = calcularKPIs(pedidos);
+  return NextResponse.json({ kpis, pedidos }, { status: 200 });
+}
+</code></pre>
+
+        <div class="alert alert-secondary small" role="note">
+          <div class="fw-semibold mb-1">Teste no Postman</div>
+          <ul class="mb-0">
+            <li><strong>URL:</strong> <code>http://localhost:3000/api/pedidos-dia</code></li>
+            <li><strong>Method:</strong> GET</li>
+            <li><strong>Esperado:</strong> <code>200</code> com <code>{ kpis: {...}, pedidos: [ ... ] }</code>.</li>
+          </ul>
+        </div>
+
+        <h3 class="h5 fw-bold mt-4">3) Transformar <code>/admin</code> em Dashboard SSR</h3>
+        <p>Substitua o conteúdo de <code>app/admin/page.jsx</code> pelo dashboard que roda no servidor em cada requisição.</p>
+        <pre class="language-jsx"><code>// app/admin/page.jsx
+import Link from 'next/link';
+import { gerarPedidosDoDia, calcularKPIs } from '@/lib/pedidos';
+import RefreshButton from './refresh-button';
+
+export const dynamic = 'force-dynamic'; // força SSR
+export const revalidate = 0;
+
+function formatBRL(n) {
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export default async function AdminHome() {
+  // Gera no servidor a cada request (simulação "ao vivo")
+  const pedidos = gerarPedidosDoDia(10);
+  const kpis = calcularKPIs(pedidos);
+
+  return (
+    &lt;&gt;
+      &lt;div className="d-flex justify-content-between align-items-center mb-3"&gt;
+        &lt;h1 className="h4 mb-0"&gt;Admin — Dashboard (SSR)&lt;/h1&gt;
+        &lt;div className="d-flex gap-2"&gt;
+          &lt;RefreshButton /&gt; {/* Client component que chama router.refresh() */}
+          /admin/itens
+            &lt;i className="bi bi-list-ul me-1"&gt;&lt;/i&gt; Itens
+          &lt;/Link&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;p className="text-muted"&gt;Dados simulados a cada requisição (pedidos do dia).&lt;/p&gt;
+
+      {/* KPIs */}
+      &lt;div className="row g-3 mb-4"&gt;
+        &lt;div className="col-12 col-md-3"&gt;
+          &lt;div className="card text-bg-light h-100"&gt;
+            &lt;div className="card-body"&gt;
+              &lt;h5 className="card-title"&gt;Pedidos Hoje&lt;/h5&gt;
+              &lt;p className="display-6 mb-0"&gt;{kpis.totalPedidos}&lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div className="col-12 col-md-3"&gt;
+          &lt;div className="card text-bg-light h-100"&gt;
+            &lt;div className="card-body"&gt;
+              &lt;h5 className="card-title"&gt;Em andamento&lt;/h5&gt;
+              &lt;p className="display-6 mb-0"&gt;{kpis.emAndamento}&lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div className="col-12 col-md-3"&gt;
+          &lt;div className="card text-bg-light h-100"&gt;
+            &lt;div className="card-body"&gt;
+              &lt;h5 className="card-title"&gt;Faturamento&lt;/h5&gt;
+              &lt;p className="display-6 mb-0"&gt;{formatBRL(kpis.faturamento)}&lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div className="col-12 col-md-3"&gt;
+          &lt;div className="card text-bg-light h-100"&gt;
+            &lt;div className="card-body"&gt;
+              &lt;h5 className="card-title"&gt;Ticket Médio&lt;/h5&gt;
+              &lt;p className="display-6 mb-0"&gt;{formatBRL(kpis.ticketMedio)}&lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {/* Tabela de pedidos recentes */}
+      &lt;div className="card"&gt;
+        &lt;div className="card-body"&gt;
+          &lt;h5 className="card-title d-flex justify-content-between align-items-center"&gt;
+            Pedidos recentes
+            &lt;span className="badge text-bg-secondary"&gt;{pedidos.length}&lt;/span&gt;
+          &lt;/h5&gt;
+
+          &lt;div className="table-responsive"&gt;
+            &lt;table className="table align-middle"&gt;
+              &lt;thead&gt;
+                &lt;tr&gt;
+                  &lt;th&gt;Pedido&lt;/th&gt;
+                  &lt;th&gt;Itens&lt;/th&gt;
+                  &lt;th&gt;Total&lt;/th&gt;
+                  &lt;th&gt;Status&lt;/th&gt;
+                  &lt;th&gt;Criado em&lt;/th&gt;
+                &lt;/tr&gt;
+              &lt;/thead&gt;
+              &lt;tbody&gt;
+                {pedidos.map((p) => (
+                  &lt;tr key={p.id}&gt;
+                    &lt;td className="text-nowrap"&gt;&lt;code&gt;{p.id}&lt;/code&gt;&lt;/td&gt;
+                    &lt;td&gt;
+                      &lt;ul className="list-unstyled mb-0"&gt;
+                        {p.itens.map((it, idx) => (
+                          &lt;li key={idx}&gt;{it.qtd}× {it.nome}&lt;/li&gt;
+                        ))}
+                      &lt;/ul&gt;
+                    &lt;/td&gt;
+                    &lt;td className="fw-semibold"&gt;{formatBRL(p.total)}&lt;/td&gt;
+                    &lt;td&gt;
+                      &lt;span
+                        className={
+                          'badge ' + (
+                            p.status === 'cancelado' ? 'text-bg-danger' :
+                            p.status === 'entregue' ? 'text-bg-success' :
+                            'text-bg-warning text-dark'
+                          )
+                        }
+                      &gt;
+                        {p.status}
+                      &lt;/span&gt;
+                    &lt;/td&gt;
+                    &lt;td className="text-nowrap"&gt;
+                      {new Date(p.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    &lt;/td&gt;
+                  &lt;/tr&gt;
+                ))}
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+
+          &lt;div className="mt-3 small text-muted"&gt;
+            * Dados simulados a cada carregamento (ensino de SSR).
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/&gt;
+  );
+}
+</code></pre>
+
+        <p>Crie o botão de atualizar como Client Component:</p>
+        <pre class="language-jsx"><code>// app/admin/refresh-button.jsx
+'use client';
+
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function RefreshButton() {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  return (
+    &lt;button
+      className="btn btn-primary btn-sm d-flex align-items-center gap-2"
+      onClick={() => startTransition(() => router.refresh())}
+      disabled={pending}
+      aria-busy={pending}
+      title="Atualizar dados do dashboard"
+    &gt;
+      &lt;i className="bi bi-arrow-clockwise"&gt;&lt;/i&gt;
+      {pending ? 'Atualizando…' : 'Atualizar'}
+    &lt;/button&gt;
+  );
+}
+</code></pre>
+
+        <div class="alert alert-info small" role="note">
+          <div class="fw-semibold mb-1">Por que SSR aqui?</div>
+          <p class="mb-0">A página <code>/admin</code> é um Server Component que gera HTML com dados atuais a cada requisição. O <code>RefreshButton</code> provoca revalidação sem recarregar a aplicação inteira.</p>
+        </div>
+
+        <h3 class="h5 fw-bold mt-4">4) (Opcional) Consumir a API na página SSR com <code>fetch(no-store)</code></h3>
+        <p>Se preferir separar o provedor de dados via API, troque o gerador local por <code>fetch</code>:</p>
+        <pre class="language-js"><code>// trecho dentro de AdminHome (substitua geração local)
+const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/pedidos-dia`, {
+  cache: 'no-store',
+});
+if (!res.ok) throw new Error('Falha ao buscar pedidos');
+const { kpis, pedidos } = await res.json();
+</code></pre>
+        <p class="small text-muted">Nota: em desenvolvimento local, usar uma URL absoluta confiável simplifica (ex.: variável <code>NEXT_PUBLIC_BASE_URL=http://localhost:3000</code>). Manter a versão “importando do lib” evita depender dessa configuração e continua SSR.</p>
+
+        <h3 class="h5 fw-bold mt-4">5) Testar com Postman e medir com DevTools</h3>
+        <ul>
+          <li><strong>Postman (GET):</strong> <code>http://localhost:3000/api/pedidos-dia</code> → <code>200</code> com JSON de kpis e pedidos.</li>
+          <li><strong>DevTools (Network):</strong> Abra <code>/admin</code> com “Disable cache”. Observe TTFB e <em>Response</em> (HTML já com tabela). Compare com Home (SSG): TTFB tende a ser menor em SSG.</li>
+        </ul>
+        <p class="mb-2"><strong>Commits sugeridos</strong></p>
+        <ul>
+          <li>feat(ssr): dashboard /admin com KPIs e pedidos recentes (SSR)</li>
+          <li>feat(api): criar /api/pedidos-dia (dados simulados)</li>
+          <li>feat(ui): botão Refresh (router.refresh) no dashboard</li>
+          <li>docs: instruções de medição (TTFB) e teste no Postman</li>
+        </ul>
+      </section>
+
+      <!-- Checklist interativo -->
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2 text-danger"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">Baseado em “✅ Checklist de verificação (Cap. 11)”. O progresso fica salvo neste navegador.</p>
+
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-danger" id="chkProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="vstack gap-2" id="checklistItems">
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="1"><span><code>lib/pedidos.js</code> criado (geração de dados + KPIs).</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="2"><span>GET <code>/api/pedidos-dia</code> funcional (Postman 200).</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="3"><span><code>/admin</code> renderiza SSR (KPIs + Tabela), com <code>dynamic='force-dynamic'</code> ou <code>fetch(no-store)</code>.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="4"><span>Botão “Atualizar” recarrega dados sem reload total.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="5"><span>Medições de TTFB realizadas e comparadas com a Home (SSG).</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="6"><span>Commits claros.</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🧪 Atividades Práticas (para desenvolver por conta própria)</h2>
+        <ol>
+          <li><strong>Relatório “Últimas vendas” (SSR) com filtros simples</strong>
+            <ul>
+              <li>Crie <code>/admin/relatorios/ultimas-vendas</code> (Server Component) consumindo <code>gerarPedidosDoDia(20)</code>.</li>
+              <li>Adicione filtros (client): por status (“entregue”, “cancelado”, “em preparo”).</li>
+              <li>Mostre KPIs do filtro (contagem e soma).</li>
+            </ul>
+          </li>
+          <li><strong>Estoque ao vivo (SSR)</strong>
+            <ul>
+              <li>Crie <code>lib/estoque.js</code> com itens e quantidades dinâmicas (mock).</li>
+              <li>Página <code>/admin/estoque</code> SSR que mostra qtd disponível e alerta se &lt; 5.</li>
+              <li>Botão “Recontar estoque” com <code>router.refresh()</code>.</li>
+            </ul>
+          </li>
+          <li><strong>Comparação SSR vs SSG</strong>
+            <ul>
+              <li>Duplique <code>/admin</code> para <code>/admin-ssg-demo</code> usando dados estáticos (SSG + <code>revalidate=3600</code>).</li>
+              <li>Compare TTFB e HTML Response em DevTools e documente no README.</li>
+            </ul>
+          </li>
+          <li><strong>(Extra) Revalidação por tag</strong>
+            <ul>
+              <li>Se adotar <code>fetch</code> com <code>next: { tags: ['pedidos'] }</code>, crie uma route handler <strong>POST</strong> <code>/api/revalidate</code> que chama <code>revalidateTag('pedidos')</code>.</li>
+              <li>Faça um botão admin (client) que chama essa rota para forçar revalidação.</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="mb-2"><strong>Critérios de avaliação (10 pts):</strong></p>
+        <ul>
+          <li>Página SSR funcional com dados “do dia” — 4 pts</li>
+          <li>UX de atualização (refresh) — 2 pts</li>
+          <li>Testes no Postman + medições de TTFB — 3 pts</li>
+          <li>Código e commits organizados — 1 pt</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">🔎 Pesquisas complementares (sugestões)</h3>
+        <ul>
+          <li>“Next.js App Router — Fetching, Caching &amp; Revalidating no servidor (cache: 'no-store', dynamic, revalidate)”</li>
+          <li>“Next.js — Server Components vs Client Components (quando usar cada um)”</li>
+          <li>“Chrome DevTools — medindo TTFB e analisando Response de páginas”</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">📦 Entregáveis ao final do Capítulo 11</h3>
+        <ul>
+          <li>Dashboard <code>/admin</code> com SSR: KPIs, tabela de pedidos e botão “Atualizar”.</li>
+          <li>API <code>/api/pedidos-dia</code> testada no Postman (print).</li>
+          <li>Medições (print) comparando TTFB do Dashboard (SSR) vs Home (SSG).</li>
+          <li>Repositório com commits claros e um breve README descrevendo escolhas de SSR.</li>
+        </ul>
+      </section>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 10</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 12</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="small text-muted">
+          <i class="bi bi-journal-code me-1"></i> Capítulo 11 — Apostila PW II
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-pw" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+          <a class="btn btn-sm btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 12</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // ===== Questionário dinâmico =====
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    // ===== Checklist (salvo no localStorage) =====
+    const CHECKLIST_KEY = 'pw2_cap11_checklist_v1';
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', pct);
+      text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    loadChecklist();
+  </script>
+</body>
+</html>

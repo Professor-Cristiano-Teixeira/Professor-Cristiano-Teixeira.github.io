@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 06 — Formulários e Validação (sem libs extras)</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <style>
+    :root{
+      --pw-red:#b30000;            /* menus em vermelho */
+      --pw-red-dark:#8f0000;
+      --pw-gray:#3f3f3f;           /* botões destaque em cinza escuro */
+      --pw-gray-dark:#2f2f2f;
+      --pw-bg:#ffffff;             /* tema claro */
+      --pw-muted:#6c757d;
+      --pw-border:#e9ecef;
+      --pw-link:#b30000;
+      --code-bg:#1e1e1e;           /* VSCode-like */
+    }
+
+    body{ background:var(--pw-bg); }
+    a{ color:var(--pw-link); }
+    a:hover{ color:var(--pw-red-dark); }
+
+    /* Navbar */
+    .navbar-pw{ background:var(--pw-red); }
+    .navbar-pw .navbar-brand,
+    .navbar-pw .nav-link,
+    .navbar-pw .navbar-toggler{ color:#fff; }
+    .navbar-pw .nav-link:hover,
+    .navbar-pw .nav-link:focus{ color:#ffe6e6; }
+    .navbar-pw .dropdown-item:active{ background:var(--pw-red); }
+
+    /* Buttons */
+    .btn-pw{
+      background:var(--pw-gray);
+      border-color:var(--pw-gray);
+      color:#fff;
+    }
+    .btn-pw:hover,
+    .btn-pw:focus{
+      background:var(--pw-gray-dark);
+      border-color:var(--pw-gray-dark);
+      color:#fff;
+    }
+
+    /* Sections */
+    .chapter-hero{
+      background:linear-gradient(180deg, rgba(179,0,0,.08), rgba(179,0,0,0));
+      border-bottom:1px solid var(--pw-border);
+    }
+
+    .card-soft{
+      border:1px solid var(--pw-border);
+      border-radius:14px;
+    }
+
+    /* Code blocks */
+    pre[class*="language-"]{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 8px 26px rgba(0,0,0,.10);
+      margin: .75rem 0 1rem;
+    }
+    code[class*="language-"]{ font-size: .92rem; }
+    pre{ background: var(--code-bg) !important; }
+
+    /* Quiz */
+    .quiz-card{ border:1px solid var(--pw-border); border-radius:14px; }
+    .quiz-feedback{ min-height: 42px; }
+
+    /* Checklist */
+    .checklist-item{ border:1px solid var(--pw-border); border-radius:12px; padding:10px 12px; }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:10px; z-index:2000; }
+  </style>
+</head>
+<body>
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- NAVBAR (responsiva com hamburguer) -->
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="index.html">
+        <i class="bi bi-journal-code me-2"></i>APOSTILA PW II
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon" style="filter: invert(1) grayscale(1) brightness(2);"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html#sumario"><i class="bi bi-list-check me-1"></i>Sumário</a></li>
+
+          <!-- Dropdown com capítulos -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book me-1"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">1º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Setup do projeto</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Componentes, Props, Estado e Eventos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Listas/Condicional + Grid Bootstrap</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Rotas e Navegação (Next.js)</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Bootstrap avançado e customização</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">2º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Formulários e Validação</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Consumo de API + estados assíncronos</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Testes (Jest + RTL)</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">3º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — SSG, SSR e hidratação</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Rotas dinâmicas com SSG</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — SSR para dados variáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Hidratação e interatividade</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">4º Bimestre</h6></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Testes de interface (RTL avançado)</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Builds e releases (Next.js)</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Docker e conteinerização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto final integrador</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="#questionario"><i class="bi bi-ui-checks me-1"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-link" href="#checklist"><i class="bi bi-check2-square me-1"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 6 — Formulários e Validação (sem libs extras)</h1>
+          <p class="mb-2"><strong>Carga:</strong> 2 aulas × 140 min</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Sistema da Lanchonete (Admin) (Cap. 1–5)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Next.js (App Router) + React, Bootstrap 5 + Bootstrap Icons, Git</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2">
+            <li>Construir formulários controlados em React (useState), com HTML5 validation e feedback visual Bootstrap.</li>
+            <li>Usar input groups, select, switch e mensagens de erro (invalid-feedback).</li>
+            <li>Aplicar regras de negócio simples (ex.: campos condicionais por categoria).</li>
+            <li>Persistir temporariamente o cadastro no localStorage (sem backend) e mostrar Toast de sucesso.</li>
+          </ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>🎯 Competências e Habilidades trabalhadas</strong></p>
+            <ul class="mb-0 small">
+              <li><strong>Competências:</strong> (1) Elaborar interfaces web; (2) Aplicar práticas de desenvolvimento de sistemas.</li>
+              <li><strong>Habilidades:</strong> 1.1 (SPAs com framework frontend), 1.2 (Framework CSS), 4 (práticas de desenvolvimento: organização, versionamento).</li>
+            </ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 05</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">📆 Plano de Aula (Capítulo 6)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <p class="mb-2"><strong>Aula 1 (140 min) — Teoria + Formulários Controlados + UI/UX de Form</strong></p>
+          <p class="mb-1">Teoria (35–45 min): Inputs controlados, onChange, validação nativa HTML5, invalid-feedback, switches, selects, input groups; boas práticas de acessibilidade.</p>
+          <p class="mb-3">Prática (85–95 min): Criar a página /admin/itens/novo (cadastro de Bebidas por padrão) com validações e feedback do Bootstrap.</p>
+          <p class="mb-2"><strong>Aula 2 (140 min) — Regras de Negócio + Persistência Local + Toast</strong></p>
+          <p class="mb-1">Teoria (20–30 min): Regras condicionais (campos por categoria), localStorage (persistência local), UX de sucesso/erro (Toast).</p>
+          <p class="mb-3">Prática (100–110 min): Salvar no localStorage, limpar formulário, exibir Toast de sucesso; opcional: listar itens em /admin/itens mesclando dataset base + extras.</p>
+          <p class="mb-0"><strong>Entrega rápida (10 min):</strong> Print do formulário com erros visíveis + print do Toast após cadastro.</p>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🧠 Parte Teórica (explicação do conteúdo)</h2>
+
+  <h3 class="h5 fw-bold mt-4">1) Inputs controlados e estado</h3>
+  <p>
+    Em React, existem duas formas comuns de trabalhar com formulários: <strong>inputs não controlados</strong>
+    (quando você lê o valor direto do DOM na hora de enviar) e <strong>inputs controlados</strong>
+    (quando o valor do campo fica no estado do componente). Neste curso, vamos priorizar inputs controlados
+    porque eles deixam o comportamento mais previsível e facilitam validação, formatação e feedback.
+  </p>
+  <p>
+    Um <strong>input controlado</strong> é aquele em que o atributo <code>value</code> vem do estado, e o evento
+    <code>onChange</code> atualiza esse estado a cada digitação. Assim, o estado vira a <strong>fonte de verdade</strong>
+    do formulário: o que está na tela reflete o que está no estado, e vice-versa.
+  </p>
+  <p>
+    Isso parece “mais trabalho” no começo, mas dá vantagens importantes:
+  </p>
+  <ul>
+    <li><strong>Validação em tempo real</strong>: você consegue detectar erros enquanto o usuário digita.</li>
+    <li><strong>Normalização e formato</strong>: dá para ajustar espaços, capitalização, casas decimais etc.</li>
+    <li><strong>Envio confiável</strong>: no submit, você usa o estado (não depende de ler o DOM).</li>
+    <li><strong>Reuso</strong>: fica fácil reaproveitar o mesmo formulário para “editar” futuramente.</li>
+  </ul>
+  <p>
+    Abaixo está o padrão essencial (estado + value + onChange). Observe que o campo sempre mostra
+    exatamente o valor armazenado no estado.
+  </p>
+  <p class="mb-1">JSX</p>
+  <pre class="language-jsx"><code>const [nome, setNome] = useState('');
+&lt;input value={nome} onChange={(e) =&gt; setNome(e.target.value)} /&gt;
+Mostrar mais linhas</code></pre>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      No passo a passo (Etapa 2), a página <code>/admin/itens/novo</code> mantém estados como <code>nome</code>, <code>preco</code>,
+      <code>categoria</code> e <code>disponivel</code>. Cada campo usa <code>value</code> e <code>onChange</code>, formando um formulário
+      totalmente controlado. Isso é o que permite validar e, ao final, montar o objeto <code>item</code> com segurança.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">2) Validação nativa HTML5 + feedback visual do Bootstrap</h3>
+  <p>
+    Formulários precisam impedir dados inválidos (ex.: preço negativo, nome vazio) e orientar o usuário
+    com mensagens claras. Antes de usar bibliotecas externas, dá para ir muito longe combinando:
+  </p>
+  <ul>
+    <li><strong>Validação nativa do HTML5</strong> (regras no próprio input), e</li>
+    <li><strong>Feedback visual do Bootstrap</strong> (classes e mensagens).</li>
+  </ul>
+  <p>
+    A validação nativa do HTML5 funciona com atributos como:
+    <code>required</code>, <code>min</code>, <code>max</code>, <code>step</code>, <code>minLength</code>, <code>pattern</code> e tipos como
+    <code>type="number"</code>. Esses atributos descrevem regras básicas e o navegador consegue detectar
+    violações (campo vazio, número fora do mínimo, padrão inválido, etc.).
+  </p>
+  <p>
+    O Bootstrap entra para transformar essas falhas em uma experiência melhor.
+    O padrão é:
+  </p>
+  <ul>
+    <li>Aplicar <code>is-invalid</code> (ou <code>is-valid</code>) no input para mudar o estilo.</li>
+    <li>Exibir uma mensagem próxima usando <code>.invalid-feedback</code> (ou <code>.valid-feedback</code>).</li>
+    <li>Quando for validar “no envio”, marcar o formulário com <code>was-validated</code> para ativar os estilos.</li>
+  </ul>
+  <p>
+    Além do visual, o importante é separar dois tipos de validação:
+  </p>
+  <ul>
+    <li><strong>Validação de UI</strong>: mostra ao usuário o que falta e onde.</li>
+    <li><strong>Regra de negócio</strong>: decide se pode salvar/enviar (por exemplo, descrição mínima por categoria).</li>
+  </ul>
+  <p>
+    Nesta apostila, a regra final para salvar é calculada por um objeto <code>erros</code> e um booleano
+    <code>invalido</code>. Assim, mesmo que o HTML5 ajude, o React ainda garante consistência.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      Na Etapa 2, o campo <strong>Preço</strong> usa <code>type="number"</code>, <code>min="0"</code> e <code>step="0.01"</code>.
+      Ao mesmo tempo, você calcula <code>erros.preco</code> e aplica <code>is-invalid</code> quando necessário,
+      exibindo a mensagem com <code>invalid-feedback</code>. No <code>handleSubmit</code>, você chama
+      <em>“marcar tocados e bloquear se inválido”</em>, garantindo que o item só será salvo se estiver correto.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">3) Campos condicionais por categoria (regras de negócio simples)</h3>
+  <p>
+    Um formulário bom mostra apenas o que é relevante. No seu sistema, <strong>bebidas</strong> têm <code>volume</code>,
+    enquanto <strong>lanches e sobremesas</strong> têm <code>descricao</code>. Se você mostrar todos os campos sempre,
+    o usuário fica confuso e aumenta a chance de erro (por exemplo, preencher volume em um lanche).
+  </p>
+  <p>
+    Isso é uma regra de negócio aplicada à UX: <strong>a categoria define quais dados são obrigatórios</strong>.
+    Em React, isso se resolve com renderização condicional:
+  </p>
+  <ul>
+    <li>Se <code>categoria === 'bebida'</code> → mostrar e validar <code>volume</code>.</li>
+    <li>Se não for bebida → mostrar e validar <code>descricao</code>.</li>
+  </ul>
+  <p>
+    O ganho é duplo:
+    (1) a tela fica mais limpa e rápida de preencher;
+    (2) o dado final fica mais coerente para exibir no catálogo.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      Na Etapa 2, você calcula <code>const isBebida = categoria === 'bebida'</code>.
+      Em seguida, usa um ternário para renderizar <code>volume</code> ou <code>descricao</code>. Também altera as validações:
+      <code>required={isBebida}</code> para volume e <code>required={!isBebida}</code> para descrição.
+      Assim, o mesmo formulário atende três tipos de item sem duplicação.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">4) Acessibilidade em formulários (a11y)</h3>
+  <p>
+    Formulários são uma das áreas mais sensíveis para acessibilidade. Um usuário pode navegar por teclado,
+    usar leitor de tela ou precisar de mensagens claras para corrigir erros. Algumas boas práticas são simples
+    e fazem grande diferença:
+  </p>
+  <ul>
+    <li>
+      <strong>Label associado ao input</strong>: use <code>&lt;label htmlFor="id"&gt;</code> e o input com <code>id</code> correspondente.
+      Isso aumenta a área clicável e melhora a leitura por tecnologias assistivas.
+    </li>
+    <li>
+      <strong>Mensagens ligadas ao campo</strong>: use <code>aria-describedby</code> para apontar para o texto de ajuda e/ou erro.
+    </li>
+    <li>
+      <strong>Marcar erro semanticamente</strong>: use <code>aria-invalid="true"</code> quando houver erro no campo.
+    </li>
+    <li>
+      <strong>Controles do tipo switch</strong>: mantenha <code>label</code> e <code>id</code>, garantindo que clicar no texto altere o switch.
+    </li>
+  </ul>
+  <p>
+    Um erro comum é depender só de cor (vermelho) para indicar erro. Para ser acessível, você precisa de
+    texto e sinalização semântica (ARIA), como o capítulo já demonstra.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      Na Etapa 2, o campo <strong>Nome</strong> usa <code>aria-describedby="nomeHelp nomeError"</code> e define
+      <code>aria-invalid</code> baseado em <code>touched</code> e <code>erros</code>. As mensagens aparecem no
+      <code>invalid-feedback</code> com um <code>id</code> que o leitor de tela consegue relacionar ao campo.
+    </p>
+  </div>
+
+  <h3 class="h5 fw-bold mt-4">5) Persistência local (localStorage) e feedback de sucesso (Toast)</h3>
+  <p>
+    Neste capítulo ainda não existe backend. Mesmo assim, queremos simular uma experiência real de cadastro:
+    o usuário preenche, salva e, ao voltar, os itens continuam lá.
+    Para isso usamos o <strong>localStorage</strong>, que é um armazenamento simples do navegador.
+    Ele guarda pares chave/valor (strings). Por isso, armazenamos objetos como JSON:
+    <code>JSON.stringify</code> ao salvar e <code>JSON.parse</code> ao ler.
+  </p>
+  <p>
+    A regra principal é: <strong>localStorage só existe no cliente</strong>. Então, todo acesso deve acontecer
+    em componentes client (com <code>'use client'</code>). Por isso o capítulo cria um utilitário
+    <code>lib/localdb.js</code> e chama esse util dentro da página do formulário.
+  </p>
+  <p>
+    Além de salvar, precisamos de uma boa UX: ao cadastrar, o usuário espera uma confirmação.
+    Neste curso, o padrão escolhido é o <strong>Toast</strong> (que você já construiu no Cap. 5), porque ele
+    informa sem atrapalhar e some automaticamente.
+  </p>
+  <div class="alert alert-light border small" role="note">
+    <div class="fw-semibold mb-1">Exemplo aplicado no Passo a Passo</div>
+    <p class="mb-0">
+      Na Etapa 1, você cria <code>readExtras()</code> e <code>addExtra()</code> para ler/salvar na chave
+      <code>adminItensExtra</code>. Na Etapa 2, após validar o formulário, você monta o objeto <code>item</code>
+      e chama <code>addExtra(item)</code>. Se der certo, você exibe o <code>ToastContainer</code> com a mensagem
+      “cadastrado com sucesso” e limpa o formulário, simulando o fluxo de um CRUD real.
+    </p>
+  </div>
+
+  </section>
+
+  <!-- Questionário (transformado em múltipla escolha dinâmico) -->
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">✅ Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+
+        <div class="vstack gap-3" id="quizContainer">
+
+          <div class="quiz-card bg-white p-4" data-qid="q1" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">1. O que é um input controlado em React?</h3>
+              <span class="badge text-bg-light border">Questão 1/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1A" value="A"><label class="form-check-label" for="q1A">Um input que ignora o estado e envia o valor direto ao servidor.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1B" value="B"><label class="form-check-label" for="q1B">Um input que usa apenas atributos HTML sem onChange.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1C" value="C"><label class="form-check-label" for="q1C">Um input que é sempre somente leitura.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1D" value="D"><label class="form-check-label" for="q1D">É um input cujo valor é controlado pelo estado do componente e atualizado via onChange.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q1" id="q1E" value="E"><label class="form-check-label" for="q1E">Apenas inputs do tipo number podem ser controlados.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q1')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q1')" disabled id="btnKey-q1">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q1" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q2" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">2. Cite dois atributos de validação HTML5 e suas funções.</h3>
+              <span class="badge text-bg-light border">Questão 2/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2A" value="A"><label class="form-check-label" for="q2A">href e target — definem navegação do formulário.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2B" value="B"><label class="form-check-label" for="q2B">role e aria-live — validam números automaticamente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2C" value="C"><label class="form-check-label" for="q2C">required (obriga preenchimento) e min/step (valores mínimos e passo), pattern (regex para texto).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2D" value="D"><label class="form-check-label" for="q2D">display e visibility — controlam feedback de erro.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q2" id="q2E" value="E"><label class="form-check-label" for="q2E">src e alt — validam campos de imagem.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q2')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q2')" disabled id="btnKey-q2">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q2" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q3" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">3. Como exibir mensagens de erro com Bootstrap?</h3>
+              <span class="badge text-bg-light border">Questão 3/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3A" value="A"><label class="form-check-label" for="q3A">Aplicar <code>is-invalid</code> no input e colocar uma <code>&lt;div class="invalid-feedback"&gt;mensagem&lt;/div&gt;</code> logo após o campo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3B" value="B"><label class="form-check-label" for="q3B">Adicionar <code>hidden</code> no input até o usuário digitar algo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3C" value="C"><label class="form-check-label" for="q3C">Usar apenas toasts, nunca mensagens próximas ao campo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3D" value="D"><label class="form-check-label" for="q3D">Colocar a mensagem dentro do atributo <code>title</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q3" id="q3E" value="E"><label class="form-check-label" for="q3E">Criar um modal para cada erro.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q3')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q3')" disabled id="btnKey-q3">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q3" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q4" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">4. Qual a vantagem de usar <code>form.checkValidity()</code> antes de enviar?</h3>
+              <span class="badge text-bg-light border">Questão 4/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4A" value="A"><label class="form-check-label" for="q4A">Enviar mesmo com erros para validar no servidor.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4B" value="B"><label class="form-check-label" for="q4B">Permite bloquear o envio quando a validação nativa falha, exibindo feedback adequado ao usuário.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4C" value="C"><label class="form-check-label" for="q4C">Desabilita todos os inputs automaticamente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4D" value="D"><label class="form-check-label" for="q4D">Transforma o formulário em SSR.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q4" id="q4E" value="E"><label class="form-check-label" for="q4E">Remove a necessidade de mensagens de erro.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q4')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q4')" disabled id="btnKey-q4">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q4" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q5" data-correct="E">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">5. Por que esconder campo Volume quando a categoria é Lanche?</h3>
+              <span class="badge text-bg-light border">Questão 5/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5A" value="A"><label class="form-check-label" for="q5A">Para quebrar o layout intencionalmente.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5B" value="B"><label class="form-check-label" for="q5B">Para economizar bytes de rede.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5C" value="C"><label class="form-check-label" for="q5C">Porque o Bootstrap não suporta exibir campos diferentes.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5D" value="D"><label class="form-check-label" for="q5D">Para que o form vire uma rota dinâmica.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q5" id="q5E" value="E"><label class="form-check-label" for="q5E">Porque o campo não é relevante; reduz a carga cognitiva e erros no preenchimento.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q5')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q5')" disabled id="btnKey-q5">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q5" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q6" data-correct="A">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">6. Como marcar um input como inválido para acessibilidade?</h3>
+              <span class="badge text-bg-light border">Questão 6/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6A" value="A"><label class="form-check-label" for="q6A">Adicionar <code>aria-invalid="true"</code> quando houver erro e apontar mensagens via <code>aria-describedby</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6B" value="B"><label class="form-check-label" for="q6B">Usar apenas cores sem atributos ARIA.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6C" value="C"><label class="form-check-label" for="q6C">Remover o <code>label</code> para deixar a UI limpa.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6D" value="D"><label class="form-check-label" for="q6D">Colocar o erro somente em um toast global.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q6" id="q6E" value="E"><label class="form-check-label" for="q6E">Definir <code>tabindex="-1"</code> em todos os campos.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q6')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q6')" disabled id="btnKey-q6">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q6" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q7" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">7. Para que serve localStorage neste capítulo?</h3>
+              <span class="badge text-bg-light border">Questão 7/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7A" value="A"><label class="form-check-label" for="q7A">Para gerar páginas estáticas no build.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7B" value="B"><label class="form-check-label" for="q7B">Para validar automaticamente todos os inputs sem código.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7C" value="C"><label class="form-check-label" for="q7C">Para configurar o tema claro/escuro.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7D" value="D"><label class="form-check-label" for="q7D">Armazenar provisoriamente itens cadastrados (persistência local sem servidor).</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q7" id="q7E" value="E"><label class="form-check-label" for="q7E">Para importar ícones do Bootstrap.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q7')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q7')" disabled id="btnKey-q7">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q7" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q8" data-correct="B">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">8. O que faz a classe <code>was-validated</code> no formulário Bootstrap?</h3>
+              <span class="badge text-bg-light border">Questão 8/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8A" value="A"><label class="form-check-label" for="q8A">Desativa a validação HTML5.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8B" value="B"><label class="form-check-label" for="q8B">Ativa os estilos de validação para inputs que falharam nas regras nativas.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8C" value="C"><label class="form-check-label" for="q8C">Remove mensagens de erro do DOM.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8D" value="D"><label class="form-check-label" for="q8D">Converte todos os inputs para readOnly.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q8" id="q8E" value="E"><label class="form-check-label" for="q8E">Aplica dark mode automaticamente.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q8')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q8')" disabled id="btnKey-q8">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q8" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q9" data-correct="D">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">9. Como evitar valores negativos em um preço?</h3>
+              <span class="badge text-bg-light border">Questão 9/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9A" value="A"><label class="form-check-label" for="q9A">Usar <code>type="text"</code> para impedir números.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9B" value="B"><label class="form-check-label" for="q9B">Deixar o usuário digitar e corrigir só no backend.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9C" value="C"><label class="form-check-label" for="q9C">Formatar com duas casas e aceitar negativos.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9D" value="D"><label class="form-check-label" for="q9D">Usar <code>type="number"</code>, <code>min="0"</code>, <code>step="0.01"</code> e validar no <code>onSubmit</code>.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q9" id="q9E" value="E"><label class="form-check-label" for="q9E">Usar apenas máscara de moeda sem validação.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q9')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q9')" disabled id="btnKey-q9">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q9" aria-live="polite"></div>
+          </div>
+
+          <div class="quiz-card bg-white p-4" data-qid="q10" data-correct="C">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <h3 class="h6 fw-bold mb-2">10. Por que separar validação de UI (classes) da regra de negócio?</h3>
+              <span class="badge text-bg-light border">Questão 10/10</span>
+            </div>
+            <div class="mt-2">
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10A" value="A"><label class="form-check-label" for="q10A">Para remover todas as validações do projeto.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10B" value="B"><label class="form-check-label" for="q10B">Porque assim o código fica maior e mais complexo.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10C" value="C"><label class="form-check-label" for="q10C">Para manter o código organizado, facilitar manutenção e tornar as regras testáveis.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10D" value="D"><label class="form-check-label" for="q10D">Para que o formulário funcione só em SSR.</label></div>
+              <div class="form-check"><input class="form-check-input" type="radio" name="q10" id="q10E" value="E"><label class="form-check-label" for="q10E">Para desabilitar o HTML5 validation.</label></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-pw" type="button" onclick="submitAnswer('q10')">Enviar Resposta</button>
+              <button class="btn btn-outline-danger" type="button" onclick="showKey('q10')" disabled id="btnKey-q10">Ver Gabarito</button>
+            </div>
+            <div class="quiz-feedback mt-3" id="feedback-q10" aria-live="polite"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">🛠️ Passo a Passo — Cadastro de Itens (Bebidas) com validação e Toast</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Implementar /admin/itens/novo com nome, preço, categoria, disponibilidade, e campo condicional (Volume para bebidas / Descrição para outras). Salvar em localStorage e exibir Toast de sucesso.</p>
+
+        <h3 class="h5 fw-bold mt-4">0) Preparação</h3>
+        <ul>
+          <li>• Projeto atualizado até o Cap. 5 (com ToastContainer já criado).</li>
+          <li>• Área /admin com layout (sidebar) ativa.</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">1) Utilitário simples de persistência local</h3>
+        <p class="mb-1">Crie <code>lib/localdb.js</code> (usado apenas em componentes cliente):</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// lib/localdb.js
+export const EXTRA_KEY = 'adminItensExtra';
+
+export function readExtras() {
+try {
+const raw = localStorage.getItem(EXTRA_KEY);
+return raw ? JSON.parse(raw) : [];
+} catch {
+return [];
+}
+}
+
+export function addExtra(item) {
+const all = readExtras();
+all.push(item);
+try {
+localStorage.setItem(EXTRA_KEY, JSON.stringify(all));
+return true;
+} catch {
+return false;
+}
+}
+Mostrar mais linhas</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">2) Página /admin/itens/novo (formulário controlado)</h3>
+        <p class="mb-1">Crie <code>app/admin/itens/novo/page.jsx</code>:</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// app/admin/itens/novo/page.jsx
+'use client';
+
+import { useMemo, useState } from 'react';
+import { addExtra } from '@/lib/localdb';
+import ToastContainer from '@/components/ToastContainer';
+
+const CATEGORIAS = [
+{ value: 'bebida', label: 'Bebida', icon: 'bi-cup-straw' },
+{ value: 'lanche', label: 'Lanche', icon: 'bi-egg-fried' },
+{ value: 'sobremesa', label: 'Sobremesa', icon: 'bi-ice-cream' },
+];
+
+function slugify(texto) {
+return texto
+.toLowerCase()
+.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+.replace(/[^a-z0-9]+/g, '-')
+.replace(/(^-|-$)/g, '');
+}
+
+export default function NovoItemPage() {
+// estado do formulário
+const [categoria, setCategoria] = useState('bebida');
+const [nome, setNome] = useState('');
+const [preco, setPreco] = useState(''); // string p/ controlar input
+const [disponivel, setDisponivel] = useState(true);
+const [destaque, setDestaque] = useState(false);
+const [volume, setVolume] = useState(''); // só p/ bebida
+const [descricao, setDescricao] = useState(''); // p/ demais
+
+// controle de UI
+const [touched, setTouched] = useState({});
+const [toast, setToast] = useState({ show: false, message: '' });
+
+const icone = useMemo(() =&gt; {
+const cat = CATEGORIAS.find((c) =&gt; c.value === categoria);
+return cat?.icon ?? 'bi-list';
+}, [categoria]);
+
+const isBebida = categoria === 'bebida';
+
+// validações simples
+const erros = {
+nome: nome.trim().length &lt; 3 ? 'Informe ao menos 3 caracteres.' : '',
+preco:
+preco === '' ? 'Informe um preço.' :
+Number.isNaN(Number(preco)) ? 'Preço inválido.' :
+Number(preco) &lt; 0 ? 'Preço não pode ser negativo.' : '',
+volume: isBebida &amp;&amp; volume.trim() === '' ? 'Informe o volume (ex.: 350 ml).' : '',
+descricao: !isBebida &amp;&amp; descricao.trim().length &lt; 5 ? 'Descreva o item (mín. 5 caracteres).' : '',
+};
+
+const invalido = Boolean(erros.nome || erros.preco || erros.volume || erros.descricao);
+
+function handleBlur(field) {
+setTouched((t) =&gt; ({ ...t, [field]: true }));
+}
+
+function limparFormulario() {
+setNome('');
+setPreco('');
+setDisponivel(true);
+setDestaque(false);
+setVolume('');
+setDescricao('');
+setTouched({});
+}
+
+function handleSubmit(e) {
+e.preventDefault();
+
+// marca todos como tocados para exibir feedback
+setTouched({ nome: true, preco: true, volume: true, descricao: true });
+
+if (invalido) return;
+
+const idBase = slugify(nome);
+const id = `${idBase}-${Math.random().toString(36).slice(2, 6)}`;
+
+const item = {
+id,
+nome: nome.trim(),
+preco: Number(Number(preco).toFixed(2)),
+categoria,
+volume: isBebida ? volume.trim() : undefined,
+descricao: !isBebida ? descricao.trim() : undefined,
+disponivel,
+destaque,
+icone,
+};
+
+const ok = addExtra(item);
+if (ok) {
+setToast({ show: true, message: `${item.nome} cadastrado com sucesso!` });
+limparFormulario();
+} else {
+setToast({ show: true, message: 'Falha ao salvar. Verifique o armazenamento local.' });
+}
+}
+
+// normaliza preço ao sair do campo
+function normalizePreco() {
+if (preco === '') return;
+const num = Number(preco);
+if (!Number.isNaN(num)) setPreco(num.toFixed(2));
+}
+
+return (
+&lt;&gt;
+&lt;header className="mb-3"&gt;
+&lt;h1 className="h4 d-flex align-items-center gap-2"&gt;
+&lt;i className="bi bi-plus-circle"&gt;&lt;/i&gt; Novo Item do Cardápio
+&lt;/h1&gt;
+&lt;p className="text-muted"&gt;Preencha os campos e salve para adicionar ao cardápio (local).&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;form noValidate onSubmit={handleSubmit} className="needs-validation"&gt;
+&lt;div className="row g-3"&gt;
+{/* Categoria */}
+&lt;div className="col-12 col-md-4"&gt;
+&lt;label htmlFor="categoria" className="form-label"&gt;Categoria&lt;/label&gt;
+&lt;select
+id="categoria"
+className="form-select"
+value={categoria}
+onChange={(e) =&gt; setCategoria(e.target.value)}
+&gt;
+{CATEGORIAS.map((c) =&gt; (
+&lt;option key={c.value} value={c.value}&gt;{c.label}&lt;/option&gt;
+))}
+&lt;/select&gt;
+&lt;/div&gt;
+
+{/* Nome */}
+&lt;div className="col-12 col-md-8"&gt;
+&lt;label htmlFor="nome" className="form-label"&gt;Nome *&lt;/label&gt;
+&lt;input
+id="nome"
+type="text"
+className={`form-control ${touched.nome &amp;&amp; erros.nome ? 'is-invalid' : ''}`}
+placeholder="Ex.: Refrigerante Cola"
+value={nome}
+onChange={(e) =&gt; setNome(e.target.value)}
+onBlur={() =&gt; handleBlur('nome')}
+required
+minLength={3}
+aria-invalid={touched.nome &amp;&amp; !!erros.nome}
+aria-describedby="nomeHelp nomeError"
+/&gt;
+&lt;div id="nomeHelp" className="form-text"&gt;Mínimo 3 caracteres.&lt;/div&gt;
+{touched.nome &amp;&amp; erros.nome &amp;&amp; (
+&lt;div id="nomeError" className="invalid-feedback"&gt;{erros.nome}&lt;/div&gt;
+)}
+&lt;/div&gt;
+
+{/* Preço */}
+&lt;div className="col-12 col-md-4"&gt;
+&lt;label htmlFor="preco" className="form-label"&gt;Preço *&lt;/label&gt;
+&lt;div className="input-group"&gt;
+&lt;span className="input-group-text"&gt;R{{responseHTML}}lt;/span&gt;
+&lt;input
+id="preco"
+type="number"
+step="0.01"
+min="0"
+className={`form-control ${touched.preco &amp;&amp; erros.preco ? 'is-invalid' : ''}`}
+placeholder="0,00"
+value={preco}
+onChange={(e) =&gt; setPreco(e.target.value)}
+onBlur={() =&gt; {
+handleBlur('preco');
+normalizePreco();
+}}
+required
+aria-invalid={touched.preco &amp;&amp; !!erros.preco}
+aria-describedby="precoError"
+/&gt;
+{touched.preco &amp;&amp; erros.preco &amp;&amp; (
+&lt;div id="precoError" className="invalid-feedback d-block"&gt;{erros.preco}&lt;/div&gt;
+)}
+&lt;/div&gt;
+&lt;/div&gt;
+
+{/* Disponível &amp; Destaque (switches) */}
+&lt;div className="col-6 col-md-4 d-flex align-items-end"&gt;
+&lt;div className="form-check form-switch"&gt;
+&lt;input
+className="form-check-input"
+type="checkbox"
+id="disponivel"
+checked={disponivel}
+onChange={(e) =&gt; setDisponivel(e.target.checked)}
+/&gt;
+&lt;label className="form-check-label" htmlFor="disponivel"&gt;Disponível&lt;/label&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div className="col-6 col-md-4 d-flex align-items-end"&gt;
+&lt;div className="form-check form-switch"&gt;
+&lt;input
+className="form-check-input"
+type="checkbox"
+id="destaque"
+checked={destaque}
+onChange={(e) =&gt; setDestaque(e.target.checked)}
+/&gt;
+&lt;label className="form-check-label" htmlFor="destaque"&gt;Destaque&lt;/label&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+{/* Campo condicional */}
+{isBebida ? (
+&lt;div className="col-12 col-md-6"&gt;
+&lt;label htmlFor="volume" className="form-label"&gt;Volume *&lt;/label&gt;
+&lt;input
+id="volume"
+type="text"
+className={`form-control ${touched.volume &amp;&amp; erros.volume ? 'is-invalid' : ''}`}
+placeholder="Ex.: 350 ml"
+value={volume}
+onChange={(e) =&gt; setVolume(e.target.value)}
+onBlur={() =&gt; handleBlur('volume')}
+required={isBebida}
+aria-invalid={touched.volume &amp;&amp; !!erros.volume}
+aria-describedby="volumeError"
+/&gt;
+{touched.volume &amp;&amp; erros.volume &amp;&amp; (
+&lt;div id="volumeError" className="invalid-feedback"&gt;{erros.volume}&lt;/div&gt;
+)}
+&lt;/div&gt;
+) : (
+&lt;div className="col-12"&gt;
+&lt;label htmlFor="descricao" className="form-label"&gt;Descrição *&lt;/label&gt;
+&lt;textarea
+id="descricao"
+rows={3}
+className={`form-control ${touched.descricao &amp;&amp; erros.descricao ? 'is-invalid' : ''}`}
+placeholder="Ex.: Pão, hambúrguer, queijo e molho da casa."
+value={descricao}
+onChange={(e) =&gt; setDescricao(e.target.value)}
+onBlur={() =&gt; handleBlur('descricao')}
+required={!isBebida}
+aria-invalid={touched.descricao &amp;&amp; !!erros.descricao}
+aria-describedby="descricaoError"
+/&gt;
+{touched.descricao &amp;&amp; erros.descricao &amp;&amp; (
+&lt;div id="descricaoError" className="invalid-feedback"&gt;{erros.descricao}&lt;/div&gt;
+)}
+&lt;/div&gt;
+)}
+
+{/* Ações */}
+&lt;div className="col-12 d-flex gap-2 mt-2"&gt;
+&lt;button type="submit" className="btn btn-primary"&gt;
+&lt;i className="bi bi-save me-1"&gt;&lt;/i&gt; Salvar
+&lt;/button&gt;
+&lt;button
+type="button"
+className="btn btn-outline-secondary"
+onClick={limparFormulario}
+&gt;
+Limpar
+&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/form&gt;
+
+&lt;ToastContainer
+show={toast.show}
+message={toast.message}
+onHide={() =&gt; setToast({ show: false, message: '' })}
+/&gt;
+&lt;/&gt;
+);
+}
+Mostrar mais linhas</code></pre>
+        <p class="mb-2"><strong>Observações didáticas:</strong></p>
+        <ul>
+          <li>• Inputs controlados (value + onChange).</li>
+          <li>• Validações simples por estado + regras HTML5 (ex.: minLength, required).</li>
+          <li>• Feedback visual com <code>is-invalid</code> e <code>invalid-feedback</code>.</li>
+          <li>• Armazenamento local com <code>localStorage</code> via util <code>addExtra</code>.</li>
+        </ul>
+        <p class="mb-2"><strong>Commits sugeridos:</strong></p>
+        <ul>
+          <li>feat(admin): página /admin/itens/novo com formulário controlado</li>
+          <li>feat(admin): validação HTML5 + feedback Bootstrap e campos condicionais</li>
+          <li>feat(storage): util localdb p/ salvar itens no localStorage</li>
+        </ul>
+
+        <h3 class="h5 fw-bold mt-4">3) (Opcional) Listar itens cadastrados em /admin/itens</h3>
+        <p>Atualize <code>app/admin/itens/page.jsx</code> para mesclar dataset base + extras do localStorage.<br>Nota: Como localStorage existe apenas no cliente, a página deve ser client component.</p>
+        <p class="mb-1">JSX</p>
+        <pre class="language-jsx"><code>// app/admin/itens/page.jsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { itens as base } from '@/data/itens';
+import { readExtras } from '@/lib/localdb';
+import ProductCard from '@/components/ProductCard';
+
+export default function AdminItens() {
+const [lista, setLista] = useState(base);
+
+useEffect(() =&gt; {
+const extras = readExtras();
+setLista([...base, ...extras]);
+}, []);
+
+return (
+&lt;&gt;
+&lt;h1 className="h4 mb-3"&gt;Admin — Itens do Cardápio&lt;/h1&gt;
+&lt;p className="text-muted"&gt;Itens base + novos cadastrados localmente.&lt;/p&gt;
+&lt;div className="row g-4"&gt;
+{lista.map((item) =&gt; (
+&lt;div className="col-12 col-sm-6 col-lg-4" key={item.id}&gt;
+&lt;ProductCard item={item} onAdd={() =&gt; {}} /&gt;
+&lt;/div&gt;
+))}
+&lt;/div&gt;
+&lt;/&gt;
+);
+}
+Mostrar mais linhas</code></pre>
+
+        <h3 class="h5 fw-bold mt-4">4) Checklist de verificação (Cap. 6)</h3>
+        <ul>
+          <li>• Página /admin/itens/novo criada e acessível pela sidebar.</li>
+          <li>• Inputs controlados com validação e feedback visual.</li>
+          <li>• Campo Volume aparece apenas para Bebidas; Descrição para demais.</li>
+          <li>• Toast de sucesso após salvar; formulário limpa corretamente.</li>
+          <li>• (Opcional) Página /admin/itens lista base + extras.</li>
+          <li>• Commits claros e frequentes.</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🧪 Atividades Práticas (para desenvolver por conta própria)</h2>
+        <ol>
+          <li><strong>Cadastro de Lanches e Sobremesas</strong>
+            <ul>
+              <li>Use a mesma página (/admin/itens/novo) mudando a categoria no topo e preenchendo Descrição (em vez de Volume).</li>
+              <li>Cadastre ao menos 2 lanches e 2 sobremesas.</li>
+            </ul>
+          </li>
+          <li><strong>Máscara simples de preço (onChange)</strong>
+            <ul>
+              <li>Ao digitar, normalize o valor para apenas números e vírgula/ponto, e no onBlur formate com 2 casas decimais (toFixed(2)).</li>
+              <li>Bônus: formatação locale pt-BR (apenas UI; mantenha o número em formato padrão para salvar).</li>
+            </ul>
+          </li>
+          <li><strong>Validação de nome único</strong>
+            <ul>
+              <li>No handleSubmit, verifique se já existe item com o mesmo nome na lista base + extras; se existir, bloqueie e exiba erro no campo.</li>
+            </ul>
+          </li>
+          <li><strong>Edição e exclusão</strong>
+            <ul>
+              <li>Em /admin/itens, adicione botões para editar (carregar dados da edição em /admin/itens/editar/[id]) e excluir (remover do localStorage).</li>
+            </ul>
+          </li>
+          <li><strong>Pré-visualização (preview) do Card</strong>
+            <ul>
+              <li>À direita do formulário, exiba um ProductCard com os valores digitados (em tempo real), ajudando o aluno a visualizar o resultado.</li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="mb-2"><strong>Critérios de avaliação (10 pts):</strong></p>
+        <ul>
+          <li>• Campos controlados + validação correta — 4 pts</li>
+          <li>• Boas práticas de UX (feedback claro, switches, grupos) — 3 pts</li>
+          <li>• Persistência local e integração com listagem — 2 pts</li>
+          <li>• Organização do código e commits — 1 pt</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">🔎 Pesquisas complementares (sugestões)</h2>
+        <ul>
+          <li>• “Bootstrap 5 Forms: validation, input group, switches”</li>
+          <li>• “React: controlled components e validação HTML5”</li>
+          <li>• “Acessibilidade em formulários (labels, aria-invalid, aria-describedby)”</li>
+          <li>• “LocalStorage: salvar/ler dados e limitações”</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">📦 Entregáveis ao final do Capítulo 6</h2>
+        <ul>
+          <li>• Página /admin/itens/novo funcional com validação e Toast de sucesso.</li>
+          <li>• (Opcional) /admin/itens exibindo itens base + cadastrados localmente.</li>
+          <li>• Repositório com commits organizados, mostrando a evolução do formulário.</li>
+        </ul>
+      </section>
+
+      <!-- Checklist interativo (texto mantido) -->
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2 text-danger"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">Baseado em “4) Checklist de verificação (Cap. 6)”. O progresso fica salvo neste navegador.</p>
+
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-danger" id="chkProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="vstack gap-2" id="checklistItems">
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="1"><span>Página /admin/itens/novo criada e acessível pela sidebar.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="2"><span>Inputs controlados com validação e feedback visual.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="3"><span>Campo Volume aparece apenas para Bebidas; Descrição para demais.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="4"><span>Toast de sucesso após salvar; formulário limpa corretamente.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="5"><span>(Opcional) Página /admin/itens lista base + extras.</span></label>
+            <label class="checklist-item d-flex gap-2 align-items-start"><input class="form-check-input mt-1" type="checkbox" data-chk="6"><span>Commits claros e frequentes.</span></label>
+          </div>
+        </div>
+      </section>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 05</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 07</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="small text-muted">
+          <i class="bi bi-journal-code me-1"></i> Capítulo 06 — Apostila PW II
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-pw" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+          <a class="btn btn-sm btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Cap. 07</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Prism.js -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    // ===== Questionário dinâmico =====
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    // ===== Checklist (salvo no localStorage) =====
+    const CHECKLIST_KEY = 'pw2_cap06_checklist_v1';
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', pct);
+      text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    loadChecklist();
+  </script>
+</body>
+</html>
