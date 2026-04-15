@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Capítulo 06 — PW3 Laravel</title>
+<meta content="Capítulo 6 — Relacionamentos Eloquent e Fluxo de Pedido (Pedido e Itens)" name="description"/>
+<!-- Bootstrap 5 + Icons (CDN) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Prism.js for code highlighting (dark like VSCode) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+<style>
+    :root{
+      --pw3-danger: #dc3545;    /* vermelho */
+      --pw3-graybtn: #6c757d;   /* cinza */
+      --pw3-soft: #f8f9fa;      /* fundo suave */
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{
+      background: var(--pw3-graybtn);
+      border-color: var(--pw3-graybtn);
+      color:#fff;
+    }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism (visual VSCode) */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    /* “Meta” do capítulo */
+    .badge-soft{
+      background: rgba(220,53,69,.10);
+      color: #b02a37;
+      border: 1px solid rgba(220,53,69,.18);
+    }
+
+    /* Índice interno */
+    .toc a{ text-decoration: none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+    .quiz-option:hover{ background: #fdfdfd; }
+    .quiz-feedback{
+      border-radius: .75rem;
+      padding: .75rem;
+      border: 1px dashed var(--pw3-border);
+      background: #fff;
+      display: none;
+    }
+    .quiz-feedback.correct{
+      border-color: rgba(25,135,84,.35);
+      background: rgba(25,135,84,.06);
+      color: #0f5132;
+    }
+    .quiz-feedback.incorrect{
+      border-color: rgba(220,53,69,.35);
+      background: rgba(220,53,69,.06);
+      color: #842029;
+    }
+
+    /* Checklist */
+    .check-item{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+
+    /* Callout */
+    .callout{
+      border: 1px solid var(--pw3-border);
+      border-left: 5px solid rgba(220,53,69,.55);
+      background: #fff;
+      border-radius: .75rem;
+      padding: 1rem;
+    }
+
+    /* Acessibilidade: foco visível */
+    a:focus, button:focus, input:focus{
+      outline: 3px solid rgba(13,110,253,.25);
+      outline-offset: 2px;
+    }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+<body>
+<!-- NAVBAR (vermelha) + Offcanvas (hambúrguer) -->
+<nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+<div class="container">
+<a class="navbar-brand fw-semibold" href="index.html">
+<i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+<button aria-controls="pw3Offcanvas" aria-label="Abrir menu" class="navbar-toggler" data-bs-target="#pw3Offcanvas" data-bs-toggle="offcanvas" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<!-- Menu desktop -->
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+<li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+<i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><h6 class="dropdown-header">1º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">2º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">3º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">4º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+</ul>
+</li>
+<li class="nav-item ms-lg-2">
+<a class="btn btn-pw3 btn-sm" href="capitulo07.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 07)</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- Offcanvas (menu hambúrguer) -->
+<div aria-labelledby="pw3OffcanvasLabel" class="offcanvas offcanvas-end" id="pw3Offcanvas" tabindex="-1">
+<div class="offcanvas-header">
+<h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+</div>
+<div class="offcanvas-body">
+<div class="d-grid gap-2 mb-3">
+<a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+</div>
+<hr/>
+<p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+<div class="accordion" id="accMenu">
+<div class="accordion-item">
+<h2 class="accordion-header" id="m1">
+<button aria-controls="mc1" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc1" data-bs-toggle="collapse" type="button">
+              1º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m1" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc1">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+<a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+<a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m2">
+<button aria-controls="mc2" aria-expanded="true" class="accordion-button" data-bs-target="#mc2" data-bs-toggle="collapse" type="button">
+              2º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m2" class="accordion-collapse collapse show" data-bs-parent="#accMenu" id="mc2">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+<a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+<a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m3">
+<button aria-controls="mc3" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc3" data-bs-toggle="collapse" type="button">
+              3º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m3" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc3">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m4">
+<button aria-controls="mc4" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc4" data-bs-toggle="collapse" type="button">
+              4º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m4" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc4">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+<a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+<a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+<a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+</div>
+</div>
+</div>
+</div>
+<hr class="mt-4"/>
+<div class="d-grid gap-2">
+<a class="btn btn-pw3" href="capitulo07.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 07)</a>
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+</div>
+</div>
+</div>
+<main class="container my-4 my-lg-5" id="topo">
+<!-- Cabeçalho do capítulo -->
+<section class="mb-4">
+<div class="card">
+<div class="card-body p-4 p-lg-5">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+<span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 06</span>
+<span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+</div>
+<h1 class="fw-bold mb-2">Capítulo 6 — Relacionamentos Eloquent e Fluxo de Pedido</h1>
+<div class="mb-3">
+<div class="fw-semibold">Formato:</div>
+<div>· Semana A (100 min): Teoria + demonstração + início do passo a passo.</div>
+<div>· Semana B (100 min): Conclusão do passo a passo + atividades correlatas + revisão.</div>
+<div class="mt-2">Contexto do projeto: Sistema da Lanchonete com autenticação e perfis (Cap. 5). Agora criaremos o fluxo de pedidos.</div>
+</div>
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+<a class="btn btn-outline-secondary" href="capitulo05.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 05)</a>
+<a class="btn btn-pw3" href="capitulo07.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 07</a>
+</div>
+</div>
+</div>
+</section>
+<!-- Sumário interno -->
+<section class="mb-4" id="sumario-interno">
+<div class="row g-3">
+<div class="col-lg-8">
+<div class="card">
+<div class="card-body">
+<h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+<div class="toc d-grid gap-2">
+<a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos de aprendizagem</a>
+<a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos e ferramentas</a>
+<a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Conteúdo teórico</a>
+<a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo guiado (Pedido + Itens)</a>
+<a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas (Semana B)</a>
+<a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas complementares</a>
+<a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário de revisão (dinâmico)</a>
+<a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist de avaliação (interativo)</a>
+<a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis do capítulo</a>
+</div>
+</div>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card h-100">
+<div class="card-body">
+<h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+<p class="text-muted mb-0">
+                O foco aqui é relacionamentos <strong>1:N</strong> e o fluxo de negócio: criar pedido, adicionar itens e calcular total.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 1) Objetivos -->
+<section class="mb-4" id="sec-1">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">1) Objetivos de aprendizagem</h2>
+<div>Ao final deste capítulo, o(a) aluno(a) será capaz de:</div>
+<div>· Explicar e implementar relacionamentos Eloquent <strong>hasMany</strong> e <strong>belongsTo</strong>.</div>
+<div>· Modelar tabelas de <strong>Pedido</strong> e <strong>ItemPedido</strong> com integridade referencial (FK).</div>
+<div>· Criar um fluxo de pedido: iniciar pedido, adicionar itens e visualizar resumo.</div>
+<div>· Aplicar eager loading (<code>with()</code>) para evitar problema N+1 em listagens de pedidos.</div>
+<div>· Implementar regras iniciais de negócio (status do pedido, total calculado).</div>
+</div>
+</div>
+</section>
+<!-- 2) Pré-requisitos -->
+<section class="mb-4" id="sec-2">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">2) Pré-requisitos e ferramentas</h2>
+<div>· Pré-requisitos: autenticação pronta (Cap. 5), catálogo com Produto/Categoria e banco migrado/seedado.</div>
+<div>· Ferramentas: VS Code, Git, MySQL, navegador. (Postman ainda é opcional.)</div>
+<div>· Sugestão: tenha produtos cadastrados para conseguir adicionar itens ao pedido.</div>
+</div>
+</div>
+</section>
+<!-- 3) Teoria -->
+<section class="mb-4" id="sec-3">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">3) Conteúdo teórico</h2>
+
+
+
+
+
+
+
+
+
+
+<h3 class="h5 fw-bold mt-3">3.1. Relacionamentos Eloquent (1:N na prática)</h3><p>Relacionamentos são a forma de representar, no banco e no código, como entidades do sistema se conectam. Em um sistema de lanchonete, um pedido não é um “registro isolado”: ele precisa ter itens (produtos e quantidades). Esse cenário é clássico de relacionamento 1:N (um para muitos): um Pedido (pai) possui muitos ItemPedido (filhos).</p><p>No banco, o relacionamento 1:N acontece quando a tabela “filha” guarda uma chave estrangeira apontando para a tabela “pai”. No nosso caso, a tabela item_pedidos tem pedido_id. Isso garante que cada item sempre pertence a um pedido válido. Em Eloquent, esse relacionamento vira métodos que deixam o código expressivo: em Pedido, você define hasMany para itens; em ItemPedido, você define belongsTo para pedido. Com isso, acessar os itens de um pedido vira algo simples como $pedido-&gt;itens.</p><p>Além disso, o ItemPedido também pertence a um Produto. Isso cria um encadeamento: Pedido -&gt; itens -&gt; produto. Quando esse encadeamento existe, você consegue montar telas de resumo muito facilmente, mostrando nome do produto, quantidade, preço e subtotal. Em termos de modelagem, estamos criando uma “tabela de itens” que funciona como detalhe do pedido.</p><p>Relações importantes deste capítulo (tanto no banco quanto no Eloquent):</p><ul><li><code>Pedido hasMany ItemPedido</code> — Um pedido pode ter vários itens.</li><li><code>ItemPedido belongsTo Pedido</code> — Cada item pertence a um pedido específico.</li><li><code>ItemPedido belongsTo Produto</code> — Cada item referencia qual produto foi vendido.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 6)</div><div>Na seção 4.3, você cria os métodos user() e itens() no model Pedido e os métodos pedido() e produto() no model ItemPedido. Na seção 4.5, o método edit() faz $pedido-&gt;load("itens.produto"). Isso só funciona porque os relacionamentos foram definidos corretamente. Já na view pedidos/edit.blade.php (seção 4.7), o loop @forelse($pedido-&gt;itens as $item) acessa $item-&gt;produto-&gt;nome, mostrando o encadeamento do relacionamento.</div></div><h3 class="h5 fw-bold mt-4">3.2. Regras de negócio e consistência</h3><p>Regras de negócio são as decisões que fazem o sistema refletir a realidade do processo da lanchonete. Por exemplo: um pedido pode estar “aberto”, “em preparo”, “pronto”, “entregue” ou “fechado”; e um pedido fechado não deveria receber novos itens. Essas regras não são “detalhes técnicos”; elas definem como o sistema deve se comportar para evitar erros (por exemplo, alguém alterar um pedido já encerrado).</p><p>Outra regra central é o cálculo do total. O total do pedido normalmente é a soma dos subtotais de seus itens, e cada subtotal é quantidade × preço unitário. Parece simples, mas existe um detalhe importante: o preço do produto pode mudar no futuro. Se você sempre buscar o preço atual do produto para recalcular pedidos antigos, você altera o histórico de vendas. Por isso, é uma boa prática registrar, no item, o preço unitário no momento da venda (preco_unitario) e o subtotal calculado naquele momento. Assim, mesmo que o produto seja reajustado, o pedido antigo continua correto.</p><p>Existem duas estratégias comuns: (1) calcular o total “na hora” (somando subtotais toda vez que exibir) ou (2) armazenar o total no pedido e recalcular sempre que itens mudarem. Neste capítulo, adotamos a segunda estratégia para simplificar telas e consultas, mas garantindo que sempre que um item é adicionado ou removido o total seja recalculado imediatamente. Em aplicações reais, isso costuma ser feito com eventos/model observers ou transações, mas aqui faremos no controller para ficar didático.</p><p>Boas práticas iniciais para regras de pedido:</p><ul><li><code>Status como enum lógico</code> — Definir lista de status permitidos e evitar valores livres.</li><li><code>Imutabilidade de histórico</code> — Salvar preco_unitario no item mantém histórico fiel.</li><li><code>Recalcular total sempre que item mudar</code> — Evita total divergente do somatório.</li><li><code>Bloquear edição quando fechado</code> — Regra de negócio evita alterações indevidas.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 6)</div><div>Na migration de itens (seção 4.2), você cria as colunas preco_unitario e subtotal para registrar histórico. No ItemPedidoController (seção 4.6), após criar/atualizar o item, o código faz $pedido-&gt;total = sum("subtotal") e salva. Isso aplica diretamente a regra “total = soma dos subtotais”. Nas atividades correlatas (seção 5), você evolui a regra para impedir alteração quando status for “fechado”.</div></div><h3 class="h5 fw-bold mt-4">3.3. Eager loading e o problema N+1</h3><p>O problema N+1 é um dos principais motivos de lentidão em aplicações com ORM quando o desenvolvedor não percebe o que está acontecendo. Ele ocorre assim: você executa uma consulta para buscar N registros (por exemplo, N pedidos). Em seguida, ao renderizar a view, para cada pedido você acessa uma relação (por exemplo, $pedido-&gt;user). Se o relacionamento não estiver carregado, o Eloquent faz uma nova consulta para cada pedido. Resultado: 1 consulta para a lista + N consultas para o usuário = N+1 consultas.</p><p>Quando N é pequeno, isso passa despercebido. Mas com dezenas ou centenas de registros, o sistema fica muito lento. A solução é eager loading: carregar relacionamentos antecipadamente com with() (ou load() em um model já carregado). Assim, o Eloquent faz poucas consultas maiores, em vez de muitas consultas pequenas. Além de performance, isso ajuda na previsibilidade do sistema e reduz carga no banco.</p><p>No nosso fluxo de pedidos, eager loading é especialmente importante porque temos relações encadeadas: um pedido tem itens e cada item tem produto. Se você listar pedidos com seus itens sem eager loading, pode acabar com N+1+M consultas. Por isso, usar Pedido::with("user", "itens.produto") é uma prática essencial. Você verá isso em duas situações: (1) listagens (index) e (2) telas de edição/resumo (edit/show).</p><p>Formas comuns de eager loading no Laravel:</p><ul><li><code>with()</code> — Usado na query antes de executar (ex.: Pedido::with(...)-&gt;paginate()).</li><li><code>load()</code> — Usado após já ter um model (ex.: $pedido-&gt;load(...)).</li><li><code>Relação aninhada</code> — Carregar itens e produto junto: with("itens.produto").</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 6)</div><div>No PedidoController@index (seção 4.5), você usa Pedido::with("user") para não fazer uma consulta de usuário para cada pedido. No PedidoController@edit, você faz $pedido-&gt;load("itens.produto") para carregar itens e seus produtos antes de renderizar a view. Isso evita consultas extras dentro do loop @forelse($pedido-&gt;itens as $item) em pedidos/edit.blade.php (seção 4.7).</div></div></div>
+</div>
+</section>
+<!-- 4) Passo a passo -->
+<section class="mb-4" id="sec-4">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">4) Passo a passo guiado — Fluxo de Pedido (sem AJAX ainda)</h2>
+<div class="mb-2">
+            Meta: criar tabelas/models de Pedido e ItemPedido, iniciar pedido e adicionar itens com formulário normal.
+          </div>
+<h3 class="h5 fw-bold mt-4">4.1. Criar Models e Migrations</h3>
+<div>No terminal, dentro do projeto:</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan make:model Pedido -m
+php artisan make:model ItemPedido -m
+php artisan make:controller PedidoController --resource
+php artisan make:controller ItemPedidoController</code></pre>
+<h3 class="h5 fw-bold mt-4">4.2. Migrations: pedidos e itens_pedido</h3>
+<div>Edite a migration de pedidos (<code>create_pedidos_table</code>):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">public function up(): void
+{
+    Schema::create('pedidos', function (Blueprint $table) {
+        $table-&gt;id();
+        $table-&gt;foreignId('user_id')-&gt;constrained('users');
+        $table-&gt;string('status')-&gt;default('aberto'); // aberto, em_preparo, pronto, entregue, fechado
+        $table-&gt;decimal('total', 10, 2)-&gt;default(0);
+        $table-&gt;text('observacoes')-&gt;nullable();
+        $table-&gt;timestamps();
+    });
+}</code></pre>
+<div>Edite a migration de itens (<code>create_item_pedidos_table</code>):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">public function up(): void
+{
+    Schema::create('item_pedidos', function (Blueprint $table) {
+        $table-&gt;id();
+        $table-&gt;foreignId('pedido_id')-&gt;constrained('pedidos')-&gt;cascadeOnDelete();
+        $table-&gt;foreignId('produto_id')-&gt;constrained('produtos');
+        $table-&gt;unsignedInteger('quantidade')-&gt;default(1);
+        $table-&gt;decimal('preco_unitario', 10, 2)-&gt;default(0);
+        $table-&gt;decimal('subtotal', 10, 2)-&gt;default(0);
+        $table-&gt;timestamps();
+
+        // Evita o mesmo produto duplicado no mesmo pedido (opcional)
+        $table-&gt;unique(['pedido_id', 'produto_id']);
+    });
+}</code></pre>
+<div>Execute as migrations:</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan migrate</code></pre>
+<h3 class="h5 fw-bold mt-4">4.3. Models Eloquent: relações</h3>
+<div><code>app/Models/Pedido.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Pedido extends Model
+{
+    use HasFactory;
+
+    protected $table = 'pedidos';
+
+    protected $fillable = [
+        'user_id',
+        'status',
+        'total',
+        'observacoes',
+    ];
+
+    public function user()
+    {
+        return $this-&gt;belongsTo(User::class);
+    }
+
+    public function itens()
+    {
+        return $this-&gt;hasMany(ItemPedido::class, 'pedido_id');
+    }
+}
+</code></pre>
+<div><code>app/Models/ItemPedido.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class ItemPedido extends Model
+{
+    use HasFactory;
+
+    protected $table = 'item_pedidos';
+
+    protected $fillable = [
+        'pedido_id',
+        'produto_id',
+        'quantidade',
+        'preco_unitario',
+        'subtotal',
+    ];
+
+    public function pedido()
+    {
+        return $this-&gt;belongsTo(Pedido::class, 'pedido_id');
+    }
+
+    public function produto()
+    {
+        return $this-&gt;belongsTo(Produto::class, 'produto_id');
+    }
+}
+</code></pre>
+<h3 class="h5 fw-bold mt-4">4.4. Rotas: Pedido resource + rotas para itens</h3>
+<div>Em <code>routes/web.php</code> (dentro do grupo <code>auth</code>):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\ItemPedidoController;
+
+Route::middleware(['auth'])-&gt;group(function () {
+    Route::resource('pedidos', PedidoController::class);
+
+    // rotas para itens de um pedido
+    Route::post('pedidos/{pedido}/itens', [ItemPedidoController::class, 'store'])-&gt;name('pedidos.itens.store');
+    Route::delete('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'destroy'])-&gt;name('pedidos.itens.destroy');
+});</code></pre>
+<h3 class="h5 fw-bold mt-4">4.5. PedidoController: criar pedido e editar para adicionar itens</h3>
+<div>Implementação mínima (sem Form Request por enquanto):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Pedido;
+use Illuminate\Http\Request;
+
+class PedidoController extends Controller
+{
+    public function index()
+    {
+        $pedidos = Pedido::with('user')
+            -&gt;orderByDesc('id')
+            -&gt;paginate(10);
+
+        return view('pedidos.index', compact('pedidos'));
+    }
+
+    public function create()
+    {
+        return view('pedidos.create');
+    }
+
+    public function store(Request $request)
+    {
+        $pedido = Pedido::create([
+            'user_id' =&gt; auth()-&gt;id(),
+            'status' =&gt; 'aberto',
+            'total' =&gt; 0,
+            'observacoes' =&gt; $request-&gt;input('observacoes'),
+        ]);
+
+        return redirect()-&gt;route('pedidos.edit', $pedido)
+            -&gt;with('sucesso', 'Pedido iniciado! Agora adicione itens.');
+    }
+
+    public function edit(Pedido $pedido)
+    {
+        $pedido-&gt;load('itens.produto');
+        $produtos = \App\Models\Produto::orderBy('nome')-&gt;get();
+
+        return view('pedidos.edit', compact('pedido', 'produtos'));
+    }
+
+    // update e destroy podem ser evoluídos nas atividades
+}
+</code></pre>
+<h3 class="h5 fw-bold mt-4">4.6. ItemPedidoController: adicionar e remover itens + recalcular total</h3>
+<div>Regra: subtotal = quantidade × preco_unitario (do produto no momento), e total do pedido = soma dos subtotais.</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Pedido;
+use App\Models\ItemPedido;
+use App\Models\Produto;
+use Illuminate\Http\Request;
+
+class ItemPedidoController extends Controller
+{
+    public function store(Request $request, Pedido $pedido)
+    {
+        $dados = $request-&gt;validate([
+            'produto_id' =&gt; 'required|exists:produtos,id',
+            'quantidade' =&gt; 'required|integer|min:1|max:99',
+        ]);
+
+        $produto = Produto::findOrFail($dados['produto_id']);
+
+        $preco = $produto-&gt;preco;
+        $subtotal = $preco * $dados['quantidade'];
+
+        // Se já existir item do produto no pedido, atualiza a quantidade (opcional)
+        $item = ItemPedido::where('pedido_id', $pedido-&gt;id)
+            -&gt;where('produto_id', $produto-&gt;id)
+            -&gt;first();
+
+        if ($item) {
+            $item-&gt;quantidade += $dados['quantidade'];
+            $item-&gt;preco_unitario = $preco;
+            $item-&gt;subtotal = $item-&gt;quantidade * $preco;
+            $item-&gt;save();
+        } else {
+            ItemPedido::create([
+                'pedido_id' =&gt; $pedido-&gt;id,
+                'produto_id' =&gt; $produto-&gt;id,
+                'quantidade' =&gt; $dados['quantidade'],
+                'preco_unitario' =&gt; $preco,
+                'subtotal' =&gt; $subtotal,
+            ]);
+        }
+
+        // Recalcular total
+        $pedido-&gt;total = ItemPedido::where('pedido_id', $pedido-&gt;id)-&gt;sum('subtotal');
+        $pedido-&gt;save();
+
+        return redirect()-&gt;route('pedidos.edit', $pedido)
+            -&gt;with('sucesso', 'Item adicionado ao pedido!');
+    }
+
+    public function destroy(Pedido $pedido, ItemPedido $itemPedido)
+    {
+        // Garante que o item pertence ao pedido
+        abort_unless($itemPedido-&gt;pedido_id === $pedido-&gt;id, 404);
+
+        $itemPedido-&gt;delete();
+
+        $pedido-&gt;total = ItemPedido::where('pedido_id', $pedido-&gt;id)-&gt;sum('subtotal');
+        $pedido-&gt;save();
+
+        return redirect()-&gt;route('pedidos.edit', $pedido)
+            -&gt;with('sucesso', 'Item removido!');
+    }
+}
+</code></pre>
+<h3 class="h5 fw-bold mt-4">4.7. Views Blade (index, create, edit)</h3>
+<div>Crie a pasta <code>resources/views/pedidos/</code>.</div>
+<div class="mt-2"><code>resources/views/pedidos/index.blade.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">@extends('layouts.app')
+@section('title', 'Pedidos')
+@section('content')
+    @include('partials.alerts')
+
+    &lt;div class="d-flex justify-content-between align-items-center mb-3"&gt;
+        &lt;h2&gt;Pedidos&lt;/h2&gt;
+        &lt;a class="btn btn-primary" href="{{ route('pedidos.create') }}"&gt;Novo Pedido&lt;/a&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+        &lt;div class="card-body p-0"&gt;
+            &lt;table class="table table-striped mb-0"&gt;
+                &lt;thead class="table-light"&gt;
+                    &lt;tr&gt;
+                        &lt;th&gt;#&lt;/th&gt;
+                        &lt;th&gt;Atendente&lt;/th&gt;
+                        &lt;th&gt;Status&lt;/th&gt;
+                        &lt;th class="text-end"&gt;Total&lt;/th&gt;
+                        &lt;th class="text-end"&gt;Ações&lt;/th&gt;
+                    &lt;/tr&gt;
+                &lt;/thead&gt;
+                &lt;tbody&gt;
+                    @forelse($pedidos as $p)
+                        &lt;tr&gt;
+                            &lt;td&gt;{{ $p-&gt;id }}&lt;/td&gt;
+                            &lt;td&gt;{{ $p-&gt;user-&gt;name ?? '—' }}&lt;/td&gt;
+                            &lt;td&gt;{{ $p-&gt;status }}&lt;/td&gt;
+                            &lt;td class="text-end"&gt;R$ {{ number_format($p-&gt;total, 2, ',', '.') }}&lt;/td&gt;
+                            &lt;td class="text-end"&gt;
+                                &lt;a class="btn btn-sm btn-outline-secondary" href="{{ route('pedidos.edit', $p) }}"&gt;Abrir&lt;/a&gt;
+                            &lt;/td&gt;
+                        &lt;/tr&gt;
+                    @empty
+                        &lt;tr&gt;&lt;td colspan="5" class="text-center p-4 text-muted"&gt;Nenhum pedido.&lt;/td&gt;&lt;/tr&gt;
+                    @endforelse
+                &lt;/tbody&gt;
+            &lt;/table&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="mt-3"&gt;{{ $pedidos-&gt;links() }}&lt;/div&gt;
+@endsection</code></pre>
+<div class="mt-2"><code>resources/views/pedidos/create.blade.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">@extends('layouts.app')
+@section('title', 'Novo Pedido')
+@section('content')
+    @include('partials.alerts')
+
+    &lt;h2 class="mb-3"&gt;Iniciar Pedido&lt;/h2&gt;
+
+    &lt;form method="POST" action="{{ route('pedidos.store') }}"&gt;
+        @csrf
+        &lt;div class="mb-3"&gt;
+            &lt;label class="form-label"&gt;Observações (opcional)&lt;/label&gt;
+            &lt;textarea name="observacoes" class="form-control" rows="3"&gt;{{ old('observacoes') }}&lt;/textarea&gt;
+        &lt;/div&gt;
+        &lt;button class="btn btn-primary"&gt;Criar e adicionar itens&lt;/button&gt;
+        &lt;a class="btn btn-outline-secondary" href="{{ route('pedidos.index') }}"&gt;Cancelar&lt;/a&gt;
+    &lt;/form&gt;
+@endsection</code></pre>
+<div class="mt-2"><code>resources/views/pedidos/edit.blade.php</code> (adicionar itens + listar itens):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">@extends('layouts.app')
+@section('title', 'Editar Pedido')
+@section('content')
+    @include('partials.alerts')
+
+    &lt;div class="d-flex justify-content-between align-items-center mb-3"&gt;
+        &lt;h2&gt;Pedido #{{ $pedido-&gt;id }}&lt;/h2&gt;
+        &lt;a class="btn btn-outline-secondary" href="{{ route('pedidos.index') }}"&gt;Voltar&lt;/a&gt;
+    &lt;/div&gt;
+
+    &lt;div class="row g-3"&gt;
+        &lt;div class="col-lg-5"&gt;
+            &lt;div class="card"&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;h5 class="fw-bold"&gt;Adicionar item&lt;/h5&gt;
+                    &lt;form method="POST" action="{{ route('pedidos.itens.store', $pedido) }}"&gt;
+                        @csrf
+                        &lt;div class="mb-3"&gt;
+                            &lt;label class="form-label"&gt;Produto&lt;/label&gt;
+                            &lt;select name="produto_id" class="form-select" required&gt;
+                                &lt;option value=""&gt;Selecione...&lt;/option&gt;
+                                @foreach($produtos as $prod)
+                                    &lt;option value="{{ $prod-&gt;id }}"&gt;{{ $prod-&gt;nome }} (R$ {{ number_format($prod-&gt;preco,2,',','.') }})&lt;/option&gt;
+                                @endforeach
+                            &lt;/select&gt;
+                        &lt;/div&gt;
+                        &lt;div class="mb-3"&gt;
+                            &lt;label class="form-label"&gt;Quantidade&lt;/label&gt;
+                            &lt;input type="number" name="quantidade" class="form-control" value="1" min="1" max="99" required&gt;
+                        &lt;/div&gt;
+                        &lt;button class="btn btn-primary"&gt;Adicionar&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="col-lg-7"&gt;
+            &lt;div class="card"&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;h5 class="fw-bold"&gt;Itens do pedido&lt;/h5&gt;
+
+                    &lt;table class="table table-sm align-middle"&gt;
+                        &lt;thead&gt;
+                            &lt;tr&gt;
+                                &lt;th&gt;Produto&lt;/th&gt;
+                                &lt;th class="text-end"&gt;Qtd&lt;/th&gt;
+                                &lt;th class="text-end"&gt;Unit.&lt;/th&gt;
+                                &lt;th class="text-end"&gt;Subtotal&lt;/th&gt;
+                                &lt;th class="text-end"&gt;Ações&lt;/th&gt;
+                            &lt;/tr&gt;
+                        &lt;/thead&gt;
+                        &lt;tbody&gt;
+                            @forelse($pedido-&gt;itens as $item)
+                                &lt;tr&gt;
+                                    &lt;td&gt;{{ $item-&gt;produto-&gt;nome ?? '—' }}&lt;/td&gt;
+                                    &lt;td class="text-end"&gt;{{ $item-&gt;quantidade }}&lt;/td&gt;
+                                    &lt;td class="text-end"&gt;R$ {{ number_format($item-&gt;preco_unitario,2,',','.') }}&lt;/td&gt;
+                                    &lt;td class="text-end"&gt;R$ {{ number_format($item-&gt;subtotal,2,',','.') }}&lt;/td&gt;
+                                    &lt;td class="text-end"&gt;
+                                        &lt;form method="POST" action="{{ route('pedidos.itens.destroy', [$pedido, $item]) }}" class="d-inline"
+                                              onsubmit="return confirm('Remover este item?')"&gt;
+                                            @csrf
+                                            @method('DELETE')
+                                            &lt;button class="btn btn-sm btn-outline-danger"&gt;Remover&lt;/button&gt;
+                                        &lt;/form&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            @empty
+                                &lt;tr&gt;&lt;td colspan="5" class="text-center text-muted p-3"&gt;Nenhum item ainda.&lt;/td&gt;&lt;/tr&gt;
+                            @endforelse
+                        &lt;/tbody&gt;
+                    &lt;/table&gt;
+
+                    &lt;div class="d-flex justify-content-end"&gt;
+                        &lt;div class="fw-bold"&gt;Total: R$ {{ number_format($pedido-&gt;total,2,',','.') }}&lt;/div&gt;
+                    &lt;/div&gt;
+
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+@endsection</code></pre>
+<h3 class="h5 fw-bold mt-4">4.8. Link no menu para Pedidos</h3>
+<div>Em sua navbar, inclua um link para pedidos (visível para usuários autenticados):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">@auth
+    &lt;li class="nav-item"&gt;
+        &lt;a class="nav-link" href="{{ route('pedidos.index') }}"&gt;Pedidos&lt;/a&gt;
+    &lt;/li&gt;
+@endauth</code></pre>
+<h3 class="h5 fw-bold mt-4">4.9. Commit no Git</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 6: relacionamentos (Pedido/ItemPedido) + fluxo de pedido"
+git push</code></pre>
+</div>
+</div>
+</section>
+<!-- 5) Atividades correlatas -->
+<section class="mb-4" id="sec-5">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">5) Atividades correlatas (para a Semana B)</h2>
+<div class="mb-2">Objetivo: consolidar relacionamentos, regras de negócio e telas de pedido. Entrega via repositório (commit + push).</div>
+<div class="fw-semibold mt-2">1. Calcular total do pedido de forma consistente</div>
+<div>o Recalcular total também ao atualizar quantidade (crie rota e formulário para editar item).</div>
+<div>o Exibir resumo do pedido com total, status e observações.</div>
+<div class="fw-semibold mt-3">2. Status do pedido (aberto, em preparo, pronto, entregue, fechado)</div>
+<div>o Adicionar botão/ação para mudar status (ex.: “Enviar para preparo”).</div>
+<div>o Regra: pedidos “fechados” não podem ser editados (bloquear add/remover itens).</div>
+<div class="fw-semibold mt-3">3. Integridade e performance</div>
+<div>o Usar <code>with('itens.produto')</code> na listagem/visualização para evitar N+1.</div>
+<div>o Criar um relatório simples: pedidos do dia (apenas tabela na view).</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+<div class="text-muted">Criar um model <code>Cliente</code> e relacionar pedido a cliente (belongsTo), com campo opcional.</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 6) Pesquisas -->
+<section class="mb-4" id="sec-6">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">6) Pesquisas complementares (para aprofundar)</h2>
+<div>· Relacionamentos: diferença entre <code>hasMany</code>, <code>belongsTo</code> e <code>belongsToMany</code>.</div>
+<div>· Eager loading: como <code>with()</code> evita N+1 e como medir consultas (debugbar/log).</div>
+<div>· Regras de negócio: por que salvar <code>preco_unitario</code> no item (histórico) é importante.</div>
+<div>· Integridade referencial: por que usar FK com <code>constrained()</code> e o que é <code>cascadeOnDelete()</code>.</div>
+<div>· UX: como melhorar a tela de pedido antes de usar AJAX (Cap. 7) — ex.: agrupamento e mensagens.</div>
+</div>
+</div>
+</section>
+<!-- 7) Questionário -->
+<section class="mb-4" id="sec-7">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+<div class="mb-4 quiz-question" data-answer="C" data-qid="q1">
+<div class="fw-semibold mb-2">1. Em Eloquent, qual relacionamento representa “um Pedido tem muitos Itens”?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="A"/>A) belongsTo</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="B"/>B) belongsToMany</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="C"/>C) hasMany</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="D"/>D) morphOne</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="E"/>E) hasOneThrough</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q2">
+<div class="fw-semibold mb-2">2. Qual coluna normalmente representa a FK do item para o pedido?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="A"/>A) item_id</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="B"/>B) pedido_id</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="C"/>C) user_id</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="D"/>D) categoria_id</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="E"/>E) total_id</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q3">
+<div class="fw-semibold mb-2">3. O que é eager loading no Laravel?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="A"/>A) Um tipo de validação de formulário.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="B"/>B) Um seeder que cria pedidos automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="C"/>C) Um método para formatar moeda no Blade.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="D"/>D) Carregar relacionamentos antecipadamente com with() para reduzir consultas (evitar N+1).</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="E"/>E) Um comando do Artisan para iniciar servidor.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q4">
+<div class="fw-semibold mb-2">4. O subtotal de um item do pedido normalmente é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="A"/>A) quantidade × preço unitário</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="B"/>B) total do pedido ÷ número de itens</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="C"/>C) quantidade + preço unitário</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="D"/>D) preço unitário − quantidade</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="E"/>E) categoria_id × preço unitário</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q5">
+<div class="fw-semibold mb-2">5. Por que salvar preco_unitario no ItemPedido pode ser importante?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="A"/>A) Para evitar usar migrations.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="B"/>B) Para impedir autenticação no sistema.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="C"/>C) Para substituir o preço do produto para todos os usuários.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="D"/>D) Para desativar CSRF automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="E"/>E) Para manter histórico do preço no momento da venda, mesmo que o produto mude depois.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q6">
+<div class="fw-semibold mb-2">6. O problema N+1 ocorre quando:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="A"/>A) O usuário tenta logar N vezes.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="B"/>B) Para cada registro da lista, o sistema faz uma nova consulta para buscar relacionamentos.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="C"/>C) O MySQL cria N bancos automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="D"/>D) O Laravel não encontra a view.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="E"/>E) O Vite não compila os assets.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q7">
+<div class="fw-semibold mb-2">7. Qual comando cria um controller resource com métodos CRUD padrão?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="A"/>A) php artisan make:middleware</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="B"/>B) php artisan make:seeder</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="C"/>C) php artisan make:factory</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="D"/>D) php artisan make:controller PedidoController --resource</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="E"/>E) php artisan migrate --seed</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q8">
+<div class="fw-semibold mb-2">8. Qual método Eloquent é usado para buscar um registro e falhar com 404 se não existir?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="A"/>A) findOrFail()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="B"/>B) allOrNothing()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="C"/>C) seedOrFail()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="D"/>D) joinOrFail()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="E"/>E) paginateOrFail()</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q9">
+<div class="fw-semibold mb-2">9. Qual solução reduz N+1 ao listar pedidos com itens e produtos?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="A"/>A) Usar {!! !!} nas views.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="B"/>B) Desativar o banco de dados.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="C"/>C) Remover as FK das tabelas.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="D"/>D) Fazer select manual em loop (foreach).</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="E"/>E) Usar eager loading: Pedido::with('itens.produto').</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-0 quiz-question" data-answer="C" data-qid="q10">
+<div class="fw-semibold mb-2">10. Em um fluxo de pedido, uma regra de negócio comum é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="A"/>A) Permitir editar pedido fechado sem restrição.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="B"/>B) Remover CSRF para facilitar o desenvolvimento.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="C"/>C) Impedir alteração quando status é “fechado”.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="D"/>D) Salvar senha do usuário no pedido.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="E"/>E) Criar pedido apenas com JSON.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+</div>
+<div class="mt-4">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetQuiz" type="button">
+<i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 8) Checklist interativo -->
+<section class="mb-4" id="sec-8">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 6)</h2>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center">
+<div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+<div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+</div>
+<div aria-label="Progresso do checklist" aria-valuemax="100" aria-valuemin="0" class="progress mt-2" role="progressbar">
+<div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+</div>
+</div>
+<div class="d-grid gap-2" id="checklist">
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c1" type="checkbox"/>· Migrations de pedidos e item_pedidos criadas e executadas.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c2" type="checkbox"/>· Models Pedido e ItemPedido com $fillable configurado.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c3" type="checkbox"/>· Relacionamentos (Pedido hasMany itens; Item belongsTo pedido e produto) funcionando.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c4" type="checkbox"/>· Rotas definidas (resource pedidos + rotas de itens).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c5" type="checkbox"/>· Tela para iniciar pedido (create/store) funcionando.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c6" type="checkbox"/>· Tela para adicionar/remover itens (edit + ItemPedidoController) funcionando.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c7" type="checkbox"/>· Total do pedido recalculado corretamente ao adicionar/remover itens.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c8" type="checkbox"/>· Link no menu para Pedidos criado e rotas protegidas por auth.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c9" type="checkbox"/>· Commit + push realizados com mensagem descritiva.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetChecklist" type="button">
+<i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 9) Entregáveis -->
+<section class="mb-5" id="sec-9">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">9) Entregáveis do capítulo</h2>
+<div>1. Repositório com migrations/models/controllers e views de Pedido e ItemPedido.</div>
+<div>2. Fluxo funcionando: iniciar pedido → adicionar itens → remover itens → total atualizado.</div>
+<div>3. Capturas de tela em <code>docs/</code>: (a) lista de pedidos, (b) tela de adicionar itens, (c) total atualizado.</div>
+</div>
+</div>
+</section>
+<!-- Navegação final -->
+<section class="mb-5">
+<div class="d-flex flex-wrap justify-content-between gap-2">
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+<div class="d-flex gap-2 flex-wrap">
+<a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+<a class="btn btn-pw3" href="capitulo07.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 07</a>
+</div>
+</div>
+</section>
+<footer class="py-4 border-top">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+<div>
+<div class="fw-semibold">Apostila PW3 • Laravel</div>
+<div class="small text-muted">Capítulo 06 • Relacionamentos Eloquent e Fluxo de Pedido</div>
+</div>
+<div class="small text-muted">
+<i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos
+        </div>
+</div>
+</footer>
+</main>
+<!-- Bootstrap Bundle (com Popper) -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script>
+    // Marcar último capítulo acessado (para aparecer na Home)
+    localStorage.setItem('pw3_last_chapter', 'capitulo06.html');
+
+    // Rolagem suave para âncoras internas
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Questionário dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap06_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState));
+      }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      // Restaurar
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(saved.result === 'correct'){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else if(saved.result === 'incorrect'){
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        }
+      });
+
+      // Eventos
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+
+          quizState[qid] = {
+            selected: chosen,
+            submitted: true,
+            result: isCorrect ? 'correct' : 'incorrect'
+          };
+          saveState();
+
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(isCorrect){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else{
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap06_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+
+      // Restaurar
+      checks.forEach(ch => {
+        const key = ch.dataset.key;
+        ch.checked = !!state[key];
+      });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => {
+        ch.addEventListener('change', () => {
+          save();
+          update();
+        });
+      });
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Capítulo 11 — PW3 Laravel</title>
+<meta content="Capítulo 11 — Testes Automatizados (PHPUnit/Pest), Factories/Seeders e Qualidade de Código" name="description"/>
+<!-- Bootstrap 5 + Icons (CDN) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Prism.js (highlight) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+<style>
+    :root{
+      --pw3-danger:#dc3545;     /* vermelho */
+      --pw3-graybtn:#6c757d;    /* cinza */
+      --pw3-soft:#f8f9fa;
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{ background: var(--pw3-graybtn); border-color: var(--pw3-graybtn); color:#fff; }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    .badge-soft{ background: rgba(220,53,69,.10); color:#b02a37; border: 1px solid rgba(220,53,69,.18); }
+
+    .toc a{ text-decoration:none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+    .quiz-option:hover{ background:#fdfdfd; }
+    .quiz-feedback{ border-radius:.75rem; padding:.75rem; border:1px dashed var(--pw3-border); background:#fff; display:none; }
+    .quiz-feedback.correct{ border-color: rgba(25,135,84,.35); background: rgba(25,135,84,.06); color:#0f5132; }
+    .quiz-feedback.incorrect{ border-color: rgba(220,53,69,.35); background: rgba(220,53,69,.06); color:#842029; }
+
+    /* Checklist */
+    .check-item{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+
+    /* Callout */
+    .callout{ border:1px solid var(--pw3-border); border-left: 5px solid rgba(220,53,69,.55); background:#fff; border-radius:.75rem; padding: 1rem; }
+
+    a:focus, button:focus, input:focus{ outline: 3px solid rgba(13,110,253,.25); outline-offset: 2px; }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+<div class="container">
+<a class="navbar-brand fw-semibold" href="index.html">
+<i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+<button aria-controls="pw3Offcanvas" aria-label="Abrir menu" class="navbar-toggler" data-bs-target="#pw3Offcanvas" data-bs-toggle="offcanvas" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+<li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+<i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><h6 class="dropdown-header">1º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">2º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">3º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">4º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+</ul>
+</li>
+<li class="nav-item ms-lg-2">
+<a class="btn btn-pw3 btn-sm" href="capitulo12.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 12)</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- OFFCANVAS -->
+<div aria-labelledby="pw3OffcanvasLabel" class="offcanvas offcanvas-end" id="pw3Offcanvas" tabindex="-1">
+<div class="offcanvas-header">
+<h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+</div>
+<div class="offcanvas-body">
+<div class="d-grid gap-2 mb-3">
+<a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+</div>
+<hr/>
+<p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+<div class="accordion" id="accMenu">
+<div class="accordion-item">
+<h2 class="accordion-header" id="m1">
+<button aria-controls="mc1" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc1" data-bs-toggle="collapse" type="button">1º Bimestre</button>
+</h2>
+<div aria-labelledby="m1" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc1">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+<a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+<a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m2">
+<button aria-controls="mc2" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc2" data-bs-toggle="collapse" type="button">2º Bimestre</button>
+</h2>
+<div aria-labelledby="m2" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc2">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+<a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+<a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m3">
+<button aria-controls="mc3" aria-expanded="true" class="accordion-button" data-bs-target="#mc3" data-bs-toggle="collapse" type="button">3º Bimestre</button>
+</h2>
+<div aria-labelledby="m3" class="accordion-collapse collapse show" data-bs-parent="#accMenu" id="mc3">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m4">
+<button aria-controls="mc4" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc4" data-bs-toggle="collapse" type="button">4º Bimestre</button>
+</h2>
+<div aria-labelledby="m4" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc4">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+<a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+<a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+<a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+</div>
+</div>
+</div>
+</div>
+<hr class="mt-4"/>
+<div class="d-grid gap-2">
+<a class="btn btn-pw3" href="capitulo12.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 12)</a>
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+</div>
+</div>
+</div>
+<main class="container my-4 my-lg-5" id="topo">
+<!-- HEADER -->
+<section class="mb-4">
+<div class="card">
+<div class="card-body p-4 p-lg-5">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+<span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 11</span>
+<span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+<span class="badge text-bg-light border"><i class="bi bi-diagram-3 me-1"></i>3º Bimestre</span>
+</div>
+<h1 class="fw-bold mb-2">Capítulo 11 — Testes Automatizados (PHPUnit/Pest), Factories/Seeders e Qualidade</h1>
+<div class="mb-3">
+<div class="fw-semibold">Formato:</div>
+<div>· Semana A (100 min): Conceitos + criar testes Feature para Web e API.</div>
+<div>· Semana B (100 min): Factories/Seeders, testes com Sanctum e ajustes de qualidade.</div>
+<div class="mt-2">Contexto do projeto: Sistema da Lanchonete com API (Cap. 9–10). Agora vamos garantir qualidade com testes.</div>
+</div>
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 10)</a>
+<a class="btn btn-pw3" href="capitulo12.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 12</a>
+</div>
+</div>
+</div>
+</section>
+<!-- TOC -->
+<section class="mb-4" id="sumario-interno">
+<div class="row g-3">
+<div class="col-lg-8">
+<div class="card"><div class="card-body">
+<h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+<div class="toc d-grid gap-2">
+<a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos de aprendizagem</a>
+<a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos e ferramentas</a>
+<a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Conteúdo teórico (unit x feature)</a>
+<a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo guiado (testes + factories)</a>
+<a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas</a>
+<a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas complementares</a>
+<a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário (dinâmico)</a>
+<a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist (interativo)</a>
+<a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis</a>
+</div>
+</div></div>
+</div>
+<div class="col-lg-4">
+<div class="card h-100"><div class="card-body">
+<h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+<p class="text-muted mb-0">Use <code>RefreshDatabase</code> nos testes e crie dados com <code>factory()</code> (evite depender do banco real).</p>
+</div></div>
+</div>
+</div>
+</section>
+<!-- 1 -->
+<section class="mb-4" id="sec-1">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">1) Objetivos de aprendizagem</h2>
+<div>Ao final deste capítulo, o(a) aluno(a) será capaz de:</div>
+<div>· Diferenciar testes <strong>Unit</strong> e <strong>Feature</strong> no Laravel.</div>
+<div>· Criar testes Feature para páginas web e para endpoints de API.</div>
+<div>· Usar <code>factories</code> e <code>seeders</code> para gerar dados consistentes para testes.</div>
+<div>· Testar autenticação por token com Sanctum (<code>Sanctum::actingAs</code>).</div>
+<div>· Verificar contratos JSON (estrutura/campos) e status HTTP.</div>
+</div></div>
+</section>
+<!-- 2 -->
+<section class="mb-4" id="sec-2">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">2) Pré-requisitos e ferramentas</h2>
+<div>· Projeto Laravel com autenticação e API (Cap. 9–10).</div>
+<div>· Composer atualizado e ambiente rodando.</div>
+<div>· Opcional: Pest (se o professor quiser testar com sintaxe alternativa).</div>
+</div></div>
+</section>
+<!-- 3 -->
+<section class="mb-4" id="sec-3">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">3) Conteúdo teórico</h2>
+
+
+
+
+
+
+
+<h3 class="h5 fw-bold mt-3">3.1. Testes Unit x Feature (e onde cada um faz sentido)</h3><p>No Laravel, é comum separar testes em duas grandes categorias: Unit e Feature. Testes Unit focam em uma “unidade” pequena de código (um método, uma classe, uma função) com o mínimo de dependências possível. A ideia é testar lógica pura: por exemplo, um cálculo de subtotal, uma regra de transformação de dados, ou uma classe de serviço que não precisa necessariamente de HTTP e views. Em geral, Unit tests são rápidos e ajudam a localizar problemas com precisão.</p><p>Já testes Feature verificam o comportamento do sistema como um todo: rotas, controllers, middleware, validação, banco de dados e respostas (HTML ou JSON). Eles são mais próximos do que um usuário/cliente realmente faz: um request chega, passa por autenticação, executa uma action, interage com models e retorna uma resposta. Por isso, Feature tests dão confiança de que as partes estão integradas corretamente. Em APIs, esse tipo de teste é especialmente útil porque valida status HTTP, estrutura JSON e regras de autenticação/autorização.</p><p>Uma forma simples de decidir: se o seu teste precisa “bater em uma rota” (get/postJson) e verificar status e JSON, ele é Feature. Se o seu teste só precisa chamar um método e comparar resultado, ele tende a ser Unit. Na prática, projetos Laravel iniciantes costumam usar mais Feature, porque grande parte do valor está em garantir que rotas e validações funcionam. Conforme o projeto cresce, você começa a extrair regras de negócio para classes/serviços e aí Unit tests ganham espaço.</p><p>Comparação rápida:</p><ul><li><code>Unit</code> — Mais rápido; testa lógica isolada; fácil de diagnosticar falhas.</li><li><code>Feature</code> — Testa o fluxo real (HTTP → controller → DB → response); valida integração.</li><li><code>Estratégia didática</code> — Comece com Feature para rotas principais e crie Unit para regras de negócio que você extrair.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 11)</div><div>Na seção 4.3, você cria um teste Feature (tests/Feature/Api/ProdutoApiTest.php) que faz getJson/postJson em /api/produtos e verifica status 401/200/201/422. Isso é Feature porque passa pela rota, middleware do Sanctum, validação e Resource. Um exemplo de Unit (não obrigatório aqui) seria testar um método que calcula subtotal = quantidade * preco_unitario sem depender de HTTP.</div></div><h3 class="h5 fw-bold mt-4">3.2. Por que testar? (valor prático e “documentação viva”)</h3><p>Testes automatizados têm três benefícios diretos em projetos reais e didáticos. Primeiro: reduzem bugs — você pega erro cedo, antes de entregar. Segundo: dão confiança para refatorar — quando você melhora um controller, troca validação ou muda um Resource, os testes avisam se você quebrou algo. Terceiro: viram documentação viva — diferente de um README que pode ficar desatualizado, o teste descreve o comportamento esperado e precisa passar para o projeto estar “ok”.</p><p>No contexto da nossa API (Cap. 9–10), testes também ajudam a garantir contrato: a estrutura paginada (data/links/meta), os status corretos (201 no create, 422 na validação), e a exigência de token (401). Isso evita regressões comuns: por exemplo, alguém remover middleware auth:sanctum sem perceber, ou alterar o Resource e parar de retornar campo preco como float.</p><p>Outro ponto pedagógico: testes ajudam a aprender o “jeito Laravel” de programar. Você usa helpers como getJson/postJson, assertions como assertJsonStructure, assertJsonPath e assertJsonValidationErrors, e passa a entender melhor contratos HTTP. Além disso, quando você acopla testes a factories, você aprende a criar dados previsíveis sem depender do banco real do seu computador.</p><p>O que vale priorizar em uma suíte mínima de testes:</p><ul><li><code>Autenticação</code> — Rotas protegidas retornam 401 sem token e 200 com token.</li><li><code>Validação</code> — Payload inválido retorna 422 e indica os campos com erro.</li><li><code>Contrato JSON</code> — Estrutura esperada (data/links/meta) e campos essenciais do recurso.</li><li><code>Caminho feliz</code> — Criar/atualizar um recurso retorna status correto e dados consistentes.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 11)</div><div>A “meta prática” do capítulo (seção 3) é ter testes para 401 sem token, 200 com token e 201 no create. Esses três cenários cobrem autenticação + contrato + validação básica, gerando confiança de que a API está funcional e estável.</div></div><h3 class="h5 fw-bold mt-4">3.3. Dados de teste: Factories, Seeders e RefreshDatabase</h3><p>Testes confiáveis dependem de dados controlados. Se você depender do seu banco real (com dados que mudam a cada aula), os testes ficam instáveis: um dia passa, no outro quebra. Factories resolvem isso criando registros falsos de forma consistente e repetível. Você consegue criar 15 produtos com Produto::factory()-&gt;count(15)-&gt;create() e saber que sempre haverá registros suficientes para testar paginação.</p><p>O trait RefreshDatabase é essencial porque garante isolamento: cada teste começa com um banco “limpo”. O Laravel faz migrate/rollback (ou reusa migrações) para garantir que alterações de um teste não contaminem o próximo. Isso é o que transforma testes em algo reproduzível. Sem RefreshDatabase, um teste pode depender do que outro test criou e isso vira uma bagunça.</p><p>Seeders entram em dois cenários diferentes: (1) seeders para demonstrar o sistema (demo) — como o DemoSeeder do passo a passo; e (2) seeders como parte do setup de testes — quando você precisa de um conjunto base de dados. No geral, para testes, factories são mais flexíveis e preferíveis. Seeders são úteis quando você quer uma massa padrão para todos (por exemplo, permissões, perfis, configurações).</p><p>Boas práticas para dados em testes:</p><ul><li><code>Prefira factories</code> — Mais flexíveis e fáceis de ajustar por teste.</li><li><code>Use RefreshDatabase</code> — Evita dependência entre testes e garante isolamento.</li><li><code>Evite banco real</code> — Testes não devem depender do estado do seu MySQL local com dados antigos.</li><li><code>Crie relações com factories</code> — categoria_id =&gt; Categoria::factory() garante integridade e simplicidade.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 11)</div><div>Na seção 4.2, você cria CategoriaFactory e ProdutoFactory (incluindo categoria_id apontando para Categoria::factory()). Na seção 4.3, o teste usa RefreshDatabase e cria dados com factories antes de chamar getJson/postJson. Isso deixa os testes determinísticos e repetíveis em qualquer máquina.</div></div><h3 class="h5 fw-bold mt-4">3.4. Testando APIs protegidas com Sanctum (Sanctum::actingAs)</h3><p>Quando uma API é protegida por token (Sanctum), o comportamento esperado é: sem token → 401; com token válido → acesso permitido. Em testes, você não precisa realmente chamar /api/login e guardar token para cada request. O Laravel oferece Sanctum::actingAs(), que simula um usuário autenticado no contexto do teste. Assim, você consegue testar endpoints protegidos com simplicidade, sem depender do fluxo de login.</p><p>Essa simulação é importante por dois motivos: (1) deixa os testes mais rápidos e focados (você testa o endpoint em si, e não o login toda hora); (2) evita flutuações e complexidade desnecessária. Mesmo assim, é interessante ter pelo menos um teste específico para o endpoint de login (AuthController), verificando 200 com credenciais corretas e 401 com credenciais inválidas — isso garante que o fluxo real funciona.</p><p>Além de autenticação, você pode evoluir para autorização: por exemplo, permitir criar produtos apenas para role=gerente. Nesse caso, seus testes devem cobrir 403 quando o usuário autenticado tem role=atendente. Isso conecta o Cap. 5 (roles) com o Cap. 9–10 (API) e reforça que segurança é sempre “autenticar + autorizar”.</p><p>O que testar em endpoints com Sanctum:</p><ul><li><code>401 sem token</code> — getJson/postJson deve falhar sem autenticação.</li><li><code>200/201 com token</code> — actingAs permite simular usuário e verificar sucesso.</li><li><code>403 por role (se existir)</code> — Usuário autenticado mas sem permissão deve ser bloqueado.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 11)</div><div>No teste ProdutoApiTest (seção 4.3), Sanctum::actingAs(User::factory()-&gt;create()) habilita o acesso ao /api/produtos. O primeiro teste confirma 401 sem token e o segundo confirma 200 com token e JSON paginado. Isso valida rapidamente a proteção auth:sanctum aplicada nas rotas.</div></div><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-check2-circle me-2"></i>Meta prática (qualidade mínima que vale ouro)</div><div>Se você tiver 4 testes bem escolhidos — (1) 401 sem token, (2) 200 com token, (3) 201 criando produto, (4) 422 para payload inválido — você já reduz muito a chance de regressão na API e ganha segurança para evoluir filtros/ordenação e documentação.</div></div></div></div>
+</section>
+<!-- 4 -->
+<section class="mb-4" id="sec-4">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">4) Passo a passo guiado</h2>
+<h3 class="h5 fw-bold mt-3">4.1. Rodar testes no Laravel</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan test
+# ou
+./vendor/bin/phpunit</code></pre>
+<h3 class="h5 fw-bold mt-4">4.2. Criar factories (Categoria e Produto)</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan make:factory CategoriaFactory --model=Categoria
+php artisan make:factory ProdutoFactory --model=Produto</code></pre>
+<div>Exemplo de <code>database/factories/CategoriaFactory.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">public function definition(): array
+{
+    return [
+        'nome' =&gt; $this-&gt;faker-&gt;unique()-&gt;words(2, true),
+    ];
+}</code></pre>
+<div>Exemplo de <code>database/factories/ProdutoFactory.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">public function definition(): array
+{
+    return [
+        'nome' =&gt; $this-&gt;faker-&gt;unique()-&gt;word(),
+        'preco' =&gt; $this-&gt;faker-&gt;randomFloat(2, 1, 50),
+        'categoria_id' =&gt; \App\Models\Categoria::factory(),
+    ];
+}</code></pre>
+<h3 class="h5 fw-bold mt-4">4.3. Criar teste Feature para a API de Produtos</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan make:test Api/ProdutoApiTest</code></pre>
+<div>Em <code>tests/Feature/Api/ProdutoApiTest.php</code> (exemplo):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;?php
+
+namespace Tests\Feature\Api;
+
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+use App\Models\User;
+use App\Models\Produto;
+use App\Models\Categoria;
+
+class ProdutoApiTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_lista_produtos_exige_autenticacao()
+    {
+        $this-&gt;getJson('/api/produtos')
+            -&gt;assertStatus(401);
+    }
+
+    public function test_lista_produtos_com_token_retorna_estrutura_paginada()
+    {
+        Sanctum::actingAs(User::factory()-&gt;create());
+        Produto::factory()-&gt;count(15)-&gt;create();
+
+        $this-&gt;getJson('/api/produtos')
+            -&gt;assertOk()
+            -&gt;assertJsonStructure([
+                'data',
+                'links',
+                'meta'
+            ]);
+    }
+
+    public function test_cria_produto_com_validacao()
+    {
+        Sanctum::actingAs(User::factory()-&gt;create());
+        $cat = Categoria::factory()-&gt;create();
+
+        $payload = [
+            'nome' =&gt; 'Coxinha',
+            'preco' =&gt; 7.50,
+            'categoria_id' =&gt; $cat-&gt;id,
+        ];
+
+        $this-&gt;postJson('/api/produtos', $payload)
+            -&gt;assertStatus(201)
+            -&gt;assertJsonPath('data.nome', 'Coxinha');
+    }
+
+    public function test_validacao_rejeita_payload_invalido()
+    {
+        Sanctum::actingAs(User::factory()-&gt;create());
+
+        $this-&gt;postJson('/api/produtos', ['nome' =&gt; ''])
+            -&gt;assertStatus(422)
+            -&gt;assertJsonValidationErrors(['nome', 'preco', 'categoria_id']);
+    }
+}</code></pre>
+<div class="callout">
+<div class="fw-semibold"><i class="bi bi-info-circle me-2"></i>Dica</div>
+<div class="text-muted">Use <code>getJson/postJson</code> para garantir headers JSON automaticamente.</div>
+</div>
+<h3 class="h5 fw-bold mt-4">4.4. (Opcional) Instalar Pest</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">composer require pestphp/pest --dev
+php artisan pest:install</code></pre>
+<h3 class="h5 fw-bold mt-4">4.5. Seed de dados para demo (não confundir com testes)</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan make:seeder DemoSeeder</code></pre>
+<div>Em <code>database/seeders/DemoSeeder.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">public function run(): void
+{
+    \App\Models\Categoria::factory()-&gt;count(5)-&gt;create();
+    \App\Models\Produto::factory()-&gt;count(30)-&gt;create();
+}</code></pre>
+<h3 class="h5 fw-bold mt-4">4.6. Rodar testes e commitar</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan test
+
+git add .
+git commit -m "Capítulo 11: testes Feature API + factories/seed + qualidade"
+git push</code></pre>
+</div></div>
+</section>
+<!-- 5 -->
+<section class="mb-4" id="sec-5">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">5) Atividades correlatas (Semana B)</h2>
+<div class="mb-2">Objetivo: ampliar cobertura e garantir contratos.</div>
+<div class="fw-semibold mt-2">1. Testar filtros/ordenação (Cap. 10) na API</div>
+<div>o Criar um teste para <code>?q=</code> e outro para <code>?sort=preco&amp;dir=desc</code>.</div>
+<div class="fw-semibold mt-3">2. Testar autorização por role (gerente/atendente)</div>
+<div>o Se sua API restringe criação/edição a gerente, testar 403 para atendente.</div>
+<div class="fw-semibold mt-3">3. Testar rotas web principais</div>
+<div>o Feature test para login e acesso protegido (ex.: /pedidos exige auth).</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+<div class="text-muted">Configurar um workflow de CI (GitHub Actions) para rodar <code>php artisan test</code> em cada push.</div>
+</div>
+</div></div>
+</section>
+<!-- 6 -->
+<section class="mb-4" id="sec-6">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">6) Pesquisas complementares</h2>
+<div>· Diferença entre mocks, fakes e stubs em testes.</div>
+<div>· Como testar jobs/queues e notifications no Laravel.</div>
+<div>· Cobertura de código: o que é e como medir (conceito).</div>
+<div>· Testes de API: contract testing e snapshots (conceito).</div>
+</div></div>
+</section>
+<!-- 7 -->
+<section class="mb-4" id="sec-7">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q1">
+<div class="fw-semibold mb-2">1. Testes Feature no Laravel verificam principalmente:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="A"/>A) Apenas formatação de código.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="B"/>B) Comportamento do sistema (rotas, controllers, middleware, banco).</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="C"/>C) Apenas CSS.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="D"/>D) Apenas comandos Git.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="E"/>E) Apenas o arquivo .env.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q2">
+<div class="fw-semibold mb-2">2. Qual trait garante banco “limpo” a cada teste (migrando/rollback)?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="A"/>A) WithQueryString</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="B"/>B) HasFactory</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="C"/>C) SoftDeletes</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="D"/>D) RefreshDatabase</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="E"/>E) GuardsAttributes</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q3">
+<div class="fw-semibold mb-2">3. Factories servem para:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="A"/>A) Criar dados falsos consistentes para testes/seed.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="B"/>B) Criar rotas automaticamente em produção.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="C"/>C) Trocar MySQL por SQLite.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="D"/>D) Desativar CSRF.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="E"/>E) Compilar assets do Vite.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q4">
+<div class="fw-semibold mb-2">4. Para simular um usuário autenticado via token Sanctum em testes, usamos:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="A"/>A) Blade::actingAs()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="B"/>B) Route::actingAs()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="C"/>C) Cache::actingAs()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="D"/>D) Auth::token()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="E"/>E) Sanctum::actingAs()</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-0 quiz-question" data-answer="C" data-qid="q5">
+<div class="fw-semibold mb-2">5. Um status HTTP típico para erro de validação em JSON é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="A"/>A) 200</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="B"/>B) 201</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="C"/>C) 422</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="D"/>D) 304</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="E"/>E) 100</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+</div>
+<div class="mt-4">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetQuiz" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário</button>
+</div>
+</div></div>
+</section>
+<!-- 8 -->
+<section class="mb-4" id="sec-8">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 11)</h2>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center">
+<div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+<div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+</div>
+<div aria-label="Progresso do checklist" aria-valuemax="100" aria-valuemin="0" class="progress mt-2" role="progressbar">
+<div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+</div>
+</div>
+<div class="d-grid gap-2" id="checklist">
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c1" type="checkbox"/>· Factories de Categoria e Produto criadas e funcionando.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c2" type="checkbox"/>· Teste Feature criado para exigir autenticação na API (401 sem token).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c3" type="checkbox"/>· Teste de listagem autenticada retorna estrutura paginada (data/links/meta).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c4" type="checkbox"/>· Teste de criação (201) valida nome e retorno JSON.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c5" type="checkbox"/>· Teste de validação (422) verifica errors para campos obrigatórios.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c6" type="checkbox"/>· Seed demo criado (opcional) para dados de apresentação.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c7" type="checkbox"/>· Rodou <code>php artisan test</code> sem falhas.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c8" type="checkbox"/>· Commit + push feitos com mensagem descritiva.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetChecklist" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist</button>
+</div>
+</div></div>
+</section>
+<!-- 9 -->
+<section class="mb-5" id="sec-9">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">9) Entregáveis do capítulo</h2>
+<div>1. Suíte de testes com pelo menos 3 cenários (401 sem token, 200 com token, 201 create).</div>
+<div>2. Factories criadas e usadas nos testes.</div>
+<div>3. Prints em <code>docs/</code>: saída do <code>php artisan test</code> e estrutura JSON validada.</div>
+</div></div>
+</section>
+<!-- NAV FINAL -->
+<section class="mb-5">
+<div class="d-flex flex-wrap justify-content-between gap-2">
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+<div class="d-flex gap-2 flex-wrap">
+<a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+<a class="btn btn-pw3" href="capitulo12.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 12</a>
+</div>
+</div>
+</section>
+<footer class="py-4 border-top">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+<div>
+<div class="fw-semibold">Apostila PW3 • Laravel</div>
+<div class="small text-muted">Capítulo 11 • Testes Automatizados e Qualidade</div>
+</div>
+<div class="small text-muted"><i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos</div>
+</div>
+</footer>
+</main>
+<!-- Bootstrap Bundle -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script>
+    // último capítulo
+    localStorage.setItem('pw3_last_chapter', 'capitulo11.html');
+
+    // rolagem suave
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Quiz dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap11_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState)); }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, saved.result === 'correct' ? 'correct' : 'incorrect', saved.result === 'correct' ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        }
+      });
+
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+          quizState[qid] = { selected: chosen, submitted: true, result: isCorrect ? 'correct' : 'incorrect' };
+          saveState();
+
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, isCorrect ? 'correct' : 'incorrect', isCorrect ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap11_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+      checks.forEach(ch => { ch.checked = !!state[ch.dataset.key]; });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => ch.addEventListener('change', () => { save(); update(); }));
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>
