@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Capítulo 12 — PW3 Laravel</title>
+<meta content="Capítulo 12 — Consumindo sua própria API (Sanctum), CORS, Cliente JS (fetch) e Boas práticas de token" name="description"/>
+<!-- Bootstrap 5 + Icons (CDN) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Prism.js (highlight) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+<style>
+    :root{
+      --pw3-danger:#dc3545;     /* vermelho */
+      --pw3-graybtn:#6c757d;    /* cinza */
+      --pw3-soft:#f8f9fa;
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{ background: var(--pw3-graybtn); border-color: var(--pw3-graybtn); color:#fff; }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    .badge-soft{ background: rgba(220,53,69,.10); color:#b02a37; border: 1px solid rgba(220,53,69,.18); }
+
+    .toc a{ text-decoration:none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+    .quiz-option:hover{ background:#fdfdfd; }
+    .quiz-feedback{ border-radius:.75rem; padding:.75rem; border:1px dashed var(--pw3-border); background:#fff; display:none; }
+    .quiz-feedback.correct{ border-color: rgba(25,135,84,.35); background: rgba(25,135,84,.06); color:#0f5132; }
+    .quiz-feedback.incorrect{ border-color: rgba(220,53,69,.35); background: rgba(220,53,69,.06); color:#842029; }
+
+    /* Checklist */
+    .check-item{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+
+    /* Callout */
+    .callout{ border:1px solid var(--pw3-border); border-left: 5px solid rgba(220,53,69,.55); background:#fff; border-radius:.75rem; padding: 1rem; }
+
+    a:focus, button:focus, input:focus{ outline: 3px solid rgba(13,110,253,.25); outline-offset: 2px; }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+<div class="container">
+<a class="navbar-brand fw-semibold" href="index.html">
+<i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+<button aria-controls="pw3Offcanvas" aria-label="Abrir menu" class="navbar-toggler" data-bs-target="#pw3Offcanvas" data-bs-toggle="offcanvas" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+<li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+<i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><h6 class="dropdown-header">1º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">2º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">3º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">4º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+</ul>
+</li>
+<li class="nav-item ms-lg-2">
+<a class="btn btn-pw3 btn-sm" href="capitulo13.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 13)</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- OFFCANVAS -->
+<div aria-labelledby="pw3OffcanvasLabel" class="offcanvas offcanvas-end" id="pw3Offcanvas" tabindex="-1">
+<div class="offcanvas-header">
+<h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+</div>
+<div class="offcanvas-body">
+<div class="d-grid gap-2 mb-3">
+<a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+</div>
+<hr/>
+<p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+<div class="accordion" id="accMenu">
+<div class="accordion-item">
+<h2 class="accordion-header" id="m1">
+<button aria-controls="mc1" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc1" data-bs-toggle="collapse" type="button">1º Bimestre</button>
+</h2>
+<div aria-labelledby="m1" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc1">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+<a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+<a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m2">
+<button aria-controls="mc2" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc2" data-bs-toggle="collapse" type="button">2º Bimestre</button>
+</h2>
+<div aria-labelledby="m2" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc2">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+<a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+<a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m3">
+<button aria-controls="mc3" aria-expanded="true" class="accordion-button" data-bs-target="#mc3" data-bs-toggle="collapse" type="button">3º Bimestre</button>
+</h2>
+<div aria-labelledby="m3" class="accordion-collapse collapse show" data-bs-parent="#accMenu" id="mc3">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m4">
+<button aria-controls="mc4" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc4" data-bs-toggle="collapse" type="button">4º Bimestre</button>
+</h2>
+<div aria-labelledby="m4" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc4">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+<a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+<a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+<a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+</div>
+</div>
+</div>
+</div>
+<hr class="mt-4"/>
+<div class="d-grid gap-2">
+<a class="btn btn-pw3" href="capitulo13.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 13)</a>
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+</div>
+</div>
+</div>
+<main class="container my-4 my-lg-5" id="topo">
+<!-- HEADER -->
+<section class="mb-4">
+<div class="card">
+<div class="card-body p-4 p-lg-5">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+<span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 12</span>
+<span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+<span class="badge text-bg-light border"><i class="bi bi-diagram-3 me-1"></i>3º Bimestre</span>
+</div>
+<h1 class="fw-bold mb-2">Capítulo 12 — Consumindo sua própria API: Cliente JS, CORS e tokens (Sanctum)</h1>
+<div class="mb-3">
+<div class="fw-semibold">Formato:</div>
+<div>· Semana A: CORS + cliente JS (fetch) consumindo /api/* com token.</div>
+<div>· Semana B: UX, armazenamento seguro do token, logout e pequenos ajustes de segurança.</div>
+<div class="mt-2">Contexto: você já tem API protegida (Cap. 9–10) e testes (Cap. 11). Agora vamos criar um cliente externo (mini dashboard) consumindo a API.</div>
+</div>
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 11)</a>
+<a class="btn btn-pw3" href="capitulo13.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 13</a>
+</div>
+</div>
+</div>
+</section>
+<!-- TOC -->
+<section class="mb-4" id="sumario-interno">
+<div class="row g-3">
+<div class="col-lg-8">
+<div class="card"><div class="card-body">
+<h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+<div class="toc d-grid gap-2">
+<a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos</a>
+<a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos</a>
+<a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Teoria (CORS e tokens)</a>
+<a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo (mini cliente)</a>
+<a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas</a>
+<a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas</a>
+<a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário</a>
+<a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist</a>
+<a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis</a>
+</div>
+</div></div>
+</div>
+<div class="col-lg-4">
+<div class="card h-100"><div class="card-body">
+<h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+<p class="text-muted mb-0">Guarde token com cuidado. Para didática, usaremos <code>localStorage</code>, mas explique riscos e alternativas.</p>
+</div></div>
+</div>
+</div>
+</section>
+<!-- 1 -->
+<section class="mb-4" id="sec-1">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">1) Objetivos</h2>
+<div>Ao final deste capítulo, você será capaz de:</div>
+<div>· Explicar CORS e por que navegadores bloqueiam requisições cross-origin.</div>
+<div>· Configurar CORS para permitir um cliente separado consumir sua API.</div>
+<div>· Construir um mini cliente em HTML/JS usando <code>fetch()</code> com Bearer token.</div>
+<div>· Implementar login (obter token), listagem de produtos (paginada) e logout (revogar token).</div>
+<div>· Aplicar boas práticas: headers, tratamento de erro e feedback ao usuário.</div>
+</div></div>
+</section>
+<!-- 2 -->
+<section class="mb-4" id="sec-2">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">2) Pré-requisitos</h2>
+<div>· API funcionando com Sanctum (Cap. 9) + filtros/ordenação (Cap. 10).</div>
+<div>· Testes rodando (Cap. 11) para garantir que a API está estável.</div>
+<div>· Postman para conferir rapidamente login e endpoints.</div>
+<div>· Um usuário válido no banco para realizar login e gerar token.</div>
+</div></div>
+</section>
+<!-- 3 -->
+<section class="mb-4" id="sec-3">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">3) Teoria (CORS e Tokens)</h2>
+
+
+
+
+
+
+
+
+<h3 class="h5 fw-bold mt-3">3.1. O que é CORS? (origem, navegador e preflight)</h3><p>CORS (Cross-Origin Resource Sharing) é uma regra de segurança aplicada pelo navegador para controlar quais páginas podem chamar recursos (APIs) de outras origens. “Origem” é a combinação de protocolo + domínio + porta. Isso significa que http://localhost:5173 e http://127.0.0.1:8000 são origens diferentes, mesmo sendo o mesmo computador. Quando um front tenta chamar uma API em outra origem, o navegador bloqueia por padrão, a menos que o servidor autorize explicitamente por meio de headers CORS.</p><p>O ponto mais importante: CORS não é “segurança do servidor”; é uma proteção do navegador para o usuário. Ferramentas como Postman não sofrem bloqueio de CORS porque não são navegadores. Por isso, pode acontecer do endpoint funcionar no Postman e falhar no browser com erro de CORS. O jeito correto de resolver é ajustar a política CORS no servidor para permitir apenas as origens necessárias, sem abrir tudo para qualquer site.</p><p>Além do simples GET, muitas requisições disparam um preflight (requisição OPTIONS) antes da requisição real. Isso acontece quando o browser detecta “requisição não simples”, como: uso de Authorization header, Content-Type application/json, métodos como PUT/DELETE, ou headers customizados. O preflight pergunta ao servidor: “você aceita que essa origem envie este método e estes headers?” Se o servidor não responder com os headers corretos, o navegador bloqueia a chamada real. Em projetos com token Bearer, o Authorization quase sempre aciona preflight — então CORS precisa estar bem configurado.</p><p>Pontos-chave para entender CORS neste capítulo:</p><ul><li><code>CORS é do navegador</code> — Postman não bloqueia; o browser bloqueia.</li><li><code>Origem inclui porta</code> — 5173 e 8000 são origens diferentes.</li><li><code>Authorization geralmente gera preflight</code> — OPTIONS precisa ser permitido para api/*.</li><li><code>Permita só o necessário</code> — allowed_origins deve ser lista de origens do seu cliente.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 12)</div><div>Na seção 4.1, você ajusta config/cors.php para permitir as origens do cliente (ex.: http://localhost:5173). Isso faz o preflight e as requisições com Authorization funcionarem no browser. Se der erro, a própria seção 4.4 orienta a conferir a origem e limpar cache de config com php artisan config:clear.</div></div><h3 class="h5 fw-bold mt-4">3.2. Tokens Bearer (Sanctum) e diferença para sessão</h3><p>Nos capítulos anteriores (Blade), a autenticação era baseada em sessão: o servidor cria uma sessão e o navegador guarda um cookie. A cada requisição, o cookie identifica o usuário. Para APIs consumidas por clientes externos (como um mini dashboard em outra porta), o fluxo mais comum é token: você faz login, recebe um token e envia esse token em cada requisição no header Authorization: Bearer ...</p><p>No Sanctum com tokens pessoais, cada token é armazenado no banco e pode ser revogado (apagado) a qualquer momento. Isso é útil para simular dispositivos: um usuário pode ter um token “postman” e outro token “cliente-js”. Se um token vazar, você revoga apenas aquele token sem derrubar todos os acessos. No nosso exemplo, o endpoint /api/logout remove o token atual (currentAccessToken), o que representa “sair daquele cliente”.</p><p>Outro detalhe importante: quando você usa token Bearer, o servidor não depende do cookie de sessão, então a chamada é naturalmente stateless. Isso combina com REST e com clientes externos. Por outro lado, o token precisa ser protegido no cliente, porque quem possui o token possui acesso. Essa é a ponte para o próximo tópico: armazenamento seguro.</p><p>Boas práticas de token Bearer em clientes:</p><ul><li><code>Sempre enviar Accept: application/json</code> — Facilita tratar erros (401/422) em JSON.</li><li><code>Não logar token em público</code> — Evitar console/prints/commits com token visível.</li><li><code>Separar tokens por device_name</code> — Facilita revogar tokens por cliente/dispositivo.</li><li><code>Logout revoga token</code> — POST /api/logout para invalidar acesso daquele cliente.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 12)</div><div>Na seção 4.3, a função api() injeta Authorization: Bearer &lt;token&gt; automaticamente quando existe token salvo. No login, você chama /api/login e salva data.token. No logout, você chama POST /api/logout e remove o token do storage. Isso implementa o ciclo completo login → consumir API → logout com revogação.</div></div><h3 class="h5 fw-bold mt-4">3.3. Armazenamento do token (localStorage, riscos e alternativas)</h3><p>Guardar token em localStorage é simples e funciona bem para didática: você fecha e abre o navegador e o token ainda está lá. Porém, existe um risco importante: se houver uma falha de XSS (injeção de script) na página, um script malicioso pode ler localStorage e roubar o token. Esse é o principal motivo pelo qual, em aplicações reais, localStorage é considerado arriscado para tokens de alto privilégio.</p><p>Alternativas mais seguras dependem do tipo de aplicação. Em SPAs com Sanctum, um padrão comum é usar autenticação via cookies HttpOnly (que JavaScript não consegue ler) combinada com CSRF, evitando expor token ao JS. Outra alternativa é guardar o token apenas em memória (variável) e pedir login de novo ao recarregar a página — melhora segurança, piora conveniência. Em projetos didáticos, é suficiente explicar o trade-off: conveniência x exposição.</p><p>Mesmo usando localStorage, dá para mitigar: (1) reduzir risco de XSS usando escaping correto e evitando {!! !!} em dados do usuário; (2) aplicar Content Security Policy (CSP) — tema avançado; (3) limitar escopo do token (criar tokens com menos permissões, quando aplicável); (4) expirar o token logicamente no front, apagando após X minutos (atividade sugerida no capítulo).</p><p>Resumo didático (o que dizer para o aluno):</p><ul><li><code>localStorage é fácil</code> — Bom para aprender e prototipar.</li><li><code>Risco principal é XSS</code> — Se tiver script malicioso, ele lê o token.</li><li><code>Cookies HttpOnly são alternativa</code> — Mais seguro, mas exige fluxo SPA e CSRF.</li><li><code>Mitigação básica</code> — Evitar XSS, expirar token no front e revogar no logout.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 12)</div><div>Na seção 4.3, você usa localStorage (tokenKey = pw3_token) para persistir o token e reaproveitar nas chamadas. A seção 3.3 do capítulo já alerta que isso é didático e que, em projetos reais, você deve considerar cookies HttpOnly ou estratégias mais seguras. Nas atividades correlatas (seção 5), há a sugestão de expiração lógica no front (timestamp) para reduzir risco.</div></div><h3 class="h5 fw-bold mt-4">3.4. Boas práticas de cliente JS (fetch): headers, erros e UX</h3><p>Quando você constrói um cliente JS para consumir uma API, consistência é essencial. O cliente deve sempre enviar Accept: application/json, tratar resp.ok, lidar com erros de rede e mostrar feedback ao usuário. Além disso, ao usar JSON, você deve controlar Content-Type: application/json apenas quando o corpo realmente é JSON. Isso evita bugs de parsing no servidor.</p><p>Outra boa prática é centralizar o acesso à API em uma função (como api() no passo a passo). Assim, você coloca em um único lugar a lógica de headers, Authorization, parsing e tratamento de erros. Isso evita duplicação e facilita evoluir o cliente: paginação, filtros, criação de produto etc. A partir dessa base, você consegue criar componentes simples de UI: botões Próximo/Anterior lendo links/meta, campo de busca e selects para filtros.</p><p>Por fim, sempre depure com DevTools. Em CORS, o erro aparece no Console/Network; em 401, você vê o status; em 422, você vê a estrutura de errors. Ensinar o aluno a olhar Network/Console é tão importante quanto o código.</p><p>Checklist do cliente JS “bem comportado”:</p><ul><li><code>Centralizar função api()</code> — Um ponto único de headers, token e parsing.</li><li><code>Tratar 401/422</code> — Mostrar mensagem e orientar (login obrigatório / corrigir campos).</li><li><code>Erros de rede</code> — try/catch e mensagem “verifique servidor e internet”.</li><li><code>UX mínima</code> — Loading, mensagens claras e limpar token no logout mesmo se falhar.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 12)</div><div>Na seção 4.3, a função api() sempre define Accept, injeta Authorization quando há token e faz parsing defensivo (text → JSON). Se resp.ok for falso, lança Error com message. Os handlers de click capturam e exibem alert, garantindo feedback básico. Na seção 4.4, você valida o fluxo no navegador e usa o callout de depuração para resolver CORS rapidamente.</div></div></div></div>
+</section>
+<!-- 4 -->
+<section class="mb-4" id="sec-4">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">4) Passo a passo — Mini cliente consumindo a API</h2>
+<h3 class="h5 fw-bold mt-3">4.1. Configurar CORS no Laravel</h3>
+<div>Em Laravel, o arquivo é <code>config/cors.php</code>. Ajuste <code>allowed_origins</code> para o endereço do seu cliente.</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">// config/cors.php
+return [
+  'paths' =&gt; ['api/*'],
+  'allowed_methods' =&gt; ['*'],
+  'allowed_origins' =&gt; ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  'allowed_headers' =&gt; ['*'],
+  'supports_credentials' =&gt; false,
+];</code></pre>
+<div class="text-muted">Dica: se você servir o cliente com Live Server em outra porta, inclua a origem correta.</div>
+<h3 class="h5 fw-bold mt-4">4.2. Criar um mini cliente (arquivo HTML)</h3>
+<div>Crie um arquivo simples fora do Laravel (ex.: <code>client/index.html</code>). Ele fará login e listará produtos.</div>
+<div>HTML</div>
+<pre class="language-html"><code class="language-html">&lt;!doctype html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;title&gt;Cliente PW3 (API)&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Cliente da API (Produtos)&lt;/h1&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;Login&lt;/h2&gt;
+    &lt;input id="email" placeholder="email" /&gt;
+    &lt;input id="password" type="password" placeholder="senha" /&gt;
+    &lt;button id="btnLogin"&gt;Entrar&lt;/button&gt;
+    &lt;button id="btnLogout"&gt;Sair&lt;/button&gt;
+  &lt;/section&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;Produtos&lt;/h2&gt;
+    &lt;button id="btnLoad"&gt;Carregar produtos&lt;/button&gt;
+    &lt;pre id="out"&gt;&lt;/pre&gt;
+  &lt;/section&gt;
+
+  &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<h3 class="h5 fw-bold mt-4">4.3. Implementar app.js (fetch + Bearer)</h3>
+<div>JavaScript</div>
+<pre class="language-javascript"><code class="language-javascript">const baseUrl = 'http://127.0.0.1:8000';
+const tokenKey = 'pw3_token';
+
+function getToken(){
+  return localStorage.getItem(tokenKey);
+}
+
+function setToken(t){
+  if(t) localStorage.setItem(tokenKey, t);
+}
+
+function clearToken(){
+  localStorage.removeItem(tokenKey);
+}
+
+async function api(path, options = {}){
+  const headers = options.headers || {};
+  headers['Accept'] = 'application/json';
+
+  const token = getToken();
+  if(token){
+    headers['Authorization'] = 'Bearer ' + token;
+  }
+
+  const resp = await fetch(baseUrl + path, { ...options, headers });
+  const text = await resp.text();
+  let data;
+  try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
+
+  if(!resp.ok){
+    const msg = (data &amp;&amp; data.message) ? data.message : ('HTTP ' + resp.status);
+    throw new Error(msg);
+  }
+
+  return data;
+}
+
+document.getElementById('btnLogin').addEventListener('click', async () =&gt; {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const data = await api('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, device_name: 'cliente-js' })
+    });
+
+    setToken(data.token);
+    alert('Login OK!');
+  } catch (e){
+    alert('Erro: ' + e.message);
+  }
+});
+
+document.getElementById('btnLoad').addEventListener('click', async () =&gt; {
+  try {
+    const data = await api('/api/produtos?sort=nome&amp;dir=asc');
+    document.getElementById('out').textContent = JSON.stringify(data, null, 2);
+  } catch (e){
+    alert('Erro: ' + e.message);
+  }
+});
+
+document.getElementById('btnLogout').addEventListener('click', async () =&gt; {
+  try {
+    await api('/api/logout', { method: 'POST' });
+  } catch(e){
+    // se token estiver inválido, ainda assim limpe
+  }
+  clearToken();
+  alert('Logout OK');
+});</code></pre>
+<h3 class="h5 fw-bold mt-4">4.4. Testar no navegador</h3>
+<div>1) Rode o Laravel: <code>php artisan serve</code></div>
+<div>2) Rode o cliente com Live Server (VS Code) ou outro servidor simples.</div>
+<div>3) Faça login e clique em “Carregar produtos”.</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-bug me-2"></i>Se der erro de CORS…</div>
+<div class="text-muted">Confirme a origem (porta) do cliente e ajuste <code>allowed_origins</code>. Depois rode <code>php artisan config:clear</code>.</div>
+</div>
+<h3 class="h5 fw-bold mt-4">4.5. Commit no Git</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 12: cliente JS consumindo API + CORS + fluxo token/login/logout"
+git push</code></pre>
+</div></div>
+</section>
+<!-- 5 -->
+<section class="mb-4" id="sec-5">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">5) Atividades correlatas</h2>
+<div class="fw-semibold mt-2">1. Paginação no cliente</div>
+<div>o Ler <code>links</code> e <code>meta</code> do JSON e criar botões “Próximo/Anterior”.</div>
+<div class="fw-semibold mt-3">2. Busca e filtros</div>
+<div>o Adicionar campo de busca (q) e filtro por categoria_id no cliente.</div>
+<div class="fw-semibold mt-3">3. Melhorar segurança do token</div>
+<div>o Implementar expiração lógica (salvar timestamp e expirar no front).</div>
+<div>o Estudar alternativa SPA do Sanctum com cookies (conceito).</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+<div class="text-muted">Criar uma página de “Cadastro de Produto” no cliente (POST /api/produtos) com validação e mensagens.</div>
+</div>
+</div></div>
+</section>
+<!-- 6 -->
+<section class="mb-4" id="sec-6">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">6) Pesquisas complementares</h2>
+<div>· Qual a diferença entre CORS e CSRF?</div>
+<div>· Quais riscos de guardar token em localStorage (XSS) e como mitigar?</div>
+<div>· Sanctum SPA auth (cookies) vs tokens pessoais: quando usar cada um?</div>
+<div>· Headers úteis: <code>Accept</code>, <code>Content-Type</code>, <code>Authorization</code>, <code>Retry-After</code>.</div>
+</div></div>
+</section>
+<!-- 7 Quiz -->
+<section class="mb-4" id="sec-7">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q1">
+<div class="fw-semibold mb-2">1. CORS é uma política aplicada por:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="A"/>A) Banco de dados</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="B"/>B) Navegador (browser)</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="C"/>C) Git</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="D"/>D) Vite</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="E"/>E) Seeder</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q2">
+<div class="fw-semibold mb-2">2. O header usado para enviar token em APIs geralmente é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="A"/>A) Host</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="B"/>B) Cookie</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="C"/>C) User-Agent</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="D"/>D) Authorization: Bearer &lt;token&gt;</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="E"/>E) Cache-Control</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q3">
+<div class="fw-semibold mb-2">3. No fetch, para pedir JSON do servidor, usamos o header:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="A"/>A) Accept: application/json</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="B"/>B) X-Powered-By</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="C"/>C) Keep-Alive</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="D"/>D) Origin: false</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="E"/>E) Referer: seed</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="C" data-qid="q4">
+<div class="fw-semibold mb-2">4. Em projetos reais, um risco de guardar token em localStorage é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="A"/>A) Aumentar FPS do navegador</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="B"/>B) Melhorar cache do MySQL</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="C"/>C) Exposição em caso de XSS (script malicioso lendo o token)</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="D"/>D) Desativar CORS automaticamente</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="E"/>E) Impedir paginação</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q5">
+<div class="fw-semibold mb-2">5. Quando CORS falha, o erro aparece geralmente:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="A"/>A) No banco de dados</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="B"/>B) No composer.lock</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="C"/>C) Apenas no terminal do PHP</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="D"/>D) Apenas no GitHub</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="E"/>E) No Console/Network do DevTools do navegador</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-0 quiz-question" data-answer="B" data-qid="q6">
+<div class="fw-semibold mb-2">6. O endpoint recomendado para revogar token (no nosso exemplo) é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="A"/>A) GET /api/logout</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="B"/>B) POST /api/logout</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="C"/>C) PATCH /api/login</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="D"/>D) DELETE /api/login</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="E"/>E) PUT /api/refresh</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+</div>
+<div class="mt-4">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetQuiz" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário</button>
+</div>
+</div></div>
+</section>
+<!-- 8 Checklist -->
+<section class="mb-4" id="sec-8">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 12)</h2>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center">
+<div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+<div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+</div>
+<div aria-label="Progresso do checklist" aria-valuemax="100" aria-valuemin="0" class="progress mt-2" role="progressbar">
+<div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+</div>
+</div>
+<div class="d-grid gap-2" id="checklist">
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c1" type="checkbox"/>· CORS configurado (allowed_origins) para o endereço do cliente.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c2" type="checkbox"/>· Cliente HTML criado (client/index.html) com login e listagem.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c3" type="checkbox"/>· app.js implementa fetch com headers Accept/Content-Type.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c4" type="checkbox"/>· Token Bearer salvo e usado nas requisições (Authorization).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c5" type="checkbox"/>· Listagem de produtos retorna e é exibida em JSON (data/links/meta).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c6" type="checkbox"/>· Logout implementado (POST /api/logout) e token removido do storage.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c7" type="checkbox"/>· Tratamento de erros (alert/console) funcionando (401/422).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c8" type="checkbox"/>· Commit + push realizados com mensagem descritiva.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetChecklist" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist</button>
+</div>
+</div></div>
+</section>
+<!-- 9 -->
+<section class="mb-5" id="sec-9">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">9) Entregáveis</h2>
+<div>1. Configuração CORS adequada e versionada.</div>
+<div>2. Mini cliente em <code>client/</code> consumindo login/logout e GET produtos.</div>
+<div>3. Prints em <code>docs/</code>: (a) login OK, (b) JSON de produtos no cliente, (c) Network mostrando Authorization Bearer.</div>
+</div></div>
+</section>
+<!-- NAV FINAL -->
+<section class="mb-5">
+<div class="d-flex flex-wrap justify-content-between gap-2">
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+<div class="d-flex gap-2 flex-wrap">
+<a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+<a class="btn btn-pw3" href="capitulo13.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 13</a>
+</div>
+</div>
+</section>
+<footer class="py-4 border-top">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+<div>
+<div class="fw-semibold">Apostila PW3 • Laravel</div>
+<div class="small text-muted">Capítulo 12 • Consumindo a API (Cliente JS + CORS)</div>
+</div>
+<div class="small text-muted"><i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos</div>
+</div>
+</footer>
+</main>
+<!-- Bootstrap Bundle -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+<script>
+    // último capítulo
+    localStorage.setItem('pw3_last_chapter', 'capitulo12.html');
+
+    // rolagem suave
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Quiz dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap12_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState)); }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      // restaurar
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, saved.result === 'correct' ? 'correct' : 'incorrect', saved.result === 'correct' ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        }
+      });
+
+      // eventos
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+          quizState[qid] = { selected: chosen, submitted: true, result: isCorrect ? 'correct' : 'incorrect' };
+          saveState();
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, isCorrect ? 'correct' : 'incorrect', isCorrect ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap12_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+      checks.forEach(ch => { ch.checked = !!state[ch.dataset.key]; });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => ch.addEventListener('change', () => { save(); update(); }));
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>

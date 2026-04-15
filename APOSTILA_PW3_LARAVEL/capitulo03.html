@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Capítulo 03 — PW3 Laravel</title>
+<meta content="Capítulo 3 — Blade, Formulários, Validação e Mensagens (Laravel)" name="description"/>
+<!-- Bootstrap 5 + Icons (CDN) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Prism.js for code highlighting (dark like VSCode) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+<style>
+    :root{
+      --pw3-danger: #dc3545;    /* vermelho */
+      --pw3-graybtn: #6c757d;   /* cinza */
+      --pw3-soft: #f8f9fa;      /* fundo suave */
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{
+      background: var(--pw3-graybtn);
+      border-color: var(--pw3-graybtn);
+      color:#fff;
+    }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism (visual VSCode) */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    /* “Meta” do capítulo */
+    .badge-soft{
+      background: rgba(220,53,69,.10);
+      color: #b02a37;
+      border: 1px solid rgba(220,53,69,.18);
+    }
+
+    /* Índice interno */
+    .toc a{ text-decoration: none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+    .quiz-option:hover{ background: #fdfdfd; }
+    .quiz-feedback{
+      border-radius: .75rem;
+      padding: .75rem;
+      border: 1px dashed var(--pw3-border);
+      background: #fff;
+      display: none;
+    }
+    .quiz-feedback.correct{
+      border-color: rgba(25,135,84,.35);
+      background: rgba(25,135,84,.06);
+      color: #0f5132;
+    }
+    .quiz-feedback.incorrect{
+      border-color: rgba(220,53,69,.35);
+      background: rgba(220,53,69,.06);
+      color: #842029;
+    }
+
+    /* Checklist */
+    .check-item{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+
+    /* Acessibilidade: foco visível */
+    a:focus, button:focus, input:focus{
+      outline: 3px solid rgba(13,110,253,.25);
+      outline-offset: 2px;
+    }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+<body>
+<!-- NAVBAR (vermelha) + Offcanvas (hambúrguer) -->
+<nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+<div class="container">
+<a class="navbar-brand fw-semibold" href="index.html">
+<i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+<button aria-controls="pw3Offcanvas" aria-label="Abrir menu" class="navbar-toggler" data-bs-target="#pw3Offcanvas" data-bs-toggle="offcanvas" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<!-- Menu desktop -->
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+<li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+<i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><h6 class="dropdown-header">1º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">2º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">3º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">4º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+</ul>
+</li>
+<li class="nav-item ms-lg-2">
+<a class="btn btn-pw3 btn-sm" href="capitulo04.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 04)</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- Offcanvas (menu hambúrguer) -->
+<div aria-labelledby="pw3OffcanvasLabel" class="offcanvas offcanvas-end" id="pw3Offcanvas" tabindex="-1">
+<div class="offcanvas-header">
+<h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+</div>
+<div class="offcanvas-body">
+<div class="d-grid gap-2 mb-3">
+<a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+</div>
+<hr/>
+<p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+<div class="accordion" id="accMenu">
+<div class="accordion-item">
+<h2 class="accordion-header" id="m1">
+<button aria-controls="mc1" aria-expanded="true" class="accordion-button" data-bs-target="#mc1" data-bs-toggle="collapse" type="button">
+              1º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m1" class="accordion-collapse collapse show" data-bs-parent="#accMenu" id="mc1">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+<a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+<a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m2">
+<button aria-controls="mc2" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc2" data-bs-toggle="collapse" type="button">
+              2º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m2" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc2">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+<a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+<a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m3">
+<button aria-controls="mc3" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc3" data-bs-toggle="collapse" type="button">
+              3º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m3" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc3">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m4">
+<button aria-controls="mc4" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc4" data-bs-toggle="collapse" type="button">
+              4º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m4" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc4">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+<a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+<a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+<a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+</div>
+</div>
+</div>
+</div>
+<hr class="mt-4"/>
+<div class="d-grid gap-2">
+<a class="btn btn-pw3" href="capitulo04.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 04)</a>
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+</div>
+</div>
+</div>
+<main class="container my-4 my-lg-5" id="topo">
+<!-- Cabeçalho do capítulo -->
+<section class="mb-4">
+<div class="card">
+<div class="card-body p-4 p-lg-5">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+<span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 03</span>
+<span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+</div>
+<h1 class="fw-bold mb-2">Capítulo 3 — Blade, Formulários, Validação e Mensagens</h1>
+<div class="mb-3">
+<div class="fw-semibold">Formato:</div>
+<div>· Semana A (100 min): Conceitos + demonstração do professor + início do passo a passo.</div>
+<div>· Semana B (100 min): Conclusão do passo a passo pelos alunos + atividades correlatas + revisão.</div>
+<div class="mt-2">Contexto do projeto: continuação do Sistema da Lanchonete (CRUD de Categoria e base de Produto criados no Cap. 2).</div>
+</div>
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 02)</a>
+<a class="btn btn-pw3" href="capitulo04.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 04</a>
+</div>
+</div>
+</div>
+</section>
+<!-- Sumário interno -->
+<section class="mb-4" id="sumario-interno">
+<div class="row g-3">
+<div class="col-lg-8">
+<div class="card">
+<div class="card-body">
+<h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+<div class="toc d-grid gap-2">
+<a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos de aprendizagem</a>
+<a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos e ferramentas</a>
+<a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Conteúdo teórico</a>
+<a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo guiado (Form Requests + mensagens)</a>
+<a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas (Semana B)</a>
+<a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas complementares</a>
+<a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário de revisão (dinâmico)</a>
+<a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist de avaliação (interativo)</a>
+<a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis do capítulo</a>
+</div>
+</div>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card h-100">
+<div class="card-body">
+<h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+<p class="text-muted mb-0">
+                Ao abrir este capítulo, ele fica registrado como “último acessado” e aparece na Home.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 1) Objetivos -->
+<section class="mb-4" id="sec-1">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">1) Objetivos de aprendizagem</h2>
+<div>Ao final deste capítulo, o(a) aluno(a) será capaz de:</div>
+<div>· Explicar o que é CSRF e por que frameworks exigem token em formulários.</div>
+<div>· Diferenciar validação “inline” (no controller) de validação com Form Requests.</div>
+<div>· Criar Form Requests no Laravel, definindo regras e mensagens amigáveis.</div>
+<div>· Exibir mensagens de erro e sucesso com melhor UX (alerts) e preservar campos com old().</div>
+<div>· Aplicar boas práticas de Blade: herança de layout, diretivas (@error, @csrf, @method) e partials reutilizáveis.</div>
+</div>
+</div>
+</section>
+<!-- 2) Pré-requisitos -->
+<section class="mb-4" id="sec-2">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">2) Pré-requisitos e ferramentas</h2>
+<div>· Pré-requisitos: Capítulos 1 e 2 concluídos (projeto Laravel rodando com MySQL; CRUD de Categoria funcionando).</div>
+<div>· Ferramentas: VS Code, Git, MySQL e navegador. (Postman opcional neste capítulo.)</div>
+<div>· Recomendado: terminal do Linux com PHP/Composer configurados para o usuário (sem root).</div>
+</div>
+</div>
+</section>
+<!-- 3) Teoria -->
+<section class="mb-4" id="sec-3">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">3) Conteúdo teórico</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+<h3 class="h5 fw-bold mt-3">3.1. CSRF (Cross-Site Request Forgery)</h3><p>CSRF é um tipo de ataque em que um site malicioso tenta fazer o navegador de um usuário autenticado executar ações em outro site sem que ele perceba. O ponto crítico é que o navegador “leva junto” cookies de sessão automaticamente. Se você estiver logado em um sistema e visitar uma página maliciosa, essa página pode tentar disparar uma requisição para o seu sistema (por exemplo, um POST para excluir um registro). Se o servidor aceitar a requisição apenas porque o cookie de sessão está presente, o ataque funciona.</p><p>Para impedir isso, a defesa mais comum é exigir um “segredo” adicional que um site externo não consegue adivinhar: o token CSRF. Em frameworks como o Laravel, esse token é gerado para a sessão do usuário e precisa estar presente em requisições que alteram estado (normalmente POST, PUT, PATCH, DELETE). Se o token não estiver presente ou estiver inválido, o Laravel bloqueia a requisição. Assim, mesmo que um site malicioso force o navegador a enviar o formulário, ele não terá o token correto e a ação será negada.</p><p>No Laravel com Blade, inserir o token é fácil porque a diretiva @csrf gera automaticamente um campo hidden com o token. Essa convenção reduz erros: você não precisa lembrar de criar o input manualmente em cada formulário. Além disso, ao trabalhar com métodos PUT/DELETE em HTML (que não existem nativamente), o Laravel usa a técnica de “method spoofing” com @method("PUT") ou @method("DELETE"). Isso também depende de um formulário POST por baixo, e por isso o token CSRF continua sendo necessário.</p><ul><li><code>Quando usar</code> — Em formulários e requisições que criam/atualizam/excluem dados.</li><li><code>Quando não usar</code> — Em requisições somente de leitura (GET), que não alteram dados.</li><li><code>Erro comum</code> — Esquecer @csrf e receber erro 419 (Page Expired) no Laravel.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 3)</div><div>Na seção 4.3 você cria/edita o partial partials/alerts e garante que as views usem @include(...). Já nas views do CRUD (Cap. 2) e no fluxo de edição/exclusão (seção 4.2), os formulários devem conter @csrf. Se você testar o formulário de exclusão (DELETE) sem @csrf, o Laravel bloqueará a requisição. Portanto, ao validar o CRUD no item 4.5, um dos sinais de que o CSRF está correto é conseguir criar/editar/excluir sem erro 419.</div></div><h3 class="h5 fw-bold mt-4">3.2. Validação no Laravel (inline vs Form Request)</h3><p>Validação é o processo de garantir que os dados enviados pelo usuário fazem sentido antes de salvar no banco. Em um CRUD, isso evita registros incompletos (por exemplo, categoria sem nome), valores inválidos (preço negativo) e inconsistências (nome duplicado quando deveria ser único). Além disso, validação reduz riscos de segurança e melhora a experiência do usuário ao fornecer mensagens claras do que precisa ser corrigido.</p><p>No Laravel, a forma mais simples é validar “inline” no controller usando $request-&gt;validate([...]). Isso é útil para ações pequenas e rápidas, porque você coloca as regras no mesmo lugar onde salva o registro. O problema é que, conforme o projeto cresce, os controllers ficam grandes e difíceis de manter: as regras se repetem entre store e update, as mensagens ficam espalhadas e a leitura do controller fica confusa.</p><p>O Form Request resolve isso criando uma classe dedicada para validação. Ele separa responsabilidades: o controller passa a focar no fluxo (salvar, redirecionar) e a classe de request cuida das regras e mensagens. Além disso, o Form Request pode ter authorize(), que permite negar a ação por perfil (por exemplo, somente gerente pode cadastrar). Mesmo que você deixe authorize() como true agora, a estrutura já fica pronta para evoluir mais tarde.</p><p>Outra vantagem importante é a reutilização e consistência: o mesmo Form Request pode ser usado tanto em store quanto em update, e a regra de unique pode ser adaptada para ignorar o registro atual quando estiver editando. Isso evita um erro clássico: ao editar uma categoria sem mudar o nome, a validação unique não deve bloquear. A solução é “ignorar” o id da categoria atual — exatamente o que é feito com Rule::unique(...)-&gt;ignore($categoriaId).</p><p>Em resumo, quando usar cada abordagem:</p><ul><li><code>Inline no controller</code> — Projetos pequenos ou validações pontuais e rápidas.</li><li><code>Form Request</code> — CRUDs completos, projetos que crescem, necessidade de mensagens amigáveis e organização.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 3)</div><div>Na seção 4.1 você cria CategoriaRequest e define rules() e messages(). Na seção 4.2, o controller passa a receber CategoriaRequest $request em store/update e usa $request-&gt;validated(). Isso deixa o controller mais limpo e centraliza as regras. Quando você testar o cenário de nome duplicado (seção 4.5), a mensagem “Já existe uma categoria...” vem do messages() do Form Request.</div></div><h3 class="h5 fw-bold mt-4">3.3. Mensagens ao usuário (sucesso/erro) e UX</h3><p>Uma aplicação profissional sempre dá retorno ao usuário. Se o usuário clica em “Salvar” e nada acontece, ele fica inseguro e pode repetir a ação (gerando duplicidade). Se ocorre um erro e ele não sabe o motivo, ele não consegue corrigir. Por isso, mensagens de sucesso e erro não são “detalhe”: são parte essencial da qualidade do sistema.</p><p>No Laravel, é comum usar flash messages, que são mensagens gravadas na sessão por apenas uma requisição. Isso combina com o padrão Post/Redirect/Get: depois de salvar, o controller redireciona para a listagem e, nessa nova requisição, a mensagem aparece no topo. Esse padrão evita reenvio de formulário ao atualizar a página e mantém o fluxo mais estável.</p><p>Além disso, quando a validação falha, o Laravel redireciona de volta para o formulário com um conjunto de erros (bag $errors) e com os valores anteriores (old()). O usuário vê a mensagem do que está errado e não precisa digitar tudo de novo. Para uma boa UX, o ideal é: (1) mostrar um aviso geral no topo (“verifique os campos”), (2) mostrar o erro específico ao lado do campo, (3) manter os valores preenchidos e (4) manter a navegação clara (botão cancelar/voltar).</p><p>Boas práticas simples que melhoram muito a experiência:</p><ul><li><code>Mensagens claras</code> — Dizer o que falta e como corrigir (ex.: “Informe o nome da categoria”).</li><li><code>Evitar repetir digitação</code> — Usar old() para preservar valores.</li><li><code>Erros perto do campo</code> — Usar @error para exibir a mensagem no input certo.</li><li><code>Feedback de sucesso</code> — Mostrar confirmação após criar/editar/excluir.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 3)</div><div>Na seção 4.3 você cria o partial partials/alerts.blade.php para exibir session("sucesso"), session("erro") e um aviso quando $errors-&gt;any(). Na seção 4.4 você garante que os inputs usam old() e @error para mostrar a mensagem específica. Em 4.5, ao tentar salvar uma categoria sem nome, o formulário deve voltar com o campo preservado e uma mensagem visível; ao salvar com sucesso, o index deve exibir o alerta verde “Categoria criada com sucesso!”.</div></div><h3 class="h5 fw-bold mt-4">3.4. Blade na prática (diretivas e partials)</h3><p>Blade é o mecanismo de templates do Laravel. Ele permite construir HTML de forma organizada, usando herança de layout e reaproveitamento de componentes. A grande ideia é evitar repetição: em vez de copiar e colar a mesma navbar e footer em todas as páginas, você cria um layout base e inclui partes comuns. Isso reduz trabalho, melhora consistência visual e facilita manutenção.</p><p>As diretivas @extends, @section e @yield implementam herança: a página “filha” diz qual layout ela usa e quais seções preenche. Já @include injeta um arquivo parcial dentro da view. Com isso, você pode ter um partial de alerts, um partial de formulário, e reaproveitar em create e edit. Esse padrão é muito usado em CRUDs porque mantém as telas uniformes.</p><p>Outras diretivas do Blade são fundamentais para formulários: @csrf (token CSRF), @method (simular PUT/DELETE), @error (mostrar erro do campo) e old() (recuperar valor antigo). Quando você combina @error com classes do Bootstrap (como is-invalid) você cria uma interface que destaca imediatamente o campo errado. Isso é didaticamente importante: o aluno aprende a associar validação com feedback visual.</p><p>Diretivas e seus usos mais comuns no capítulo:</p><ul><li><code>@extends / @section / @yield</code> — Herança de layout: define estrutura e encaixa conteúdo.</li><li><code>@include</code> — Reutiliza pedaços: alerts, navbar, footer, formulário.</li><li><code>@csrf</code> — Proteção CSRF em formulários.</li><li><code>@method</code> — Simula PUT/DELETE em formulários HTML.</li><li><code>@error</code> — Exibe mensagem do campo e permite estilizar input com erro.</li><li><code>old()</code> — Reutiliza valores digitados após erro de validação.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 3)</div><div>Na seção 4.3 você centraliza mensagens em um único partial (partials/alerts). Depois, todas as telas do CRUD apenas fazem @include("partials.alerts"), evitando duplicação. Na seção 4.4, o input usa old("nome", ...) e @error("nome") para mostrar feedback. Isso conecta diretamente a teoria: Blade fornece as ferramentas para criar layouts reutilizáveis e formulários com validação amigável.</div></div></div>
+</div>
+</section>
+<!-- 4) Passo a passo -->
+<section class="mb-4" id="sec-4">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">4) Passo a passo guiado (Projeto Lanchonete)</h2>
+<div class="mb-2">
+            Meta do capítulo: <strong>converter a validação do CRUD de Categoria para Form Requests</strong>,
+            <strong>exibir mensagens de sucesso/erro</strong> e <strong>preservar valores com old()</strong>.
+          </div>
+<h3 class="h5 fw-bold mt-4">4.1. Criar o Form Request (CategoriaRequest)</h3>
+<div>No terminal (dentro do projeto):</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan make:request CategoriaRequest</code></pre>
+<div>Edite <code>app/Http/Requests/CategoriaRequest.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class CategoriaRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // por enquanto qualquer usuário pode; autorização entra mais adiante
+    }
+
+    public function rules(): array
+    {
+        // Se estiver editando, o model vem pela rota (route model binding)
+        $categoriaId = $this-&gt;route('categoria')?-&gt;id;
+
+        return [
+            'nome' =&gt; [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('categorias', 'nome')-&gt;ignore($categoriaId),
+            ],
+            'descricao' =&gt; 'nullable|string|max:500',
+            'ativa' =&gt; 'nullable|boolean',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'nome.required' =&gt; 'Informe o nome da categoria.',
+            'nome.max' =&gt; 'O nome deve ter no máximo :max caracteres.',
+            'nome.unique' =&gt; 'Já existe uma categoria com este nome.',
+            'descricao.max' =&gt; 'A descrição deve ter no máximo :max caracteres.',
+        ];
+    }
+}</code></pre>
+<h3 class="h5 fw-bold mt-4">4.2. Atualizar o Controller para usar Form Request</h3>
+<div>No <code>CategoriaController</code>, troque <code>Request</code> por <code>CategoriaRequest</code> em store/update.</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Categoria;
+use App\Http\Requests\CategoriaRequest;
+
+class CategoriaController extends Controller
+{
+    public function index()
+    {
+        $categorias = Categoria::orderBy('nome')-&gt;get();
+        return view('categorias.index', compact('categorias'));
+    }
+
+    public function create()
+    {
+        return view('categorias.create');
+    }
+
+    public function store(CategoriaRequest $request)
+    {
+        $dados = $request-&gt;validated();
+        $dados['ativa'] = $request-&gt;boolean('ativa');
+
+        Categoria::create($dados);
+
+        return redirect()-&gt;route('categorias.index')
+            -&gt;with('sucesso', 'Categoria criada com sucesso!');
+    }
+
+    public function edit(Categoria $categoria)
+    {
+        return view('categorias.edit', compact('categoria'));
+    }
+
+    public function update(CategoriaRequest $request, Categoria $categoria)
+    {
+        $dados = $request-&gt;validated();
+        $dados['ativa'] = $request-&gt;boolean('ativa');
+
+        $categoria-&gt;update($dados);
+
+        return redirect()-&gt;route('categorias.index')
+            -&gt;with('sucesso', 'Categoria atualizada com sucesso!');
+    }
+
+    public function destroy(Categoria $categoria)
+    {
+        $categoria-&gt;delete();
+
+        return redirect()-&gt;route('categorias.index')
+            -&gt;with('sucesso', 'Categoria excluída com sucesso!');
+    }
+}</code></pre>
+<h3 class="h5 fw-bold mt-4">4.3. Melhorar o partial de alertas (sucesso/erro/validação)</h3>
+<div>Crie (ou edite) <code>resources/views/partials/alerts.blade.php</code>:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">{{-- resources/views/partials/alerts.blade.php --}}
+
+@if (session('sucesso'))
+    &lt;div class="alert alert-success alert-dismissible fade show" role="alert"&gt;
+        {{ session('sucesso') }}
+        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+@endif
+
+@if (session('erro'))
+    &lt;div class="alert alert-danger alert-dismissible fade show" role="alert"&gt;
+        {{ session('erro') }}
+        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+@endif
+
+@if ($errors-&gt;any())
+    &lt;div class="alert alert-warning" role="alert"&gt;
+        &lt;strong&gt;Atenção:&lt;/strong&gt; verifique os campos do formulário.
+    &lt;/div&gt;
+@endif</code></pre>
+<div>Garanta que suas views chamam:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">@include('partials.alerts')</code></pre>
+<h3 class="h5 fw-bold mt-4">4.4. Preservar valores e exibir erros por campo (old() e @error)</h3>
+<div>
+            No Cap. 2, o <code>_form.blade.php</code> já usava <code>old()</code> e <code>@error</code>.
+            Confira se está assim (ou ajuste se necessário):
+          </div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;input type="text" class="form-control @error('nome') is-invalid @enderror"
+       id="nome" name="nome" value="{{ old('nome', $categoria-&gt;nome ?? '') }}" maxlength="100" required&gt;
+
+@error('nome')
+    &lt;div class="invalid-feedback"&gt;{{ $message }}&lt;/div&gt;
+@enderror</code></pre>
+<h3 class="h5 fw-bold mt-4">4.5. Teste de validação (erros e sucesso)</h3>
+<div>Teste cenários:</div>
+<div>· Tentar criar categoria sem nome → deve aparecer erro e manter campos.</div>
+<div>· Tentar criar categoria com nome já existente → mensagem de “Já existe uma categoria...”.</div>
+<div>· Criar/editar/excluir → deve aparecer mensagem de sucesso no topo.</div>
+<h3 class="h5 fw-bold mt-4">4.6. Commit no Git</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 3: Form Request para Categoria + alerts + mensagens e old()"
+git push</code></pre>
+</div>
+</div>
+</section>
+<!-- 5) Atividades correlatas -->
+<section class="mb-4" id="sec-5">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">5) Atividades correlatas (para a Semana B)</h2>
+<div class="mb-2">O professor acompanha e tira dúvidas. Entrega via repositório (commit + push).</div>
+<div class="fw-semibold mt-2">1. Aplicar Form Requests ao CRUD de Produto</div>
+<div>o Criar <code>ProdutoRequest</code> com regras: nome obrigatório, preço numérico ≥ 0, categoria_id obrigatório, ativo boolean.</div>
+<div>o Atualizar <code>ProdutoController</code> para usar <code>ProdutoRequest</code> em store/update.</div>
+<div class="fw-semibold mt-3">2. Upload de imagem do produto (Storage local) + exibição</div>
+<div>o Adicionar campo <code>imagem</code> (string/nullable) na tabela de produtos via migration.</div>
+<div>o Validar: arquivo de imagem, tamanho máximo e extensões (jpg, png, webp).</div>
+<div>o Salvar em <code>storage/app/public</code> e exibir na listagem usando <code>Storage::url()</code>.</div>
+<div class="fw-semibold mt-3">3. Regras de validação adicionais</div>
+<div>o Validar preço: <code>numeric|min:0</code>.</div>
+<div>o Validar imagem: <code>image|mimes:jpg,jpeg,png,webp|max:2048</code> (exemplo).</div>
+<div>o Mensagens amigáveis (custom messages) para as regras.</div>
+</div>
+</div>
+</section>
+<!-- 6) Pesquisas complementares -->
+<section class="mb-4" id="sec-6">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">6) Pesquisas complementares (para aprofundar)</h2>
+<div>· CSRF: como cookies e sessões participam do mecanismo de proteção em frameworks.</div>
+<div>· Form Request: como usar <code>authorize()</code> para restringir ações por perfil (ex.: gerente).</div>
+<div>· Mensagens de validação: como personalizar atributos (ex.: “nome do produto” em vez de “nome”).</div>
+<div>· Blade: diferença entre partials e components; quando criar um componente.</div>
+<div>· Upload seguro: validação de MIME, nomes de arquivo e cuidados com diretório público.</div>
+</div>
+</div>
+</section>
+<!-- 7) Questionário (dinâmico) -->
+<section class="mb-4" id="sec-7">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q1">
+<div class="fw-semibold mb-2">1. Para que serve a diretiva @csrf em formulários Blade?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="A"/>A) Para habilitar paginação automática em tabelas.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="B"/>B) Para permitir upload de arquivos sem validação.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="C"/>C) Para gerar rotas REST automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="D"/>D) Para escapar HTML e evitar XSS.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="E"/>E) Para proteger contra CSRF, inserindo um token verificado pelo Laravel.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q2">
+<div class="fw-semibold mb-2">2. Qual a principal vantagem de usar Form Request em vez de validação inline no controller?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="A"/>A) Ele elimina a necessidade de rotas.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="B"/>B) Ele transforma automaticamente HTML em JSON.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="C"/>C) Ele impede qualquer erro de banco de dados.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="D"/>D) Ele centraliza regras/mensagens e deixa o controller mais organizado.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="E"/>E) Ele substitui migrations e seeders.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q3">
+<div class="fw-semibold mb-2">3. O que a função validated() retorna em um Form Request?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="A"/>A) Todos os dados enviados, mesmo os não permitidos.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="B"/>B) Apenas os dados validados conforme as regras definidas.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="C"/>C) Apenas os dados que já estavam no banco.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="D"/>D) Um HTML pronto com os campos preenchidos.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="E"/>E) Um token de sessão para autenticação.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q4">
+<div class="fw-semibold mb-2">4. Para que serve old('campo') em um formulário Blade?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="A"/>A) Para preservar valores digitados após erro de validação.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="B"/>B) Para apagar automaticamente valores do formulário.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="C"/>C) Para executar seeders automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="D"/>D) Para criar rotas resource no Laravel.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="E"/>E) Para gerar HTML com Bootstrap automaticamente.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="C" data-qid="q5">
+<div class="fw-semibold mb-2">5. Qual diretiva Blade facilita mostrar a mensagem de erro de um campo específico?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="A"/>A) @extends</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="B"/>B) @yield</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="C"/>C) @error('campo')</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="D"/>D) @includeIf</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="E"/>E) @foreach</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q6">
+<div class="fw-semibold mb-2">6. Qual código é mais adequado para mostrar mensagem de sucesso após salvar?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="A"/>A) echo "ok"; no controller</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="B"/>B) var_dump($request); no Blade</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="C"/>C) die(); após salvar</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="D"/>D) return redirect()-&gt;route(...)-&gt;with('sucesso','...');</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="E"/>E) return view('home'); sem dados</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q7">
+<div class="fw-semibold mb-2">7. Para validar preço como número e impedir valores negativos, uma regra adequada é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="A"/>A) string|max:10</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="B"/>B) numeric|min:0</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="C"/>C) alpha|size:2</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="D"/>D) required|confirmed</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="E"/>E) email|unique</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q8">
+<div class="fw-semibold mb-2">8. Para upload de imagem, qual conjunto de regras faz mais sentido?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="A"/>A) integer|min:0</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="B"/>B) json|array</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="C"/>C) url|active_url</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="D"/>D) ip|timezone</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="E"/>E) image|mimes:jpg,jpeg,png,webp|max:2048</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="C" data-qid="q9">
+<div class="fw-semibold mb-2">9. Qual é a função principal de um partial como partials/alerts.blade.php?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="A"/>A) Substituir models do Eloquent.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="B"/>B) Criar tabelas no banco automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="C"/>C) Reutilizar uma parte de view em várias páginas, evitando repetição.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="D"/>D) Forçar autenticação no sistema.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="E"/>E) Executar migrations e seeders ao iniciar o servidor.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-0 quiz-question" data-answer="A" data-qid="q10">
+<div class="fw-semibold mb-2">10. Ao ocorrer erro de validação, qual status HTTP costuma ser usado pelo Laravel?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="A"/>A) 422 Unprocessable Entity</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="B"/>B) 201 Created</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="C"/>C) 100 Continue</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="D"/>D) 304 Not Modified</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="E"/>E) 503 Service Unavailable</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+</div>
+<div class="mt-4">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetQuiz" type="button">
+<i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 8) Checklist interativo -->
+<section class="mb-4" id="sec-8">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 3)</h2>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center">
+<div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+<div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+</div>
+<div aria-label="Progresso do checklist" aria-valuemax="100" aria-valuemin="0" class="progress mt-2" role="progressbar">
+<div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+</div>
+</div>
+<div class="d-grid gap-2" id="checklist">
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c1" type="checkbox"/>· Form Request CategoriaRequest criado.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c2" type="checkbox"/>· Regras e mensagens amigáveis configuradas no CategoriaRequest.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c3" type="checkbox"/>· CategoriaController atualizado para usar CategoriaRequest (store/update).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c4" type="checkbox"/>· Partial partials/alerts.blade.php criado/atualizado e incluído nas views.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c5" type="checkbox"/>· Formulários preservam valores com old() e exibem @error por campo.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c6" type="checkbox"/>· Fluxo testado: erro (nome vazio/duplicado) e sucesso (criar/editar/excluir).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c7" type="checkbox"/>· Commit + push realizados com mensagem descritiva.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetChecklist" type="button">
+<i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 9) Entregáveis -->
+<section class="mb-5" id="sec-9">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">9) Entregáveis do capítulo</h2>
+<div>1. Repositório atualizado com CategoriaRequest e controller revisado.</div>
+<div>2. Partial de alerts funcionando (sucesso/erro/validação) em todas as páginas do CRUD.</div>
+<div>3. Capturas de tela do formulário com erro de validação e do sucesso após salvar (salvar em docs/).</div>
+</div>
+</div>
+</section>
+<!-- Navegação final -->
+<section class="mb-5">
+<div class="d-flex flex-wrap justify-content-between gap-2">
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+<div class="d-flex gap-2 flex-wrap">
+<a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+<a class="btn btn-pw3" href="capitulo04.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 04</a>
+</div>
+</div>
+</section>
+<footer class="py-4 border-top">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+<div>
+<div class="fw-semibold">Apostila PW3 • Laravel</div>
+<div class="small text-muted">Capítulo 03 • Blade, Formulários, Validação e Mensagens</div>
+</div>
+<div class="small text-muted">
+<i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos
+        </div>
+</div>
+</footer>
+</main>
+<!-- Bootstrap Bundle (com Popper) -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script>
+    // Marcar último capítulo acessado (para aparecer na Home)
+    localStorage.setItem('pw3_last_chapter', 'capitulo03.html');
+
+    // Rolagem suave para âncoras internas
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Questionário dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap03_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState));
+      }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      // Restaurar
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(saved.result === 'correct'){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else if(saved.result === 'incorrect'){
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        }
+      });
+
+      // Eventos
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+
+          quizState[qid] = {
+            selected: chosen,
+            submitted: true,
+            result: isCorrect ? 'correct' : 'incorrect'
+          };
+          saveState();
+
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(isCorrect){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else{
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap03_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+
+      // Restaurar
+      checks.forEach(ch => {
+        const key = ch.dataset.key;
+        ch.checked = !!state[key];
+      });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => {
+        ch.addEventListener('change', () => {
+          save();
+          update();
+        });
+      });
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>

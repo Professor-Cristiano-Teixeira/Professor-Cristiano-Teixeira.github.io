@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Capítulo 14 — PW3 Laravel</title>
+<meta content="Capítulo 14 — Observabilidade e Segurança em Produção: logs, monitoramento, backups, HTTPS e hardening" name="description"/>
+<!-- Bootstrap 5 + Icons (CDN) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Prism.js for code highlighting (dark like VSCode) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+<style>
+    :root{
+      --pw3-danger:#dc3545;     /* vermelho */
+      --pw3-graybtn:#6c757d;    /* cinza */
+      --pw3-soft:#f8f9fa;
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{ background: var(--pw3-graybtn); border-color: var(--pw3-graybtn); color:#fff; }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    .badge-soft{ background: rgba(220,53,69,.10); color:#b02a37; border: 1px solid rgba(220,53,69,.18); }
+
+    .toc a{ text-decoration:none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+    .quiz-option:hover{ background:#fdfdfd; }
+    .quiz-feedback{ border-radius:.75rem; padding:.75rem; border:1px dashed var(--pw3-border); background:#fff; display:none; }
+    .quiz-feedback.correct{ border-color: rgba(25,135,84,.35); background: rgba(25,135,84,.06); color:#0f5132; }
+    .quiz-feedback.incorrect{ border-color: rgba(220,53,69,.35); background: rgba(220,53,69,.06); color:#842029; }
+
+    /* Checklist */
+    .check-item{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+
+    /* Callout */
+    .callout{ border:1px solid var(--pw3-border); border-left: 5px solid rgba(220,53,69,.55); background:#fff; border-radius:.75rem; padding: 1rem; }
+
+    a:focus, button:focus, input:focus{ outline: 3px solid rgba(13,110,253,.25); outline-offset: 2px; }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+<div class="container">
+<a class="navbar-brand fw-semibold" href="index.html">
+<i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+<button aria-controls="pw3Offcanvas" aria-label="Abrir menu" class="navbar-toggler" data-bs-target="#pw3Offcanvas" data-bs-toggle="offcanvas" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+<li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+<i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><h6 class="dropdown-header">1º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">2º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">3º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">4º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+</ul>
+</li>
+<li class="nav-item ms-lg-2">
+<a class="btn btn-pw3 btn-sm" href="capitulo15.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 15)</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- OFFCANVAS -->
+<div aria-labelledby="pw3OffcanvasLabel" class="offcanvas offcanvas-end" id="pw3Offcanvas" tabindex="-1">
+<div class="offcanvas-header">
+<h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+</div>
+<div class="offcanvas-body">
+<div class="d-grid gap-2 mb-3">
+<a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+</div>
+<hr/>
+<p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+<div class="accordion" id="accMenu">
+<div class="accordion-item">
+<h2 class="accordion-header" id="m1">
+<button aria-controls="mc1" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc1" data-bs-toggle="collapse" type="button">1º Bimestre</button>
+</h2>
+<div aria-labelledby="m1" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc1">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+<a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+<a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m2">
+<button aria-controls="mc2" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc2" data-bs-toggle="collapse" type="button">2º Bimestre</button>
+</h2>
+<div aria-labelledby="m2" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc2">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+<a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+<a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m3">
+<button aria-controls="mc3" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc3" data-bs-toggle="collapse" type="button">3º Bimestre</button>
+</h2>
+<div aria-labelledby="m3" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc3">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m4">
+<button aria-controls="mc4" aria-expanded="true" class="accordion-button" data-bs-target="#mc4" data-bs-toggle="collapse" type="button">4º Bimestre</button>
+</h2>
+<div aria-labelledby="m4" class="accordion-collapse collapse show" data-bs-parent="#accMenu" id="mc4">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+<a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+<a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+<a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+</div>
+</div>
+</div>
+</div>
+<hr class="mt-4"/>
+<div class="d-grid gap-2">
+<a class="btn btn-pw3" href="capitulo15.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 15)</a>
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+</div>
+</div>
+</div>
+<main class="container my-4 my-lg-5" id="topo">
+<!-- HEADER -->
+<section class="mb-4">
+<div class="card">
+<div class="card-body p-4 p-lg-5">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+<span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 14</span>
+<span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+<span class="badge text-bg-light border"><i class="bi bi-diagram-3 me-1"></i>4º Bimestre</span>
+</div>
+<h1 class="fw-bold mb-2">Capítulo 14 — Observabilidade e Segurança em Produção</h1>
+<div class="mb-3">
+<div class="fw-semibold">Formato:</div>
+<div>· Semana A (100 min): Logs, monitoramento, health-check e alertas básicos.</div>
+<div>· Semana B (100 min): HTTPS, hardening, backup/restore e revisão final.</div>
+<div class="mt-2">Contexto: Após o deploy (Cap. 13), precisamos manter o sistema confiável e seguro em produção.</div>
+</div>
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+<a class="btn btn-outline-secondary" href="capitulo13.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 13)</a>
+<a class="btn btn-pw3" href="capitulo15.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 15</a>
+</div>
+</div>
+</div>
+</section>
+<!-- TOC -->
+<section class="mb-4" id="sumario-interno">
+<div class="row g-3">
+<div class="col-lg-8">
+<div class="card"><div class="card-body">
+<h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+<div class="toc d-grid gap-2">
+<a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos de aprendizagem</a>
+<a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos</a>
+<a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Conteúdo teórico (observabilidade)</a>
+<a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo (logs/health/HTTPS/backups)</a>
+<a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas</a>
+<a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas complementares</a>
+<a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário (dinâmico)</a>
+<a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist (interativo)</a>
+<a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis</a>
+</div>
+</div></div>
+</div>
+<div class="col-lg-4">
+<div class="card h-100"><div class="card-body">
+<h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+<p class="text-muted mb-0">Em produção, prefira logs estruturados, backups automatizados e HTTPS obrigatório.</p>
+</div></div>
+</div>
+</div>
+</section>
+<!-- 1 -->
+<section class="mb-4" id="sec-1">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">1) Objetivos de aprendizagem</h2>
+<div>Ao final deste capítulo, você será capaz de:</div>
+<div>· Criar um endpoint de health-check e validar status do app.</div>
+<div>· Configurar logs e identificar erros de produção com rapidez.</div>
+<div>· Implementar monitoramento básico (uptime) e alertas simples.</div>
+<div>· Ativar HTTPS e aplicar hardening mínimo no Nginx.</div>
+<div>· Implementar backup do banco + storage e testar restore.</div>
+</div></div>
+</section>
+<!-- 2 -->
+<section class="mb-4" id="sec-2">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">2) Pré-requisitos</h2>
+<div>· Deploy concluído (Cap. 13) e URL do sistema funcionando.</div>
+<div>· Acesso SSH ao servidor e permissão para editar Nginx/cron.</div>
+<div>· Banco de dados em produção configurado.</div>
+</div></div>
+</section>
+<!-- 3 -->
+<section class="mb-4" id="sec-3">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">3) Conteúdo teórico — Observabilidade</h2>
+
+
+
+
+
+
+
+
+
+
+
+<h3 class="h5 fw-bold mt-3">3.1. O que é observabilidade? (logs, métricas e traces na prática)</h3><p>Observabilidade é a capacidade de entender o que está acontecendo dentro do sistema apenas olhando seus “sinais”. Ela vai além de “ter logs”: envolve conseguir responder rapidamente perguntas como: o sistema está no ar? está lento? onde está o gargalo? qual requisição falhou? qual usuário foi afetado?</p><p>Os três sinais clássicos são: logs, métricas e traces. Logs contam “eventos” (ex.: pedido criado, erro 500, usuário logou). Métricas resumem comportamento ao longo do tempo (ex.: taxa de erro, tempo médio de resposta, uso de CPU/RAM). Traces (rastreamentos) mostram o caminho de uma requisição por várias camadas (controller → banco → API externa), permitindo descobrir onde o tempo está sendo gasto. Em projetos didáticos, você pode começar por logs e health-check; conforme evolui, adiciona métricas e correlação por request_id.</p><p>A regra prática é: sem observabilidade, você depende de “achismo”. Com observabilidade, você transforma incidentes em diagnóstico: você vê o erro, identifica a causa provável, valida com dados e aplica uma correção. Esse capítulo coloca a fundação: um health-check para medir disponibilidade e logs com contexto para explicar “por quê”.</p><p>Sinais e o que cada um responde com mais facilidade:</p><ul><li><code>Logs</code> — O que aconteceu? Qual erro? Qual usuário/rota?</li><li><code>Métricas</code> — Está degradando? Quantos erros por minuto? Qual latência?</li><li><code>Traces</code> — Onde está lento? Em qual camada (DB, API externa, código)?</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 14)</div><div>Na seção 4.1, você cria /health para ter um sinal simples de disponibilidade (uptime). Na seção 4.2, você aprende onde olhar logs (laravel.log e logs do Nginx) e como registrar contexto com Log::info(). Isso cobre o “mínimo viável” de observabilidade: saber se caiu e entender por que caiu.</div></div><h3 class="h5 fw-bold mt-4">3.2. Logs úteis: o que registrar (e o que NÃO registrar)</h3><p>Logs são úteis quando ajudam a reconstruir um incidente. Um log bom responde: qual ação ocorreu, quando ocorreu, em qual rota, para qual recurso, por qual usuário, e com qual resultado. Por isso, em produção é comum registrar eventos importantes (login, criação/fechamento de pedido, falhas em integrações), sempre adicionando contexto mínimo: ids, rota, status e um identificador de correlação (request_id).</p><p>Mas logs também podem ser perigosos: eles podem vazar dados sensíveis. Nunca registre senhas, tokens, dados de cartão, ou conteúdo completo de requisições que tenham informações pessoais. Mesmo registrar e-mail e IP deve ser feito com propósito e cuidado. O objetivo é diagnosticar sem violar privacidade e sem criar um “vazamento interno” por meio de arquivos de log.</p><p>Logs estruturados (por exemplo, JSON) facilitam análise por ferramentas e tornam buscas mais eficientes. Mesmo sem uma plataforma (ELK/Splunk), você pode começar padronizando campos em Log::info() e garantindo consistência. Outra boa prática é registrar tempo de resposta (latência) em milissegundos, especialmente em endpoints críticos. Isso ajuda a detectar degradação antes de virar queda.</p><p>Checklist de logs “bons” para este projeto:</p><ul><li><code>Erros e exceptions</code> — Sempre registrar com stacktrace no servidor, mas sem expor ao usuário.</li><li><code>Eventos críticos</code> — login/logout, pedido criado/fechado, falha em API externa.</li><li><code>Contexto mínimo</code> — user_id, pedido_id, rota, status, request_id.</li><li><code>Evitar dados sensíveis</code> — Nunca logar password, tokens, secrets, dumps completos.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 14)</div><div>Na seção 4.2, você configura LOG_CHANNEL/LOG_LEVEL e registra um evento com contexto: Log::info("Pedido criado", [pedido_id, user_id]). A atividade correlata 5.1 sugere request_id para correlação, que é justamente o próximo passo para deixar logs “profissionais”.</div></div><h3 class="h5 fw-bold mt-4">3.3. Health-check e monitoramento: detectar queda antes do usuário reclamar</h3><p>Um health-check é um endpoint simples que responde rápido e indica se o sistema está operacional. Ele não precisa expor detalhes; ele precisa ser confiável. O objetivo é permitir que uma ferramenta externa (ou mesmo um script) verifique periodicamente se o sistema está “vivo”. Quando o health-check falha, você dispara um alerta e atua antes que o usuário perceba.</p><p>O health-check pode ser básico (retornar status ok) ou mais completo (checar conexão com banco, cache, filas). Em projetos didáticos, o básico já é muito útil. Em produção real, é comum ter pelo menos dois níveis: liveness (o processo responde) e readiness (o sistema está pronto para receber tráfego, incluindo dependências).</p><p>Monitoramento de uptime funciona como “alarme” de disponibilidade. Ferramentas como UptimeRobot e similares fazem GET a cada X minutos e avisam por e-mail/Telegram quando o endpoint falha. Mesmo sem ferramenta paga, isso já muda o jogo: você deixa de descobrir falhas “por acaso”.</p><p>Boas práticas para health-check/monitoramento:</p><ul><li><code>Responder rápido</code> — Sem consultas pesadas; ideal &lt; 200ms.</li><li><code>Não expor segredos</code> — Sem dados internos; apenas status e timestamp.</li><li><code>Usar HTTPS</code> — Evita interceptação e falsos positivos por bloqueios.</li><li><code>Alertas claros</code> — Saber quando caiu e quando voltou (downtime window).</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 14)</div><div>Na seção 4.1, você cria /health retornando JSON simples (status/app/time). Na seção 4.3, você conecta isso a um monitor de uptime chamando /health periodicamente. Isso responde a primeira pergunta da regra prática: “Caiu?”.</div></div><h3 class="h5 fw-bold mt-4">3.4. Segurança em produção (mínimo essencial) e hardening</h3><p>Segurança em produção é sobre reduzir superfície de ataque e minimizar impacto de falhas. Dois pilares são obrigatórios: HTTPS e backups. HTTPS protege tráfego (senhas, cookies, tokens) e evita interceptação. Backups garantem que você consegue recuperar dados após incidentes (erro humano, falha de disco, ataque).</p><p>Hardening é o conjunto de ajustes que deixam o servidor “menos permissivo” e mais seguro: headers de segurança (nosniff, frame options, referrer policy), HSTS (após validar HTTPS), e configurações de servidor que bloqueiam arquivos sensíveis. Esses ajustes não substituem correção de vulnerabilidades, mas ajudam a mitigar ataques comuns e reduzem riscos simples.</p><p>O ponto mais didático deste capítulo é entender que segurança não é só “colocar senha”. É processo: atualizar sistema, restringir permissões, não expor debug, monitorar logs e testar restore de backup. Se você tem HTTPS mas não tem restore testado, seu risco continua alto, porque perda de dados é um incidente grave.</p><p>Mínimo essencial de segurança/operacional para o projeto:</p><ul><li><code>HTTPS obrigatório</code> — Forçar redirecionamento 80→443 e usar certificados válidos.</li><li><code>Headers de hardening</code> — nosniff, SAMEORIGIN, Referrer-Policy, HSTS (com cuidado).</li><li><code>Backups automatizados</code> — Banco + storage; rotina agendada.</li><li><code>Restore testado</code> — Backup só vale se você consegue restaurar.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 14)</div><div>Na seção 4.4, você instala Certbot e habilita HTTPS com redirecionamento. Na seção 4.5, adiciona headers de hardening no Nginx. Na seção 4.6, cria rotina de backup (mysqldump + tar do storage) e na 4.7 testa restore. Isso responde às perguntas “Como voltar rápido?” e “Como não perder dados?”.</div></div></div></div>
+</section>
+<!-- 4 -->
+<section class="mb-4" id="sec-4">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">4) Passo a passo — Logs, Health-check, HTTPS e Backups</h2>
+<h3 class="h5 fw-bold mt-3">4.1. Criar rota de health-check</h3>
+<div>Crie uma rota simples em <code>routes/web.php</code> (pode ser pública):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">Route::get('/health', function () {
+    return response()-&gt;json([
+        'status' =&gt; 'ok',
+        'app' =&gt; config('app.name'),
+        'time' =&gt; now()-&gt;toIso8601String(),
+    ]);
+});</code></pre>
+<div class="text-muted">Teste: <code>curl https://seu-dominio.com/health</code></div>
+<h3 class="h5 fw-bold mt-4">4.2. Logs: onde olhar e como configurar</h3>
+<div>Em produção, confira:</div>
+<div>· <code>storage/logs/laravel.log</code></div>
+<div>· logs do servidor web: Nginx/Apache</div>
+<div>Se necessário, ajuste o canal em <code>.env</code>:</div>
+<div>ENV</div>
+<pre class="language-bash"><code class="language-bash">LOG_CHANNEL=stack
+LOG_LEVEL=info</code></pre>
+<div>Exemplo de log com contexto no código:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">use Illuminate\Support\Facades\Log;
+
+Log::info('Pedido criado', [
+  'pedido_id' =&gt; $pedido-&gt;id,
+  'user_id' =&gt; auth()-&gt;id(),
+]);</code></pre>
+<h3 class="h5 fw-bold mt-4">4.3. Monitoramento básico (uptime) com health-check</h3>
+<div>Estratégia didática:</div>
+<div>· Um monitor (UptimeRobot, StatusCake etc.) chamando <code>/health</code> a cada 5 min</div>
+<div>· Alertas por e-mail/Telegram quando cair</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-bell me-2"></i>Importante</div>
+<div class="text-muted">Mesmo sem ferramentas pagas, um health-check simples + alertas já evita “descobrir” a queda tarde demais.</div>
+</div>
+<h3 class="h5 fw-bold mt-4">4.4. HTTPS com Certbot (Nginx)</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d seu-dominio.com
+# escolha redirecionar HTTP -&gt; HTTPS</code></pre>
+<h3 class="h5 fw-bold mt-4">4.5. Hardening: headers básicos no Nginx</h3>
+<div>Adicione no bloco server (exemplo):</div>
+<div>Nginx</div>
+<pre class="language-nginx"><code class="language-nginx">add_header X-Content-Type-Options "nosniff" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+# HSTS (use após confirmar HTTPS ok)
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;</code></pre>
+<h3 class="h5 fw-bold mt-4">4.6. Backup do banco + storage (rotina simples)</h3>
+<div>Crie uma pasta segura e faça dump do MySQL:</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">sudo mkdir -p /var/backups/lanchonete
+sudo chown -R root:root /var/backups/lanchonete
+
+# dump do banco
+mysqldump -u SEU_USUARIO -p SUA_BASE &gt; /var/backups/lanchonete/db_$(date +%F).sql
+
+# compactar storage (uploads)
+tar -czf /var/backups/lanchonete/storage_$(date +%F).tar.gz -C /var/www/lanchonete storage/app/public</code></pre>
+<div>Automatize com cron (diário, por exemplo):</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash"># crontab -e
+0 2 * * * /usr/bin/mysqldump -u SEU_USUARIO -pSENHA SUA_BASE &gt; /var/backups/lanchonete/db_$(date +\%F).sql
+0 2 * * * /bin/tar -czf /var/backups/lanchonete/storage_$(date +\%F).tar.gz -C /var/www/lanchonete storage/app/public</code></pre>
+<div class="text-muted">Dica: evite senha em crontab usando arquivo <code>~/.my.cnf</code> (melhor prática).</div>
+<h3 class="h5 fw-bold mt-4">4.7. Testar restore (muito importante)</h3>
+<div>Restore do banco (em ambiente de teste):</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">mysql -u SEU_USUARIO -p SUA_BASE &lt; /var/backups/lanchonete/db_2026-04-04.sql</code></pre>
+<div>Restore do storage:</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">tar -xzf /var/backups/lanchonete/storage_2026-04-04.tar.gz -C /var/www/lanchonete</code></pre>
+<h3 class="h5 fw-bold mt-4">4.8. Commit no Git</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 14: observabilidade (health/logs) + HTTPS + hardening + backup/restore"
+git push</code></pre>
+</div></div>
+</section>
+<!-- 5 -->
+<section class="mb-4" id="sec-5">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">5) Atividades correlatas</h2>
+<div class="fw-semibold mt-2">1. Logs estruturados</div>
+<div>o Criar um <code>request_id</code> por requisição e registrar no log.</div>
+<div class="fw-semibold mt-3">2. Monitorar erros de API</div>
+<div>o Padronizar erro JSON e registrar falhas 500 com contexto.</div>
+<div class="fw-semibold mt-3">3. Rotação de backups e logs</div>
+<div>o Apagar backups antigos (ex.: manter últimos 7 dias) e configurar logrotate.</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+<div class="text-muted">Adicionar um painel admin com status do sistema: último backup, último deploy, versão do app.</div>
+</div>
+</div></div>
+</section>
+<!-- 6 -->
+<section class="mb-4" id="sec-6">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">6) Pesquisas complementares</h2>
+<div>· Diferença entre logs, métricas e traces (observabilidade).</div>
+<div>· Como usar Redis para cache/filas em produção.</div>
+<div>· O que é WAF e quando faz sentido (conceito).</div>
+<div>· Estratégias de backup: full vs incremental (conceito).</div>
+</div></div>
+</section>
+<!-- 7 Quiz -->
+<section class="mb-4" id="sec-7">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q1">
+<div class="fw-semibold mb-2">1. Qual trio é clássico em observabilidade?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="A"/>A) Logs, métricas e traces</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="B"/>B) HTML, CSS e JS</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="C"/>C) Git, GitHub e GitLab</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="D"/>D) Seeders, migrations e factories</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="E"/>E) Eloquent, Blade e Vite</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q2">
+<div class="fw-semibold mb-2">2. Qual endpoint simples ajuda a monitorar se o app está “no ar”?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="A"/>A) /debug</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="B"/>B) /artisan</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="C"/>C) /vendor</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="D"/>D) /health</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="E"/>E) /composer</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q3">
+<div class="fw-semibold mb-2">3. Qual é uma prática correta em produção?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="A"/>A) APP_DEBUG=true</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="B"/>B) HTTPS obrigatório + headers de segurança</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="C"/>C) Versionar .env no Git</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="D"/>D) Exibir stacktrace para o usuário</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="E"/>E) Guardar token no HTML</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-0 quiz-question" data-answer="C" data-qid="q4">
+<div class="fw-semibold mb-2">4. Por que “backup sem restore não vale”?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="A"/>A) Porque backup aumenta FPS</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="B"/>B) Porque backup desativa cache</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="C"/>C) Porque é preciso garantir que o backup consegue ser restaurado quando necessário</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="D"/>D) Porque restore não funciona em Laravel</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="E"/>E) Porque logs substituem backup</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+</div>
+<div class="mt-4">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetQuiz" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário</button>
+</div>
+</div></div>
+</section>
+<!-- 8 Checklist -->
+<section class="mb-4" id="sec-8">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 14)</h2>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center">
+<div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+<div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+</div>
+<div aria-label="Progresso do checklist" aria-valuemax="100" aria-valuemin="0" class="progress mt-2" role="progressbar">
+<div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+</div>
+</div>
+<div class="d-grid gap-2" id="checklist">
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c1" type="checkbox"/>· Rota /health criada e respondendo JSON com status ok.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c2" type="checkbox"/>· Logs verificados (laravel.log e logs do Nginx) e erros resolvidos.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c3" type="checkbox"/>· Monitor de uptime configurado chamando /health (ou equivalente).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c4" type="checkbox"/>· HTTPS configurado (Certbot) com redirecionamento HTTP→HTTPS.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c5" type="checkbox"/>· Headers de hardening adicionados no Nginx (nosniff, frame, HSTS etc.).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c6" type="checkbox"/>· Rotina de backup criada (banco + storage) e agendada.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c7" type="checkbox"/>· Restore testado (banco e/ou storage) em ambiente seguro.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c8" type="checkbox"/>· Documentação em docs/ atualizada com comandos e evidências.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c9" type="checkbox"/>· Commit + push realizados com mensagem descritiva.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetChecklist" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist</button>
+</div>
+</div></div>
+</section>
+<!-- 9 -->
+<section class="mb-5" id="sec-9">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">9) Entregáveis</h2>
+<div>1. Endpoint de health-check funcionando e monitorado.</div>
+<div>2. HTTPS habilitado e hardening mínimo configurado.</div>
+<div>3. Rotina de backup automatizada e restore testado.</div>
+<div>4. Prints e logs em <code>docs/</code> comprovando: health ok, HTTPS, backups e teste de restore.</div>
+</div></div>
+</section>
+<!-- NAV FINAL -->
+<section class="mb-5">
+<div class="d-flex flex-wrap justify-content-between gap-2">
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+<div class="d-flex gap-2 flex-wrap">
+<a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+<a class="btn btn-pw3" href="capitulo15.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 15</a>
+</div>
+</div>
+</section>
+<footer class="py-4 border-top">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+<div>
+<div class="fw-semibold">Apostila PW3 • Laravel</div>
+<div class="small text-muted">Capítulo 14 • Observabilidade e Segurança</div>
+</div>
+<div class="small text-muted"><i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos</div>
+</div>
+</footer>
+</main>
+<!-- Bootstrap Bundle -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-nginx.min.js"></script>
+<script>
+    // último capítulo
+    localStorage.setItem('pw3_last_chapter', 'capitulo14.html');
+
+    // rolagem suave
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Quiz dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap14_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState)); }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      // restaurar
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, saved.result === 'correct' ? 'correct' : 'incorrect', saved.result === 'correct' ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        }
+      });
+
+      // eventos
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+          quizState[qid] = { selected: chosen, submitted: true, result: isCorrect ? 'correct' : 'incorrect' };
+          saveState();
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, isCorrect ? 'correct' : 'incorrect', isCorrect ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap14_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+      checks.forEach(ch => { ch.checked = !!state[ch.dataset.key]; });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => ch.addEventListener('change', () => { save(); update(); }));
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>

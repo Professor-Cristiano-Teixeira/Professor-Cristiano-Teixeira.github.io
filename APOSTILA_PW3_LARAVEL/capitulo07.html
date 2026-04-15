@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Capítulo 07 — PW3 Laravel</title>
+<meta content="Capítulo 7 — Requisições Assíncronas (AJAX) no Laravel/Blade (fetch + JSON)" name="description"/>
+<!-- Bootstrap 5 + Icons (CDN) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Prism.js for code highlighting (dark like VSCode) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+<style>
+    :root{
+      --pw3-danger: #dc3545;    /* vermelho */
+      --pw3-graybtn: #6c757d;   /* cinza */
+      --pw3-soft: #f8f9fa;      /* fundo suave */
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{
+      background: var(--pw3-graybtn);
+      border-color: var(--pw3-graybtn);
+      color:#fff;
+    }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism (visual VSCode) */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    /* “Meta” do capítulo */
+    .badge-soft{
+      background: rgba(220,53,69,.10);
+      color: #b02a37;
+      border: 1px solid rgba(220,53,69,.18);
+    }
+
+    /* Índice interno */
+    .toc a{ text-decoration: none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+    .quiz-option:hover{ background: #fdfdfd; }
+    .quiz-feedback{
+      border-radius: .75rem;
+      padding: .75rem;
+      border: 1px dashed var(--pw3-border);
+      background: #fff;
+      display: none;
+    }
+    .quiz-feedback.correct{
+      border-color: rgba(25,135,84,.35);
+      background: rgba(25,135,84,.06);
+      color: #0f5132;
+    }
+    .quiz-feedback.incorrect{
+      border-color: rgba(220,53,69,.35);
+      background: rgba(220,53,69,.06);
+      color: #842029;
+    }
+
+    /* Checklist */
+    .check-item{
+      border: 1px solid var(--pw3-border);
+      border-radius: .75rem;
+      padding: .6rem .75rem;
+      background: #fff;
+    }
+
+    /* Callout */
+    .callout{
+      border: 1px solid var(--pw3-border);
+      border-left: 5px solid rgba(220,53,69,.55);
+      background: #fff;
+      border-radius: .75rem;
+      padding: 1rem;
+    }
+
+    /* Toast demo */
+    .toast-container{ z-index: 1080; }
+
+    /* Acessibilidade: foco visível */
+    a:focus, button:focus, input:focus{
+      outline: 3px solid rgba(13,110,253,.25);
+      outline-offset: 2px;
+    }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+<body>
+<!-- NAVBAR (vermelha) + Offcanvas (hambúrguer) -->
+<nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+<div class="container">
+<a class="navbar-brand fw-semibold" href="index.html">
+<i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+<button aria-controls="pw3Offcanvas" aria-label="Abrir menu" class="navbar-toggler" data-bs-target="#pw3Offcanvas" data-bs-toggle="offcanvas" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<!-- Menu desktop -->
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+<li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+<i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><h6 class="dropdown-header">1º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">2º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">3º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">4º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+</ul>
+</li>
+<li class="nav-item ms-lg-2">
+<a class="btn btn-pw3 btn-sm" href="capitulo08.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 08)</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- Offcanvas (menu hambúrguer) -->
+<div aria-labelledby="pw3OffcanvasLabel" class="offcanvas offcanvas-end" id="pw3Offcanvas" tabindex="-1">
+<div class="offcanvas-header">
+<h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+</div>
+<div class="offcanvas-body">
+<div class="d-grid gap-2 mb-3">
+<a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+</div>
+<hr/>
+<p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+<div class="accordion" id="accMenu">
+<div class="accordion-item">
+<h2 class="accordion-header" id="m1">
+<button aria-controls="mc1" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc1" data-bs-toggle="collapse" type="button">
+              1º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m1" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc1">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+<a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+<a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m2">
+<button aria-controls="mc2" aria-expanded="true" class="accordion-button" data-bs-target="#mc2" data-bs-toggle="collapse" type="button">
+              2º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m2" class="accordion-collapse collapse show" data-bs-parent="#accMenu" id="mc2">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+<a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+<a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m3">
+<button aria-controls="mc3" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc3" data-bs-toggle="collapse" type="button">
+              3º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m3" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc3">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m4">
+<button aria-controls="mc4" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc4" data-bs-toggle="collapse" type="button">
+              4º Bimestre
+            </button>
+</h2>
+<div aria-labelledby="m4" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc4">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+<a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+<a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+<a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+</div>
+</div>
+</div>
+</div>
+<hr class="mt-4"/>
+<div class="d-grid gap-2">
+<a class="btn btn-pw3" href="capitulo08.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 08)</a>
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+</div>
+</div>
+</div>
+<!-- Toast container (para exemplos de confirmação/erro) -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+<div aria-atomic="true" aria-live="polite" class="toast" id="pw3Toast" role="status">
+<div class="toast-header">
+<i class="bi bi-info-circle me-2"></i>
+<strong class="me-auto" id="pw3ToastTitle">Mensagem</strong>
+<small class="text-muted">agora</small>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="toast" type="button"></button>
+</div>
+<div class="toast-body" id="pw3ToastBody">...</div>
+</div>
+</div>
+<main class="container my-4 my-lg-5" id="topo">
+<!-- Cabeçalho do capítulo -->
+<section class="mb-4">
+<div class="card">
+<div class="card-body p-4 p-lg-5">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+<span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 07</span>
+<span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+</div>
+<h1 class="fw-bold mb-2">Capítulo 7 — Requisições Assíncronas (AJAX) no Laravel/Blade</h1>
+<div class="mb-3">
+<div class="fw-semibold">Formato:</div>
+<div>· Semana A (100 min): Conceitos + demonstração do professor + início do passo a passo.</div>
+<div>· Semana B (100 min): Conclusão do passo a passo + atividades correlatas + revisão.</div>
+<div class="mt-2">Contexto do projeto: pedidos e itens já existem (Cap. 6). Agora vamos deixar a tela de pedido “responsiva” sem recarregar a página.</div>
+</div>
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 06)</a>
+<a class="btn btn-pw3" href="capitulo08.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 08</a>
+</div>
+</div>
+</div>
+</section>
+<!-- Sumário interno -->
+<section class="mb-4" id="sumario-interno">
+<div class="row g-3">
+<div class="col-lg-8">
+<div class="card">
+<div class="card-body">
+<h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+<div class="toc d-grid gap-2">
+<a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos de aprendizagem</a>
+<a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos e ferramentas</a>
+<a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Conteúdo teórico</a>
+<a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo guiado (AJAX no Pedido)</a>
+<a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas (Semana B)</a>
+<a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas complementares</a>
+<a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário de revisão (dinâmico)</a>
+<a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist de avaliação (interativo)</a>
+<a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis do capítulo</a>
+</div>
+</div>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card h-100">
+<div class="card-body">
+<h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+<p class="text-muted mb-0">
+                Use <code>fetch()</code> com JSON e não esqueça do token CSRF. O servidor devolve status HTTP + JSON.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 1) Objetivos -->
+<section class="mb-4" id="sec-1">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">1) Objetivos de aprendizagem</h2>
+<div>Ao final deste capítulo, o(a) aluno(a) será capaz de:</div>
+<div>· Explicar o que é AJAX e por que melhora a experiência do usuário (sem recarregar a página).</div>
+<div>· Fazer requisições assíncronas usando <code>fetch()</code> e trabalhar com JSON.</div>
+<div>· Criar rotas que retornam JSON no Laravel e usar códigos de status (200/201/422/403/404).</div>
+<div>· Atualizar a UI do pedido dinamicamente: adicionar/remover item e atualizar total.</div>
+<div>· Implementar tratamento de erros e mensagens (toast) para sucesso/erro.</div>
+</div>
+</div>
+</section>
+<!-- 2) Pré-requisitos -->
+<section class="mb-4" id="sec-2">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">2) Pré-requisitos e ferramentas</h2>
+<div>· Pré-requisitos: Cap. 6 concluído (Pedido e ItemPedido com tela edit funcionando) e autenticação (Cap. 5).</div>
+<div>· Ferramentas: VS Code, Git, MySQL, navegador com DevTools (aba Network/Console).</div>
+<div>· Opcional: Postman/Insomnia para testar endpoints JSON (Cap. 8 aprofunda documentação/testes).</div>
+</div>
+</div>
+</section>
+<!-- 3) Teoria -->
+<section class="mb-4" id="sec-3">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">3) Conteúdo teórico</h2>
+
+
+
+
+
+
+
+
+
+
+<h3 class="h5 fw-bold mt-3">3.1. O que é AJAX (moderno)</h3><p>AJAX é um conjunto de técnicas para fazer requisições HTTP em segundo plano e atualizar apenas partes da página, sem recarregar tudo. O nome original (Asynchronous JavaScript and XML) aparece muito em livros antigos, mas hoje quase sempre trocamos dados em JSON. O ponto central não é a sigla, e sim a experiência: o usuário interage com a tela e recebe retorno rápido, com menos “piscar” de página e sem perder o contexto (scroll, campos preenchidos, foco do cursor).</p><p>Em uma aplicação tradicional (sem AJAX), ao enviar um formulário o navegador faz um POST e recarrega a página inteira após o redirecionamento. Esse fluxo é estável e simples, mas pode deixar a interface lenta em operações repetitivas, como adicionar vários itens em um pedido. Com AJAX, a tela continua “viva”: o front envia somente os dados necessários (produto_id e quantidade), o servidor responde com um JSON contendo o item criado/atualizado e o novo total, e o JavaScript atualiza a tabela e o total na hora.</p><p>É importante entender que AJAX não elimina o backend — ele apenas muda a forma de comunicação. Você continua tendo rotas, controllers, validação e regras de negócio no Laravel. A diferença é que, em vez de responder com HTML e redirecionar, você responde com JSON e um status HTTP apropriado. Isso permite que o JavaScript decida como atualizar a interface. Em termos de arquitetura, você está criando uma “mini-API interna” para melhorar a UX.</p><p>Benefícios e cuidados comuns ao adotar AJAX:</p><ul><li><code>Melhor UX</code> — Atualiza somente o que mudou e mantém o usuário no contexto.</li><li><code>Menos tráfego</code> — Em geral, troca menos HTML e envia/recebe apenas dados.</li><li><code>Depuração</code> — Você precisa usar DevTools (Network/Console) para acompanhar requests.</li><li><code>Atenção a estados</code> — A UI precisa tratar loading, sucesso e erro para não confundir o usuário.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 7)</div><div>Na seção 4.4, o formulário “Adicionar (AJAX)” deixa de recarregar a página: você intercepta o submit, envia os dados com fetch() para a rota JSON (seção 4.2) e, quando recebe o JSON, chama upsertRow() para atualizar/inserir a linha na tabela e setTotal() para atualizar o total. O usuário percebe o ganho ao adicionar vários itens seguidos sem refresh.</div></div><h3 class="h5 fw-bold mt-4">3.2. JSON, headers e códigos de status</h3><p>JSON (JavaScript Object Notation) é um formato de dados leve e fácil de ler, baseado em objetos e listas. Ele é muito usado porque funciona bem no navegador, no servidor e em ferramentas de teste. Em uma requisição AJAX, o ideal é que o servidor responda sempre em JSON (inclusive em caso de erro), para que o front consiga tratar a resposta de forma consistente.</p><p>Para “negociar” o formato da resposta, usamos headers. O mais importante aqui é Accept: application/json, que diz ao servidor: “eu espero JSON como resposta”. No Laravel, esse header faz diferença principalmente em erros de validação: com Accept: application/json, o framework tende a devolver 422 com um corpo JSON contendo message e errors, em vez de redirecionar de volta ao formulário com sessão.</p><p>O Content-Type (quando você envia JSON) indica o formato do corpo da requisição. Porém, neste capítulo, você envia FormData no fetch, então não precisa setar manualmente Content-Type: o navegador define o boundary corretamente. Se você setar Content-Type errado ao enviar FormData, o servidor pode não conseguir ler os dados. Por isso, a regra prática é: (1) FormData → não setar Content-Type; (2) JSON.stringify(...) → setar Content-Type: application/json.</p><p>Códigos de status HTTP tornam a comunicação mais “profissional”: o front entende rapidamente se foi sucesso ou erro. Em AJAX, usar status corretos é ainda mais importante porque você não está navegando entre páginas — você precisa saber se deve atualizar a UI, mostrar toast de sucesso, ou exibir erros de validação. Os status mais comuns aqui são: 200/201 (sucesso), 422 (validação), 403 (proibido), 404 (não encontrado), e ocasionalmente 500 (erro inesperado).</p><p>Mapa rápido de status e o que o front deve fazer:</p><ul><li><code>200 OK</code> — Atualizar UI e mostrar confirmação.</li><li><code>201 Created</code> — Semelhante ao 200, mas indica criação de recurso.</li><li><code>422 Unprocessable Entity</code> — Exibir mensagens de validação (data.errors) e manter o usuário no formulário.</li><li><code>403 Forbidden</code> — Informar falta de permissão e possivelmente redirecionar/ocultar ações.</li><li><code>404 Not Found</code> — Informar que o recurso não existe (pedido/item removido, id inválido).</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 7)</div><div>Na seção 4.4, o fetch envia o header Accept: application/json. Assim, se a validação falhar no storeJson (seção 4.3), o Laravel responde com 422 e JSON. O script verifica resp.ok; se não for ok, mostra um toast de erro e você consegue inspecionar data.errors no console. Quando dá certo, o JSON retorna o item e o novo total, e a UI é atualizada.</div></div><h3 class="h5 fw-bold mt-4">3.3. CSRF em requisições AJAX</h3><p>Mesmo usando AJAX, você continua fazendo requisições para rotas web (routes/web.php) que são protegidas por CSRF no Laravel. CSRF é a proteção contra um ataque em que um site externo tenta disparar uma ação no seu sistema usando a sessão do usuário. Por isso, toda requisição que altera dados (POST/PUT/PATCH/DELETE) precisa carregar o token CSRF válido.</p><p>Em formulários Blade, o token entra com @csrf automaticamente. Em AJAX, você precisa enviar o token manualmente. O padrão mais prático é colocar o token em uma meta tag no layout (&lt;meta name="csrf-token" ...&gt;) e, no JavaScript, ler esse valor e enviá-lo no header X-CSRF-TOKEN. Assim, você não precisa “injetar” o token em cada script, e mantém um único ponto de configuração.</p><p>Além do token, é boa prática enviar Accept: application/json para que, em caso de erro (incluindo 419/CSRF inválido, 422/validação), você receba uma resposta que o front possa tratar. E lembre-se: CSRF está ligado a sessão; em rotas de API (routes/api.php) normalmente se usa token (Sanctum/Passport) e CSRF não é aplicado da mesma forma. Neste capítulo, como estamos no mundo Blade + sessão, CSRF é obrigatório.</p><p>Checklist mental para AJAX seguro em rotas web:</p><ul><li><code>Token disponível no HTML</code> — Adicionar meta csrf-token no layout.</li><li><code>Enviar token no header</code> — X-CSRF-TOKEN: csrfToken().</li><li><code>Usar métodos corretos</code> — POST para adicionar, DELETE para remover, PATCH para atualizar quantidade (atividade).</li><li><code>Tratar erros</code> — Mostrar feedback e logar detalhes no console para depurar.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 7)</div><div>Na seção 4.1, você adiciona a meta csrf-token no layout. Na seção 4.4, a função csrfToken() lê a meta e o fetch envia X-CSRF-TOKEN em POST e DELETE. Sem isso, você veria erro de CSRF (geralmente 419). Com o token correto, as rotas storeJson/destroyJson funcionam e o front consegue atualizar a tabela e o total em tempo real.</div></div></div>
+</div>
+</section>
+<!-- 4) Passo a passo -->
+<section class="mb-4" id="sec-4">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">4) Passo a passo guiado — Pedido com AJAX (fetch + JSON)</h2>
+<div class="mb-2">Meta: criar endpoints JSON e atualizar a tela de pedido sem recarregar.</div>
+<h3 class="h5 fw-bold mt-4">4.1. Inserir CSRF token no layout (meta)</h3>
+<div>Edite <code>resources/views/layouts/app.blade.php</code> e adicione no &lt;head&gt;:</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;meta name="csrf-token" content="{{ csrf_token() }}"&gt;</code></pre>
+<h3 class="h5 fw-bold mt-4">4.2. Criar rotas JSON para itens do pedido</h3>
+<div>Em <code>routes/web.php</code> (dentro do grupo <code>auth</code>):</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">use App\Http\Controllers\ItemPedidoController;
+
+Route::post('pedidos/{pedido}/itens-json', [ItemPedidoController::class, 'storeJson'])
+    -&gt;name('pedidos.itens.storeJson');
+
+Route::delete('pedidos/{pedido}/itens-json/{itemPedido}', [ItemPedidoController::class, 'destroyJson'])
+    -&gt;name('pedidos.itens.destroyJson');</code></pre>
+<h3 class="h5 fw-bold mt-4">4.3. Implementar métodos JSON no ItemPedidoController</h3>
+<div>Adicione dois métodos: <code>storeJson</code> e <code>destroyJson</code>.</div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">public function storeJson(Request $request, Pedido $pedido)
+{
+    $dados = $request-&gt;validate([
+        'produto_id' =&gt; 'required|exists:produtos,id',
+        'quantidade' =&gt; 'required|integer|min:1|max:99',
+    ]);
+
+    $produto = Produto::findOrFail($dados['produto_id']);
+
+    $preco = $produto-&gt;preco;
+
+    $item = ItemPedido::where('pedido_id', $pedido-&gt;id)
+        -&gt;where('produto_id', $produto-&gt;id)
+        -&gt;first();
+
+    if ($item) {
+        $item-&gt;quantidade += $dados['quantidade'];
+        $item-&gt;preco_unitario = $preco;
+        $item-&gt;subtotal = $item-&gt;quantidade * $preco;
+        $item-&gt;save();
+    } else {
+        $item = ItemPedido::create([
+            'pedido_id' =&gt; $pedido-&gt;id,
+            'produto_id' =&gt; $produto-&gt;id,
+            'quantidade' =&gt; $dados['quantidade'],
+            'preco_unitario' =&gt; $preco,
+            'subtotal' =&gt; $dados['quantidade'] * $preco,
+        ]);
+    }
+
+    $pedido-&gt;total = ItemPedido::where('pedido_id', $pedido-&gt;id)-&gt;sum('subtotal');
+    $pedido-&gt;save();
+
+    $item-&gt;load('produto');
+
+    return response()-&gt;json([
+        'message' =&gt; 'Item adicionado!',
+        'pedido' =&gt; [
+            'id' =&gt; $pedido-&gt;id,
+            'total' =&gt; (float) $pedido-&gt;total,
+        ],
+        'item' =&gt; [
+            'id' =&gt; $item-&gt;id,
+            'produto' =&gt; [
+                'id' =&gt; $item-&gt;produto-&gt;id,
+                'nome' =&gt; $item-&gt;produto-&gt;nome,
+            ],
+            'quantidade' =&gt; (int) $item-&gt;quantidade,
+            'preco_unitario' =&gt; (float) $item-&gt;preco_unitario,
+            'subtotal' =&gt; (float) $item-&gt;subtotal,
+        ]
+    ], 200);
+}
+
+public function destroyJson(Pedido $pedido, ItemPedido $itemPedido)
+{
+    abort_unless($itemPedido-&gt;pedido_id === $pedido-&gt;id, 404);
+
+    $itemPedido-&gt;delete();
+
+    $pedido-&gt;total = ItemPedido::where('pedido_id', $pedido-&gt;id)-&gt;sum('subtotal');
+    $pedido-&gt;save();
+
+    return response()-&gt;json([
+        'message' =&gt; 'Item removido!',
+        'pedido' =&gt; [
+            'id' =&gt; $pedido-&gt;id,
+            'total' =&gt; (float) $pedido-&gt;total,
+        ],
+        'removed_item_id' =&gt; (int) $itemPedido-&gt;id,
+    ], 200);
+}</code></pre>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-exclamation-circle me-2"></i>Dica de depuração</div>
+<div class="text-muted">Abra o DevTools (F12) → Network para ver o request e a resposta JSON.</div>
+</div>
+<h3 class="h5 fw-bold mt-4">4.4. Atualizar a view do pedido para enviar via fetch</h3>
+<div>
+            No <code>resources/views/pedidos/edit.blade.php</code>, troque o formulário de adicionar item por um formulário com id e evite submit padrão.
+            Exemplo (apenas o bloco do form):
+          </div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;form id="formAddItem"&gt;
+    @csrf
+    &lt;div class="mb-3"&gt;
+        &lt;label class="form-label"&gt;Produto&lt;/label&gt;
+        &lt;select name="produto_id" class="form-select" required&gt;
+            &lt;option value=""&gt;Selecione...&lt;/option&gt;
+            @foreach($produtos as $prod)
+                &lt;option value="{{ $prod-&gt;id }}"&gt;{{ $prod-&gt;nome }} (R$ {{ number_format($prod-&gt;preco,2,',','.') }})&lt;/option&gt;
+            @endforeach
+        &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class="mb-3"&gt;
+        &lt;label class="form-label"&gt;Quantidade&lt;/label&gt;
+        &lt;input type="number" name="quantidade" class="form-control" value="1" min="1" max="99" required&gt;
+    &lt;/div&gt;
+    &lt;button class="btn btn-primary" type="submit"&gt;Adicionar (AJAX)&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  window.PW3 = {
+    pedidoId: {{ $pedido-&gt;id }},
+    urlAdd: "{{ route('pedidos.itens.storeJson', $pedido) }}",
+    urlDelBase: "{{ url('pedidos/'.$pedido-&gt;id.'/itens-json') }}"
+  };
+&lt;/script&gt;</code></pre>
+<div>
+            Agora, adicione um script (no final da view) para interceptar o submit e atualizar a tabela.
+            Você pode manter a tabela com um <code>&lt;tbody id="itensBody"&gt;</code>.
+          </div>
+<div>JavaScript</div>
+<pre class="language-javascript"><code class="language-javascript">function csrfToken() {
+  return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+function moneyBR(value) {
+  return (value ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function showToast(title, body) {
+  const el = document.getElementById('pw3Toast');
+  document.getElementById('pw3ToastTitle').textContent = title;
+  document.getElementById('pw3ToastBody').textContent = body;
+  const toast = bootstrap.Toast.getOrCreateInstance(el, { delay: 2500 });
+  toast.show();
+}
+
+function upsertRow(item) {
+  const tbody = document.getElementById('itensBody');
+  let row = document.getElementById('item-' + item.id);
+
+  const html = `
+    &lt;tr id="item-${item.id}"&gt;
+      &lt;td&gt;${item.produto.nome}&lt;/td&gt;
+      &lt;td class="text-end"&gt;${item.quantidade}&lt;/td&gt;
+      &lt;td class="text-end"&gt;${moneyBR(item.preco_unitario)}&lt;/td&gt;
+      &lt;td class="text-end"&gt;${moneyBR(item.subtotal)}&lt;/td&gt;
+      &lt;td class="text-end"&gt;
+        &lt;button class="btn btn-sm btn-outline-danger" data-remove="${item.id}"&gt;Remover&lt;/button&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;`;
+
+  if (row) {
+    row.outerHTML = html;
+  } else {
+    tbody.insertAdjacentHTML('beforeend', html);
+  }
+}
+
+function removeRow(itemId) {
+  const row = document.getElementById('item-' + itemId);
+  if (row) row.remove();
+}
+
+function setTotal(total) {
+  document.getElementById('pedidoTotal').textContent = moneyBR(total);
+}
+
+document.getElementById('formAddItem').addEventListener('submit', async (e) =&gt; {
+  e.preventDefault();
+
+  const form = e.currentTarget;
+  const fd = new FormData(form);
+
+  try {
+    const resp = await fetch(window.PW3.urlAdd, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken(),
+        'Accept': 'application/json'
+      },
+      body: fd
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      // 422 validação vem com errors
+      const msg = data.message || 'Erro ao adicionar item.';
+      showToast('Erro', msg);
+      console.error(data);
+      return;
+    }
+
+    upsertRow(data.item);
+    setTotal(data.pedido.total);
+    showToast('Sucesso', data.message);
+
+    // reset rápido
+    form.quantidade.value = 1;
+    form.produto_id.value = '';
+
+  } catch (err) {
+    console.error(err);
+    showToast('Erro', 'Falha de conexão. Verifique servidor e console.');
+  }
+});
+
+// Delegação de evento para botões remover
+document.getElementById('itensBody').addEventListener('click', async (e) =&gt; {
+  const btn = e.target.closest('[data-remove]');
+  if (!btn) return;
+
+  const itemId = btn.getAttribute('data-remove');
+  if (!confirm('Remover este item?')) return;
+
+  try {
+    const resp = await fetch(`${window.PW3.urlDelBase}/${itemId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken(),
+        'Accept': 'application/json'
+      }
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      showToast('Erro', data.message || 'Erro ao remover.');
+      console.error(data);
+      return;
+    }
+
+    removeRow(data.removed_item_id);
+    setTotal(data.pedido.total);
+    showToast('Sucesso', data.message);
+
+  } catch (err) {
+    console.error(err);
+    showToast('Erro', 'Falha de conexão.');
+  }
+});</code></pre>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-check2-circle me-2"></i>Resultado esperado</div>
+<div class="text-muted">Adicionar/remover itens sem recarregar a página, com atualização do total e toast de feedback.</div>
+</div>
+<h3 class="h5 fw-bold mt-4">4.5. Ajuste mínimo na tabela para suportar atualização dinâmica</h3>
+<div>Na tabela de itens do pedido, garanta:</div>
+<div>· <code>&lt;tbody id="itensBody"&gt;</code></div>
+<div>· total exibido em <code>&lt;span id="pedidoTotal"&gt;</code></div>
+<div>PHP</div>
+<pre class="language-php"><code class="language-php">&lt;tbody id="itensBody"&gt;
+  @foreach($pedido-&gt;itens as $item)
+    &lt;tr id="item-{{ $item-&gt;id }}"&gt;
+      &lt;td&gt;{{ $item-&gt;produto-&gt;nome }}&lt;/td&gt;
+      &lt;td class="text-end"&gt;{{ $item-&gt;quantidade }}&lt;/td&gt;
+      &lt;td class="text-end"&gt;R$ {{ number_format($item-&gt;preco_unitario,2,',','.') }}&lt;/td&gt;
+      &lt;td class="text-end"&gt;R$ {{ number_format($item-&gt;subtotal,2,',','.') }}&lt;/td&gt;
+      &lt;td class="text-end"&gt;
+        &lt;button class="btn btn-sm btn-outline-danger" data-remove="{{ $item-&gt;id }}"&gt;Remover&lt;/button&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  @endforeach
+&lt;/tbody&gt;
+
+&lt;div class="fw-bold"&gt;Total: &lt;span id="pedidoTotal"&gt;R$ {{ number_format($pedido-&gt;total,2,',','.') }}&lt;/span&gt;&lt;/div&gt;</code></pre>
+<h3 class="h5 fw-bold mt-4">4.6. Commit no Git</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 7: AJAX (fetch) no pedido + endpoints JSON + UI dinâmica"
+git push</code></pre>
+</div>
+</div>
+</section>
+<!-- 5) Atividades correlatas -->
+<section class="mb-4" id="sec-5">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">5) Atividades correlatas (para a Semana B)</h2>
+<div class="mb-2">Objetivo: consolidar AJAX, tratamento de erros e melhorias de UX. Entrega via repositório (commit + push).</div>
+<div class="fw-semibold mt-2">1. Remover item via AJAX (já base) + confirmação e estado de loading</div>
+<div>o Desabilitar botão enquanto o request está em andamento.</div>
+<div>o Mostrar spinner no botão “Adicionar (AJAX)”.</div>
+<div class="fw-semibold mt-3">2. Atualizar quantidade via AJAX com debounce</div>
+<div>o Criar endpoint <code>PATCH</code> para alterar quantidade de item.</div>
+<div>o No front, colocar input number na tabela e enviar após 400ms sem digitar (debounce).</div>
+<div class="fw-semibold mt-3">3. Mostrar toast de confirmação/erro (melhorar mensagens)</div>
+<div>o Em validação 422, listar quais campos estão inválidos.</div>
+<div>o Exibir mensagens amigáveis em português.</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+<div class="text-muted">Criar um “mini-carrinho” no topo da página mostrando quantidade de itens e total atualizando em tempo real.</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 6) Pesquisas -->
+<section class="mb-4" id="sec-6">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">6) Pesquisas complementares (para aprofundar)</h2>
+<div>· Fetch API: diferenças entre enviar FormData e JSON (Content-Type e parsing).</div>
+<div>· Códigos de status: quando usar 201, 204, 409 e 422 em APIs.</div>
+<div>· Tratamento de erros: boas práticas para padronizar respostas JSON no Laravel.</div>
+<div>· UX: debounce, optimistic UI e acessibilidade em interações assíncronas.</div>
+<div>· Segurança: por que CSRF importa em rotas web e quando usar rotas de API (api.php) com tokens.</div>
+</div>
+</div>
+</section>
+<!-- 7) Questionário -->
+<section class="mb-4" id="sec-7">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q1">
+<div class="fw-semibold mb-2">1. O que é AJAX?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="A"/>A) Um banco de dados do Laravel.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="B"/>B) Um comando do Artisan para migrar tabelas.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="C"/>C) Um método para criar controllers automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="D"/>D) Técnica para fazer requisições assíncronas e atualizar partes da página sem recarregar.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="E"/>E) Um tipo de autenticação por senha.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q2">
+<div class="fw-semibold mb-2">2. Qual API do navegador usamos neste capítulo para requisições assíncronas?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="A"/>A) localStorage()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="B"/>B) fetch()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="C"/>C) seed()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="D"/>D) migrate()</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="E"/>E) paginate()</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q3">
+<div class="fw-semibold mb-2">3. Qual header ajuda a pedir respostas em JSON para o Laravel?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="A"/>A) X-POWERED-BY</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="B"/>B) Cache-Control: no-cache</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="C"/>C) Host</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="D"/>D) User-Agent</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="E"/>E) Accept: application/json</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q4">
+<div class="fw-semibold mb-2">4. Para rotas web no Laravel, por que precisamos enviar CSRF também no AJAX?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="A"/>A) Para proteger contra ataques CSRF em ações que alteram dados (POST/PUT/DELETE).</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="B"/>B) Para aumentar o número de consultas no banco.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="C"/>C) Para permitir XSS no navegador.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="D"/>D) Para substituir autenticação do Breeze.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="E"/>E) Para obrigar a usar SOAP.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="C" data-qid="q5">
+<div class="fw-semibold mb-2">5. Qual status HTTP é comum para erro de validação no Laravel ao enviar JSON?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="A"/>A) 200</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="B"/>B) 201</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="C"/>C) 422</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="D"/>D) 304</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="E"/>E) 100</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q6">
+<div class="fw-semibold mb-2">6. Em fetch(), qual método HTTP usamos para remover item no exemplo?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="A"/>A) GET</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="B"/>B) POST</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="C"/>C) PUT</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="D"/>D) DELETE</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q6" type="radio" value="E"/>E) TRACE</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q7">
+<div class="fw-semibold mb-2">7. Qual técnica evita que o front envie requisição a cada tecla digitada (no caso de quantidade)?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="A"/>A) CSRF</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="B"/>B) debounce</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="C"/>C) eager loading</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="D"/>D) seeders</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q7" type="radio" value="E"/>E) migrations</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q8">
+<div class="fw-semibold mb-2">8. Qual opção descreve corretamente o papel do JSON no AJAX?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="A"/>A) É um comando do Git.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="B"/>B) É um tipo de migration do Laravel.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="C"/>C) É o motor do MySQL.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="D"/>D) É um template engine como Blade.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q8" type="radio" value="E"/>E) Formato de dados para trocar informações entre front e back de forma leve.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q9">
+<div class="fw-semibold mb-2">9. Qual é um bom local para ver o request/response de AJAX durante testes?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="A"/>A) DevTools do navegador (Network/Console)</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="B"/>B) Apenas no arquivo .env</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="C"/>C) No README do projeto</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="D"/>D) No composer.lock</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q9" type="radio" value="E"/>E) No favicon do navegador</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-0 quiz-question" data-answer="C" data-qid="q10">
+<div class="fw-semibold mb-2">10. Em uma UI de pedido, o benefício mais direto do AJAX é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="A"/>A) Trocar MySQL por SQLite automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="B"/>B) Eliminar necessidade de rotas no Laravel.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="C"/>C) Atualizar itens e total sem recarregar a página inteira.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="D"/>D) Criar seeders automaticamente.</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q10" type="radio" value="E"/>E) Desativar CSRF e validações.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+</div>
+<div class="mt-4">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetQuiz" type="button">
+<i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 8) Checklist interativo -->
+<section class="mb-4" id="sec-8">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 7)</h2>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center">
+<div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+<div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+</div>
+<div aria-label="Progresso do checklist" aria-valuemax="100" aria-valuemin="0" class="progress mt-2" role="progressbar">
+<div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+</div>
+</div>
+<div class="d-grid gap-2" id="checklist">
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c1" type="checkbox"/>· Meta CSRF adicionada no layout (csrf-token).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c2" type="checkbox"/>· Rotas JSON para adicionar/remover itens criadas.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c3" type="checkbox"/>· Métodos storeJson/destroyJson implementados retornando JSON + status.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c4" type="checkbox"/>· View edit do pedido ajustada para usar fetch no submit.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c5" type="checkbox"/>· Tabela de itens com tbody#itensBody e linhas com ids (item-...).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c6" type="checkbox"/>· Total atualizado dinamicamente (span#pedidoTotal).</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c7" type="checkbox"/>· Toasts/feedback de sucesso e erro funcionando.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c8" type="checkbox"/>· Tratamento de erro 422 (validação) testado no console.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c9" type="checkbox"/>· Commit + push realizados com mensagem descritiva.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetChecklist" type="button">
+<i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 9) Entregáveis -->
+<section class="mb-5" id="sec-9">
+<div class="card">
+<div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">9) Entregáveis do capítulo</h2>
+<div>1. Repositório com endpoints JSON (storeJson/destroyJson) e rotas configuradas.</div>
+<div>2. Tela de pedido (edit) atualizando itens e total sem recarregar (AJAX).</div>
+<div>3. Capturas de tela em <code>docs/</code>: (a) Network mostrando resposta JSON, (b) item adicionado sem refresh, (c) toast de confirmação.</div>
+</div>
+</div>
+</section>
+<!-- Navegação final -->
+<section class="mb-5">
+<div class="d-flex flex-wrap justify-content-between gap-2">
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+<div class="d-flex gap-2 flex-wrap">
+<a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+<a class="btn btn-pw3" href="capitulo08.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 08</a>
+</div>
+</div>
+</section>
+<footer class="py-4 border-top">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+<div>
+<div class="fw-semibold">Apostila PW3 • Laravel</div>
+<div class="small text-muted">Capítulo 07 • Requisições Assíncronas (AJAX) no Laravel/Blade</div>
+</div>
+<div class="small text-muted">
+<i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos
+        </div>
+</div>
+</footer>
+</main>
+<!-- Bootstrap Bundle (com Popper) -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+<script>
+    // Marcar último capítulo acessado (para aparecer na Home)
+    localStorage.setItem('pw3_last_chapter', 'capitulo07.html');
+
+    // Rolagem suave para âncoras internas
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Questionário dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap07_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState));
+      }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      // Restaurar
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(saved.result === 'correct'){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else if(saved.result === 'incorrect'){
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        }
+      });
+
+      // Eventos
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+
+          quizState[qid] = {
+            selected: chosen,
+            submitted: true,
+            result: isCorrect ? 'correct' : 'incorrect'
+          };
+          saveState();
+
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+
+          if(isCorrect){
+            setFeedback(qEl, 'correct', 'Correto!');
+          }else{
+            setFeedback(qEl, 'incorrect', 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+          }
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap07_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+
+      // Restaurar
+      checks.forEach(ch => {
+        const key = ch.dataset.key;
+        ch.checked = !!state[key];
+      });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => {
+        ch.addEventListener('change', () => {
+          save();
+          update();
+        });
+      });
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Capítulo 13 — PW3 Laravel</title>
+<meta content="Capítulo 13 — Deploy de Aplicação Laravel: ambiente, build, storage, filas, logs e segurança básica" name="description"/>
+<!-- Bootstrap 5 + Icons (CDN) -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Prism.js for code highlighting -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+<style>
+    :root{
+      --pw3-danger:#dc3545;     /* vermelho */
+      --pw3-graybtn:#6c757d;    /* cinza */
+      --pw3-soft:#f8f9fa;
+      --pw3-border: rgba(0,0,0,.08);
+    }
+
+    body{ background: var(--pw3-soft); }
+
+    /* Navbar vermelha */
+    .navbar-pw3{ background: var(--pw3-danger); }
+    .navbar-pw3 .navbar-brand,
+    .navbar-pw3 .nav-link,
+    .navbar-pw3 .navbar-toggler{ color:#fff !important; }
+    .navbar-pw3 .nav-link:hover{ opacity:.9; text-decoration: underline; }
+    .navbar-pw3 .navbar-toggler{ border-color: rgba(255,255,255,.35); }
+
+    /* Botões cinza */
+    .btn-pw3{ background: var(--pw3-graybtn); border-color: var(--pw3-graybtn); color:#fff; }
+    .btn-pw3:hover{ filter: brightness(.95); color:#fff; }
+
+    .card{ border: 1px solid var(--pw3-border); box-shadow: 0 1px 0 rgba(0,0,0,.02); }
+
+    /* Prism */
+    pre[class*="language-"]{
+      border-radius: .75rem;
+      border: 1px solid rgba(255,255,255,.08);
+      margin: .75rem 0 1rem;
+    }
+
+    .badge-soft{ background: rgba(220,53,69,.10); color:#b02a37; border: 1px solid rgba(220,53,69,.18); }
+
+    .toc a{ text-decoration:none; }
+    .toc a:hover{ text-decoration: underline; }
+
+    /* Quiz */
+    .quiz-option{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+    .quiz-option:hover{ background:#fdfdfd; }
+    .quiz-feedback{ border-radius:.75rem; padding:.75rem; border:1px dashed var(--pw3-border); background:#fff; display:none; }
+    .quiz-feedback.correct{ border-color: rgba(25,135,84,.35); background: rgba(25,135,84,.06); color:#0f5132; }
+    .quiz-feedback.incorrect{ border-color: rgba(220,53,69,.35); background: rgba(220,53,69,.06); color:#842029; }
+
+    /* Checklist */
+    .check-item{ border: 1px solid var(--pw3-border); border-radius: .75rem; padding: .6rem .75rem; background:#fff; }
+
+    /* Callout */
+    .callout{ border:1px solid var(--pw3-border); border-left: 5px solid rgba(220,53,69,.55); background:#fff; border-radius:.75rem; padding: 1rem; }
+
+    a:focus, button:focus, input:focus{ outline: 3px solid rgba(13,110,253,.25); outline-offset: 2px; }
+
+    footer{ color:#6c757d; }
+  </style>
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-pw3 sticky-top">
+<div class="container">
+<a class="navbar-brand fw-semibold" href="index.html">
+<i class="bi bi-braces-asterisk me-1"></i>
+        Apostila PW3 • Laravel
+      </a>
+<button aria-controls="pw3Offcanvas" aria-label="Abrir menu" class="navbar-toggler" data-bs-target="#pw3Offcanvas" data-bs-toggle="offcanvas" type="button">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+<li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#topo"><i class="bi bi-arrow-up-circle me-1"></i>Topo</a></li>
+<li class="nav-item dropdown">
+<a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">
+<i class="bi bi-journals me-1"></i>Capítulos
+            </a>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><h6 class="dropdown-header">1º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">2º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">3º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+<li><hr class="dropdown-divider"/></li>
+<li><h6 class="dropdown-header">4º Bimestre</h6></li>
+<li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+</ul>
+</li>
+<li class="nav-item ms-lg-2">
+<a class="btn btn-pw3 btn-sm" href="capitulo14.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 14)</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<!-- OFFCANVAS -->
+<div aria-labelledby="pw3OffcanvasLabel" class="offcanvas offcanvas-end" id="pw3Offcanvas" tabindex="-1">
+<div class="offcanvas-header">
+<h5 class="offcanvas-title" id="pw3OffcanvasLabel"><i class="bi bi-list me-1"></i>Navegação</h5>
+<button aria-label="Fechar" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+</div>
+<div class="offcanvas-body">
+<div class="d-grid gap-2 mb-3">
+<a class="btn btn-outline-secondary" href="index.html"><i class="bi bi-house-door me-1"></i>Home</a>
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do Capítulo</a>
+</div>
+<hr/>
+<p class="text-muted mb-2"><i class="bi bi-journals me-1"></i><strong>Capítulos</strong></p>
+<div class="accordion" id="accMenu">
+<div class="accordion-item">
+<h2 class="accordion-header" id="m1">
+<button aria-controls="mc1" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc1" data-bs-toggle="collapse" type="button">1º Bimestre</button>
+</h2>
+<div aria-labelledby="m1" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc1">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo01.html">Capítulo 01</a>
+<a class="btn btn-outline-secondary" href="capitulo02.html">Capítulo 02</a>
+<a class="btn btn-outline-secondary" href="capitulo03.html">Capítulo 03</a>
+<a class="btn btn-outline-secondary" href="capitulo04.html">Capítulo 04</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m2">
+<button aria-controls="mc2" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc2" data-bs-toggle="collapse" type="button">2º Bimestre</button>
+</h2>
+<div aria-labelledby="m2" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc2">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo05.html">Capítulo 05</a>
+<a class="btn btn-outline-secondary" href="capitulo06.html">Capítulo 06</a>
+<a class="btn btn-outline-secondary" href="capitulo07.html">Capítulo 07</a>
+<a class="btn btn-outline-secondary" href="capitulo08.html">Capítulo 08</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m3">
+<button aria-controls="mc3" aria-expanded="false" class="accordion-button collapsed" data-bs-target="#mc3" data-bs-toggle="collapse" type="button">3º Bimestre</button>
+</h2>
+<div aria-labelledby="m3" class="accordion-collapse collapse" data-bs-parent="#accMenu" id="mc3">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo09.html">Capítulo 09</a>
+<a class="btn btn-outline-secondary" href="capitulo10.html">Capítulo 10</a>
+<a class="btn btn-outline-secondary" href="capitulo11.html">Capítulo 11</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html">Capítulo 12</a>
+</div>
+</div>
+</div>
+<div class="accordion-item">
+<h2 class="accordion-header" id="m4">
+<button aria-controls="mc4" aria-expanded="true" class="accordion-button" data-bs-target="#mc4" data-bs-toggle="collapse" type="button">4º Bimestre</button>
+</h2>
+<div aria-labelledby="m4" class="accordion-collapse collapse show" data-bs-parent="#accMenu" id="mc4">
+<div class="accordion-body d-grid gap-2">
+<a class="btn btn-outline-secondary" href="capitulo13.html">Capítulo 13</a>
+<a class="btn btn-outline-secondary" href="capitulo14.html">Capítulo 14</a>
+<a class="btn btn-outline-secondary" href="capitulo15.html">Capítulo 15</a>
+<a class="btn btn-outline-secondary" href="capitulo16.html">Capítulo 16</a>
+</div>
+</div>
+</div>
+</div>
+<hr class="mt-4"/>
+<div class="d-grid gap-2">
+<a class="btn btn-pw3" href="capitulo14.html"><i class="bi bi-skip-forward me-1"></i>Próximo (Cap. 14)</a>
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+</div>
+</div>
+</div>
+<main class="container my-4 my-lg-5" id="topo">
+<!-- HEADER -->
+<section class="mb-4">
+<div class="card">
+<div class="card-body p-4 p-lg-5">
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+<span class="badge badge-soft rounded-pill"><i class="bi bi-book me-1"></i>Capítulo 13</span>
+<span class="badge text-bg-light border"><i class="bi bi-clock me-1"></i>Carga horária: 2 semanas (100 min/semana)</span>
+<span class="badge text-bg-light border"><i class="bi bi-diagram-3 me-1"></i>4º Bimestre</span>
+</div>
+<h1 class="fw-bold mb-2">Capítulo 13 — Deploy de Aplicação Laravel (Produção)</h1>
+<div class="mb-3">
+<div class="fw-semibold">Formato:</div>
+<div>· Semana A (100 min): Conceitos + checklist de produção + deploy em ambiente controlado.</div>
+<div>· Semana B (100 min): Ajustes finais (storage, filas, cache, logs) + validação com testes e monitoramento.</div>
+<div class="mt-2">Contexto: Projeto da Lanchonete está pronto. Agora vamos colocá-lo em produção com segurança e boas práticas.</div>
+</div>
+<div class="d-flex flex-wrap gap-2">
+<a class="btn btn-outline-secondary" href="#sumario-interno"><i class="bi bi-list-ul me-1"></i>Sumário do capítulo</a>
+<a class="btn btn-outline-secondary" href="capitulo12.html"><i class="bi bi-skip-backward me-1"></i>Voltar (Cap. 12)</a>
+<a class="btn btn-pw3" href="capitulo14.html"><i class="bi bi-skip-forward me-1"></i>Ir para Capítulo 14</a>
+</div>
+</div>
+</div>
+</section>
+<!-- TOC -->
+<section class="mb-4" id="sumario-interno">
+<div class="row g-3">
+<div class="col-lg-8">
+<div class="card"><div class="card-body">
+<h2 class="h5 fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Sumário do Capítulo</h2>
+<div class="toc d-grid gap-2">
+<a href="#sec-1"><i class="bi bi-1-circle me-2"></i>1) Objetivos</a>
+<a href="#sec-2"><i class="bi bi-2-circle me-2"></i>2) Pré-requisitos</a>
+<a href="#sec-3"><i class="bi bi-3-circle me-2"></i>3) Teoria (produção)</a>
+<a href="#sec-4"><i class="bi bi-4-circle me-2"></i>4) Passo a passo (deploy)</a>
+<a href="#sec-5"><i class="bi bi-5-circle me-2"></i>5) Atividades correlatas</a>
+<a href="#sec-6"><i class="bi bi-6-circle me-2"></i>6) Pesquisas</a>
+<a href="#sec-7"><i class="bi bi-7-circle me-2"></i>7) Questionário</a>
+<a href="#sec-8"><i class="bi bi-8-circle me-2"></i>8) Checklist</a>
+<a href="#sec-9"><i class="bi bi-9-circle me-2"></i>9) Entregáveis</a>
+</div>
+</div></div>
+</div>
+<div class="col-lg-4">
+<div class="card h-100"><div class="card-body">
+<h2 class="h6 fw-bold mb-2"><i class="bi bi-pin-angle me-2"></i>Dica</h2>
+<p class="text-muted mb-0">Em produção, use <code>APP_DEBUG=false</code>, não versiona <code>.env</code> e proteja as permissões do <code>storage</code>.</p>
+</div></div>
+</div>
+</div>
+</section>
+<!-- 1 -->
+<section class="mb-4" id="sec-1">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">1) Objetivos</h2>
+<div>Ao final deste capítulo, você será capaz de:</div>
+<div>· Preparar um projeto Laravel para produção (env, cache, build, permissões).</div>
+<div>· Fazer deploy em VPS (Nginx) ou hospedagem compatível com PHP.</div>
+<div>· Configurar fila/cron, logs e monitoramento básico.</div>
+<div>· Aplicar práticas mínimas de segurança (debug off, headers, backups).</div>
+</div></div>
+</section>
+<!-- 2 -->
+<section class="mb-4" id="sec-2">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">2) Pré-requisitos</h2>
+<div>· Projeto final funcionando localmente (web + API + testes).</div>
+<div>· Acesso a um servidor (VPS) ou serviço de hospedagem (com PHP 8+ e Composer).</div>
+<div>· Git configurado (repositório remoto) e noções de terminal/SSH.</div>
+</div></div>
+</section>
+<!-- 3 -->
+<section class="mb-4" id="sec-3">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">3) Teoria (produção)</h2>
+
+
+
+
+
+
+
+
+
+
+
+<h3 class="h5 fw-bold mt-3">3.1. O que muda em produção? (mentalidade e configurações essenciais)</h3><p>“Subir para produção” não é apenas copiar arquivos para um servidor. Em produção, seu sistema vira um serviço real: precisa ser estável, performático e seguro. Isso muda a mentalidade e muda configurações. No desenvolvimento, você aceita mensagens detalhadas de erro, recarrega assets no Vite e usa configurações locais. Em produção, você evita expor detalhes internos, otimiza carregamento e garante que segredos não vazem.</p><p>No Laravel, as mudanças mais básicas incluem: desligar debug (APP_DEBUG=false), usar APP_ENV=production, ativar caches (config/route/view) para reduzir custo de boot a cada request e configurar corretamente o APP_URL para geração de links e callbacks. Também entra a diferença de build do front-end: em vez de servir assets no modo dev, você gera uma build (npm run build) e publica os arquivos estáticos.</p><p>Outro ponto central é o filesystem: uploads e arquivos gerados pela aplicação vivem em storage. Em produção, a pasta public não deve receber uploads “diretos” sem controle; o padrão Laravel é salvar em storage/app/public e expor via storage:link. Se isso estiver errado, o sistema pode funcionar localmente e quebrar no servidor (uploads somem, 404 em imagens, erros de permissão).</p><p>Checklist de mentalidade de produção (o mínimo):</p><ul><li><code>Debug OFF</code> — APP_DEBUG=false para não expor stack traces e detalhes internos.</li><li><code>Segredos fora do Git</code> — .env só no servidor; nunca versionar chaves e senhas.</li><li><code>Caches ligados</code> — config:cache, route:cache e view:cache para performance.</li><li><code>Storage correto</code> — uploads em storage + storage:link para acesso público controlado.</li><li><code>Build do front</code> — assets em modo produção (build), não dev server.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 13)</div><div>Na seção 4.3, você ajusta APP_ENV/APP_DEBUG/APP_URL no .env e gera a APP_KEY. Na seção 4.4, você executa storage:link e ativa caches (config/route/view). Esses passos materializam exatamente as mudanças de “mentalidade de produção”.</div></div><h3 class="h5 fw-bold mt-4">3.2. Erros comuns de deploy (e por que eles acontecem)</h3><p>A maioria dos erros de deploy no Laravel não é “bug do código”; é ambiente e configuração. O clássico erro 500 após subir o projeto costuma estar relacionado a uma destas causas: .env errado (DB inválido), APP_KEY ausente, permissões incorretas em storage/bootstrap/cache, ou cache desatualizado. Por isso, deploy precisa de um checklist repetível: se você seguir sempre a mesma sequência, você reduz muito o tempo de diagnóstico.</p><p>Permissões são campeãs de problema. O PHP-FPM roda como um usuário (por exemplo www-data). Se esse usuário não consegue escrever em storage/ ou bootstrap/cache, o Laravel não consegue criar logs, compilar views e salvar cache. O resultado aparece como erro 500 ou como falhas em features específicas (upload não salva, sessão não grava, log não escreve).</p><p>Outro erro frequente é esquecer migrations. Em produção, o banco geralmente começa vazio ou diferente do seu local. Se você não rodar migrate --force, tabelas e colunas podem faltar, quebrando o sistema. Ainda: quando você muda rotas ou config e não limpa/regera cache, o servidor “continua vendo” o estado antigo. Isso gera bugs confusos: rota existe no código, mas 404 no servidor; variável do .env mudou, mas continua com valor antigo.</p><p>Principais erros e como reconhecer rapidamente:</p><ul><li><code>Erro 500 após deploy</code> — Verificar logs em storage/logs/laravel.log; geralmente .env, key ou permissão.</li><li><code>Imagens/uploads 404</code> — storage:link ausente ou permissões no storage/app/public.</li><li><code>Rota 404 que existe no código</code> — route:cache desatualizado; rodar route:clear e route:cache.</li><li><code>Banco “não tem coluna”</code> — migrations não rodaram ou rodaram incompletas.</li><li><code>Assets quebrados</code> — build do Vite não foi feita ou public/build não foi publicado.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 13)</div><div>A seção 4.5 trata exatamente do erro mais comum: permissões. Ela ajusta ownership e chmod para garantir escrita em storage/ e bootstrap/cache. Já a seção 4.4 cobre migrations, storage:link e caches — o trio que resolve a maioria dos “bugs de deploy”.</div></div><h3 class="h5 fw-bold mt-4">3.3. Operação em produção: logs, filas, cache e tarefas agendadas</h3><p>Deploy não termina quando o site abre. Em produção, você precisa cuidar do “funcionamento contínuo”: logs para diagnosticar problemas, filas (queue) para tarefas demoradas, cache para performance e scheduler (cron) para rotinas periódicas. Mesmo que seu projeto ainda não use filas, entender o conceito é importante porque muitas features reais dependem disso (envio de e-mail, geração de relatórios, integrações com APIs, processamento de imagens etc.).</p><p>Logs: o Laravel registra em storage/logs e isso é sua primeira fonte de verdade quando algo quebra. Em produção, você precisa também pensar em rotação (não deixar o arquivo crescer infinito) e em coletar logs (por exemplo, via ferramentas do servidor). Cache: em produção, usar config/route/view cache melhora performance. Para caches de dados (ex.: consultas), drivers como Redis dão mais escala, mas file cache já serve para ambiente pequeno.</p><p>Filas e scheduler: o scheduler do Laravel é disparado pelo cron (um comando por minuto), e ele decide o que rodar. Já as filas precisam de workers sempre ativos. Rodar queue:work no terminal funciona para estudo, mas em produção real você usa Supervisor ou Systemd para manter o worker vivo após reboot e reiniciar se cair. Sem isso, jobs ficam presos e features “param” silenciosamente.</p><p>O que manter sob controle em produção (nível mínimo):</p><ul><li><code>Logs acessíveis</code> — Conseguir abrir storage/logs/laravel.log e identificar erros.</li><li><code>Caches corretos</code> — Regerar caches após mudanças: config:cache/route:cache/view:cache.</li><li><code>Cron do scheduler</code> — Uma linha no crontab chamando schedule:run.</li><li><code>Worker de fila</code> — queue:work mantido por Supervisor/Systemd.</li><li><code>Backups</code> — Dump do banco + rotina de restauração testada.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 13)</div><div>Na seção 4.7, você adiciona o cron para schedule:run e mostra queue:work para estudo. O callout “Produção de verdade” reforça o uso de Supervisor/Systemd e HTTPS. Na seção 4.8, o “script mental” inclui queue:restart, que é crucial após deploy para reiniciar workers e aplicar mudanças.</div></div><h3 class="h5 fw-bold mt-4">3.4. Segurança básica em produção (o que não pode faltar)</h3><p>Produção exige um mínimo de segurança operacional. O primeiro passo é não expor detalhes: APP_DEBUG=false. Isso evita que um erro mostre caminhos do servidor, queries e detalhes do framework. O segundo passo é proteger segredos: nunca versionar .env, nunca colocar senha de banco em commit, e garantir permissões adequadas no servidor para que arquivos sensíveis não fiquem públicos.</p><p>Também é fundamental usar HTTPS. Sem HTTPS, tokens, sessões e senhas podem ser interceptados em redes inseguras. Com HTTPS, além de criptografar tráfego, você pode aplicar HSTS e forçar redirecionamento 80→443. Em Nginx, Certbot (Let’s Encrypt) é o caminho comum. Em hospedagens, muitas já oferecem SSL simplificado. Mesmo que o capítulo não mostre todos os comandos, o conceito deve ser fixado: produção ≠ HTTP simples.</p><p>Outros cuidados úteis: limitar permissões de escrita apenas onde é necessário (storage e cache), bloquear acesso a arquivos ocultos (ex.: .env), configurar headers básicos (X-Content-Type-Options, X-Frame-Options), e manter o servidor atualizado. Para o projeto da Lanchonete, isso já é suficiente como “segurança mínima viável”.</p><p>Checklist rápido de segurança mínima:</p><ul><li><code>APP_DEBUG=false</code> — Nunca deixar debug ligado em produção.</li><li><code>HTTPS obrigatório</code> — Tráfego criptografado; proteger login e tokens.</li><li><code>.env fora do Git</code> — Segredos só no servidor.</li><li><code>Permissões restritas</code> — Escrita apenas em storage/ e bootstrap/cache.</li><li><code>Backups</code> — Se der ruim, você consegue restaurar.</li></ul><div class="alert alert-light border rounded-3 mt-3"><div class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Exemplo aplicado no passo a passo (Cap. 13)</div><div>Na seção 4.3, você define APP_ENV=production e APP_DEBUG=false. Na configuração do Nginx (seção 4.6), a root aponta para public/ e há uma regra deny para arquivos .ht*, reduzindo risco de exposição. O callout da seção 4.7 reforça HTTPS e Supervisor como parte do “produção de verdade”.</div></div></div></div>
+</section>
+<!-- 4 -->
+<section class="mb-4" id="sec-4">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">4) Passo a passo — Deploy (VPS com Nginx)</h2>
+<h3 class="h5 fw-bold mt-3">4.1. Preparar servidor (pacotes essenciais)</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash"># Ubuntu/Debian (exemplo)
+sudo apt update
+sudo apt install -y nginx git unzip
+sudo apt install -y php8.2-fpm php8.2-mysql php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-bcmath
+
+# Composer (se não tiver)
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php
+sudo mv composer.phar /usr/local/bin/composer</code></pre>
+<h3 class="h5 fw-bold mt-4">4.2. Clonar o projeto e instalar dependências</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">cd /var/www
+sudo git clone https://seu-repo.git lanchonete
+cd lanchonete
+
+composer install --no-dev --optimize-autoloader</code></pre>
+<h3 class="h5 fw-bold mt-4">4.3. Configurar .env de produção</h3>
+<div>Copie o exemplo e edite variáveis:</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">cp .env.example .env
+php artisan key:generate</code></pre>
+<div>Checklist mínimo no .env:</div>
+<div>· <code>APP_ENV=production</code></div>
+<div>· <code>APP_DEBUG=false</code></div>
+<div>· <code>APP_URL=https://seu-dominio.com</code></div>
+<div>· DB_* apontando para o banco do servidor</div>
+<h3 class="h5 fw-bold mt-4">4.4. Migrations, storage e caches</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">php artisan migrate --force
+php artisan storage:link
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache</code></pre>
+<h3 class="h5 fw-bold mt-4">4.5. Permissões (storage e cache)</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">sudo chown -R www-data:www-data /var/www/lanchonete
+sudo find /var/www/lanchonete -type f -exec chmod 644 {} \;
+sudo find /var/www/lanchonete -type d -exec chmod 755 {} \;
+
+sudo chmod -R 775 /var/www/lanchonete/storage /var/www/lanchonete/bootstrap/cache</code></pre>
+<h3 class="h5 fw-bold mt-4">4.6. Configurar Nginx (server block)</h3>
+<div>Crie <code>/etc/nginx/sites-available/lanchonete</code>:</div>
+<div>Nginx</div>
+<pre class="language-nginx"><code class="language-nginx">server {
+    listen 80;
+    server_name seu-dominio.com;
+
+    root /var/www/lanchonete/public;
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+</code></pre>
+<div>Ative e reinicie:</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">sudo ln -s /etc/nginx/sites-available/lanchonete /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx</code></pre>
+<h3 class="h5 fw-bold mt-4">4.7. Filas/cron (opcional, mas recomendado)</h3>
+<div>Se usar filas (jobs) e agendamentos (scheduler):</div>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash"># crontab
+* * * * * cd /var/www/lanchonete &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1
+
+# worker simples (p/ estudos):
+php artisan queue:work --tries=3</code></pre>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-shield-check me-2"></i>Produção de verdade</div>
+<div class="text-muted">Use Supervisor/Systemd para manter o worker sempre ativo e configure HTTPS (Certbot) no Nginx.</div>
+</div>
+<h3 class="h5 fw-bold mt-4">4.8. Checklist de “deploy” rápido (script mental)</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">git pull
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan queue:restart</code></pre>
+<h3 class="h5 fw-bold mt-4">4.9. Commit no Git</h3>
+<div>Shell</div>
+<pre class="language-bash"><code class="language-bash">git add .
+git commit -m "Capítulo 13: guia de deploy + configs de produção + checklist"
+git push</code></pre>
+</div></div>
+</section>
+<!-- 5 -->
+<section class="mb-4" id="sec-5">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">5) Atividades correlatas</h2>
+<div class="fw-semibold mt-2">1. Deploy em hospedagem compartilhada</div>
+<div>o Ajustar <code>public/</code> como diretório público e proteger arquivos sensíveis.</div>
+<div>o Criar <code>.htaccess</code> (Apache) e testar uploads.</div>
+<div class="fw-semibold mt-3">2. HTTPS + Headers</div>
+<div>o Configurar HTTPS (Certbot) e redirecionamento 80→443.</div>
+<div>o Adicionar headers básicos de segurança (HSTS, X-Content-Type-Options).</div>
+<div class="fw-semibold mt-3">3. Backup e restore</div>
+<div>o Criar rotina de backup do banco (dump) e testar restauração.</div>
+<div class="callout mt-3">
+<div class="fw-semibold"><i class="bi bi-plus-circle me-2"></i>Plus (opcional)</div>
+<div class="text-muted">Automatizar deploy com GitHub Actions + SSH (deploy on push) — com cuidado e chaves protegidas.</div>
+</div>
+</div></div>
+</section>
+<!-- 6 -->
+<section class="mb-4" id="sec-6">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">6) Pesquisas complementares</h2>
+<div>· Qual diferença entre Nginx e Apache para apps PHP?</div>
+<div>· O que é Supervisor e por que usar para queue workers?</div>
+<div>· Estratégias de logs: Laravel logs + rotacionamento.</div>
+<div>· Cache em produção: Redis vs file cache (conceito).</div>
+</div></div>
+</section>
+<!-- 7 Quiz -->
+<section class="mb-4" id="sec-7">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">7) Questionário de revisão (com gabarito)</h2>
+<div class="mb-4 quiz-question" data-answer="D" data-qid="q1">
+<div class="fw-semibold mb-2">1. Em produção, qual valor recomendado para APP_DEBUG?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="A"/>A) true</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="B"/>B) 1</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="C"/>C) yes</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="D"/>D) false</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q1" type="radio" value="E"/>E) debug</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="B" data-qid="q2">
+<div class="fw-semibold mb-2">2. Qual comando cria o link público para arquivos do storage?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="A"/>A) php artisan make:link</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="B"/>B) php artisan storage:link</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="C"/>C) php artisan route:link</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="D"/>D) php artisan view:publish</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q2" type="radio" value="E"/>E) php artisan serve:link</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="A" data-qid="q3">
+<div class="fw-semibold mb-2">3. Qual pasta deve ser a raiz do site no Nginx/Apache para Laravel?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="A"/>A) public/</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="B"/>B) app/</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="C"/>C) storage/</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="D"/>D) vendor/</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q3" type="radio" value="E"/>E) tests/</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-4 quiz-question" data-answer="E" data-qid="q4">
+<div class="fw-semibold mb-2">4. Qual comando é usado para aplicar migrations em produção com segurança?</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="A"/>A) php artisan migrate:undo</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="B"/>B) php artisan migrate:reset</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="C"/>C) php artisan migrate:fresh</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="D"/>D) php artisan migrate --seed</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q4" type="radio" value="E"/>E) php artisan migrate --force</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+<hr class="mt-4"/>
+</div>
+<div class="mb-0 quiz-question" data-answer="C" data-qid="q5">
+<div class="fw-semibold mb-2">5. O middleware/serviço que mantém queue worker rodando em produção geralmente é:</div>
+<div class="d-grid gap-2">
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="A"/>A) Composer</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="B"/>B) Seeder</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="C"/>C) Supervisor/Systemd</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="D"/>D) Blade</label>
+<label class="quiz-option"><input class="form-check-input me-2" name="q5" type="radio" value="E"/>E) Vite</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-pw3 btn-sm btn-submit" type="button"><i class="bi bi-send me-1"></i>Enviar Resposta</button>
+<button class="btn btn-outline-secondary btn-sm btn-key" disabled="" type="button"><i class="bi bi-eye me-1"></i>Ver Gabarito</button>
+</div>
+<div aria-live="polite" class="quiz-feedback mt-3"></div>
+</div>
+<div class="mt-4">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetQuiz" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpar respostas do questionário</button>
+</div>
+</div></div>
+</section>
+<!-- 8 Checklist -->
+<section class="mb-4" id="sec-8">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">8) Checklist de avaliação (Capítulo 13)</h2>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center">
+<div class="fw-semibold"><i class="bi bi-check2-square me-2"></i>Progresso</div>
+<div class="text-muted small"><span id="checkDone">0</span>/<span id="checkTotal">0</span> concluídos</div>
+</div>
+<div aria-label="Progresso do checklist" aria-valuemax="100" aria-valuemin="0" class="progress mt-2" role="progressbar">
+<div class="progress-bar" id="checkProgress" style="width: 0%"></div>
+</div>
+</div>
+<div class="d-grid gap-2" id="checklist">
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c1" type="checkbox"/>· Servidor preparado (PHP, Nginx/Apache, Composer) e acesso SSH funcionando.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c2" type="checkbox"/>· Projeto clonado e <code>composer install --no-dev</code> executado com sucesso.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c3" type="checkbox"/>· .env configurado com APP_ENV=production e APP_DEBUG=false.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c4" type="checkbox"/>· Migrations executadas em produção com <code>--force</code>.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c5" type="checkbox"/>· <code>storage:link</code> e permissões em storage/bootstrap-cache ajustadas.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c6" type="checkbox"/>· Cache de config/rotas/views gerado.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c7" type="checkbox"/>· Nginx apontando para <code>public/</code> e try_files configurado.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c8" type="checkbox"/>· Logs verificados e endpoint principal carregando sem erro 500.</label>
+<label class="check-item"><input class="form-check-input me-2 check" data-key="c9" type="checkbox"/>· Commit/push com documentação de deploy (README/docs) realizado.</label>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-3">
+<button class="btn btn-outline-secondary btn-sm" id="btnResetChecklist" type="button"><i class="bi bi-arrow-counterclockwise me-1"></i>Resetar checklist</button>
+</div>
+</div></div>
+</section>
+<!-- 9 -->
+<section class="mb-5" id="sec-9">
+<div class="card"><div class="card-body p-4">
+<h2 class="h4 fw-bold mb-3">9) Entregáveis</h2>
+<div>1. Aplicação publicada (URL acessível) com login e páginas principais funcionando.</div>
+<div>2. Documento em <code>docs/</code> com passos do deploy e prints (Nginx/URL/health-check).</div>
+<div>3. Checklist de produção preenchido e evidências (logs/commands).</div>
+</div></div>
+</section>
+<!-- NAV FINAL -->
+<section class="mb-5">
+<div class="d-flex flex-wrap justify-content-between gap-2">
+<a class="btn btn-outline-secondary" href="index.html#sumario"><i class="bi bi-list-ul me-1"></i>Voltar ao Sumário</a>
+<div class="d-flex gap-2 flex-wrap">
+<a class="btn btn-outline-secondary" href="#topo"><i class="bi bi-arrow-up me-1"></i>Ir ao Topo</a>
+<a class="btn btn-pw3" href="capitulo14.html"><i class="bi bi-skip-forward me-1"></i>Próximo: Capítulo 14</a>
+</div>
+</div>
+</section>
+<footer class="py-4 border-top">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2">
+<div>
+<div class="fw-semibold">Apostila PW3 • Laravel</div>
+<div class="small text-muted">Capítulo 13 • Deploy e Produção</div>
+</div>
+<div class="small text-muted"><i class="bi bi-shield-check me-1"></i>Questionário e checklist interativos</div>
+</div>
+</footer>
+</main>
+<!-- Bootstrap Bundle -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism -->
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-nginx.min.js"></script>
+<script>
+    // último capítulo
+    localStorage.setItem('pw3_last_chapter', 'capitulo13.html');
+
+    // rolagem suave
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ===== Quiz dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap13_quiz';
+      const quizState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState)); }
+
+      function setFeedback(qEl, status, msg){
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.classList.remove('correct','incorrect');
+        fb.classList.add(status === 'correct' ? 'correct' : 'incorrect');
+        fb.textContent = msg;
+        fb.style.display = 'block';
+      }
+
+      function showKey(qEl){
+        const ans = qEl.dataset.answer;
+        const fb = qEl.querySelector('.quiz-feedback');
+        fb.style.display = 'block';
+        fb.classList.remove('correct','incorrect');
+        fb.textContent = 'Gabarito: alternativa ' + ans + '.';
+      }
+
+      // restaurar
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const saved = quizState[qid];
+        if(saved && saved.selected){
+          const radio = qEl.querySelector('input[type="radio"][value="'+saved.selected+'"]');
+          if(radio) radio.checked = true;
+        }
+        if(saved && saved.submitted){
+          const btnSubmit = qEl.querySelector('.btn-submit');
+          const btnKey = qEl.querySelector('.btn-key');
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, saved.result === 'correct' ? 'correct' : 'incorrect', saved.result === 'correct' ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        }
+      });
+
+      // eventos
+      document.querySelectorAll('.quiz-question').forEach(qEl => {
+        const qid = qEl.dataset.qid;
+        const answer = qEl.dataset.answer;
+        const btnSubmit = qEl.querySelector('.btn-submit');
+        const btnKey = qEl.querySelector('.btn-key');
+
+        btnSubmit.addEventListener('click', () => {
+          const selected = qEl.querySelector('input[type="radio"]:checked');
+          if(!selected){
+            setFeedback(qEl, 'incorrect', 'Selecione uma alternativa antes de enviar.');
+            return;
+          }
+          const chosen = selected.value;
+          const isCorrect = (chosen === answer);
+          quizState[qid] = { selected: chosen, submitted: true, result: isCorrect ? 'correct' : 'incorrect' };
+          saveState();
+          btnSubmit.disabled = true;
+          btnKey.disabled = false;
+          setFeedback(qEl, isCorrect ? 'correct' : 'incorrect', isCorrect ? 'Correto!' : 'Incorreto. Revise o conteúdo e use "Ver Gabarito" se necessário.');
+        });
+
+        btnKey.addEventListener('click', () => showKey(qEl));
+
+        qEl.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.addEventListener('change', () => {
+            quizState[qid] = quizState[qid] || {};
+            quizState[qid].selected = r.value;
+            saveState();
+          });
+        });
+      });
+
+      document.getElementById('btnResetQuiz').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      });
+    })();
+
+    // ===== Checklist dinâmico =====
+    (function(){
+      const STORAGE_KEY = 'pw3_cap13_checklist';
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const checks = Array.from(document.querySelectorAll('#checklist .check'));
+      const totalEl = document.getElementById('checkTotal');
+      const doneEl = document.getElementById('checkDone');
+      const barEl = document.getElementById('checkProgress');
+
+      totalEl.textContent = checks.length.toString();
+      checks.forEach(ch => { ch.checked = !!state[ch.dataset.key]; });
+
+      function update(){
+        const done = checks.filter(c => c.checked).length;
+        doneEl.textContent = done.toString();
+        const pct = checks.length ? Math.round((done / checks.length) * 100) : 0;
+        barEl.style.width = pct + '%';
+        barEl.textContent = pct >= 15 ? (pct + '%') : '';
+        barEl.setAttribute('aria-valuenow', pct.toString());
+      }
+
+      function save(){
+        const s = {};
+        checks.forEach(ch => s[ch.dataset.key] = ch.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+      }
+
+      checks.forEach(ch => ch.addEventListener('change', () => { save(); update(); }));
+
+      document.getElementById('btnResetChecklist').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        checks.forEach(c => c.checked = false);
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>
