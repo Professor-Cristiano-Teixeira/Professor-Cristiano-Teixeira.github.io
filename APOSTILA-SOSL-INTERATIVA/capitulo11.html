@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 11 — Usuários, Grupos e Permissões no Linux — SOSL</title>
+  <meta name="description" content="Capítulo 11 da apostila SOSL: usuários, grupos, sudo e permissões (rwx), chmod/chown/chgrp, umask e bits especiais (setuid/setgid/sticky), com prática guiada, quiz e checklist." />
+
+  <!-- arquivo: capitulo11.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+      --code-accent:#38bdf8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 290px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    h4{ margin: 12px 0 6px; font-size: 1.0rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 980px){ .grid-2{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    /* Code blocks */
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Steps */
+    .step{ border:1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin: 12px 0; }
+    .step .hd{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight: 950; }
+    .step .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:34px; height:34px; padding:0 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.10);
+      border: 1px solid rgba(11,31,58,.22);
+      color: var(--pw-red-dark);
+      font-weight: 950;
+    }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 11</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#usuarios">Usuários/Grupos</a>
+          <a href="#permissoes">Permissões</a>
+          <a href="#passo">Passo a passo</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo01.html" role="menuitem"><span>Cap. 01 — Tipos, licenças e história</span><span class="pill">01</span></a>
+              <a href="capitulo02.html" role="menuitem"><span>Cap. 02 — SL hoje: aplicações e ecossistema</span><span class="pill">02</span></a>
+              <a href="capitulo03.html" role="menuitem"><span>Cap. 03 — Linux e distribuições</span><span class="pill">03</span></a>
+              <a href="capitulo04.html" role="menuitem"><span>Cap. 04 — VM + Instalação Mint</span><span class="pill">04</span></a>
+              <a href="capitulo05.html" role="menuitem"><span>Cap. 05 — Interfaces gráficas</span><span class="pill">05</span></a>
+              <a href="capitulo06.html" role="menuitem"><span>Cap. 06 — Pacotes, lojas, Snap/Flatpak</span><span class="pill">06</span></a>
+              <a href="capitulo07.html" role="menuitem"><span>Cap. 07 — Boot e systemd</span><span class="pill">07</span></a>
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo14.html" role="menuitem"><span>Cap. 14 — Manutenção preventiva</span><span class="pill">14</span></a>
+              <a href="capitulo15.html" role="menuitem"><span>Cap. 15 — Backup e restauração</span><span class="pill">15</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 11 — Usuários, Grupos e Permissões no Linux</h1>
+          <p class="subtitle">
+            A base de segurança do Linux é: <strong>quem</strong> (usuário), <strong>qual equipe</strong> (grupo) e <strong>o que pode fazer</strong> (permissões).
+            Neste capítulo você aprende a diagnosticar e corrigir problemas de acesso com <em>evidência</em>.
+          </p>
+
+          <div class="badges">
+            <span class="badge">UID/GID</span>
+            <span class="badge">getent</span>
+            <span class="badge">/etc/passwd</span>
+            <span class="badge">/etc/shadow</span>
+            <span class="badge">/etc/group</span>
+            <span class="badge">sudo</span>
+            <span class="badge">rwx</span>
+            <span class="badge">chmod</span>
+            <span class="badge">chown / chgrp</span>
+            <span class="badge">umask</span>
+            <span class="badge">setgid</span>
+            <span class="badge">sticky</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Explicar usuário/grupo e identificar UID/GID.</li>
+                <li>Reconhecer arquivos básicos de contas (passwd/shadow/group).</li>
+                <li>Criar usuário/grupo e gerenciar associação em grupos.</li>
+                <li>Interpretar permissões rwx em arquivos e diretórios.</li>
+                <li>Aplicar <code>chmod</code>, <code>chown</code> e <code>chgrp</code> com segurança.</li>
+                <li>Entender <code>umask</code> e bits especiais (setgid/sticky) em nível de suporte.</li>
+                <li>Construir uma pasta compartilhada por grupo (colaboração) com setgid.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>Cap. 09 e 10: conforto com terminal e arquivos.</li>
+                <li>Cap. 08: noções do FHS (/etc, /home, /srv).</li>
+              </ul>
+              <div class="callout warn">
+                <strong>Atenção:</strong> evite alterar permissões de pastas do sistema fora dos exemplos.
+                Faça snapshot da VM antes se possível.
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#usuarios">👤 Usuários e grupos</a>
+            <a href="#permissoes">🔐 Permissões</a>
+            <a href="#passo">🧪 Passo a passo</a>
+            <a href="#atividades">🧩 Atividades</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo10.html">← Voltar ao Cap. 10</a>
+            <a class="btn dark" href="capitulo12.html">Próximo: Cap. 12 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Teoria: identidade, autorização e controle de acesso</h2>
+
+          <h3>1.1 Usuários, grupos, UID e GID</h3>
+          <p>
+            No Linux, cada usuário é identificado por um número (<strong>UID</strong>) e cada grupo por um número (<strong>GID</strong>).
+            O sistema decide permissões usando esses identificadores e a associação do usuário a grupos.
+          </p>
+          <p>
+            Isso importa no suporte porque muitos erros de acesso ("Permission denied") são resolvidos entendendo: quem é o usuário,
+            quais grupos ele possui e quais permissões o arquivo/pasta exige.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai usar <code>id</code> e <code>getent</code> para cruzar UID/GID e grupos.
+          </div>
+
+          <h3>1.2 /etc/passwd, /etc/shadow, /etc/group (sem editar)</h3>
+          <p>
+            O <code>/etc/passwd</code> lista contas e informações básicas (UID, GID, home, shell). O <code>/etc/shadow</code> guarda hashes de senha e é protegido.
+            O <code>/etc/group</code> lista grupos e seus membros.
+          </p>
+          <div class="callout warn">
+            <strong>Boa prática:</strong> não edite manualmente esses arquivos. Use comandos como <code>adduser</code>, <code>usermod</code>, <code>groupadd</code> e <code>passwd</code>.
+          </div>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Você vai consultar com <code>getent</code> e extrair colunas com <code>cut</code>.
+          </div>
+
+          <h3>1.3 Permissões rwx (u/g/o) e o detalhe do diretório</h3>
+          <p>
+            Permissões são dadas para três classes: dono (u), grupo (g) e outros (o). Cada classe pode ter leitura (r), escrita (w) e execução (x).
+          </p>
+          <p>
+            <strong>Detalhe importante:</strong> em diretórios, o "x" significa <em>atravessar/entrar</em>. Sem x, você pode ver o nome mas não acessa o conteúdo.
+          </p>
+          <div class="callout ok">
+            <strong>Regra prática:</strong> problema de acesso → <code>ls -ld pasta</code> (permissões do diretório) e depois <code>ls -l arquivo</code>.
+          </div>
+
+          <h3>1.4 chmod/chown/chgrp e umask</h3>
+          <p>
+            <code>chmod</code> altera permissões; <code>chown</code> altera dono (e grupo) e <code>chgrp</code> altera apenas o grupo.
+            <code>umask</code> define permissões padrão para novos arquivos/diretórios.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No laboratório, você vai criar uma pasta compartilhada por grupo com setgid (2770) e testar com dois usuários.
+          </div>
+
+          <h3>1.5 Bits especiais: setuid, setgid e sticky (visão de suporte)</h3>
+          <p>
+            <strong>setuid</strong> faz um programa rodar com o UID do dono; <strong>setgid</strong> faz rodar com o GID do grupo e, em diretórios,
+            faz novos arquivos herdarem o grupo; <strong>sticky</strong> evita que usuários apaguem arquivos de outros em diretórios compartilhados (ex.: /tmp).
+          </p>
+          <div class="callout warn">
+            <strong>Atenção:</strong> setuid é sensível e não deve ser aplicado sem critério. Aqui o foco prático é setgid em diretório.
+          </div>
+
+        </div>
+      </section>
+
+      <section id="usuarios" class="card">
+        <div class="content">
+          <h2>2) Usuários e grupos (comandos essenciais)</h2>
+
+          <h3>2.1 Identidade e grupos</h3>
+          <pre><code>whoami
+id
+groups
+</code></pre>
+
+          <h3>2.2 Consultas profissionais com getent</h3>
+          <pre><code>getent passwd $USER
+getent group sudo
+</code></pre>
+
+          <h3>2.3 Ler formato sem editar (apenas estudo)</h3>
+          <pre><code>head -n 5 /etc/passwd
+head -n 5 /etc/group
+
+cut -d: -f1 /etc/passwd | head
+</code></pre>
+
+          <h3>2.4 Criar grupo e usuário (laboratório)</h3>
+          <pre><code>sudo groupadd sosl 2>/dev/null || true
+sudo adduser aluno2
+sudo usermod -aG sosl aluno2
+
+id aluno2
+getent group sosl
+</code></pre>
+
+          <h3>2.5 Senha e bloqueio (conceito)</h3>
+          <pre><code>sudo passwd aluno2
+sudo passwd -l aluno2
+sudo passwd -u aluno2
+</code></pre>
+
+          <h3>2.6 sudo (privilégio sob demanda)</h3>
+          <pre><code>sudo -l
+</code></pre>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No Cap. 12, muitas ações administrativas dependem de sudo (configs/processos/rede).
+          </div>
+
+        </div>
+      </section>
+
+      <section id="permissoes" class="card">
+        <div class="content">
+          <h2>3) Permissões: interpretar e aplicar</h2>
+
+          <h3>3.1 Interpretar ls -l</h3>
+          <pre><code>ls -l
+# exemplo: -rw-r----- 1 aluno sosl 120 abr 23 21:00 arquivo.txt
+# exemplo: drwxr-s--- 2 root  sosl 4096 abr 23 21:05 compartilhado
+</code></pre>
+
+          <h3>3.2 chmod simbólico e octal</h3>
+          <pre><code># simbólico
+chmod g+r arquivo.txt
+chmod o-w arquivo.txt
+
+# octal (r=4,w=2,x=1)
+chmod 640 arquivo.txt
+chmod 750 pasta
+</code></pre>
+
+          <h3>3.3 Propriedade: chown/chgrp</h3>
+          <pre><code>sudo chown aluno2:sosl arquivo.txt
+sudo chgrp sosl arquivo.txt
+</code></pre>
+
+          <h3>3.4 setgid em diretório (colaboração)</h3>
+          <pre><code>sudo mkdir -p /srv/sosl-compartilhado
+sudo chgrp sosl /srv/sosl-compartilhado
+sudo chmod 2770 /srv/sosl-compartilhado
+ls -ld /srv/sosl-compartilhado
+</code></pre>
+          <p class="code-hint">O "2" (setgid) garante herança do grupo para novos arquivos dentro do diretório.</p>
+
+          <h3>3.5 sticky bit (conceito)</h3>
+          <pre><code>ls -ld /tmp
+# normalmente termina com ...t
+</code></pre>
+
+        </div>
+      </section>
+
+      <section id="passo" class="card">
+        <div class="content">
+          <h2>4) Passo a passo prático: pasta compartilhada por grupo (setgid)</h2>
+          <p class="muted">Objetivo: simular um cenário real de suporte: equipe precisa compartilhar arquivos sem expor para "outros".</p>
+
+          <div class="callout ok"><strong>Resultado esperado:</strong> arquivos criados por dois usuários dentro de <code>/srv/sosl-compartilhado</code> com grupo <code>sosl</code>.</div>
+
+          <div class="step"><div class="hd"><span><span class="num">1</span> Preparar pasta do capítulo</span><span class="pill">Organização</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap11
+</code></pre>
+          </div>
+
+          <div class="step"><div class="hd"><span><span class="num">2</span> Criar grupo e usuário de teste</span><span class="pill">Contas</span></div>
+            <pre><code>sudo groupadd sosl 2>/dev/null || true
+sudo adduser aluno2
+sudo usermod -aG sosl aluno2
+
+getent group sosl
+id aluno2
+</code></pre>
+            <p class="code-hint">Se aluno2 já existir, pule adduser e apenas garanta o grupo.</p>
+          </div>
+
+          <div class="step"><div class="hd"><span><span class="num">3</span> Criar diretório compartilhado e aplicar setgid</span><span class="pill">Permissões</span></div>
+            <pre><code>sudo mkdir -p /srv/sosl-compartilhado
+sudo chgrp sosl /srv/sosl-compartilhado
+sudo chmod 2770 /srv/sosl-compartilhado
+
+ls -ld /srv/sosl-compartilhado
+</code></pre>
+          </div>
+
+          <div class="step"><div class="hd"><span><span class="num">4</span> Testar criação de arquivos por dois usuários</span><span class="pill">Teste</span></div>
+            <pre><code># como usuário atual
+sudo -u "$USER" bash -lc 'cd /srv/sosl-compartilhado && echo "Arquivo do usuario atual" > arq_aluno.txt'
+
+# como aluno2
+sudo -u aluno2 bash -lc 'cd /srv/sosl-compartilhado && echo "Arquivo do aluno2" > arq_aluno2.txt'
+
+ls -l /srv/sosl-compartilhado
+</code></pre>
+            <div class="callout ok"><strong>Verifique:</strong> os arquivos aparecem com grupo <code>sosl</code>. Isso prova a herança do setgid.</div>
+          </div>
+
+          <div class="step"><div class="hd"><span><span class="num">5</span> Gerar relatório de evidências (ticket-ready)</span><span class="pill">Evidência</span></div>
+            <pre><code>R=~/SOSL/cap11/relatorio-cap11.txt
+: > "$R"
+{
+  echo "RELATÓRIO — CAP. 11";
+  echo "Data: $(date)";
+  echo "Usuário atual: $(whoami)";
+  echo "\n[GRUPO sosl]";
+  getent group sosl;
+  echo "\n[DIRETÓRIO]";
+  ls -ld /srv/sosl-compartilhado;
+  echo "\n[ARQUIVOS]";
+  ls -l /srv/sosl-compartilhado;
+  echo "\n[EXPLICAÇÃO]";
+  echo "setgid (2770) no diretório força herança do grupo, evitando arquivos com grupo incorreto em trabalho colaborativo.";
+} | tee -a "$R"
+
+less "$R"
+</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>5) Atividades práticas sugeridas</h2>
+          <ul class="list">
+            <li><strong>Atividade 1:</strong> crie <code>~/SOSL/privado</code> com <code>chmod 700</code> e explique a diferença para 750 e 770.</li>
+            <li><strong>Atividade 2:</strong> gere <code>~/SOSL/cap11/usuarios_shell.txt</code> com usuário e shell (campos 1 e 7) de <code>/etc/passwd</code>.</li>
+            <li><strong>Atividade 3:</strong> execute <code>umask</code>, crie um arquivo e um diretório e compare permissões (explique em 5 linhas).</li>
+          </ul>
+
+          <h3>Pesquisas complementares</h3>
+          <ul class="list">
+            <li>Diferença entre grupo primário e grupos suplementares.</li>
+            <li>Por que /etc/shadow é protegido e quais riscos existem.</li>
+            <li>Sticky bit: por que /tmp termina com "t".</li>
+            <li>ACLs (getfacl/setfacl): quando o rwx tradicional não resolve.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>6) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz11">
+
+            <div class="q" data-answer="b" data-topic="uidgid">
+              <div class="q-hd"><span>1) O que identifica um usuário de forma fundamental no Linux?</span><span class="pill">UID</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q1" value="a"> O papel de parede</label>
+                <label class="opt"><input type="radio" name="q1" value="b"> O UID (número)</label>
+                <label class="opt"><input type="radio" name="q1" value="c"> O tema do desktop</label>
+                <label class="opt"><input type="radio" name="q1" value="d"> O navegador padrão</label>
+                <label class="opt"><input type="radio" name="q1" value="e"> O tamanho do disco</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="shadow">
+              <div class="q-hd"><span>2) Qual arquivo guarda hashes de senha e é protegido?</span><span class="pill">shadow</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q2" value="a"> /etc/passwd</label>
+                <label class="opt"><input type="radio" name="q2" value="b"> /etc/group</label>
+                <label class="opt"><input type="radio" name="q2" value="c"> /var/log</label>
+                <label class="opt"><input type="radio" name="q2" value="d"> /etc/shadow</label>
+                <label class="opt"><input type="radio" name="q2" value="e"> /home</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="id">
+              <div class="q-hd"><span>3) Qual comando mostra UID, GID e grupos do usuário?</span><span class="pill">id</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q3" value="a"> id</label>
+                <label class="opt"><input type="radio" name="q3" value="b"> mkdir</label>
+                <label class="opt"><input type="radio" name="q3" value="c"> df</label>
+                <label class="opt"><input type="radio" name="q3" value="d"> apt</label>
+                <label class="opt"><input type="radio" name="q3" value="e"> rm</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="dirx">
+              <div class="q-hd"><span>4) Em diretórios, o "x" significa:</span><span class="pill">dir</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q4" value="a"> Pode mudar o dono</label>
+                <label class="opt"><input type="radio" name="q4" value="b"> Pode sempre escrever</label>
+                <label class="opt"><input type="radio" name="q4" value="c"> Pode executar como programa</label>
+                <label class="opt"><input type="radio" name="q4" value="d"> Pode ver o tamanho</label>
+                <label class="opt"><input type="radio" name="q4" value="e"> Pode atravessar/entrar e acessar itens</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="chmod">
+              <div class="q-hd"><span>5) Qual comando altera permissões?</span><span class="pill">chmod</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q5" value="a"> chown</label>
+                <label class="opt"><input type="radio" name="q5" value="b"> chgrp</label>
+                <label class="opt"><input type="radio" name="q5" value="c"> chmod</label>
+                <label class="opt"><input type="radio" name="q5" value="d"> whoami</label>
+                <label class="opt"><input type="radio" name="q5" value="e"> uptime</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="octal">
+              <div class="q-hd"><span>6) Qual octal corresponde a rw-r----- ?</span><span class="pill">octal</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q6" value="a"> 640</label>
+                <label class="opt"><input type="radio" name="q6" value="b"> 777</label>
+                <label class="opt"><input type="radio" name="q6" value="c"> 700</label>
+                <label class="opt"><input type="radio" name="q6" value="d"> 755</label>
+                <label class="opt"><input type="radio" name="q6" value="e"> 600</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="chown">
+              <div class="q-hd"><span>7) Para mudar dono e grupo de um arquivo, usa-se:</span><span class="pill">chown</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q7" value="a"> chmod</label>
+                <label class="opt"><input type="radio" name="q7" value="b"> grep</label>
+                <label class="opt"><input type="radio" name="q7" value="c"> wc</label>
+                <label class="opt"><input type="radio" name="q7" value="d"> chown</label>
+                <label class="opt"><input type="radio" name="q7" value="e"> lsblk</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="setgid">
+              <div class="q-hd"><span>8) O setgid em diretório serve para:</span><span class="pill">setgid</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q8" value="a"> Bloquear o grupo</label>
+                <label class="opt"><input type="radio" name="q8" value="b"> Fazer novos arquivos herdarem o grupo do diretório</label>
+                <label class="opt"><input type="radio" name="q8" value="c"> Apagar arquivos automaticamente</label>
+                <label class="opt"><input type="radio" name="q8" value="d"> Trocar o UID do dono</label>
+                <label class="opt"><input type="radio" name="q8" value="e"> Aumentar RAM</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="sudo">
+              <div class="q-hd"><span>9) Em suporte, sudo deve ser usado:</span><span class="pill">sudo</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q9" value="a"> Sempre, em qualquer comando</label>
+                <label class="opt"><input type="radio" name="q9" value="b"> Para mudar tema do sistema</label>
+                <label class="opt"><input type="radio" name="q9" value="c"> Apenas quando necessário, de forma controlada e registrada</label>
+                <label class="opt"><input type="radio" name="q9" value="d"> Para acelerar o PC</label>
+                <label class="opt"><input type="radio" name="q9" value="e"> Para editar /etc/shadow manualmente</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="proximo">
+              <div class="q-hd"><span>10) O foco principal do Capítulo 12 é:</span><span class="pill">Sequência</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q10" value="a"> Configurações, processos e rede</label>
+                <label class="opt"><input type="radio" name="q10" value="b"> Apenas instalação de VM</label>
+                <label class="opt"><input type="radio" name="q10" value="c"> Apenas licenças</label>
+                <label class="opt"><input type="radio" name="q10" value="d"> Apenas interfaces gráficas</label>
+                <label class="opt"><input type="radio" name="q10" value="e"> Apenas backup</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>7) Checklist do aluno (interativo)</h2>
+          <p class="muted">Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist11">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu entendo</strong> UID/GID e consigo ver com <code>id</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu sei</strong> o papel de /etc/passwd, /etc/shadow e /etc/group.</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu criei</strong> um grupo e usuário de teste (sosl/aluno2).</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu adicionei</strong> usuário ao grupo com <code>usermod -aG</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu interpreto</strong> permissões rwx no <code>ls -l</code> (arquivo e diretório).</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu usei</strong> chmod (simbólico e octal) com segurança.</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu usei</strong> chown/chgrp para corrigir dono/grupo.</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu configurei</strong> setgid (2770) em diretório de grupo e testei.</label></div>
+            <div class="check-item"><input type="checkbox" id="c9"><label for="c9"><strong>Eu gerei</strong> o relatório de evidências em <code>~/SOSL/cap11</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c10"><label for="c10"><strong>Eu respondi</strong> o quiz e revisei onde errei.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo10.html">← Voltar ao Cap. 10</a>
+            <a class="btn dark" href="capitulo12.html">Ir para Cap. 12 →</a>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz11');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'uidgid': 'Revise 1.1: UID identifica usuários; GID identifica grupos.',
+        'shadow': 'Revise 1.2: /etc/shadow guarda hashes de senha e é protegido.',
+        'id': 'Revise 2.1: id mostra UID/GID e grupos.',
+        'dirx': 'Revise 1.3: em diretório, x = atravessar/entrar.',
+        'chmod': 'Revise 1.4 e 3: chmod altera permissões.',
+        'octal': 'Revise 3.2: 640 = rw-r-----.',
+        'chown': 'Revise 3.3: chown muda dono e grupo.',
+        'setgid': 'Revise 3.4 e passo a passo: setgid faz herança de grupo.',
+        'sudo': 'Revise 2.6: sudo é privilégio sob demanda e deve ser controlado.',
+        'proximo': 'Cap. 12: configurações, processos e rede.'
+      };
+      return map[topic] || 'Revise teoria e prática deste capítulo.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist11');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap11_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+  </script>
+
+</body>
+</html>

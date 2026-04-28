@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 01 — Tipos de Software, Licenças e História do Software Livre (SOSL)</title>
+  <meta name="description" content="Capítulo 01 da apostila SOSL: tipos de software, licenciamento e marcos históricos do Software Livre e do Open Source." />
+
+  <!-- arquivo: capitulo01.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+      --code-accent:#38bdf8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav (mesmo estilo do index) */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 280px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 980px){
+      .grid-2,.grid-3{ grid-template-columns: 1fr; }
+    }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top: 12px;
+    }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    /* “Prism-like” code block (self-contained) */
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+    .tok-key{ color: #93c5fd; }
+    .tok-str{ color: #a7f3d0; }
+    .tok-com{ color: #94a3b8; }
+    .tok-fn{ color: #fca5a5; }
+    .tok-ac{ color: #38bdf8; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Quiz */
+    .quiz{
+      margin-top: 6px;
+    }
+    .q{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow:hidden;
+      margin: 12px 0;
+      background:#fff;
+    }
+    .q-hd{
+      padding: 12px 14px;
+      background: rgba(11,31,58,.06);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      font-weight: 900;
+    }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 10px 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor:pointer;
+      background:#fff;
+    }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{
+      display:none;
+      margin-top: 10px;
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background:#f9fafb;
+    }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background:#fff;
+      margin-top: 10px;
+    }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Footer */
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* Tables */
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      margin: 10px 0;
+    }
+    .table th, .table td{
+      border-bottom:1px solid var(--border);
+      padding: 10px 10px;
+      text-align:left;
+      vertical-align: top;
+    }
+    .table th{
+      background: rgba(11,31,58,.06);
+      font-weight: 900;
+    }
+    .table tr:last-child td{ border-bottom:0; }
+
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight:800; font-size:.9rem; padding:2px 6px; border-radius:8px; border:1px solid var(--border); background:#f8fafc; }
+
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- Header / Navbar -->
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 01</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo01.html" role="menuitem"><span>Cap. 01 — Tipos, licenças e história</span><span class="pill">01</span></a>
+              <a href="capitulo02.html" role="menuitem"><span>Cap. 02 — SL hoje: aplicações e ecossistema</span><span class="pill">02</span></a>
+              <a href="capitulo03.html" role="menuitem"><span>Cap. 03 — Linux e distribuições (pesquisa)</span><span class="pill">03</span></a>
+              <a href="capitulo04.html" role="menuitem"><span>Cap. 04 — VM + instalação Linux Mint</span><span class="pill">04</span></a>
+              <a href="capitulo05.html" role="menuitem"><span>Cap. 05 — Interfaces gráficas</span><span class="pill">05</span></a>
+              <a href="capitulo06.html" role="menuitem"><span>Cap. 06 — Pacotes, lojas, Snap/Flatpak</span><span class="pill">06</span></a>
+              <a href="capitulo07.html" role="menuitem"><span>Cap. 07 — Boot e systemd</span><span class="pill">07</span></a>
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo14.html" role="menuitem"><span>Cap. 14 — Manutenção preventiva</span><span class="pill">14</span></a>
+              <a href="capitulo15.html" role="menuitem"><span>Cap. 15 — Backup e restauração</span><span class="pill">15</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 01 — Tipos de Software, Licenças e História do Software Livre</h1>
+          <p class="subtitle">
+            Este capítulo é <strong>teórico</strong> (com exemplos e leitura guiada) para o aluno estudar de forma <strong>autônoma</strong>.
+            As práticas de laboratório (VM/instalação) começam no <strong>Capítulo 04</strong>.
+          </p>
+
+          <div class="badges">
+            <span class="badge">Conceitos fundamentais</span>
+            <span class="badge">Licenciamento</span>
+            <span class="badge">Software Livre vs Open Source</span>
+            <span class="badge">Vantagens e desvantagens</span>
+            <span class="badge">Comparativos e casos</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Diferenciar <strong>software livre</strong>, <strong>código aberto</strong> e modelos <strong>proprietários</strong>.</li>
+                <li>Compreender por que <strong>licenças</strong> existem e como elas afetam uso, cópia, modificação e distribuição.</li>
+                <li>Reconhecer os principais <strong>modelos de licenças</strong> (copyleft e permissivas) e quando cada um é adequado.</li>
+                <li>Entender os <strong>marcos históricos</strong> e influências do movimento de Software Livre e do Open Source.</li>
+                <li>Aplicar uma estratégia básica de <strong>análise de licença</strong> (o que posso/não posso fazer) em um cenário real.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>Saber usar computador com interface gráfica (abrir arquivos, pastas, navegador).</li>
+                <li>Noções de hardware e de instalação de programas ajudam, mas não são obrigatórias.</li>
+                <li>Leitura atenta: você vai “interpretar regras” (licenças) como se fossem contratos simples.</li>
+              </ul>
+              <div class="callout warn">
+                <strong>Importante:</strong> neste capítulo, algumas datas são apresentadas como <em>marcos geralmente citados</em> na literatura.
+                Use isso como guia de estudo. No Cap. 02 você fará curadoria de fontes e notícias para validar e atualizar informações.
+              </div>
+            </div>
+          </div>
+
+          <div class="callout ok">
+            <strong>Como estudar sozinho (roteiro):</strong>
+            1) Leia a teoria na ordem do sumário • 2) Faça as “pausas de checagem” • 3) Responda o quiz • 4) Complete o checklist.
+            Se errar no quiz, volte no tópico indicado pelo feedback.
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#modelos">🧩 Modelos de software</a>
+            <a href="#licencas">📜 Licenças</a>
+            <a href="#livre">🕊️ Software Livre</a>
+            <a href="#opensource">🔓 Open Source</a>
+            <a href="#comparativos">⚖️ Comparativos</a>
+            <a href="#boas-praticas">✅ Boas práticas</a>
+            <a href="#quiz">📝 Quiz (10 questões)</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="index.html">← Voltar ao Index</a>
+            <a class="btn dark" href="capitulo02.html">Próximo: Cap. 02 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <!-- TEORIA -->
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Por que falar de licenças antes de falar de Linux?</h2>
+          <p>
+            Em um curso de suporte e infraestrutura, você vai instalar, atualizar, configurar e automatizar sistemas.
+            Só que, antes disso, é essencial entender <strong>o que você está autorizado a fazer</strong> com um software.
+            Uma licença define regras de uso: copiar? instalar em quantas máquinas? modificar? redistribuir?
+            Em ambientes corporativos e educacionais, isso evita problemas legais, dá segurança para a organização
+            e torna o suporte mais profissional.
+          </p>
+          <p>
+            Além da parte legal, licenças influenciam diretamente aspectos técnicos: compatibilidade de bibliotecas,
+            modelo de distribuição, como você pode empacotar e publicar modificações, e até como uma empresa
+            consegue manter um produto sustentável. Portanto, dominar licenciamento é dominar um pedaço importante
+            da engenharia de software e da administração de sistemas.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso no curso?</strong> Quando você instalar distribuições Linux (Cap. 04) e gerenciar pacotes (Cap. 06),
+            você estará usando software com diferentes licenças. Na automação (Cap. 13) e implantação (Cap. 16),
+            você precisará saber o que pode redistribuir em imagens e scripts.
+          </div>
+
+          <h3>Pausa de checagem (rápida)</h3>
+          <ul class="list">
+            <li>Você sabe diferenciar “<em>grátis</em>” de “<em>livre</em>”?</li>
+            <li>Você sabe o que significa “código-fonte disponível”?</li>
+            <li>Você sabe por que uma organização se preocupa com conformidade de licenças?</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- MODELOS -->
+      <section id="modelos" class="card">
+        <div class="content">
+          <h2>2) Tipos e modelos de software (visão prática para suporte)</h2>
+
+          <h3>2.1 Software proprietário (closed source)</h3>
+          <p>
+            Software proprietário é aquele em que o fabricante mantém o código-fonte fechado e concede ao usuário
+            uma licença de uso restrita. Normalmente você pode <strong>usar</strong> o programa, mas não pode legalmente
+            <strong>copiar e redistribuir</strong>, nem <strong>modificar</strong> o código. Atualizações, correções e roadmap dependem
+            do fornecedor. Para suporte técnico, isso significa seguir procedimentos do fabricante e lidar com
+            limitações impostas pelo licenciamento.
+          </p>
+          <div class="callout">
+            <strong>Aplicação:</strong> você verá esse modelo em drivers, firmwares, suítes comerciais e softwares corporativos.
+            Em ambientes mistos (Windows + Linux), compreender a licença ajuda na escolha de alternativas.
+          </div>
+
+          <h3>2.2 Software gratuito (freeware) e versões de avaliação (trial/shareware)</h3>
+          <p>
+            <strong>Freeware</strong> é “gratuito para usar”, mas não significa que seja livre. Pode ser proprietário, com restrições
+            de redistribuição e sem acesso ao código-fonte. <strong>Trial</strong> ou <strong>shareware</strong> são versões com tempo limitado
+            ou recursos reduzidos. Para o suporte, o risco é instalar algo “gratuito” e depois descobrir que a
+            organização não pode usar em contexto comercial, ou que haverá custo após o período de avaliação.
+          </p>
+
+          <h3>2.3 Software livre (free software) e software de código aberto (open source)</h3>
+          <p>
+            Ambos têm relação com acesso ao código e permissões de uso, mas a <strong>motivação</strong> e a forma de explicar
+            a ideia mudam (detalhamos nas seções 4 e 5). Em geral, esses modelos permitem auditoria, adaptação,
+            correção e colaboração. Isso é extremamente relevante para Linux e o ecossistema de ferramentas de TI.
+          </p>
+
+          <h3>2.4 Modelos de negócio no mundo real (mesmo em software livre)</h3>
+          <p>
+            Um erro comum é pensar que “software livre” significa “sem dinheiro envolvido”. Na prática, existem
+            estratégias para sustentar desenvolvimento: suporte pago, consultoria, treinamento, hospedagem,
+            marketplace, doações, fundações, patrocínios, e o modelo <em>open core</em> (núcleo aberto com recursos
+            proprietários adicionais). Para suporte, isso importa porque define como a organização obtém
+            suporte oficial, atualizações e garantias.
+          </p>
+
+          <table class="table" aria-label="Tabela de tipos de software">
+            <thead>
+              <tr>
+                <th>Tipo/Modelo</th>
+                <th>Fonte disponível?</th>
+                <th>Posso modificar?</th>
+                <th>Posso redistribuir?</th>
+                <th>Exemplo típico (genérico)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Proprietário</strong></td>
+                <td>Não</td>
+                <td>Não</td>
+                <td>Geralmente não</td>
+                <td>Suite comercial, driver fechado</td>
+              </tr>
+              <tr>
+                <td><strong>Freeware</strong></td>
+                <td>Não (na maioria)</td>
+                <td>Não</td>
+                <td>Depende da licença</td>
+                <td>Utilitário gratuito</td>
+              </tr>
+              <tr>
+                <td><strong>Trial/Shareware</strong></td>
+                <td>Não (na maioria)</td>
+                <td>Não</td>
+                <td>Depende da licença</td>
+                <td>Teste de antivírus, editor</td>
+              </tr>
+              <tr>
+                <td><strong>Software Livre</strong></td>
+                <td>Sim</td>
+                <td>Sim</td>
+                <td>Sim (com condições)</td>
+                <td>Ferramentas GNU, kernel Linux</td>
+              </tr>
+              <tr>
+                <td><strong>Open Source</strong></td>
+                <td>Sim</td>
+                <td>Sim</td>
+                <td>Sim (com condições)</td>
+                <td>Projetos comunitários e corporativos</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout warn">
+            <strong>Armadilha clássica:</strong> “grátis” (preço = R$ 0) não garante “liberdade”.
+            Você pode ter um software gratuito, mas com proibição total de modificar/redistribuir.
+          </div>
+        </div>
+      </section>
+
+      <!-- LICENÇAS -->
+      <section id="licencas" class="card">
+        <div class="content">
+          <h2>3) Licenças de software: o que são e por que existem</h2>
+
+          <h3>3.1 A ideia central: copyright e permissão</h3>
+          <p>
+            Em muitos países, quando alguém cria um software, o autor automaticamente possui direitos de autor
+            (<em>copyright</em>). Isso significa que, por padrão, outras pessoas <strong>não</strong> têm permissão para copiar,
+            modificar ou redistribuir. A licença é o documento que diz: “você pode fazer X, Y e Z… sob tais condições”.
+            Por isso, licenças não são burocracia: elas são a forma oficial de conceder permissões.
+          </p>
+
+          <h3>3.2 O que uma licença costuma definir (lista de verificação)</h3>
+          <ul class="list">
+            <li><strong>Uso:</strong> posso usar em casa? em escola? em empresa? em quantas máquinas?</li>
+            <li><strong>Cópia e distribuição:</strong> posso compartilhar com colegas? posso incluir em uma imagem de instalação?</li>
+            <li><strong>Modificação:</strong> posso alterar o código? posso criar versões derivadas?</li>
+            <li><strong>Distribuição de derivados:</strong> se eu modificar, preciso liberar o código também?</li>
+            <li><strong>Atribuição:</strong> preciso manter créditos e avisos de copyright?</li>
+            <li><strong>Garantias:</strong> o software é fornecido “como está” (sem garantia)?</li>
+            <li><strong>Marcas:</strong> posso usar o nome/logotipo do projeto?</li>
+          </ul>
+
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Na prática do curso, você vai instalar pacotes, distribuir scripts e talvez criar imagens.
+            Saber se pode redistribuir (e sob quais condições) é essencial para não quebrar regras.
+          </div>
+
+          <h3>3.3 Licenças “permissivas” e “copyleft” (conceito-chave)</h3>
+          <p>
+            Uma forma muito usada de classificar licenças de software livre/código aberto é:
+          </p>
+          <ul class="list">
+            <li><strong>Permissivas:</strong> permitem usar, modificar e redistribuir com poucas exigências (geralmente manter créditos).
+              Exemplos conhecidos incluem famílias do tipo MIT/BSD/Apache.</li>
+            <li><strong>Copyleft:</strong> permitem usar/modificar/redistribuir, mas exigem que derivados mantenham a mesma liberdade.
+              A ideia é “se você recebeu liberdade, deve repassar liberdade” (conceito associado à GPL).</li>
+          </ul>
+
+          <div class="grid-2">
+            <div class="callout ok">
+              <strong>Vantagem das permissivas (visão prática):</strong> alta compatibilidade com diferentes projetos e empresas.
+              É comum em bibliotecas e componentes reutilizáveis.
+            </div>
+            <div class="callout warn">
+              <strong>Vantagem do copyleft (visão prática):</strong> reduz a chance de alguém “fechar” melhorias.
+              Ajuda comunidades a manter contribuições abertas.
+            </div>
+          </div>
+
+          <h3>3.4 Como reconhecer uma licença em um projeto (sem prática de laboratório)</h3>
+          <p>
+            Mesmo sem programar, você já pode aprender a localizar e interpretar licenças. Um projeto costuma ter:
+            um arquivo <span class="kbd">LICENSE</span> ou <span class="kbd">COPYING</span>, ou uma seção “License” no repositório.
+            Além disso, muitas organizações usam identificadores <strong>SPDX</strong> (um código curto que representa a licença).
+          </p>
+
+          <pre><code>
+# Exemplo DIDÁTICO de cabeçalho de licença em arquivo (comentários)
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Nome do Autor
+# Permissão é concedida, gratuitamente, para...
+</code></pre>
+          <p class="code-hint">
+            Você não precisa decorar textos longos. A habilidade é: <strong>reconhecer o tipo</strong> e identificar <strong>obrigações</strong>
+            (atribuição, redistribuição, divulgação de modificações etc.).
+          </p>
+
+          <div class="callout warn">
+            <strong>Cuidado:</strong> “código no GitHub” não significa “licença liberada”. Se não houver licença explícita,
+            o padrão legal costuma ser “todos os direitos reservados”. Em suporte, isso significa: evite redistribuir.
+          </div>
+        </div>
+      </section>
+
+      <!-- SOFTWARE LIVRE -->
+      <section id="livre" class="card">
+        <div class="content">
+          <h2>4) Software Livre: filosofia e definição (o que é “livre” de verdade)</h2>
+
+          <h3>4.1 A ideia das “liberdades”</h3>
+          <p>
+            “Software Livre” é um movimento que enfatiza <strong>liberdade do usuário</strong>. A definição mais conhecida
+            é baseada em quatro liberdades: usar o programa para qualquer propósito; estudar como o programa funciona
+            (acesso ao código-fonte); modificar para atender suas necessidades; e redistribuir cópias (incluindo versões
+            modificadas) para ajudar outras pessoas.
+          </p>
+
+          <div class="callout ok">
+            <strong>Por que isso importa para suporte?</strong> Porque liberdade significa autonomia. Se um sistema precisa de correção,
+            a comunidade pode investigar e corrigir. Se você precisa adaptar para um laboratório/empresa, você tem
+            base legal e técnica para isso.
+          </div>
+
+          <h3>4.2 Copyleft: liberdade com “cláusula de reciprocidade”</h3>
+          <p>
+            O copyleft é uma estratégia de licenciamento que protege as liberdades do software: se alguém fizer uma
+            versão derivada e distribuí-la, deve manter as mesmas liberdades para os próximos usuários. Isso impede que
+            uma melhoria comunitária vire um produto fechado quando distribuída como derivado.
+          </p>
+
+          <h3>4.3 Vantagens e desvantagens do modelo (caracterização pedida no plano)</h3>
+          <div class="grid-2">
+            <div>
+              <h3>Vantagens (benefícios comuns)</h3>
+              <ul class="list">
+                <li><strong>Transparência:</strong> auditoria do código e maior confiança em ambientes críticos.</li>
+                <li><strong>Flexibilidade:</strong> adaptar a necessidades do usuário/organização.</li>
+                <li><strong>Comunidade:</strong> colaboração e melhoria contínua em muitos projetos.</li>
+                <li><strong>Independência:</strong> menos dependência de um único fornecedor (reduz <em>vendor lock-in</em>).</li>
+                <li><strong>Aprendizado:</strong> excelente para formação técnica, pois dá acesso ao “como funciona”.</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Desvantagens (pontos de atenção)</h3>
+              <ul class="list">
+                <li><strong>Curva de aprendizado:</strong> algumas ferramentas exigem estudo e prática.</li>
+                <li><strong>Suporte:</strong> nem sempre há suporte oficial gratuito; pode exigir contrato ou comunidade.</li>
+                <li><strong>Fragmentação:</strong> múltiplas opções e padrões podem confundir iniciantes.</li>
+                <li><strong>Compatibilidade:</strong> em alguns cenários, softwares/driver proprietários ainda são necessários.</li>
+                <li><strong>Gestão de conformidade:</strong> equipes precisam controlar licenças e obrigações.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Onde vou aplicar isso no curso?</strong> Você vai experimentar vantagens (atualizações, ferramentas, scripts)
+            e desafios (drivers, compatibilidade, escolhas de distribuição) quando começar o laboratório.
+          </div>
+
+          <h3>4.4 Marcos históricos e influências (linha do tempo guiada)</h3>
+          <p>
+            A seguir está uma linha do tempo resumida, com marcos geralmente citados em livros e materiais de referência.
+            O objetivo é dar contexto: <em>por que surgiu</em> e <em>como evoluiu</em>.
+          </p>
+          <ul class="list">
+            <li><strong>Décadas de 1960–1970:</strong> cultura de compartilhamento de código em universidades e laboratórios; surgimento do Unix e ecossistemas acadêmicos.</li>
+            <li><strong>1983:</strong> anúncio do Projeto GNU (iniciativa para criar um sistema operacional livre e compatível com Unix).</li>
+            <li><strong>1985:</strong> criação de uma fundação para apoiar o movimento e a infraestrutura do GNU/Software Livre.</li>
+            <li><strong>1989:</strong> publicação inicial de uma licença copyleft muito influente (família GPL).</li>
+            <li><strong>1991:</strong> início do desenvolvimento do kernel Linux (que, combinado com ferramentas GNU, populariza sistemas GNU/Linux).</li>
+            <li><strong>1998:</strong> popularização do termo “Open Source” e criação de entidades para promover o modelo com foco pragmático.</li>
+            <li><strong>Anos 2000–2010:</strong> expansão do open source em servidores, internet, DevOps, nuvem; crescimento de comunidades e fundações.</li>
+            <li><strong>Anos 2010–2020:</strong> open source se torna peça central de infraestrutura digital; cresce a preocupação com segurança, cadeia de suprimentos e governança.</li>
+          </ul>
+
+          <div class="callout warn">
+            <strong>Como estudar a linha do tempo:</strong> não memorize datas isoladas. Memorize <strong>causa → movimento → consequência</strong>.
+            Ex.: “falta de liberdade/compartilhamento → GNU/FSF → licenças e cultura colaborativa → Linux e ecossistema atual”.
+          </div>
+        </div>
+      </section>
+
+      <!-- OPEN SOURCE -->
+      <section id="opensource" class="card">
+        <div class="content">
+          <h2>5) Open Source: definição, foco e diferenças para Software Livre</h2>
+
+          <h3>5.1 O que é Open Source (na prática)</h3>
+          <p>
+            “Open Source” destaca o acesso ao código-fonte e as permissões de uso, modificação e redistribuição,
+            porém costuma enfatizar benefícios pragmáticos: qualidade, segurança por auditoria, inovação, colaboração
+            entre empresas e comunidades, redução de custo e velocidade de evolução.
+          </p>
+
+          <h3>5.2 Diferença central: filosofia x pragmatismo</h3>
+          <p>
+            A diferença mais comum entre “Software Livre” e “Open Source” não é técnica (ambos podem usar licenças
+            semelhantes), mas sim de <strong>argumento</strong>. Software Livre foca em <strong>liberdades e ética</strong>. Open Source foca em
+            <strong>metodologia de desenvolvimento e benefícios</strong>.
+          </p>
+
+          <div class="grid-2">
+            <div class="callout ok">
+              <strong>Quando isso ajuda no suporte:</strong> ao conversar com gestores, o discurso “open source” pode ser mais aceito
+              (redução de custo, flexibilidade, independência, rapidez). Ao conversar com comunidade, o discurso
+              “software livre” pode ser mais coerente (liberdades e colaboração).
+            </div>
+            <div class="callout warn">
+              <strong>Não confunda:</strong> projeto open source pode ter governança corporativa forte; isso não é “ruim”,
+              mas influencia roadmap, decisões e suporte.
+            </div>
+          </div>
+
+          <h3>5.3 Licenças e compatibilidade (por que profissionais se preocupam)</h3>
+          <p>
+            Em ambientes reais, um sistema pode combinar vários componentes com licenças diferentes. A compatibilidade
+            entre licenças afeta como você pode distribuir um produto derivado. Por isso, equipes usam ferramentas e
+            padrões como identificadores SPDX e inventários de componentes (em capítulos posteriores você verá como isso
+            aparece na prática de pacotes e distribuição).
+          </p>
+
+          <pre><code>
+# Exemplo DIDÁTICO de inventário simplificado (não é prática do curso ainda)
+Componente: biblioteca-x
+Versão: 1.2.3
+Licença: Apache-2.0
+Uso no sistema: módulo de rede
+Obrigação principal: manter avisos/atribuição
+</code></pre>
+          <p class="code-hint">A ideia aqui é treinar sua leitura: “o que eu uso”, “qual licença”, “qual obrigação”.</p>
+
+        </div>
+      </section>
+
+      <!-- COMPARATIVOS -->
+      <section id="comparativos" class="card">
+        <div class="content">
+          <h2>6) Comparativos: Proprietário × Livre/Open Source (com foco em suporte)</h2>
+
+          <h3>6.1 Comparativo por critérios de suporte</h3>
+          <table class="table" aria-label="Comparativo por critérios">
+            <thead>
+              <tr>
+                <th>Critério</th>
+                <th>Proprietário (típico)</th>
+                <th>Livre/Open Source (típico)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Atualizações</strong></td>
+                <td>Dependem do fornecedor; ciclo definido por empresa</td>
+                <td>Podem vir de comunidade e empresas; várias políticas por distribuição/projeto</td>
+              </tr>
+              <tr>
+                <td><strong>Diagnóstico</strong></td>
+                <td>Limitado a logs e ferramentas fornecidas; código fechado</td>
+                <td>Maior visibilidade; logs e código auditável (quando necessário)</td>
+              </tr>
+              <tr>
+                <td><strong>Customização</strong></td>
+                <td>Geralmente limitada; algumas configurações são bloqueadas</td>
+                <td>Alta; possível adaptar e automatizar (scripts, configs)</td>
+              </tr>
+              <tr>
+                <td><strong>Dependência de fornecedor</strong></td>
+                <td>Maior risco de <em>vendor lock-in</em></td>
+                <td>Menor; possibilidade de migração e suporte por terceiros</td>
+              </tr>
+              <tr>
+                <td><strong>Conformidade</strong></td>
+                <td>Controle por contratos; auditoria de licenças mais “fechada”</td>
+                <td>Exige controle de licenças e obrigações; transparência facilita auditoria</td>
+              </tr>
+              <tr>
+                <td><strong>Custos</strong></td>
+                <td>Licenças, renovações, suporte; previsível, mas pode ser alto</td>
+                <td>Software pode ser gratuito; custos podem estar em suporte, treinamento e operação</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>6.2 “Escolha consciente” — não existe bala de prata</h3>
+          <p>
+            Um profissional de suporte não precisa “torcer” para um modelo. Precisa escolher com critérios.
+            Em algumas situações, o software proprietário oferece integração e suporte contratual muito valiosos.
+            Em outras, software livre oferece flexibilidade e independência essenciais.
+          </p>
+
+          <div class="callout">
+            <strong>Regra prática:</strong> antes de instalar/implantar algo, responda:
+            “Qual é a necessidade do usuário? Qual ambiente? Quais restrições (hardware, compatibilidade, política)? Qual licença?”
+          </div>
+        </div>
+      </section>
+
+      <!-- BOAS PRÁTICAS (teóricas) -->
+      <section id="boas-praticas" class="card">
+        <div class="content">
+          <h2>7) Boas práticas de licenciamento (para quem faz suporte)</h2>
+
+          <h3>7.1 Checklist mental de licenças antes de instalar</h3>
+          <ul class="list">
+            <li><strong>Finalidade:</strong> uso pessoal, educacional ou comercial?</li>
+            <li><strong>Distribuição:</strong> vou apenas instalar localmente ou redistribuir (imagem/pendrive/pacote)?</li>
+            <li><strong>Modificações:</strong> vou alterar código/compilar? (raro em suporte básico, mas possível)</li>
+            <li><strong>Obrigações:</strong> preciso manter créditos/avisos? disponibilizar código de mudanças?</li>
+            <li><strong>Políticas internas:</strong> há regras da instituição para software permitido?</li>
+          </ul>
+
+          <h3>7.2 Como registrar o que foi instalado (boa prática de documentação)</h3>
+          <p>
+            Mesmo antes das práticas, você pode criar o hábito de registrar:
+            <strong>nome do software</strong>, <strong>versão</strong>, <strong>fonte de obtenção</strong> (repositório/loja), e <strong>licença</strong>.
+            Isso ajuda em auditorias, atualizações e resolução de incidentes.
+          </p>
+
+          <pre><code>
+# Modelo DIDÁTICO de registro (log) de instalação
+Data: 22/04/2026
+Máquina/VM: LAB-01
+Software: ExemploApp
+Versão: 2.0
+Fonte: repositório oficial / loja
+Licença: GPL-3.0-or-later
+Observações: instalado para testes; sem redistribuição.
+</code></pre>
+
+          <h3>7.3 Exercício de leitura (sem laboratório)</h3>
+          <p>
+            Pegue um software que você usa no dia a dia (qualquer um) e tente responder:
+            “Eu posso copiar e compartilhar?” “Eu posso modificar?” “Eu posso usar na empresa?”
+            A intenção é treinar sua habilidade de buscar e interpretar licenças.
+          </p>
+
+          <div class="callout warn">
+            <strong>Sem prática pesada agora:</strong> você não precisa instalar nada neste capítulo.
+            O foco é construir base conceitual para que, no Cap. 04, o laboratório seja muito mais tranquilo.
+          </div>
+
+          <h3>7.4 Sugestões de atividades (para estudo autônomo)</h3>
+          <ul class="list">
+            <li><strong>Atividade 1 — Classificação:</strong> faça uma lista de 10 softwares que você conhece e classifique: proprietário, freeware, livre/open source. Justifique em 1 frase.</li>
+            <li><strong>Atividade 2 — Leitura guiada:</strong> escolha 2 licenças (uma permissiva e uma copyleft) e anote: obrigações principais, riscos e vantagens.</li>
+            <li><strong>Atividade 3 — Cenário de suporte:</strong> imagine que a escola quer instalar um editor de imagem em 30 PCs. Quais perguntas você faz sobre licença e uso?</li>
+          </ul>
+
+          <h3>7.5 Pesquisas complementares (sem links, para não depender de internet)</h3>
+          <ul class="list">
+            <li>Capítulos sobre licenciamento em livros de Sistemas Operacionais e introdução a Linux (bibliografia da disciplina).</li>
+            <li>Leitura de “termos de uso” de um software proprietário e comparação com uma licença livre.</li>
+            <li>Entender o que é “copyleft” e como isso se relaciona com redistribuição de derivados.</li>
+            <li>Pesquisar o conceito de “governança de projeto” (comunidade vs empresa) e como isso afeta suporte.</li>
+          </ul>
+
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>8) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz01">
+
+            <!-- Q1 -->
+            <div class="q" data-answer="b" data-topic="Software livre x gratuito">
+              <div class="q-hd"><span>1) Qual afirmação descreve melhor a diferença entre “software livre” e “software gratuito”?</span><span class="pill">Conceitos</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q1" value="a"> Software livre é sempre pago; software gratuito é sempre proprietário.</label>
+                  <label class="opt"><input type="radio" name="q1" value="b"> Software livre trata de liberdades (usar, estudar, modificar, redistribuir); software gratuito trata de preço (R$ 0).</label>
+                  <label class="opt"><input type="radio" name="q1" value="c"> Software gratuito sempre permite redistribuir e modificar; software livre não.</label>
+                  <label class="opt"><input type="radio" name="q1" value="d"> Não há diferença: são sinônimos.</label>
+                  <label class="opt"><input type="radio" name="q1" value="e"> Software livre é apenas para Linux; software gratuito é apenas para Windows.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="q" data-answer="d" data-topic="Licenças">
+              <div class="q-hd"><span>2) Em geral, qual é a função de uma licença de software?</span><span class="pill">Licenças</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q2" value="a"> Aumentar o desempenho do sistema operacional.</label>
+                  <label class="opt"><input type="radio" name="q2" value="b"> Impedir qualquer uso do software por outras pessoas.</label>
+                  <label class="opt"><input type="radio" name="q2" value="c"> Garantir que o software nunca tenha bugs.</label>
+                  <label class="opt"><input type="radio" name="q2" value="d"> Conceder permissões e impor condições sobre uso, cópia, modificação e distribuição.</label>
+                  <label class="opt"><input type="radio" name="q2" value="e"> Transformar automaticamente software proprietário em software livre.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="q" data-answer="c" data-topic="Modelos">
+              <div class="q-hd"><span>3) Qual opção descreve melhor um software proprietário?</span><span class="pill">Modelos</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q3" value="a"> Código-fonte aberto e redistribuição obrigatória de melhorias.</label>
+                  <label class="opt"><input type="radio" name="q3" value="b"> Sempre gratuito e sem restrições de cópia.</label>
+                  <label class="opt"><input type="radio" name="q3" value="c"> Código-fonte fechado e licença de uso com restrições definidas pelo fornecedor.</label>
+                  <label class="opt"><input type="radio" name="q3" value="d"> Sem licença, pois a lei permite livre cópia.</label>
+                  <label class="opt"><input type="radio" name="q3" value="e"> Apenas um software que funciona em celulares.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="q" data-answer="a" data-topic="Copyleft">
+              <div class="q-hd"><span>4) O que o conceito de “copyleft” busca garantir quando um software derivado é distribuído?</span><span class="pill">Copyleft</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q4" value="a"> Que as mesmas liberdades sejam mantidas, exigindo que derivados distribuídos permaneçam sob condições compatíveis.</label>
+                  <label class="opt"><input type="radio" name="q4" value="b"> Que o software passe a ser proprietário automaticamente.</label>
+                  <label class="opt"><input type="radio" name="q4" value="c"> Que o software não possa ser usado comercialmente.</label>
+                  <label class="opt"><input type="radio" name="q4" value="d"> Que o código-fonte seja removido do projeto.</label>
+                  <label class="opt"><input type="radio" name="q4" value="e"> Que o software não possa ser instalado no Linux.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="q" data-answer="e" data-topic="Permissivas">
+              <div class="q-hd"><span>5) Qual característica é típica de licenças “permissivas”?</span><span class="pill">Permissivas</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q5" value="a"> Exigem que qualquer derivado seja distribuído sob a mesma licença, sempre.</label>
+                  <label class="opt"><input type="radio" name="q5" value="b"> Proíbem uso comercial.</label>
+                  <label class="opt"><input type="radio" name="q5" value="c"> Não permitem redistribuição do software.</label>
+                  <label class="opt"><input type="radio" name="q5" value="d"> Exigem pagamento obrigatório por cópia instalada.</label>
+                  <label class="opt"><input type="radio" name="q5" value="e"> Permitem ampla reutilização com poucas exigências, geralmente manter avisos e atribuição.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="q" data-answer="b" data-topic="Open Source">
+              <div class="q-hd"><span>6) Qual alternativa melhor representa a diferença mais comum entre Software Livre e Open Source?</span><span class="pill">Diferenças</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q6" value="a"> Open Source não permite acesso ao código; Software Livre permite.</label>
+                  <label class="opt"><input type="radio" name="q6" value="b"> A diferença é mais de enfoque: Software Livre enfatiza liberdades/ética; Open Source enfatiza vantagens pragmáticas e metodologia.</label>
+                  <label class="opt"><input type="radio" name="q6" value="c"> Software Livre é sempre permissivo; Open Source é sempre copyleft.</label>
+                  <label class="opt"><input type="radio" name="q6" value="d"> Open Source só existe em sistemas Windows.</label>
+                  <label class="opt"><input type="radio" name="q6" value="e"> Não existe nenhuma diferença de discurso, só muda o nome.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="q" data-answer="d" data-topic="Sem licença">
+              <div class="q-hd"><span>7) Um projeto está publicado em um repositório público, mas não possui arquivo LICENSE. Qual é a atitude mais segura?</span><span class="pill">Conformidade</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q7" value="a"> Considerar automaticamente domínio público e redistribuir à vontade.</label>
+                  <label class="opt"><input type="radio" name="q7" value="b"> Assumir que é GPL e distribuir derivados sem preocupação.</label>
+                  <label class="opt"><input type="radio" name="q7" value="c"> Assumir que é MIT e incluir em produto comercial sem atribuição.</label>
+                  <label class="opt"><input type="radio" name="q7" value="d"> Evitar redistribuição e buscar confirmação de licença (ou alternativa licenciada) antes de usar/distribuir.</label>
+                  <label class="opt"><input type="radio" name="q7" value="e"> Copiar o código e remover o nome do autor.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="q" data-answer="a" data-topic="Freeware">
+              <div class="q-hd"><span>8) Qual afirmação sobre “freeware” é correta?</span><span class="pill">Modelos</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q8" value="a"> Pode ser gratuito para uso, mas ainda assim proprietário, com restrições de redistribuição e sem código-fonte.</label>
+                  <label class="opt"><input type="radio" name="q8" value="b"> É sinônimo de software livre (mesmas liberdades).</label>
+                  <label class="opt"><input type="radio" name="q8" value="c"> Sempre permite modificar o código-fonte.</label>
+                  <label class="opt"><input type="radio" name="q8" value="d"> É obrigatoriamente pago por assinatura.</label>
+                  <label class="opt"><input type="radio" name="q8" value="e"> Só existe em distribuições Linux.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q9 -->
+            <div class="q" data-answer="c" data-topic="Conformidade">
+              <div class="q-hd"><span>9) Qual prática ajuda mais na conformidade e suporte em uma organização?</span><span class="pill">Boas práticas</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q9" value="a"> Instalar softwares sem registro para economizar tempo.</label>
+                  <label class="opt"><input type="radio" name="q9" value="b"> Desativar atualizações e logs para evitar notificações.</label>
+                  <label class="opt"><input type="radio" name="q9" value="c"> Manter inventário de software (nome/versão/fonte/licença) e registrar mudanças.</label>
+                  <label class="opt"><input type="radio" name="q9" value="d"> Usar sempre apenas software proprietário.</label>
+                  <label class="opt"><input type="radio" name="q9" value="e"> Compartilhar instaladores por mensagens sem documentação.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <!-- Q10 -->
+            <div class="q" data-answer="e" data-topic="Escolha consciente">
+              <div class="q-hd"><span>10) Ao escolher um software para instalar em um laboratório, qual sequência de raciocínio é mais adequada?</span><span class="pill">Decisão</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q10" value="a"> Escolher o mais famoso, ignorar licença e compatibilidade.</label>
+                  <label class="opt"><input type="radio" name="q10" value="b"> Escolher apenas o gratuito, sempre, sem analisar suporte.</label>
+                  <label class="opt"><input type="radio" name="q10" value="c"> Escolher o mais novo, pois sempre é melhor.</label>
+                  <label class="opt"><input type="radio" name="q10" value="d"> Escolher apenas software com interface bonita, sem considerar uso.</label>
+                  <label class="opt"><input type="radio" name="q10" value="e"> Definir necessidade e contexto → verificar compatibilidade/políticas → analisar licença e obrigações → planejar instalação e documentação.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" id="quizScoreBox" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CHECKLIST -->
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>9) Checklist de estudo (interativo)</h2>
+          <p class="muted">Marque o que você conseguiu fazer. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist01">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu sei</strong> diferenciar “grátis” (preço) de “livre” (liberdade).</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu consigo</strong> explicar o que uma licença define (uso, cópia, modificação, redistribuição).</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu reconheço</strong> os termos “permissiva” e “copyleft” e a diferença entre eles.</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu consigo</strong> localizar onde um projeto costuma declarar a licença (LICENSE/COPYING/descrição).</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu entendo</strong> por que software livre e open source podem ser parecidos tecnicamente, mas diferentes em discurso.</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu consigo</strong> listar pelo menos 3 vantagens e 3 desvantagens do modelo de software livre.</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu consigo</strong> explicar por que “código público sem licença” é um risco e exige cautela.</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu consegui</strong> responder o quiz e revisar os tópicos em que errei.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Próximo passo:</strong> no Cap. 02 você verá aplicações atuais do software livre e fará curadoria de notícias.
+            No Cap. 03 você pesquisa distribuições. E no Cap. 04 começamos laboratório (VM + Linux Mint).
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="index.html">← Voltar ao Index</a>
+            <a class="btn dark" href="capitulo02.html">Ir para Cap. 02 →</a>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ INTERATIVO
+    // =============================
+    const quiz = document.getElementById('quiz01');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){
+      scoreEl.textContent = String(correctCount);
+    }
+
+    function explain(topic){
+      const map = {
+        'Software livre x gratuito': 'Volte à seção 2 (Modelos) e 4 (Software Livre) para revisar: preço ≠ liberdade.',
+        'Licenças': 'Revise a seção 3 (Licenças): função, permissões e condições.',
+        'Modelos': 'Revise a seção 2 (Tipos e modelos de software) e a tabela comparativa.',
+        'Copyleft': 'Revise 3.3 e 4.2 (Copyleft): reciprocidade ao distribuir derivados.',
+        'Permissivas': 'Revise 3.3 (Permissivas): poucas exigências, normalmente atribuição.',
+        'Open Source': 'Revise a seção 5: diferença de enfoque (pragmático) vs (liberdades).',
+        'Conformidade': 'Revise 3.4 e 7.1: ausência de licença explícita é risco → cautela.',
+        'Boas práticas': 'Revise 7.2: inventário, registro e documentação.',
+        'Decisão': 'Revise 6.2 e 7.1: necessidade→compatibilidade/políticas→licença→documentar.'
+      };
+      return map[topic] || 'Revise a teoria do capítulo para reforçar este conceito.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    // marca se já contou ponto, para evitar múltiplas somas
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, False, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            if(!ok && isCounted(qEl)){
+              // Se o aluno trocou e errou após já ter acertado, mantém a pontuação (mais justo para estudo).
+              // O objetivo é motivar; avaliação formal pode ser feita em ambiente separado.
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou a alternativa <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+            // não mexe no score (estudo). Se quiser “zerar”, recarregue a página.
+          }
+        });
+      });
+    });
+
+    // Fix: JS True/False capitalization
+    // (Small patch for the line above that used Python-like False)
+    // We will overwrite setFeedback call for unselected option.
+    // To avoid editing HTML content again, we monkey patch the submit handler behavior below.
+    // But simpler: define global alias.
+    const False = false;
+
+    // =============================
+    // CHECKLIST (com localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist01');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const key = 'sosl_cap01_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(key);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){ /* ignore */ }
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(key);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+    updateScore();
+
+  </script>
+
+</body>
+</html>

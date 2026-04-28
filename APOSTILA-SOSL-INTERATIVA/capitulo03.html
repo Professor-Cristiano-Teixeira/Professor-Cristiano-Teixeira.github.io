@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 03 — Linux e Distribuições: pesquisa orientada, critérios e escolha (SOSL)</title>
+  <meta name="description" content="Capítulo 03 da apostila SOSL: o que são distribuições Linux, famílias, critérios de escolha, aquisição (ISO) e trabalho de pesquisa orientada." />
+
+  <!-- arquivo: capitulo03.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 280px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 980px){ .grid-2,.grid-3{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Form */
+    .form{ border:1px solid var(--border); border-radius: 14px; padding: 14px; background:#fff; margin-top: 10px; }
+    .field{ display:flex; flex-direction:column; gap:6px; margin: 10px 0; }
+    label{ font-weight: 800; }
+    input[type="text"], textarea, select{ width:100%; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; font: inherit; background:#fff; }
+    textarea{ min-height: 110px; resize: vertical; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 03</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#pesquisa">Trabalho de Pesquisa</a>
+          <a href="#passo">Passo a passo</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo01.html" role="menuitem"><span>Cap. 01 — Tipos, licenças e história</span><span class="pill">01</span></a>
+              <a href="capitulo02.html" role="menuitem"><span>Cap. 02 — SL hoje: aplicações e ecossistema</span><span class="pill">02</span></a>
+              <a href="capitulo03.html" role="menuitem"><span>Cap. 03 — Linux e distribuições (pesquisa)</span><span class="pill">03</span></a>
+              <a href="capitulo04.html" role="menuitem"><span>Cap. 04 — VM + instalação Linux Mint</span><span class="pill">04</span></a>
+              <a href="capitulo05.html" role="menuitem"><span>Cap. 05 — Interfaces gráficas</span><span class="pill">05</span></a>
+              <a href="capitulo06.html" role="menuitem"><span>Cap. 06 — Pacotes, lojas, Snap/Flatpak</span><span class="pill">06</span></a>
+              <a href="capitulo07.html" role="menuitem"><span>Cap. 07 — Boot e systemd</span><span class="pill">07</span></a>
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo14.html" role="menuitem"><span>Cap. 14 — Manutenção preventiva</span><span class="pill">14</span></a>
+              <a href="capitulo15.html" role="menuitem"><span>Cap. 15 — Backup e restauração</span><span class="pill">15</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 03 — Linux e Distribuições: pesquisa orientada, critérios e escolha</h1>
+          <p class="subtitle">
+            Neste capítulo você aprende <strong>o que é uma distribuição Linux</strong>, como elas se organizam em famílias e como escolher uma distro com critérios.
+            Também está aqui o <strong>Trabalho de Pesquisa</strong> (mencionado no plano) para comparar distribuições.
+            O laboratório (instalação na VM) começa no <strong>Capítulo 04</strong>.
+          </p>
+
+          <div class="badges">
+            <span class="badge">Distribuições Linux</span>
+            <span class="badge">Famílias e objetivos</span>
+            <span class="badge">Critérios de escolha</span>
+            <span class="badge">Aquisição (ISO)</span>
+            <span class="badge">Pesquisa orientada</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Explicar o que é uma <strong>distribuição Linux</strong> (distro) e o que ela reúne.</li>
+                <li>Entender o que muda entre distros: <strong>pacotes</strong>, <strong>ciclo de releases</strong>, <strong>objetivo</strong> e <strong>suporte</strong>.</li>
+                <li>Conhecer as <strong>famílias</strong> mais comuns (por exemplo: Debian-like, Red Hat-like, Arch-like e outras).</li>
+                <li>Aplicar um conjunto de <strong>critérios técnicos</strong> para escolher distro para desktop ou servidor.</li>
+                <li>Aprender a <strong>baixar uma ISO</strong> com segurança e <strong>verificar integridade</strong> (checksum) — sem usar VM ainda.</li>
+                <li>Realizar o <strong>Trabalho de Pesquisa</strong> comparando distribuições e apresentando resultados.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>Ter lido Cap. 01 (licenças) e Cap. 02 (ecossistema/curadoria).</li>
+                <li>Conhecimento básico de navegação e download de arquivos.</li>
+                <li>Não precisa instalar Linux neste capítulo.</li>
+              </ul>
+              <div class="callout warn">
+                <strong>Dica para estudo autônomo:</strong> não tente memorizar “a melhor distro”.
+                O objetivo é aprender a escolher com critérios e justificar a decisão.
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#familias">🧬 Famílias</a>
+            <a href="#criterios">🎯 Critérios</a>
+            <a href="#pesquisa">🧑‍🎓 Trabalho</a>
+            <a href="#passo">🧭 Passo a passo</a>
+            <a href="#atividades">🧪 Atividades</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo02.html">← Voltar ao Cap. 02</a>
+            <a class="btn dark" href="capitulo04.html">Próximo: Cap. 04 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) O que é uma distribuição Linux?</h2>
+          <p>
+            Uma <strong>distribuição Linux</strong> (distro) é um conjunto organizado de software que inclui: o <strong>kernel Linux</strong>,
+            bibliotecas essenciais, ferramentas de sistema, um <strong>gerenciador de pacotes</strong>, repositórios e, em muitos casos,
+            um ambiente gráfico. Em outras palavras, a distro é “o Linux pronto para uso”, com escolhas de instalação, padrões e manutenção.
+          </p>
+          <p>
+            Distros existem porque diferentes públicos têm necessidades diferentes. Um servidor precisa priorizar estabilidade, segurança e ciclos de suporte.
+            Um desktop pode priorizar facilidade, compatibilidade com hardware e interface amigável. Um laboratório técnico pode priorizar reprodutibilidade
+            e facilidade de reinstalação. Uma distro “faz escolhas” para você — e essas escolhas são o que você precisa aprender a avaliar.
+          </p>
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso?</strong> No Cap. 04, você vai instalar o Linux Mint em uma VM.
+            No Cap. 06, você verá como o gerenciador de pacotes (escolha da distro) impacta instalação de software.
+          </div>
+
+          <h3>1.1 O que costuma variar entre distros</h3>
+          <ul class="list">
+            <li><strong>Gerenciador de pacotes</strong> e formato (ex.: sistemas baseados em APT, RPM, etc.).</li>
+            <li><strong>Repositórios</strong> (o que vem “oficialmente” e com quais políticas de atualização).</li>
+            <li><strong>Ciclo de releases</strong>: versões estáveis/LTS vs atualizações contínuas (rolling).</li>
+            <li><strong>Objetivo</strong>: desktop, servidor, segurança, educação, leveza, imutável etc.</li>
+            <li><strong>Padrões de configuração</strong>: serviços ativados, firewall, permissões, ferramentas pré-instaladas.</li>
+            <li><strong>Comunidade e suporte</strong>: documentação, fóruns, tutoriais, empresas parceiras.</li>
+          </ul>
+
+          <div class="callout warn">
+            <strong>Conceito importante:</strong> distro ≠ apenas “visual”.
+            A interface pode mudar, mas o que mais impacta suporte é: pacotes, suporte, política de atualizações e estabilidade.
+          </div>
+        </div>
+      </section>
+
+      <section id="familias" class="card">
+        <div class="content">
+          <h2>2) Famílias de distribuições (visão geral)</h2>
+          <p>
+            Muitas distros compartilham uma base e herdam escolhas técnicas. Para fins didáticos, é comum agrupar em “famílias”.
+            A ideia aqui não é listar todas, e sim entender o padrão: <strong>base</strong> → <strong>pacotes</strong> → <strong>políticas</strong>.
+          </p>
+
+          <div class="grid-2">
+            <div>
+              <h3>2.1 Família Debian-like (ex.: Debian/Ubuntu/Mint)</h3>
+              <p>
+                Geralmente associada a gerenciamento de pacotes com foco em repositórios e estabilidade. É muito usada em desktop e servidores.
+                No nosso curso, a base prática será <strong>Linux Mint</strong> (derivado de Ubuntu, que é derivado de Debian), por ser amigável
+                e adequado a laboratório.
+              </p>
+            </div>
+            <div>
+              <h3>2.2 Família Red Hat-like (ex.: RHEL/Fedora/derivados)</h3>
+              <p>
+                Muito comum em cenários corporativos e servidores. Geralmente tem forte integração com práticas corporativas, suporte e documentação.
+                Para estudo comparativo, é uma ótima família para entender ciclos de release e suporte.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>2.3 Família Arch-like (ex.: Arch/derivados)</h3>
+              <p>
+                Associada a filosofia de simplicidade e controle do usuário, frequentemente com modelo <em>rolling release</em>.
+                Excelente para aprender internals e personalização, mas pode exigir mais maturidade do aluno iniciante.
+              </p>
+            </div>
+            <div>
+              <h3>2.4 Outras bases e propostas</h3>
+              <p>
+                Há também famílias e propostas como SUSE-like, distros “imutáveis”, distros focadas em segurança, educação e leveza.
+                No trabalho de pesquisa, você pode escolher qualquer distro relevante, desde que consiga justificar.
+              </p>
+            </div>
+          </div>
+
+          <table class="table" aria-label="Comparativo rápido entre famílias">
+            <thead>
+              <tr>
+                <th>Família (exemplos)</th>
+                <th>Onde é comum ver</th>
+                <th>Ponto forte</th>
+                <th>Ponto de atenção</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Debian-like</strong> (Debian/Ubuntu/Mint)</td>
+                <td>Desktop, laboratórios, servidores</td>
+                <td>Facilidade, grande comunidade, compatibilidade</td>
+                <td>Nem sempre o software mais novo; depende de políticas</td>
+              </tr>
+              <tr>
+                <td><strong>Red Hat-like</strong> (Fedora/RHEL/derivados)</td>
+                <td>Corporativo, servidores, cloud</td>
+                <td>Boas práticas corporativas e suporte</td>
+                <td>Curva de adaptação para alguns usuários</td>
+              </tr>
+              <tr>
+                <td><strong>Arch-like</strong> (Arch/derivados)</td>
+                <td>Usuários avançados, personalização</td>
+                <td>Atualizações rápidas e controle</td>
+                <td>Requer mais cuidado com mudanças frequentes</td>
+              </tr>
+              <tr>
+                <td><strong>Especializadas</strong> (segurança/educação/leveza/imutável)</td>
+                <td>Casos específicos</td>
+                <td>Atendem objetivo claramente</td>
+                <td>Podem ter comunidade menor ou foco restrito</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No Cap. 04 você instalará uma distro “desktop amigável”.
+            No Cap. 06 você verá que gerenciador de pacotes e repositórios mudam conforme a base.
+          </div>
+        </div>
+      </section>
+
+      <section id="criterios" class="card">
+        <div class="content">
+          <h2>3) Critérios de escolha (o jeito “profissional” de comparar distribuições)</h2>
+          <p>
+            Escolher distro no suporte não é questão de gosto. Você avalia <strong>requisitos</strong>, <strong>restrições</strong> e <strong>risco</strong>.
+            A seguir há um conjunto de critérios que você deve aplicar no trabalho de pesquisa.
+          </p>
+
+          <h3>3.1 Critérios técnicos (com perguntas-guia)</h3>
+          <ul class="list">
+            <li><strong>Público-alvo:</strong> para quem a distro foi pensada? iniciantes, servidores, empresas?</li>
+            <li><strong>Suporte e comunidade:</strong> há documentação boa? fóruns ativos? tutoriais atualizados?</li>
+            <li><strong>Ciclo de releases:</strong> LTS? estável? rolling? Qual o impacto em suporte?</li>
+            <li><strong>Pacotes e repositórios:</strong> há software suficiente? política de atualização é confiável?</li>
+            <li><strong>Segurança:</strong> atualizações de segurança são rápidas? há ferramentas padrão (firewall, logs)?</li>
+            <li><strong>Compatibilidade de hardware:</strong> funciona bem no hardware do laboratório? Wi‑Fi, vídeo, impressoras?</li>
+            <li><strong>Facilidade de instalação e recuperação:</strong> existe modo live? instalação guiada? documentação de troubleshooting?</li>
+            <li><strong>Desempenho:</strong> roda bem com 4GB/8GB? qual ambiente gráfico recomendado?</li>
+          </ul>
+
+          <h3>3.2 Critérios “organizacionais” (muito importantes no mundo real)</h3>
+          <ul class="list">
+            <li><strong>Padronização:</strong> é fácil manter todas as máquinas iguais?</li>
+            <li><strong>Treinamento:</strong> usuários precisam reaprender muito?</li>
+            <li><strong>Compatibilidade com políticas:</strong> autenticação, permissões, atualizações, softwares permitidos.</li>
+            <li><strong>Custos indiretos:</strong> tempo de suporte, manutenção, reconfiguração e reimplantação.</li>
+          </ul>
+
+          <div class="callout ok">
+            <strong>Regra prática:</strong> para laboratório e ensino, valorize: estabilidade, documentação, facilidade de uso e reprodutibilidade.
+            Para servidores, valorize: estabilidade, ciclo de suporte, segurança e previsibilidade.
+          </div>
+        </div>
+      </section>
+
+      <section id="pesquisa" class="card">
+        <div class="content">
+          <h2>4) Trabalho de Pesquisa (Distribuições Linux)</h2>
+          <p>
+            <strong>Objetivo:</strong> comparar distribuições Linux e justificar qual seria mais adequada para um cenário proposto.
+            Este trabalho é citado no plano da disciplina e serve para você aprender a escolher distro com critérios.
+          </p>
+
+          <div class="callout warn">
+            <strong>Importante:</strong> este capítulo inclui o trabalho. A instalação prática só começa no Cap. 04.
+          </div>
+
+          <h3>4.1 Entrega (sugestão de formato)</h3>
+          <ul class="list">
+            <li>Um relatório (1 a 3 páginas) ou apresentação (5 a 8 slides).</li>
+            <li>Comparar <strong>no mínimo 3 distribuições</strong> (podem ser de famílias diferentes).</li>
+            <li>Conter: critérios, dados coletados, justificativa e recomendação final.</li>
+          </ul>
+
+          <h3>4.2 Cenários para escolher (selecione 1)</h3>
+          <ul class="list">
+            <li><strong>Cenário A (Laboratório escolar):</strong> 20 PCs, usuários iniciantes, foco em estudo, necessidade de reinstalar rápido.</li>
+            <li><strong>Cenário B (Empresa pequena):</strong> 10 desktops + 1 servidor, prioridade em estabilidade, suporte e atualizações.</li>
+            <li><strong>Cenário C (PC antigo):</strong> hardware limitado, necessidade de leveza e desempenho para tarefas básicas.</li>
+            <li><strong>Cenário D (Desenvolvimento):</strong> foco em ferramentas atuais, atualizações frequentes e ambiente configurável.</li>
+          </ul>
+
+          <h3>4.3 Rubrica (como será avaliado)</h3>
+          <table class="table" aria-label="Rubrica">
+            <thead>
+              <tr>
+                <th>Critério</th>
+                <th>O que será observado</th>
+                <th>Peso sugerido</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Pesquisa e fontes</strong></td>
+                <td>Fontes confiáveis, dados consistentes, datas/versões quando relevantes</td>
+                <td>25%</td>
+              </tr>
+              <tr>
+                <td><strong>Critérios técnicos</strong></td>
+                <td>Aplicação correta dos critérios (suporte, releases, pacotes, hardware)</td>
+                <td>25%</td>
+              </tr>
+              <tr>
+                <td><strong>Justificativa</strong></td>
+                <td>Argumentação lógica e alinhada ao cenário escolhido</td>
+                <td>30%</td>
+              </tr>
+              <tr>
+                <td><strong>Clareza e organização</strong></td>
+                <td>Estrutura, escrita, tabelas/quadros, conclusão objetiva</td>
+                <td>20%</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>4.4 Modelo de ficha (preencha e depois exporte)</h3>
+          <p class="muted">Use o formulário abaixo para montar sua ficha e exportar em Markdown/JSON (salva no navegador).</p>
+
+          <div class="form" id="form03">
+            <div class="row">
+              <div class="field">
+                <label for="sc">Cenário escolhido</label>
+                <select id="sc">
+                  <option value="A - Laboratório escolar">A - Laboratório escolar</option>
+                  <option value="B - Empresa pequena">B - Empresa pequena</option>
+                  <option value="C - PC antigo">C - PC antigo</option>
+                  <option value="D - Desenvolvimento">D - Desenvolvimento</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="aluno">Aluno/Grupo</label>
+                <input id="aluno" type="text" placeholder="Nome(s)" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="distros">Distribuições comparadas (mínimo 3)</label>
+              <textarea id="distros" placeholder="Liste as distros e suas bases (ex.: Mint - Debian-like; Fedora - Red Hat-like; ...)"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="criterios">Critérios usados (resumo)</label>
+                <textarea id="criterios" placeholder="Ex.: suporte, ciclo de release, hardware, pacotes, segurança..."></textarea>
+              </div>
+              <div class="field">
+                <label for="fontes">Fontes consultadas</label>
+                <textarea id="fontes" placeholder="Ex.: documentação oficial, release notes, páginas de download..."></textarea>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="comparacao">Tabela/resumo comparativo (texto)</label>
+              <textarea id="comparacao" placeholder="Escreva o comparativo: pontos fortes, fracos, observações por distro."></textarea>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="recomendacao">Recomendação final (1 distro) + justificativa</label>
+                <textarea id="recomendacao" placeholder="Qual distro você recomenda para o cenário e por quê?"></textarea>
+              </div>
+              <div class="field">
+                <label for="riscos">Riscos/limitações e como mitigar</label>
+                <textarea id="riscos" placeholder="Ex.: compatibilidade, curva de aprendizado, política de atualização..."></textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="saveFicha" type="button">Salvar ficha</button>
+              <button class="btn ghost" id="loadFicha" type="button">Carregar ficha</button>
+              <button class="btn dark" id="clearFicha" type="button">Limpar ficha</button>
+              <button class="btn dark" id="exportMd" type="button">Exportar Markdown</button>
+              <button class="btn dark" id="exportJson" type="button">Exportar JSON</button>
+            </div>
+
+            <div id="msg03" class="callout" style="display:none"></div>
+            <pre id="out03" style="display:none"></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="passo" class="card">
+        <div class="content">
+          <h2>5) Passo a passo (leve) — aquisição segura de ISO e verificação de integridade</h2>
+          <p>
+            Este passo a passo não exige instalar Linux. Ele prepara você para o Cap. 04: baixar a ISO certa e garantir
+            que o arquivo não corrompeu durante o download.
+          </p>
+
+          <div class="callout warn">
+            <strong>Por que isso é importante?</strong> Porque arquivos corrompidos ou obtidos de fontes não oficiais podem causar falhas
+            na instalação ou riscos de segurança.
+          </div>
+
+          <h3>5.1 Passo 1 — escolher a fonte oficial</h3>
+          <ul class="list">
+            <li>Procure sempre o <strong>site oficial</strong> do projeto ou um espelho (<em>mirror</em>) recomendado pelo projeto.</li>
+            <li>Evite baixar ISO de sites aleatórios, grupos de mensagens ou links sem contexto.</li>
+            <li>Prefira HTTPS e páginas que exibem checksums (SHA256) e/ou assinaturas.</li>
+          </ul>
+
+          <h3>5.2 Passo 2 — baixar a ISO e o checksum</h3>
+          <p>
+            Normalmente, a página oficial disponibiliza o arquivo <strong>.iso</strong> e um arquivo com o checksum (ex.: SHA256).
+            Após o download, você calcula o checksum do arquivo baixado e compara com o valor oficial.
+          </p>
+
+          <h3>5.3 Passo 3 — calcular checksum no Windows (PowerShell)</h3>
+          <pre><code># Calcular SHA256 no Windows PowerShell
+Get-FileHash -Algorithm SHA256 "C:\\caminho\\para\\arquivo.iso"</code></pre>
+          <p class="code-hint">Compare o valor exibido com o checksum fornecido no site oficial (devem ser idênticos).</p>
+
+          <h3>5.4 Passo 4 — calcular checksum no Linux/macOS (Terminal)</h3>
+          <pre><code># Linux (geralmente):
+sha256sum arquivo.iso
+
+# macOS (pode usar):
+shasum -a 256 arquivo.iso</code></pre>
+
+          <h3>5.5 Passo 5 — interpretar o resultado</h3>
+          <ul class="list">
+            <li><strong>Igual:</strong> download íntegro, pode prosseguir.</li>
+            <li><strong>Diferente:</strong> arquivo corrompido ou incorreto → baixe novamente (de preferência outro mirror) e refaça o teste.</li>
+          </ul>
+
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso?</strong> No Cap. 04 você fará a instalação do Linux Mint na VM.
+            Uma ISO íntegra reduz falhas e acelera o laboratório.
+          </div>
+        </div>
+      </section>
+
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>6) Sugestões de atividades (derivadas do capítulo)</h2>
+          <ul class="list">
+            <li><strong>Atividade 1 — Comparação rápida:</strong> escolha 3 distros e preencha um quadro com: base/família, objetivo, ciclo de release e público-alvo.</li>
+            <li><strong>Atividade 2 — Cenário:</strong> para o Cenário A (laboratório), justifique por que uma distro “amigável” é adequada e quais riscos existem.</li>
+            <li><strong>Atividade 3 — Integridade:</strong> descreva (em texto) o que é checksum e por que ele evita problemas no Cap. 04.</li>
+          </ul>
+
+          <h3>Pesquisas complementares</h3>
+          <ul class="list">
+            <li>Diferença entre LTS, stable e rolling release (e impacto em suporte).</li>
+            <li>O que são “mirrors” e por que existem (distribuição de downloads).</li>
+            <li>Assinatura digital (GPG) vs checksum: qual a diferença e para que serve cada um.</li>
+            <li>Como comunidades organizam documentação e suporte (wikis, fóruns, issue trackers).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>7) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz03">
+
+            <div class="q" data-answer="d" data-topic="Definição">
+              <div class="q-hd"><span>1) O que é uma distribuição Linux?</span><span class="pill">Conceito</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q1" value="a"> Apenas um tema visual (papel de parede e ícones).</label>
+                  <label class="opt"><input type="radio" name="q1" value="b"> Apenas o kernel Linux, sem ferramentas.</label>
+                  <label class="opt"><input type="radio" name="q1" value="c"> Um programa único para instalar outros programas.</label>
+                  <label class="opt"><input type="radio" name="q1" value="d"> Um conjunto organizado: kernel + ferramentas + pacotes + repositórios + padrões de instalação/manutenção.</label>
+                  <label class="opt"><input type="radio" name="q1" value="e"> Um tipo de licença de software.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Variações">
+              <div class="q-hd"><span>2) Qual item costuma variar significativamente entre distribuições?</span><span class="pill">Diferenças</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q2" value="a"> O conceito de arquivo e pasta (sempre totalmente diferente).</label>
+                  <label class="opt"><input type="radio" name="q2" value="b"> Gerenciador de pacotes, repositórios e política de atualizações.</label>
+                  <label class="opt"><input type="radio" name="q2" value="c"> O fato de usar CPU e memória (isso muda por distro).</label>
+                  <label class="opt"><input type="radio" name="q2" value="d"> A existência de rede (algumas distros não têm).</label>
+                  <label class="opt"><input type="radio" name="q2" value="e"> O uso de teclado e mouse (isso muda por distro).</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Famílias">
+              <div class="q-hd"><span>3) Por que agrupamos distribuições em “famílias”?</span><span class="pill">Famílias</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q3" value="a"> Para entender bases compartilhadas e heranças (pacotes, políticas, repositórios).</label>
+                  <label class="opt"><input type="radio" name="q3" value="b"> Para definir qual é “a melhor” distro universal.</label>
+                  <label class="opt"><input type="radio" name="q3" value="c"> Para separar distros que têm internet das que não têm.</label>
+                  <label class="opt"><input type="radio" name="q3" value="d"> Para garantir que todas as distros sejam idênticas.</label>
+                  <label class="opt"><input type="radio" name="q3" value="e"> Para proibir o uso de pacotes.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="Ciclos">
+              <div class="q-hd"><span>4) Qual motivo explica por que “nem sempre a versão mais nova é a melhor” para suporte?</span><span class="pill">Releases</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q4" value="a"> Porque versões novas nunca corrigem bugs.</label>
+                  <label class="opt"><input type="radio" name="q4" value="b"> Porque é ilegal atualizar em Linux.</label>
+                  <label class="opt"><input type="radio" name="q4" value="c"> Porque distros não permitem atualização.</label>
+                  <label class="opt"><input type="radio" name="q4" value="d"> Porque versões novas sempre consomem mais energia e são inúteis.</label>
+                  <label class="opt"><input type="radio" name="q4" value="e"> Porque estabilidade, compatibilidade e políticas de suporte (LTS/estável) podem ser prioritárias.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="Critérios">
+              <div class="q-hd"><span>5) Qual é um critério técnico importante para escolher distro para laboratório escolar?</span><span class="pill">Critérios</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q5" value="a"> A distro ter o maior número de wallpapers.</label>
+                  <label class="opt"><input type="radio" name="q5" value="b"> A distro ser a mais difícil, para “forçar” aprendizado.</label>
+                  <label class="opt"><input type="radio" name="q5" value="c"> Documentação, estabilidade, facilidade de uso e reprodutibilidade.</label>
+                  <label class="opt"><input type="radio" name="q5" value="d"> A distro ter o logo mais bonito.</label>
+                  <label class="opt"><input type="radio" name="q5" value="e"> A distro ser a mais recente sempre.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Aquisição">
+              <div class="q-hd"><span>6) Qual prática é mais segura ao baixar uma ISO de Linux?</span><span class="pill">Download</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q6" value="a"> Baixar de qualquer site e confiar no tamanho do arquivo.</label>
+                  <label class="opt"><input type="radio" name="q6" value="b"> Baixar do site oficial/mirror recomendado e validar checksum (ex.: SHA256).</label>
+                  <label class="opt"><input type="radio" name="q6" value="c"> Receber por aplicativo de mensagens e instalar sem checar nada.</label>
+                  <label class="opt"><input type="radio" name="q6" value="d"> Baixar apenas por torrents desconhecidos sem verificação.</label>
+                  <label class="opt"><input type="radio" name="q6" value="e"> Alterar o nome do arquivo para “.zip” para ficar seguro.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="Checksum">
+              <div class="q-hd"><span>7) O que o checksum (ex.: SHA256) ajuda a verificar?</span><span class="pill">Integridade</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q7" value="a"> Se o computador é rápido o suficiente.</label>
+                  <label class="opt"><input type="radio" name="q7" value="b"> Se a distro tem interface bonita.</label>
+                  <label class="opt"><input type="radio" name="q7" value="c"> Se a senha do usuário é forte.</label>
+                  <label class="opt"><input type="radio" name="q7" value="d"> Se o arquivo baixado está íntegro (não corrompido) e corresponde ao valor oficial.</label>
+                  <label class="opt"><input type="radio" name="q7" value="e"> Se a ISO já está instalada na VM.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Pesquisa">
+              <div class="q-hd"><span>8) No trabalho de pesquisa, o que é essencial apresentar?</span><span class="pill">Trabalho</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q8" value="a"> Critérios, fontes consultadas, comparação e recomendação justificada para um cenário.</label>
+                  <label class="opt"><input type="radio" name="q8" value="b"> Apenas o logo das distribuições.</label>
+                  <label class="opt"><input type="radio" name="q8" value="c"> Apenas uma opinião pessoal sem critérios.</label>
+                  <label class="opt"><input type="radio" name="q8" value="d"> Apenas a lista de comandos do terminal.</label>
+                  <label class="opt"><input type="radio" name="q8" value="e"> Somente capturas de tela do site de download.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="Suporte">
+              <div class="q-hd"><span>9) Qual item tende a reduzir esforço de suporte para iniciantes?</span><span class="pill">Suporte</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q9" value="a"> Ausência total de documentação e fóruns.</label>
+                  <label class="opt"><input type="radio" name="q9" value="b"> Atualizações imprevisíveis e mudanças frequentes sem aviso.</label>
+                  <label class="opt"><input type="radio" name="q9" value="c"> Boa documentação, comunidade ativa e padrões estáveis (LTS/estável).</label>
+                  <label class="opt"><input type="radio" name="q9" value="d"> Instalação sem modo live e sem ajuda.</label>
+                  <label class="opt"><input type="radio" name="q9" value="e"> Depender sempre de arquivos baixados fora dos repositórios oficiais.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="Próximo">
+              <div class="q-hd"><span>10) Qual será o foco do Capítulo 04?</span><span class="pill">Sequência</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q10" value="a"> Apenas história do software livre.</label>
+                  <label class="opt"><input type="radio" name="q10" value="b"> Apenas curadoria de notícias.</label>
+                  <label class="opt"><input type="radio" name="q10" value="c"> Apenas segurança e SBOM.</label>
+                  <label class="opt"><input type="radio" name="q10" value="d"> Apenas criação de usuários e permissões.</label>
+                  <label class="opt"><input type="radio" name="q10" value="e"> Prática: criar VM e instalar Linux Mint no VirtualBox (início do laboratório).</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" id="quizScoreBox" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>8) Checklist de estudo (interativo)</h2>
+          <p class="muted">Marque o que você conseguiu fazer. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist03">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu consigo</strong> explicar o que é uma distribuição Linux.</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu sei</strong> citar diferenças relevantes entre distros (pacotes, ciclos, objetivos).</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu entendo</strong> o conceito de famílias e herança de base.</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu consigo</strong> aplicar critérios técnicos e organizacionais para escolher uma distro.</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu sei</strong> por que checksum/assinatura importa para baixar ISOs.</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu iniciei</strong> o trabalho de pesquisa e salvei a ficha (formulário).</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu respondi</strong> o quiz e revisei os tópicos em que errei.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo02.html">← Voltar ao Cap. 02</a>
+            <a class="btn dark" href="capitulo04.html">Ir para Cap. 04 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz03');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'Definição': 'Revise a seção 1: distro = conjunto organizado (kernel + ferramentas + pacotes + políticas).',
+        'Variações': 'Revise 1.1: pacotes/repositórios/política de atualização variam bastante.',
+        'Famílias': 'Revise a seção 2: famílias ajudam a entender base e heranças.',
+        'Ciclos': 'Revise a seção 3: LTS/estável prioriza previsibilidade no suporte.',
+        'Critérios': 'Revise a seção 3: escolha com critérios técnicos e organizacionais.',
+        'Aquisição': 'Revise a seção 5: fonte oficial + checksum.',
+        'Checksum': 'Revise 5.3–5.5: checksum valida integridade e correspondência.',
+        'Pesquisa': 'Revise a seção 4: relatório deve ter critérios, fontes, comparação e recomendação.',
+        'Suporte': 'Revise 3.1: documentação e comunidade ativa reduzem suporte.',
+        'Próximo': 'Revise o início do capítulo: Cap. 04 é VM + instalação do Linux Mint.'
+      };
+      return map[topic] || 'Revise a teoria do capítulo para reforçar este conceito.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist03');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap03_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+
+    // =============================
+    // FICHA DO TRABALHO (localStorage)
+    // =============================
+    const keyFicha = 'sosl_cap03_ficha_v1';
+    const f = {
+      sc: document.getElementById('sc'),
+      aluno: document.getElementById('aluno'),
+      distros: document.getElementById('distros'),
+      criterios: document.getElementById('criterios'),
+      fontes: document.getElementById('fontes'),
+      comparacao: document.getElementById('comparacao'),
+      recomendacao: document.getElementById('recomendacao'),
+      riscos: document.getElementById('riscos'),
+      msg: document.getElementById('msg03'),
+      out: document.getElementById('out03')
+    };
+
+    function showMsg(kind, html){
+      f.msg.style.display = 'block';
+      f.msg.classList.remove('ok','warn','bad');
+      f.msg.classList.add(kind);
+      f.msg.innerHTML = html;
+      setTimeout(() => { f.msg.style.display = 'none'; }, 3500);
+    }
+
+    function readFicha(){
+      const raw = localStorage.getItem(keyFicha);
+      if(!raw) return null;
+      try{ return JSON.parse(raw); }catch(e){ return null; }
+    }
+
+    function writeFicha(obj){
+      localStorage.setItem(keyFicha, JSON.stringify(obj));
+    }
+
+    function clearFicha(){
+      f.sc.value = 'A - Laboratório escolar';
+      f.aluno.value = '';
+      f.distros.value = '';
+      f.criterios.value = '';
+      f.fontes.value = '';
+      f.comparacao.value = '';
+      f.recomendacao.value = '';
+      f.riscos.value = '';
+      f.out.style.display = 'none';
+      f.out.textContent = '';
+    }
+
+    function fillFicha(obj){
+      if(!obj) return;
+      f.sc.value = obj.sc || 'A - Laboratório escolar';
+      f.aluno.value = obj.aluno || '';
+      f.distros.value = obj.distros || '';
+      f.criterios.value = obj.criterios || '';
+      f.fontes.value = obj.fontes || '';
+      f.comparacao.value = obj.comparacao || '';
+      f.recomendacao.value = obj.recomendacao || '';
+      f.riscos.value = obj.riscos || '';
+    }
+
+    function collectFicha(){
+      return {
+        sc: f.sc.value,
+        aluno: f.aluno.value.trim(),
+        distros: f.distros.value.trim(),
+        criterios: f.criterios.value.trim(),
+        fontes: f.fontes.value.trim(),
+        comparacao: f.comparacao.value.trim(),
+        recomendacao: f.recomendacao.value.trim(),
+        riscos: f.riscos.value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function toMarkdown(obj){
+      return `# Trabalho de Pesquisa — Distribuições Linux\n\n` +
+        `- **Aluno/Grupo:** ${obj.aluno || '—'}\n` +
+        `- **Cenário:** ${obj.sc || '—'}\n` +
+        `- **Atualizado em:** ${obj.updatedAt || '—'}\n\n` +
+        `## Distribuições comparadas\n${obj.distros || ''}\n\n` +
+        `## Critérios usados\n${obj.criterios || ''}\n\n` +
+        `## Fontes consultadas\n${obj.fontes || ''}\n\n` +
+        `## Comparação (resumo)\n${obj.comparacao || ''}\n\n` +
+        `## Recomendação final\n${obj.recomendacao || ''}\n\n` +
+        `## Riscos/limitações e mitigação\n${obj.riscos || ''}\n`;
+    }
+
+    document.getElementById('saveFicha')?.addEventListener('click', () => {
+      const obj = collectFicha();
+      if(!obj.aluno || !obj.distros || !obj.recomendacao){
+        showMsg('warn', '<strong>Preencha pelo menos:</strong> Aluno/Grupo, Distribuições comparadas e Recomendação final.');
+        return;
+      }
+      writeFicha(obj);
+      showMsg('ok', '<strong>Ficha salva!</strong>');
+    });
+
+    document.getElementById('loadFicha')?.addEventListener('click', () => {
+      const obj = readFicha();
+      if(!obj){ showMsg('warn','<strong>Nenhuma ficha salva ainda.</strong>'); return; }
+      fillFicha(obj);
+      showMsg('ok','<strong>Ficha carregada.</strong>');
+    });
+
+    document.getElementById('clearFicha')?.addEventListener('click', () => {
+      clearFicha();
+      localStorage.removeItem(keyFicha);
+      showMsg('ok','<strong>Ficha limpa.</strong>');
+    });
+
+    document.getElementById('exportMd')?.addEventListener('click', () => {
+      const obj = collectFicha();
+      const md = toMarkdown(obj);
+      f.out.style.display = 'block';
+      f.out.textContent = md;
+      navigator.clipboard?.writeText(md);
+      showMsg('ok','<strong>Markdown gerado e copiado.</strong>');
+    });
+
+    document.getElementById('exportJson')?.addEventListener('click', () => {
+      const obj = collectFicha();
+      const json = JSON.stringify(obj, null, 2);
+      f.out.style.display = 'block';
+      f.out.textContent = json;
+      navigator.clipboard?.writeText(json);
+      showMsg('ok','<strong>JSON gerado e copiado.</strong>');
+    });
+
+    // auto load if exists
+    const obj0 = readFicha();
+    if(obj0) fillFicha(obj0);
+
+  </script>
+
+</body>
+</html>

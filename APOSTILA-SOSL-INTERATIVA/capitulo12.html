@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 12 — Configurações, Processos e Rede (diagnóstico e administração) — SOSL</title>
+  <meta name="description" content="Capítulo 12 da apostila SOSL: configuração básica (arquivos em /etc), processos (ps/top/kill) e rede (ip/ss/ping/dns), com prática de diagnóstico e Entrega 3 do Projeto Integrador." />
+
+  <!-- arquivo: capitulo12.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+      --code-accent:#38bdf8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 290px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    h4{ margin: 12px 0 6px; font-size: 1.0rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 980px){ .grid-2{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    /* Code blocks */
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Steps */
+    .step{ border:1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin: 12px 0; }
+    .step .hd{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight: 950; }
+    .step .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:34px; height:34px; padding:0 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.10);
+      border: 1px solid rgba(11,31,58,.22);
+      color: var(--pw-red-dark);
+      font-weight: 950;
+    }
+
+    /* Form */
+    .form{ border:1px solid var(--border); border-radius: 14px; padding: 14px; background:#fff; margin-top: 10px; }
+    .field{ display:flex; flex-direction:column; gap:6px; margin: 10px 0; }
+    label{ font-weight: 800; }
+    input[type="text"], textarea{ width:100%; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; font: inherit; background:#fff; }
+    textarea{ min-height: 110px; resize: vertical; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 12</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#configs">Configs</a>
+          <a href="#processos">Processos</a>
+          <a href="#rede">Rede</a>
+          <a href="#passo">Passo a passo</a>
+          <a href="#entrega">Entrega 3</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 12 — Configurações, Processos e Rede (diagnóstico e administração)</h1>
+          <p class="subtitle">
+            Este capítulo fecha o <strong>3º bimestre</strong>. Você vai aprender como um técnico diagnostica problemas de forma profissional:
+            (1) <strong>configs</strong> (arquivos em <code>/etc</code>), (2) <strong>processos</strong> (o que está rodando e consumindo recursos) e
+            (3) <strong>rede</strong> (IP, rota, DNS, portas). Ao final, você fará a <strong>Entrega 3 do Projeto Integrador</strong> com um relatório completo.
+          </p>
+
+          <div class="badges">
+            <span class="badge">/etc (configs)</span>
+            <span class="badge">nano / tee / diff</span>
+            <span class="badge">systemctl</span>
+            <span class="badge">ps / top / htop</span>
+            <span class="badge">kill / pkill</span>
+            <span class="badge">journalctl</span>
+            <span class="badge">ip / ss</span>
+            <span class="badge">ping / traceroute</span>
+            <span class="badge">DNS (dig/nslookup)</span>
+            <span class="badge">nmcli (Mint)</span>
+            <span class="badge">Entrega 3</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Reconhecer configurações essenciais em <code>/etc</code> e aplicar mudanças seguras (backup + evidência).</li>
+                <li>Entender o que é um processo, como listar, monitorar e finalizar (ps/top/kill).</li>
+                <li>Relacionar serviços do systemd com processos e logs (systemctl + journalctl).</li>
+                <li>Diagnosticar rede: IP, rota, DNS e portas (ip/ss/ping/traceroute/dig).</li>
+                <li>Produzir um relatório de diagnóstico “ticket-ready” com comandos e evidências.</li>
+                <li>Entregar a <strong>Entrega 3</strong> consolidando Caps 09–12 (CLI, arquivos, usuários, configs, processos e rede).</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>Cap. 09 e 10: CLI e utilitários de texto (grep/tee).</li>
+                <li>Cap. 11: usuários/permissões e uso consciente de sudo.</li>
+                <li>Cap. 07: systemd e journalctl (conceitos básicos de logs).</li>
+              </ul>
+              <div class="callout warn">
+                <strong>Segurança:</strong> nunca edite configs sem backup. Evite mexer em rede do host.
+                No laboratório, seguimos alterações pequenas e reversíveis.
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#configs">🧩 Configurações</a>
+            <a href="#processos">⚙️ Processos</a>
+            <a href="#rede">🌐 Rede</a>
+            <a href="#passo">🧪 Passo a passo (diagnóstico)</a>
+            <a href="#atividades">🧩 Atividades</a>
+            <a href="#entrega">📦 Projeto Integrador — Entrega 3</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo11.html">← Voltar ao Cap. 11</a>
+            <a class="btn dark" href="capitulo13.html">Próximo: Cap. 13 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <!-- TEORIA -->
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Teoria: como um técnico pensa (configs + processos + rede)</h2>
+
+          <h3>1.1 Configuração é “fonte da verdade” (e muda comportamento)</h3>
+          <p>
+            Em Linux, muita configuração é feita por arquivos de texto em <code>/etc</code>. Quando um serviço “não funciona”,
+            a causa frequentemente está em: configuração errada, arquivo inexistente, permissão ou dependência.
+          </p>
+          <p>
+            Alterar config é uma <strong>mudança controlada</strong>: você faz backup, aplica alteração mínima e registra evidência.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai fazer backup e comparar arquivos com <code>diff</code>.
+          </div>
+
+          <h3>1.2 Processo vs serviço: o que está rodando agora</h3>
+          <p>
+            <strong>Processo</strong> é um programa em execução (tem PID). <strong>Serviço</strong> é uma unit do systemd que controla processos
+            (iniciar/parar/reiniciar) e registra logs.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Você vai cruzar <code>systemctl status</code> com <code>ps</code> e depois conferir logs no <code>journalctl</code>.
+          </div>
+
+          <h3>1.3 Diagnóstico de rede: camadas (IP → rota → DNS → portas)</h3>
+          <p>
+            Em suporte, “sem internet” pode significar várias coisas. A forma profissional é testar em camadas:
+            <strong>IP</strong> (tenho endereço?) → <strong>rota</strong> (tenho caminho?) → <strong>DNS</strong> (resolvo nomes?) → <strong>portas</strong> (serviço responde?).
+          </p>
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai usar <code>ip</code>, <code>ip route</code>, <code>ping</code>, <code>resolvectl/dig</code> e <code>ss</code>.
+          </div>
+
+          <h3>1.4 Logs são evidência, não “ruído”</h3>
+          <p>
+            Logs contam a história do que aconteceu. Para suporte, eles são evidência para justificar uma ação.
+            Você já viu o journal no Cap. 07; aqui você usa logs para fechar diagnóstico.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Você vai incluir no relatório as últimas linhas relevantes do journal.
+          </div>
+        </div>
+      </section>
+
+      <!-- CONFIGS -->
+      <section id="configs" class="card">
+        <div class="content">
+          <h2>2) Configurações: arquivos essenciais e boas práticas</h2>
+
+          <h3>2.1 Arquivos essenciais em /etc (foco de suporte)</h3>
+          <table class="table" aria-label="Arquivos comuns em /etc">
+            <thead><tr><th>Arquivo</th><th>Para que serve</th><th>Quando olhar</th></tr></thead>
+            <tbody>
+              <tr><td><code>/etc/os-release</code></td><td>Identifica distribuição/versão</td><td>Inventário e compatibilidade</td></tr>
+              <tr><td><code>/etc/hosts</code></td><td>Resolução local de nomes</td><td>Problemas pontuais de DNS/nome</td></tr>
+              <tr><td><code>/etc/hostname</code></td><td>Nome da máquina</td><td>Inventário e rede</td></tr>
+              <tr><td><code>/etc/resolv.conf</code></td><td>DNS (em algumas distros é gerenciado)</td><td>Falha de resolução de nomes</td></tr>
+              <tr><td><code>/etc/fstab</code></td><td>Montagens de disco</td><td>Erro de boot/montagem (cuidado)</td></tr>
+            </tbody>
+          </table>
+
+          <h3>2.2 Regra de mudança segura (padrão profissional)</h3>
+          <ol class="list">
+            <li><strong>Identificar</strong> arquivo/serviço impactado.</li>
+            <li><strong>Backup</strong>: copiar o arquivo antes (<code>.bak</code>).</li>
+            <li><strong>Alteração mínima</strong>: uma mudança por vez.</li>
+            <li><strong>Validar</strong>: reiniciar serviço/testar.</li>
+            <li><strong>Registrar evidência</strong>: comandos e resultados (antes/depois).</li>
+          </ol>
+          <div class="callout warn">
+            <strong>Cuidado:</strong> em ambientes reais, mudanças exigem aprovação. Aqui é laboratório, mas o hábito é o mesmo.
+          </div>
+
+          <h3>2.3 Ferramentas úteis para configs</h3>
+          <pre><code># editar (use com cautela)
+sudo nano /etc/hosts
+
+# salvar saída em arquivo e ver ao mesmo tempo
+comando | tee -a relatorio.txt
+
+# comparar arquivos (antes/depois)
+diff -u arquivo.bak arquivo
+</code></pre>
+        </div>
+      </section>
+
+      <!-- PROCESSOS -->
+      <section id="processos" class="card">
+        <div class="content">
+          <h2>3) Processos: listar, monitorar e finalizar com responsabilidade</h2>
+
+          <h3>3.1 ps: fotografia dos processos</h3>
+          <pre><code># processos do usuário
+ps -u $USER
+
+# visão completa (muito usado)
+ps aux | head
+
+# procurar um processo
+ps aux | grep -i firefox
+</code></pre>
+
+          <h3>3.2 top/htop: monitoramento ao vivo</h3>
+          <pre><code>top
+# sair: q
+
+# htop (se instalado)
+htop
+</code></pre>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Quando “está lento”, você verifica CPU/RAM e quem está consumindo.
+          </div>
+
+          <h3>3.3 Finalizar processos: sinais e cuidado</h3>
+          <p>
+            <code>kill</code> envia sinais. O mais comum é <code>TERM</code> (15) — pedir para encerrar — e, em último caso, <code>KILL</code> (9) — força.
+          </p>
+          <pre><code># pedir para encerrar (preferível)
+kill -15 PID
+
+# forçar (último recurso)
+kill -9 PID
+
+# por nome (cuidado)
+pkill -f nome_do_processo
+</code></pre>
+          <div class="callout warn">
+            <strong>Boa prática:</strong> sempre identifique o processo certo antes. Em suporte, finalizar errado pode derrubar serviços.
+          </div>
+
+          <h3>3.4 systemd + logs: status e histórico</h3>
+          <pre><code># status de um serviço
+systemctl status NetworkManager --no-pager
+
+# logs do serviço
+journalctl -u NetworkManager -b --no-pager | tail -n 40
+</code></pre>
+        </div>
+      </section>
+
+      <!-- REDE -->
+      <section id="rede" class="card">
+        <div class="content">
+          <h2>4) Rede: IP, rota, DNS e portas (sequência de diagnóstico)</h2>
+
+          <h3>4.1 IP e interfaces</h3>
+          <pre><code># resumo de interfaces e IP
+ip -br a
+
+# detalhes
+ip a
+</code></pre>
+
+          <h3>4.2 Rotas</h3>
+          <pre><code>ip route
+</code></pre>
+          <p class="code-hint">Sem rota padrão (default), a máquina pode não alcançar internet.</p>
+
+          <h3>4.3 Teste de conectividade (camadas)</h3>
+          <pre><code># ping no gateway (substitua pelo IP do seu gateway)
+# ping -c 3 192.168.0.1
+
+# ping em IP público (testa saída sem depender de DNS)
+ping -c 3 8.8.8.8
+
+# ping por nome (testa DNS)
+ping -c 3 google.com
+</code></pre>
+
+          <h3>4.4 DNS (resolução de nomes)</h3>
+          <pre><code># em sistemas com systemd-resolved
+resolvectl status 2>/dev/null || true
+
+# alternativas (podem não existir)
+nslookup google.com 2>/dev/null || true
+dig google.com +short 2>/dev/null || true
+</code></pre>
+          <div class="callout warn">
+            <strong>Se nslookup/dig não existir:</strong> é comum instalar <code>dnsutils</code>. Isso é opcional e deve ser registrado.
+          </div>
+
+          <h3>4.5 Portas e conexões (ss)</h3>
+          <pre><code># sockets escutando (TCP/UDP)
+ss -tulpen | head
+
+# conexões TCP
+ss -tan | head
+</code></pre>
+
+          <h3>4.6 Rede no desktop Mint (nmcli)</h3>
+          <pre><code># status do NetworkManager
+nmcli general status 2>/dev/null || true
+
+# dispositivos
+nmcli device status 2>/dev/null || true
+</code></pre>
+        </div>
+      </section>
+
+      <!-- PASSO A PASSO -->
+      <section id="passo" class="card">
+        <div class="content">
+          <h2>5) Passo a passo (prático): relatório completo de diagnóstico</h2>
+          <p class="muted">Objetivo: gerar um relatório único para anexar a um ticket: configs + processos + rede + logs.</p>
+
+          <div class="callout ok">
+            <strong>Resultado final:</strong> arquivo <code>~/SOSL/cap12/diagnostico-cap12.txt</code> com seções e evidências.
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">1</span> Preparar pasta e arquivo do relatório</span><span class="pill">Setup</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap12
+R=~/SOSL/cap12/diagnostico-cap12.txt
+: > "$R"
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">2</span> Cabeçalho do relatório</span><span class="pill">Registro</span></div>
+            <pre><code>{
+  echo "DIAGNÓSTICO — CAP. 12";
+  echo "Data: $(date)";
+  echo "Usuário: $(whoami)";
+  echo "Host: $(hostname)";
+  echo "----------------------------------------";
+} | tee -a "$R"
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">3</span> Configs essenciais (somente leitura)</span><span class="pill">Configs</span></div>
+            <pre><code>echo "\n[CONFIGS — /etc]" | tee -a "$R"
+
+# Identificação do sistema
+cat /etc/os-release | tee -a "$R"
+
+# Hostname e hosts
+echo "\n-- /etc/hostname" | tee -a "$R"
+cat /etc/hostname | tee -a "$R"
+
+echo "\n-- /etc/hosts" | tee -a "$R"
+cat /etc/hosts | tee -a "$R"
+</code></pre>
+            <p class="code-hint">Aqui você treina “config como evidência”: copiar o estado atual para o relatório.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">4</span> Processos e recursos</span><span class="pill">Processos</span></div>
+            <pre><code>echo "\n[PROCESSOS / RECURSOS]" | tee -a "$R"
+
+# uptime/carga
+uptime | tee -a "$R"
+
+# memória
+free -h | tee -a "$R"
+
+# top 10 processos por CPU
+ps aux --sort=-%cpu | head -n 11 | tee -a "$R"
+
+# top 10 processos por memória
+ps aux --sort=-%mem | head -n 11 | tee -a "$R"
+</code></pre>
+            <div class="callout">
+              <strong>Onde vou aplicar isso?</strong> Quando o usuário diz “está lento”, você entrega evidência de carga e top consumidores.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">5</span> Serviços e logs (systemd + journal)</span><span class="pill">Serviços</span></div>
+            <pre><code>echo "\n[SERVIÇOS / FALHAS]" | tee -a "$R"
+
+systemctl --failed | tee -a "$R"
+
+echo "\n[LOGS — WARN/ERR (boot atual)]" | tee -a "$R"
+journalctl -b -p warning..err --no-pager | tail -n 60 | tee -a "$R"
+</code></pre>
+            <p class="code-hint">Se não houver falhas, ótimo — o relatório registra essa evidência.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">6</span> Rede: IP, rota, DNS e portas</span><span class="pill">Rede</span></div>
+            <pre><code>echo "\n[REDE — IP / ROTAS]" | tee -a "$R"
+ip -br a | tee -a "$R"
+ip route | tee -a "$R"
+
+echo "\n[REDE — PING]" | tee -a "$R"
+# ping em IP (sem DNS)
+ping -c 2 8.8.8.8 | tee -a "$R" || true
+# ping por nome (DNS)
+ping -c 2 google.com | tee -a "$R" || true
+
+echo "\n[REDE — DNS]" | tee -a "$R"
+resolvectl status 2>/dev/null | tee -a "$R" || true
+nslookup google.com 2>/dev/null | tee -a "$R" || true
+dig google.com +short 2>/dev/null | tee -a "$R" || true
+
+echo "\n[REDE — PORTAS (ss)]" | tee -a "$R"
+ss -tulpen 2>/dev/null | head -n 30 | tee -a "$R" || true
+</code></pre>
+            <div class="callout ok">
+              <strong>Leitura rápida:</strong> ping IP funciona mas ping nome falha → suspeita de DNS.
+              Se ip route não tem default → suspeita de rota/gateway.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">7</span> (Opcional) Instalar ferramentas úteis e registrar</span><span class="pill">Opcional</span></div>
+            <p class="muted">Se alguns comandos não existirem, você pode instalar ferramentas. Registre a mudança (Cap. 06).</p>
+            <pre><code># ferramentas comuns
+sudo apt update
+sudo apt install -y htop traceroute dnsutils
+
+# testar
+htop --version
+traceroute -m 5 8.8.8.8 | head
+nslookup google.com | head
+</code></pre>
+            <div class="callout warn">
+              <strong>Ambiente real:</strong> instalar pacotes exige autorização. Aqui é laboratório.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">8</span> Revisar e anexar como evidência</span><span class="pill">Final</span></div>
+            <pre><code>less "$R"
+
+du -h "$R"
+</code></pre>
+            <div class="callout ok">
+              <strong>Parabéns:</strong> você criou um relatório completo com abordagem profissional (camadas + evidências).
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ATIVIDADES -->
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>6) Atividades práticas sugeridas (2–3)</h2>
+          <ul class="list">
+            <li><strong>Atividade 1 — Caso “DNS quebrado” (simulado):</strong> descreva, em 8–10 linhas, como você provaria que o problema é DNS usando a sequência IP → DNS.</li>
+            <li><strong>Atividade 2 — Processo suspeito:</strong> escolha um processo com alto uso (ou simule abrindo várias abas) e registre: PID, %CPU, %MEM e ação tomada (apenas observação ou encerramento controlado em app de usuário).</li>
+            <li><strong>Atividade 3 — Evidência de config:</strong> faça backup do <code>/etc/hosts</code> (sem mudar) e mostre no relatório a diferença (diff deve ser vazio).</li>
+          </ul>
+
+          <h3>Pesquisas complementares (2–5)</h3>
+          <ul class="list">
+            <li>Diferença entre <strong>processo</strong> e <strong>thread</strong> (visão básica).</li>
+            <li>O que é <strong>gateway padrão</strong> e por que sem ele não há internet.</li>
+            <li>Como o DNS funciona (cliente → resolvedor → autoritativo) em termos simples.</li>
+            <li>Qual a diferença entre <code>ss</code> e <code>netstat</code> (e por que ss é mais moderno).</li>
+            <li>Boas práticas ao editar arquivos em /etc (backup, validação, reversão).</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ENTREGA 3 -->
+      <section id="entrega" class="card">
+        <div class="content">
+          <h2>7) Projeto Integrador — Entrega 3 (Bimestre 3)</h2>
+          <p>
+            <strong>Entrega 3: “Relatório de Diagnóstico e Administração (B3)”</strong> — consolida Caps 09–12:
+            CLI (ajuda e inventário), manipulação de arquivos/texto, usuários/permissões e diagnóstico de configs/processos/rede.
+            Seu objetivo é entregar um documento que qualquer técnico de suporte entregaria em um chamado.
+          </p>
+
+          <div class="grid-2">
+            <div>
+              <h3>O que entregar</h3>
+              <ul class="list">
+                <li><strong>Relatório principal</strong> (Markdown/PDF) com: diagnóstico + evidências.</li>
+                <li><strong>Evidências</strong>: trechos/prints de terminal (comandos executados e resultados).</li>
+                <li><strong>Seção rede</strong>: IP, rota, ping IP e ping nome + conclusão (DNS/rota ok?).</li>
+                <li><strong>Seção processos</strong>: top 5 CPU e top 5 MEM + análise simples.</li>
+                <li><strong>Seção permissões</strong>: uma pasta compartilhada por grupo (do Cap. 11) e evidência do setgid.</li>
+                <li><strong>Seção configs</strong>: backup de um arquivo (ex.: hosts) + evidência de diff/validação.</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Critérios (rubrica rápida)</h3>
+              <ul class="list">
+                <li><strong>Método:</strong> diagnóstico em camadas (IP→rota→DNS→portas) com conclusão.</li>
+                <li><strong>Clareza:</strong> linguagem técnica simples e objetiva.</li>
+                <li><strong>Evidência:</strong> comandos e outputs sustentando afirmações.</li>
+                <li><strong>Segurança:</strong> mudanças controladas (backup/registro), nada perigoso.</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Modelo de relatório (copie e preencha)</h3>
+          <pre><code># Entrega 3 — Relatório de Diagnóstico e Administração (Bimestre 3)
+
+Aluno/Grupo:
+Data:
+VM/Host:
+
+## 1) Inventário e CLI (Caps 09–10)
+- 5 comandos usados e para que servem:
+- Evidências anexadas:
+
+## 2) Usuários e permissões (Cap. 11)
+- Grupo criado:
+- Pasta compartilhada (setgid):
+- Evidência (ls -ld e ls -l):
+
+## 3) Configurações (Cap. 12)
+- Arquivo analisado em /etc:
+- Backup criado:
+- Validação (diff/resultado):
+
+## 4) Processos e recursos (Cap. 12)
+- uptime:
+- Top 5 CPU:
+- Top 5 MEM:
+- Observação/ação tomada:
+
+## 5) Rede (Cap. 12)
+- ip -br a:
+- ip route:
+- ping IP (8.8.8.8):
+- ping nome (google.com):
+- Conclusão (DNS/rota/porta):
+
+## 6) Conclusão geral
+- O que aprendeu e como aplicaria em um chamado real.
+</code></pre>
+
+          <h3>Formulário (salva no navegador e exporta)</h3>
+          <p class="muted">Preencha e exporte em Markdown/JSON para anexar na entrega.</p>
+
+          <div class="form" id="form12">
+            <div class="row">
+              <div class="field"><label for="aluno">Aluno/Grupo</label><input id="aluno" type="text" placeholder="Nome(s)" /></div>
+              <div class="field"><label for="data">Data</label><input id="data" type="text" placeholder="dd/mm/aaaa" /></div>
+            </div>
+            <div class="field"><label for="vm">VM/Host (resumo)</label><input id="vm" type="text" placeholder="Ex.: Mint (4GB/2vCPU)" /></div>
+            <div class="field"><label for="cli">Inventário/CLI (Caps 09–10)</label><textarea id="cli" placeholder="Comandos usados + evidências"></textarea></div>
+            <div class="field"><label for="perm">Usuários/Permissões (Cap. 11)</label><textarea id="perm" placeholder="Grupo/pasta setgid + evidências"></textarea></div>
+            <div class="field"><label for="cfg">Configurações (Cap. 12)</label><textarea id="cfg" placeholder="Arquivo em /etc + backup + validação"></textarea></div>
+            <div class="row">
+              <div class="field"><label for="proc">Processos/Recursos</label><textarea id="proc" placeholder="uptime + top CPU/MEM"></textarea></div>
+              <div class="field"><label for="net">Rede</label><textarea id="net" placeholder="IP/rota/pings + conclusão"></textarea></div>
+            </div>
+            <div class="field"><label for="conc">Conclusão geral</label><textarea id="conc" placeholder="O que aprendeu e como aplicaria"></textarea></div>
+
+            <div class="actions">
+              <button class="btn primary" id="saveEntrega" type="button">Salvar</button>
+              <button class="btn ghost" id="loadEntrega" type="button">Carregar</button>
+              <button class="btn dark" id="clearEntrega" type="button">Limpar</button>
+              <button class="btn dark" id="exportMd" type="button">Exportar Markdown</button>
+              <button class="btn dark" id="exportJson" type="button">Exportar JSON</button>
+            </div>
+
+            <div id="msg12" class="callout" style="display:none"></div>
+            <pre id="out12" style="display:none"></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>8) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz12">
+
+            <div class="q" data-answer="b" data-topic="configs">
+              <div class="q-hd"><span>1) Em Linux, configurações do sistema ficam frequentemente em:</span><span class="pill">Config</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q1" value="a"> /home</label>
+                <label class="opt"><input type="radio" name="q1" value="b"> /etc</label>
+                <label class="opt"><input type="radio" name="q1" value="c"> /tmp</label>
+                <label class="opt"><input type="radio" name="q1" value="d"> /proc (sempre)</label>
+                <label class="opt"><input type="radio" name="q1" value="e"> /bin</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="backup">
+              <div class="q-hd"><span>2) Qual é a melhor prática antes de editar um arquivo crítico em /etc?</span><span class="pill">Boas práticas</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q2" value="a"> Editar direto sem registrar</label>
+                <label class="opt"><input type="radio" name="q2" value="b"> Apagar o arquivo e criar outro</label>
+                <label class="opt"><input type="radio" name="q2" value="c"> Dar chmod 777 no arquivo</label>
+                <label class="opt"><input type="radio" name="q2" value="d"> Fazer backup e mudança mínima, com validação</label>
+                <label class="opt"><input type="radio" name="q2" value="e"> Reiniciar o sistema antes</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="processo">
+              <div class="q-hd"><span>3) Um processo no Linux é:</span><span class="pill">Processo</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q3" value="a"> Um programa em execução (com PID)</label>
+                <label class="opt"><input type="radio" name="q3" value="b"> Um tipo de diretório</label>
+                <label class="opt"><input type="radio" name="q3" value="c"> Um arquivo de configuração</label>
+                <label class="opt"><input type="radio" name="q3" value="d"> Um pacote .deb</label>
+                <label class="opt"><input type="radio" name="q3" value="e"> Um driver de rede</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="ps">
+              <div class="q-hd"><span>4) Qual comando mostra uma “fotografia” dos processos (lista)?</span><span class="pill">ps</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q4" value="a"> ip a</label>
+                <label class="opt"><input type="radio" name="q4" value="b"> df -h</label>
+                <label class="opt"><input type="radio" name="q4" value="c"> ps aux</label>
+                <label class="opt"><input type="radio" name="q4" value="d"> chmod</label>
+                <label class="opt"><input type="radio" name="q4" value="e"> lsblk</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="kill">
+              <div class="q-hd"><span>5) Qual é a forma preferível de encerrar um processo?</span><span class="pill">kill</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q5" value="a"> kill -9 sempre</label>
+                <label class="opt"><input type="radio" name="q5" value="b"> kill -15 primeiro (TERM)</label>
+                <label class="opt"><input type="radio" name="q5" value="c"> apagar /proc</label>
+                <label class="opt"><input type="radio" name="q5" value="d"> reiniciar a máquina sempre</label>
+                <label class="opt"><input type="radio" name="q5" value="e"> chmod 777 no processo</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="camadas">
+              <div class="q-hd"><span>6) A sequência de diagnóstico de rede mais profissional é:</span><span class="pill">Rede</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q6" value="a"> DNS → portas → IP → rota</label>
+                <label class="opt"><input type="radio" name="q6" value="b"> portas → DNS → IP → rota</label>
+                <label class="opt"><input type="radio" name="q6" value="c"> reiniciar → reinstalar → formatar → pronto</label>
+                <label class="opt"><input type="radio" name="q6" value="d"> só pingar google.com</label>
+                <label class="opt"><input type="radio" name="q6" value="e"> IP → rota → DNS → portas</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="ip">
+              <div class="q-hd"><span>7) Qual comando mostra IP e interfaces (resumo)?</span><span class="pill">ip</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q7" value="a"> ip -br a</label>
+                <label class="opt"><input type="radio" name="q7" value="b"> ps aux</label>
+                <label class="opt"><input type="radio" name="q7" value="c"> journalctl</label>
+                <label class="opt"><input type="radio" name="q7" value="d"> chmod</label>
+                <label class="opt"><input type="radio" name="q7" value="e"> whoami</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="dns">
+              <div class="q-hd"><span>8) Se ping em IP funciona mas ping por nome falha, a suspeita principal é:</span><span class="pill">DNS</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q8" value="a"> Falta de RAM</label>
+                <label class="opt"><input type="radio" name="q8" value="b"> Permissão de arquivo</label>
+                <label class="opt"><input type="radio" name="q8" value="c"> Problema de DNS</label>
+                <label class="opt"><input type="radio" name="q8" value="d"> Kernel corrompido</label>
+                <label class="opt"><input type="radio" name="q8" value="e"> Placa de vídeo</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="ss">
+              <div class="q-hd"><span>9) Qual comando moderno lista portas/conexões (substitui netstat)?</span><span class="pill">ss</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q9" value="a"> ls</label>
+                <label class="opt"><input type="radio" name="q9" value="b"> cut</label>
+                <label class="opt"><input type="radio" name="q9" value="c"> man</label>
+                <label class="opt"><input type="radio" name="q9" value="d"> ss</label>
+                <label class="opt"><input type="radio" name="q9" value="e"> rm</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="proximo">
+              <div class="q-hd"><span>10) O foco principal do Capítulo 13 é:</span><span class="pill">Sequência</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q10" value="a"> Boot e systemd</label>
+                <label class="opt"><input type="radio" name="q10" value="b"> Shell Script (automação)</label>
+                <label class="opt"><input type="radio" name="q10" value="c"> Interfaces gráficas</label>
+                <label class="opt"><input type="radio" name="q10" value="d"> Backup</label>
+                <label class="opt"><input type="radio" name="q10" value="e"> Implantação</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" id="quizScoreBox" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHECKLIST -->
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>9) Checklist do aluno (interativo)</h2>
+          <p class="muted">Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist12">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu entendo</strong> que /etc guarda configs e sei citar 3 arquivos.</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu aplico</strong> a regra: backup → mudança mínima → validação → evidência.</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu sei</strong> listar processos com <code>ps</code> e interpretar PID/CPU/MEM.</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu consigo</strong> monitorar com <code>top</code>/<code>htop</code> e encerrar com <code>kill</code> de forma segura.</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu sei</strong> relacionar serviço ↔ processo ↔ logs (systemctl/journalctl).</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu consigo</strong> obter IP e rota com <code>ip -br a</code> e <code>ip route</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu testo</strong> conectividade com ping IP e ping nome e concluo sobre DNS.</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu listei</strong> portas com <code>ss</code> e entendi o objetivo.</label></div>
+            <div class="check-item"><input type="checkbox" id="c9"><label for="c9"><strong>Eu gerei</strong> o relatório <code>diagnostico-cap12.txt</code> em <code>~/SOSL/cap12</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c10"><label for="c10"><strong>Eu preenchi</strong> a Entrega 3 (B3) e exportei o relatório.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo11.html">← Voltar ao Cap. 11</a>
+            <a class="btn dark" href="capitulo13.html">Ir para Cap. 13 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz12');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'configs': 'Revise 2: /etc concentra muitos arquivos de configuração do sistema.',
+        'backup': 'Revise 2.2: mudança segura = backup + alteração mínima + validação.',
+        'processo': 'Revise 3: processo é programa em execução (PID).',
+        'ps': 'Revise 3.1: ps aux lista processos.',
+        'kill': 'Revise 3.3: preferir TERM (15) antes de KILL (9).',
+        'camadas': 'Revise 1.3 e 4: diagnóstico em camadas (IP→rota→DNS→portas).',
+        'ip': 'Revise 4.1: ip -br a mostra interfaces e IP de forma resumida.',
+        'dns': 'Revise 4.3/4.4: ping IP ok e ping nome falha sugere DNS.',
+        'ss': 'Revise 4.5: ss lista sockets/portas e conexões (moderno).',
+        'proximo': 'Cap. 13: Shell Script (automação).' 
+      };
+      return map[topic] || 'Revise teoria e prática deste capítulo.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist12');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap12_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+
+    // =============================
+    // ENTREGA 3 (localStorage)
+    // =============================
+    const keyEntrega = 'sosl_cap12_entrega3_v1';
+    const e = {
+      aluno: document.getElementById('aluno'),
+      data: document.getElementById('data'),
+      vm: document.getElementById('vm'),
+      cli: document.getElementById('cli'),
+      perm: document.getElementById('perm'),
+      cfg: document.getElementById('cfg'),
+      proc: document.getElementById('proc'),
+      net: document.getElementById('net'),
+      conc: document.getElementById('conc'),
+      msg: document.getElementById('msg12'),
+      out: document.getElementById('out12')
+    };
+
+    function showMsg(kind, html){
+      e.msg.style.display = 'block';
+      e.msg.classList.remove('ok','warn','bad');
+      e.msg.classList.add(kind);
+      e.msg.innerHTML = html;
+      setTimeout(() => { e.msg.style.display = 'none'; }, 3500);
+    }
+
+    function collect(){
+      return {
+        aluno: e.aluno.value.trim(),
+        data: e.data.value.trim(),
+        vm: e.vm.value.trim(),
+        cli: e.cli.value.trim(),
+        perm: e.perm.value.trim(),
+        cfg: e.cfg.value.trim(),
+        proc: e.proc.value.trim(),
+        net: e.net.value.trim(),
+        conc: e.conc.value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function write(obj){ localStorage.setItem(keyEntrega, JSON.stringify(obj)); }
+    function read(){
+      const raw = localStorage.getItem(keyEntrega);
+      if(!raw) return null;
+      try{ return JSON.parse(raw); }catch(err){ return null; }
+    }
+
+    function fill(obj){
+      if(!obj) return;
+      e.aluno.value = obj.aluno || '';
+      e.data.value = obj.data || '';
+      e.vm.value = obj.vm || '';
+      e.cli.value = obj.cli || '';
+      e.perm.value = obj.perm || '';
+      e.cfg.value = obj.cfg || '';
+      e.proc.value = obj.proc || '';
+      e.net.value = obj.net || '';
+      e.conc.value = obj.conc || '';
+    }
+
+    function clear(){
+      e.aluno.value=''; e.data.value=''; e.vm.value='';
+      e.cli.value=''; e.perm.value=''; e.cfg.value=''; e.proc.value=''; e.net.value=''; e.conc.value='';
+      e.out.style.display='none'; e.out.textContent='';
+    }
+
+    function toMarkdown(obj){
+      return `# Entrega 3 — Relatório de Diagnóstico e Administração (Bimestre 3)\n\n`+
+        `- **Aluno/Grupo:** ${obj.aluno || '—'}\n`+
+        `- **Data:** ${obj.data || '—'}\n`+
+        `- **VM/Host:** ${obj.vm || '—'}\n\n`+
+        `## 1) Inventário e CLI (Caps 09–10)\n${obj.cli || ''}\n\n`+
+        `## 2) Usuários e permissões (Cap. 11)\n${obj.perm || ''}\n\n`+
+        `## 3) Configurações (Cap. 12)\n${obj.cfg || ''}\n\n`+
+        `## 4) Processos e recursos (Cap. 12)\n${obj.proc || ''}\n\n`+
+        `## 5) Rede (Cap. 12)\n${obj.net || ''}\n\n`+
+        `## 6) Conclusão geral\n${obj.conc || ''}\n\n`+
+        `> Atualizado em: ${obj.updatedAt || '—'}\n`;
+    }
+
+    document.getElementById('saveEntrega')?.addEventListener('click', () => {
+      const obj = collect();
+      if(!obj.aluno || !obj.net || !obj.proc){
+        showMsg('warn','<strong>Preencha pelo menos:</strong> Aluno/Grupo, Rede e Processos.');
+        return;
+      }
+      write(obj);
+      showMsg('ok','<strong>Entrega 3 salva no navegador!</strong>');
+    });
+
+    document.getElementById('loadEntrega')?.addEventListener('click', () => {
+      const obj = read();
+      if(!obj){ showMsg('warn','<strong>Nenhum registro salvo ainda.</strong>'); return; }
+      fill(obj);
+      showMsg('ok','<strong>Registro carregado.</strong>');
+    });
+
+    document.getElementById('clearEntrega')?.addEventListener('click', () => {
+      clear();
+      localStorage.removeItem(keyEntrega);
+      showMsg('ok','<strong>Registro limpo.</strong>');
+    });
+
+    document.getElementById('exportMd')?.addEventListener('click', () => {
+      const obj = collect();
+      const md = toMarkdown(obj);
+      e.out.style.display='block';
+      e.out.textContent = md;
+      navigator.clipboard?.writeText(md);
+      showMsg('ok','<strong>Markdown gerado e copiado.</strong>');
+    });
+
+    document.getElementById('exportJson')?.addEventListener('click', () => {
+      const obj = collect();
+      const json = JSON.stringify(obj, null, 2);
+      e.out.style.display='block';
+      e.out.textContent = json;
+      navigator.clipboard?.writeText(json);
+      showMsg('ok','<strong>JSON gerado e copiado.</strong>');
+    });
+
+    const obj0 = read();
+    if(obj0) fill(obj0);
+  </script>
+
+</body>
+</html>

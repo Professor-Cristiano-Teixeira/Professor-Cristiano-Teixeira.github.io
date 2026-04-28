@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 — CLI (2): Arquivos, Diretórios e Utilitários de Texto — SOSL</title>
+  <meta name="description" content="Capítulo 10 da apostila SOSL: CLI II — manipulação de arquivos e diretórios, curingas (globbing), busca (find), inspeção (file/stat), leitura de texto (cat/less/head/tail), filtros (grep/wc/sort/uniq/cut) e redirecionamento/pipes, com prática guiada e quiz." />
+
+  <!-- arquivo: capitulo10.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+      --code-accent:#38bdf8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 290px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    h4{ margin: 12px 0 6px; font-size: 1.0rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 980px){ .grid-2,.grid-3{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    /* Code blocks */
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Steps */
+    .step{ border:1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin: 12px 0; }
+    .step .hd{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight: 950; }
+    .step .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:34px; height:34px; padding:0 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.10);
+      border: 1px solid rgba(11,31,58,.22);
+      color: var(--pw-red-dark);
+      font-weight: 950;
+    }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* KBD */
+    kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight:800; font-size:.9rem; padding:2px 6px; border-radius:8px; border:1px solid var(--border); background:#f8fafc; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 10</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#arquivos">Arquivos/Diretórios</a>
+          <a href="#texto">Texto (filtros)</a>
+          <a href="#passo">Passo a passo</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1): ajuda e inventário</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2): arquivos e texto</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 10 — CLI (2): Arquivos, Diretórios e Utilitários de Texto</h1>
+          <p class="subtitle">
+            Neste capítulo você aprende a parte mais usada da linha de comando no suporte: <strong>manipular arquivos e pastas</strong>,
+            <strong>localizar coisas</strong> e <strong>processar texto</strong> com filtros (grep, head, tail, wc, sort, uniq, cut),
+            usando <strong>redirecionamento</strong> e <strong>pipes</strong>. Isso é a base para logs, automação e diagnóstico.
+          </p>
+
+          <div class="badges">
+            <span class="badge">mkdir / touch</span>
+            <span class="badge">cp / mv / rm</span>
+            <span class="badge">globbing (* ? [])</span>
+            <span class="badge">quoting ("" '')</span>
+            <span class="badge">find</span>
+            <span class="badge">file / stat</span>
+            <span class="badge">cat / less</span>
+            <span class="badge">head / tail</span>
+            <span class="badge">grep / wc</span>
+            <span class="badge">sort / uniq / cut</span>
+            <span class="badge">> >> | tee</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Criar e organizar estruturas de pastas e arquivos (padrão de curso e de suporte).</li>
+                <li>Copiar, mover e remover com segurança (incluindo opções como <code>-i</code> e <code>-r</code>).</li>
+                <li>Entender e usar curingas (<em>globbing</em>) e aspas (quoting) para evitar erros.</li>
+                <li>Localizar arquivos com <code>find</code> (e quando usar).</li>
+                <li>Inspecionar arquivos: tipo (<code>file</code>), metadados (<code>stat</code>).</li>
+                <li>Ler e “fatiar” texto: <code>cat</code>, <code>less</code>, <code>head</code>, <code>tail</code>.</li>
+                <li>Filtrar e resumir dados: <code>grep</code>, <code>wc</code>, <code>sort</code>, <code>uniq</code>, <code>cut</code>.</li>
+                <li>Encadear comandos com <code>|</code> e salvar saídas com <code>&gt;</code>, <code>&gt;&gt;</code> e <code>tee</code>.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>Cap. 09: ajuda (man/--help) e inventário básico.</li>
+                <li>Cap. 08: noções do FHS (onde ficam logs e configs).</li>
+                <li>VM Linux Mint funcionando (Cap. 04).</li>
+              </ul>
+              <div class="callout warn">
+                <strong>Regra de segurança:</strong> evite <code>rm -rf</code>. Aqui você vai treinar opções seguras (<code>rm -i</code>, <code>rm -r</code> com cuidado).
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#arquivos">📁 Arquivos e diretórios</a>
+            <a href="#texto">🧾 Texto e filtros</a>
+            <a href="#pipes">🔗 Redirecionamento e pipes</a>
+            <a href="#passo">🧪 Passo a passo</a>
+            <a href="#atividades">🧩 Atividades</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo09.html">← Voltar ao Cap. 09</a>
+            <a class="btn dark" href="capitulo11.html">Próximo: Cap. 11 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <!-- TEORIA -->
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Teoria: por que “arquivos + texto” é a alma do Linux</h2>
+
+          <h3>1.1 Tudo vira arquivo (inclusive evidências)</h3>
+          <p>
+            No Linux, muitas informações e configurações são representadas como arquivos (textos em <code>/etc</code>, logs em <code>/var/log</code>,
+            informações em <code>/proc</code>). Por isso, um técnico eficiente precisa dominar leitura, busca e manipulação de arquivos.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai criar uma estrutura de laboratório, gerar logs de teste e extrair informações com filtros.
+          </div>
+
+          <h3>1.2 Globbing (curingas) não é regex: é o shell trabalhando</h3>
+          <p>
+            Quando você digita <code>*.log</code> ou <code>relatorio-??.txt</code>, quem expande isso é o <strong>shell</strong> antes do comando rodar.
+            Isso se chama <strong>globbing</strong>. É rápido e útil, mas pode causar erros se você não entender.
+          </p>
+          <ul class="list">
+            <li><code>*</code> → qualquer sequência de caracteres</li>
+            <li><code>?</code> → um único caractere</li>
+            <li><code>[abc]</code> → um caractere entre as opções (a, b ou c)</li>
+            <li><code>[0-9]</code> → um dígito (0 a 9)</li>
+          </ul>
+          <div class="callout warn">
+            <strong>Onde vou aplicar isso?</strong> Ao copiar/mover vários arquivos de uma vez e ao filtrar nomes de log. Você verá por que aspas mudam o comportamento.
+          </div>
+
+          <h3>1.3 Quoting (aspas) e espaços: o erro mais comum de iniciante</h3>
+          <p>
+            Espaços separam argumentos. Se um arquivo se chama <code>Meu Arquivo.txt</code>, o shell entende como dois argumentos.
+            Para tratar como um único nome, use aspas:
+            <code>"Meu Arquivo.txt"</code>. Aspas simples <code>' '</code> evitam expansão (úteis para texto literal).
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai criar um arquivo com espaço no nome e ver como copiar/mover corretamente.
+          </div>
+
+          <h3>1.4 Operações de risco: remoção e recursão</h3>
+          <p>
+            <code>rm</code> remove arquivos; <code>rm -r</code> remove pastas e tudo dentro; <code>rm -rf</code> remove sem perguntar.
+            Em suporte, a prática é usar <code>-i</code> (interativo) e conferir o alvo com <code>ls</code> antes.
+          </p>
+          <div class="callout bad">
+            <strong>Regra de sobrevivência:</strong> antes de um <code>rm -r</code>, faça <code>ls</code> no alvo e confirme o caminho.
+          </div>
+
+          <h3>1.5 Filtros: pequenos comandos que fazem uma coisa muito bem</h3>
+          <p>
+            O estilo Unix é encadear comandos simples. Você pega texto (logs, listas, saídas) e passa por filtros:
+            <code>grep</code> (seleciona linhas), <code>wc</code> (conta), <code>sort</code>/<code>uniq</code> (organiza e resume), <code>cut</code> (recorta colunas).
+          </p>
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai extrair “erros” de um log e produzir um resumo com contagens.
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ARQUIVOS -->
+      <section id="arquivos" class="card">
+        <div class="content">
+          <h2>2) Arquivos e diretórios: comandos essenciais (com mentalidade de suporte)</h2>
+
+          <h3>2.1 Criar e organizar</h3>
+          <pre><code># criar pastas
+mkdir pasta
+mkdir -p projeto/subpasta
+
+# criar arquivo vazio
+touch arquivo.txt
+</code></pre>
+          <p class="code-hint">Use <code>-p</code> para criar estruturas inteiras sem erro se já existir.</p>
+
+          <h3>2.2 Copiar e mover</h3>
+          <pre><code># copiar arquivo
+cp origem.txt destino.txt
+
+# copiar pasta (recursivo)
+cp -r pasta1 pasta2
+
+# mover/renomear
+mv antigo.txt novo.txt
+</code></pre>
+
+          <h3>2.3 Remover com cuidado</h3>
+          <pre><code># remover arquivo interativamente
+rm -i arquivo.txt
+
+# remover pasta vazia
+rmdir pasta_vazia
+
+# remover pasta com conteúdo (cuidado)
+rm -r pasta
+</code></pre>
+
+          <h3>2.4 Inspecionar: tipo e metadados</h3>
+          <pre><code># descobrir tipo do arquivo
+file arquivo.txt
+
+# ver detalhes (tamanho, datas, permissões)
+stat arquivo.txt
+</code></pre>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Quando alguém diz “não abre”, você confirma se é texto, binário, script, etc.
+          </div>
+
+          <h3>2.5 Buscar: find (a ferramenta profissional)</h3>
+          <p>
+            <code>find</code> procura arquivos por nome, tipo e outras condições. É mais confiável que “olhar manualmente” em pastas.
+          </p>
+          <pre><code># procurar por nome (case-insensitive) no diretório atual
+find . -iname "*.log"
+
+# procurar no /var/log por arquivos recentes (últimos 7 dias)
+find /var/log -type f -mtime -7 2>/dev/null | head
+</code></pre>
+          <div class="callout warn">
+            <strong>Onde vou aplicar isso?</strong> Em incidentes: localizar logs e arquivos de configuração rapidamente.
+          </div>
+        </div>
+      </section>
+
+      <!-- TEXTO -->
+      <section id="texto" class="card">
+        <div class="content">
+          <h2>3) Texto e filtros: ler, cortar, contar e resumir</h2>
+
+          <h3>3.1 Ler com segurança: cat vs less</h3>
+          <p>
+            <code>cat</code> imprime tudo (bom para arquivos pequenos). <code>less</code> permite navegar (bom para logs grandes).
+          </p>
+          <pre><code>cat arquivo_pequeno.txt
+less /var/log/syslog  # se existir
+</code></pre>
+
+          <h3>3.2 Pegar apenas o começo/fim: head e tail</h3>
+          <pre><code>head -n 20 arquivo.txt
+tail -n 50 arquivo.txt
+
+# acompanhar arquivo crescendo (log em tempo real)
+# pressione Ctrl+C para parar
+tail -f arquivo.txt
+</code></pre>
+
+          <h3>3.3 Filtrar linhas: grep</h3>
+          <pre><code># procurar linhas que contenham "error" (case-insensitive)
+grep -i "error" arquivo.log
+
+# contar quantas linhas bateram
+grep -i "error" arquivo.log | wc -l
+</code></pre>
+
+          <h3>3.4 Contar: wc</h3>
+          <pre><code>wc -l arquivo.txt   # linhas
+wc -w arquivo.txt   # palavras
+wc -c arquivo.txt   # bytes
+</code></pre>
+
+          <h3>3.5 Ordenar e resumir: sort + uniq</h3>
+          <pre><code># ordenar e contar repetidos
+sort arquivo.txt | uniq -c | sort -n
+</code></pre>
+          <p class="code-hint">Muito usado para resumir nomes repetidos, erros recorrentes e IPs.</p>
+
+          <h3>3.6 Recortar colunas: cut (CSV/colon/space)</h3>
+          <pre><code># pegar a 1ª coluna separada por ':' (ex.: /etc/passwd)
+cut -d: -f1 /etc/passwd | head
+</code></pre>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Em Cap. 11 (usuários), você vai analisar /etc/passwd e /etc/group.
+          </div>
+        </div>
+      </section>
+
+      <!-- PIPES -->
+      <section id="pipes" class="card">
+        <div class="content">
+          <h2>4) Redirecionamento e pipes: transformar saídas em arquivos (e em evidência)</h2>
+
+          <h3>4.1 Redirecionamento básico</h3>
+          <ul class="list">
+            <li><code>&gt;</code> sobrescreve (cria/zera)</li>
+            <li><code>&gt;&gt;</code> adiciona ao final (append)</li>
+          </ul>
+          <pre><code>echo "linha 1" &gt; saida.txt
+echo "linha 2" &gt;&gt; saida.txt
+</code></pre>
+
+          <h3>4.2 Pipe (|): saída de um vira entrada do outro</h3>
+          <pre><code># filtrar e contar
+journalctl -b --no-pager | grep -i "error" | wc -l
+</code></pre>
+
+          <h3>4.3 tee: mostrar na tela e salvar ao mesmo tempo</h3>
+          <pre><code># salva e mostra
+uname -a | tee inventario.txt
+
+# acrescenta
+uname -a | tee -a inventario.txt
+</code></pre>
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso?</strong> Em tickets e relatórios: você gera evidência em arquivo enquanto executa diagnóstico.
+          </div>
+        </div>
+      </section>
+
+      <!-- PASSO A PASSO -->
+      <section id="passo" class="card">
+        <div class="content">
+          <h2>5) Passo a passo prático (laboratório): do zero ao relatório com filtros</h2>
+          <p class="muted">Objetivo: criar um mini-ambiente de logs e produzir um resumo com grep/wc/sort/uniq/cut + pipes.</p>
+
+          <div class="callout ok">
+            <strong>Resultado final:</strong> você terá uma pasta <code>~/SOSL/cap10</code> com arquivos de teste e um relatório <code>resumo-cap10.txt</code>.
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">1</span> Criar a área de trabalho do capítulo</span><span class="pill">Setup</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap10/{entrada,saida,logs}
+cd ~/SOSL/cap10
+pwd
+ls -lah
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">2</span> Criar arquivos de texto (incluindo nome com espaço)</span><span class="pill">Arquivos</span></div>
+            <pre><code>cd ~/SOSL/cap10/entrada
+
+echo "INFO: Sistema iniciado" &gt; log1.txt
+echo "WARN: Baixa memória" &gt;&gt; log1.txt
+echo "ERROR: Falha ao montar /dados" &gt;&gt; log1.txt
+
+echo "INFO: Serviço ok" &gt; log2.txt
+echo "ERROR: Timeout de rede" &gt;&gt; log2.txt
+echo "ERROR: Timeout de rede" &gt;&gt; log2.txt
+
+# arquivo com espaço no nome
+printf "linha A\nlinha B\n" &gt; "meu arquivo.txt"
+ls -lah
+</code></pre>
+            <p class="code-hint">Observe como usamos aspas para o arquivo com espaço no nome.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">3</span> Copiar/mover usando globbing</span><span class="pill">Globbing</span></div>
+            <pre><code># copiar todos .txt para a pasta logs
+cp *.txt ~/SOSL/cap10/logs/
+
+# mover apenas log?.txt para saida
+mv log?.txt ~/SOSL/cap10/saida/
+
+# conferir
+ls -lah ~/SOSL/cap10/logs
+ls -lah ~/SOSL/cap10/saida
+</code></pre>
+            <div class="callout warn"><strong>Onde vou aplicar isso?</strong> Ao organizar evidências por pasta (entrada/saida/logs) sem copiar um por um.</div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">4</span> Inspecionar arquivos: file e stat</span><span class="pill">Inspeção</span></div>
+            <pre><code>cd ~/SOSL/cap10/logs
+file "meu arquivo.txt"
+stat "meu arquivo.txt" | head -n 15
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">5</span> Ler e navegar em texto</span><span class="pill">Leitura</span></div>
+            <pre><code>cat "meu arquivo.txt"
+less "meu arquivo.txt"   # saia com q
+
+# ver começo e fim
+head -n 2 "meu arquivo.txt"
+tail -n 2 "meu arquivo.txt"
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">6</span> Filtrar erros e contar (grep + wc)</span><span class="pill">Filtro</span></div>
+            <pre><code>cd ~/SOSL/cap10/saida
+
+# juntar logs em um só
+cat log1.txt log2.txt &gt; ../logs/combined.log
+
+# quantas linhas de erro?
+grep -i "error" ../logs/combined.log | wc -l
+
+# mostrar as linhas de erro
+grep -i "error" ../logs/combined.log
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">7</span> Resumir erros por mensagem (sort + uniq)</span><span class="pill">Resumo</span></div>
+            <pre><code># extrair apenas o texto após o nível (ex.: "ERROR:")
+# aqui usamos cut com delimitador ':' para pegar a 2ª parte
+cut -d: -f2- ../logs/combined.log | sed 's/^ *//' &gt; ../logs/msg.txt
+
+# contar repetidos
+sort ../logs/msg.txt | uniq -c | sort -nr
+</code></pre>
+            <p class="code-hint">Se o comando com sed parecer novo, não se preocupe: ele apenas remove espaços iniciais. Você verá mais manipulação de texto em capítulos posteriores.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">8</span> Buscar arquivos com find</span><span class="pill">Busca</span></div>
+            <pre><code>cd ~/SOSL/cap10
+
+# achar todos .log
+find . -iname "*.log"
+
+# achar arquivos com 'arquivo' no nome
+find . -iname "*arquivo*"
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">9</span> Gerar relatório final com tee</span><span class="pill">Relatório</span></div>
+            <pre><code>R=~/SOSL/cap10/resumo-cap10.txt
+: &gt; "$R"
+
+{
+  echo "RESUMO — CAP. 10 (CLI II)";
+  echo "Data: $(date)";
+  echo "Pasta: $(pwd)";
+  echo "--------------------------------";
+  echo "Arquivos .log encontrados:";
+  find ~/SOSL/cap10 -iname "*.log";
+  echo "--------------------------------";
+  echo "Contagem de erros no combined.log:";
+  grep -i "error" ~/SOSL/cap10/logs/combined.log | wc -l;
+  echo "--------------------------------";
+  echo "Top mensagens (msg.txt):";
+  sort ~/SOSL/cap10/logs/msg.txt | uniq -c | sort -nr | head -n 10;
+} | tee -a "$R"
+
+less "$R"
+</code></pre>
+            <div class="callout ok"><strong>Parabéns:</strong> você criou um relatório automático usando filtros e pipes — exatamente como um técnico faz para evidenciar problemas.</div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ATIVIDADES -->
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>6) Atividades práticas sugeridas (2–3)</h2>
+          <ul class="list">
+            <li><strong>Atividade 1 — Novo filtro:</strong> modifique o relatório para contar também <code>WARN</code> e <code>INFO</code> separadamente (use grep + wc).</li>
+            <li><strong>Atividade 2 — Busca real:</strong> use <code>find /var/log</code> para localizar arquivos alterados nos últimos 3 dias e registre 5 caminhos (use <code>-mtime</code>).</li>
+            <li><strong>Atividade 3 — Recorte de colunas:</strong> use <code>cut</code> em <code>/etc/passwd</code> para extrair usuário e shell (campos 1 e 7) e gere um arquivo em <code>~/SOSL/cap10/saida</code>.</li>
+          </ul>
+
+          <h3>Pesquisas complementares (2–5 itens)</h3>
+          <ul class="list">
+            <li>Diferença entre globbing (curingas do shell) e regex (expressões regulares usadas por grep).</li>
+            <li>O que é <code>PATH</code> e como o shell encontra comandos.</li>
+            <li>Qual a diferença entre <code>cat</code>, <code>less</code> e <code>more</code> (quando usar cada um).</li>
+            <li>Por que <code>rm</code> não tem “lixeira” por padrão (e como isso impacta suporte).</li>
+            <li>Como usar <code>find</code> com <code>-type</code>, <code>-name</code>, <code>-mtime</code> e <code>-size</code> para triagem.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>7) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz10">
+
+            <div class="q" data-answer="c" data-topic="globbing">
+              <div class="q-hd"><span>1) No Linux, o que significa <code>*</code> em um padrão de globbing?</span><span class="pill">Curinga</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q1" value="a"> Um único caractere</label>
+                <label class="opt"><input type="radio" name="q1" value="b"> Um número entre 0 e 9</label>
+                <label class="opt"><input type="radio" name="q1" value="c"> Qualquer sequência de caracteres</label>
+                <label class="opt"><input type="radio" name="q1" value="d"> Apenas letras</label>
+                <label class="opt"><input type="radio" name="q1" value="e"> Apenas nomes de pastas</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="quoting">
+              <div class="q-hd"><span>2) Para manipular um arquivo chamado <code>Meu Arquivo.txt</code>, o que é mais correto?</span><span class="pill">Aspas</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q2" value="a"> cp Meu Arquivo.txt /destino</label>
+                <label class="opt"><input type="radio" name="q2" value="b"> cp "Meu Arquivo.txt" /destino</label>
+                <label class="opt"><input type="radio" name="q2" value="c"> cp Meu\ Arquivo.txt /destino (sempre errado)</label>
+                <label class="opt"><input type="radio" name="q2" value="d"> rm -rf Meu Arquivo.txt</label>
+                <label class="opt"><input type="radio" name="q2" value="e"> mv /destino "Meu Arquivo.txt"</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="rm">
+              <div class="q-hd"><span>3) Qual comando remove uma pasta com conteúdo (com cuidado)?</span><span class="pill">Remoção</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q3" value="a"> rmdir pasta (sempre)</label>
+                <label class="opt"><input type="radio" name="q3" value="b"> rm pasta</label>
+                <label class="opt"><input type="radio" name="q3" value="c"> rm -f pasta</label>
+                <label class="opt"><input type="radio" name="q3" value="d"> rm --help</label>
+                <label class="opt"><input type="radio" name="q3" value="e"> rm -r pasta</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="find">
+              <div class="q-hd"><span>4) Qual ferramenta é mais indicada para procurar arquivos por nome/condições?</span><span class="pill">Busca</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q4" value="a"> find</label>
+                <label class="opt"><input type="radio" name="q4" value="b"> mkdir</label>
+                <label class="opt"><input type="radio" name="q4" value="c"> uname</label>
+                <label class="opt"><input type="radio" name="q4" value="d"> whoami</label>
+                <label class="opt"><input type="radio" name="q4" value="e"> clear</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="less">
+              <div class="q-hd"><span>5) Para ler um log grande com navegação, qual comando é mais adequado?</span><span class="pill">Leitura</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q5" value="a"> cat (sempre)</label>
+                <label class="opt"><input type="radio" name="q5" value="b"> touch</label>
+                <label class="opt"><input type="radio" name="q5" value="c"> mv</label>
+                <label class="opt"><input type="radio" name="q5" value="d"> less</label>
+                <label class="opt"><input type="radio" name="q5" value="e"> rm</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="headtail">
+              <div class="q-hd"><span>6) Qual comando mostra as últimas linhas de um arquivo?</span><span class="pill">Tail</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q6" value="a"> head</label>
+                <label class="opt"><input type="radio" name="q6" value="b"> tail</label>
+                <label class="opt"><input type="radio" name="q6" value="c"> sort</label>
+                <label class="opt"><input type="radio" name="q6" value="d"> uniq</label>
+                <label class="opt"><input type="radio" name="q6" value="e"> file</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="grep">
+              <div class="q-hd"><span>7) Qual comando filtra linhas que contêm um padrão de texto?</span><span class="pill">Grep</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q7" value="a"> wc</label>
+                <label class="opt"><input type="radio" name="q7" value="b"> cut</label>
+                <label class="opt"><input type="radio" name="q7" value="c"> grep</label>
+                <label class="opt"><input type="radio" name="q7" value="d"> df</label>
+                <label class="opt"><input type="radio" name="q7" value="e"> lsblk</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="pipe">
+              <div class="q-hd"><span>8) O que o símbolo <code>|</code> (pipe) faz?</span><span class="pill">Pipe</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q8" value="a"> Envia a saída de um comando como entrada para o próximo</label>
+                <label class="opt"><input type="radio" name="q8" value="b"> Apaga arquivos temporários</label>
+                <label class="opt"><input type="radio" name="q8" value="c"> Reinicia o sistema</label>
+                <label class="opt"><input type="radio" name="q8" value="d"> Troca o usuário</label>
+                <label class="opt"><input type="radio" name="q8" value="e"> Mostra o manual do comando</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="redir">
+              <div class="q-hd"><span>9) Qual operador adiciona a saída ao final de um arquivo (append)?</span><span class="pill">Redirec.</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q9" value="a"> &gt;</label>
+                <label class="opt"><input type="radio" name="q9" value="b"> |</label>
+                <label class="opt"><input type="radio" name="q9" value="c"> &lt;</label>
+                <label class="opt"><input type="radio" name="q9" value="d"> =</label>
+                <label class="opt"><input type="radio" name="q9" value="e"> &gt;&gt;</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="proximo">
+              <div class="q-hd"><span>10) Qual é o foco principal do Capítulo 11?</span><span class="pill">Sequência</span></div>
+              <div class="q-bd"><div class="opts">
+                <label class="opt"><input type="radio" name="q10" value="a"> VirtualBox e instalação</label>
+                <label class="opt"><input type="radio" name="q10" value="b"> Interfaces gráficas</label>
+                <label class="opt"><input type="radio" name="q10" value="c"> Boot e systemd</label>
+                <label class="opt"><input type="radio" name="q10" value="d"> Usuários, grupos e permissões</label>
+                <label class="opt"><input type="radio" name="q10" value="e"> Backup e restauração</label>
+              </div>
+              <div class="q-actions"><button class="btn primary" data-action="submit">Enviar Resposta</button><button class="btn ghost" data-action="show">Ver Gabarito</button><button class="btn dark" data-action="reset">Limpar</button></div>
+              <div class="feedback" aria-live="polite"></div></div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CHECKLIST -->
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>8) Checklist do aluno (interativo)</h2>
+          <p class="muted">Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist10">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu consigo</strong> criar pastas e arquivos com <code>mkdir -p</code> e <code>touch</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu sei</strong> copiar e mover arquivos/pastas (<code>cp</code>, <code>cp -r</code>, <code>mv</code>).</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu removo</strong> com cuidado usando <code>rm -i</code> e entendo <code>rm -r</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu entendo</strong> globbing e consigo usar <code>*</code>, <code>?</code> e <code>[ ]</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu consigo</strong> lidar com nomes com espaço usando aspas.</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu usei</strong> <code>find</code> para localizar arquivos.</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu sei</strong> ler arquivos com <code>less</code>, <code>head</code> e <code>tail</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu filtrei</strong> texto com <code>grep</code> e contei com <code>wc</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c9"><label for="c9"><strong>Eu resumi</strong> dados com <code>sort</code> + <code>uniq</code> e recortei com <code>cut</code>.</label></div>
+            <div class="check-item"><input type="checkbox" id="c10"><label for="c10"><strong>Eu gerei</strong> o relatório <code>resumo-cap10.txt</code> usando <code>tee</code>, pipes e redirecionamento.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo09.html">← Voltar ao Cap. 09</a>
+            <a class="btn dark" href="capitulo11.html">Ir para Cap. 11 →</a>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz10');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'globbing': 'Revise 1.2: globbing é expansão feita pelo shell (* = qualquer sequência).',
+        'quoting': 'Revise 1.3: arquivos com espaço devem ser usados com aspas.',
+        'rm': 'Revise 1.4 e 2.3: rm -r remove pasta com conteúdo; cuidado com -rf.',
+        'find': 'Revise 2.5: find é a ferramenta profissional de busca por nome/condições.',
+        'less': 'Revise 3.1: less permite navegar em arquivos grandes; sai com q.',
+        'headtail': 'Revise 3.2: tail mostra o fim; head mostra o começo.',
+        'grep': 'Revise 3.3: grep filtra linhas por padrão.',
+        'pipe': 'Revise 4.2: pipe envia a saída de um comando para a entrada do próximo.',
+        'redir': 'Revise 4.1: >> adiciona ao final do arquivo; > sobrescreve.',
+        'proximo': 'Cap. 11 aborda usuários, grupos e permissões.'
+      };
+      return map[topic] || 'Revise teoria e passo a passo deste capítulo.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist10');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap10_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+  </script>
+
+</body>
+</html>

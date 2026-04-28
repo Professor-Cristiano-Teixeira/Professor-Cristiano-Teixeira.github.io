@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — FHS e Estrutura de Diretórios no Linux (arquivos do sistema) — SOSL</title>
+  <meta name="description" content="Capítulo 08 da apostila SOSL: FHS, estrutura de diretórios do Linux, onde ficam configs, logs e binários; prática guiada de exploração e Entrega 2 do Projeto Integrador." />
+
+  <!-- arquivo: capitulo08.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 280px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    h4{ margin: 12px 0 6px; font-size: 1.0rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 980px){ .grid-2{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    /* Code blocks */
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Steps */
+    .step{ border:1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin: 12px 0; }
+    .step .hd{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight: 950; }
+    .step .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:34px; height:34px; padding:0 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.10);
+      border: 1px solid rgba(11,31,58,.22);
+      color: var(--pw-red-dark);
+      font-weight: 950;
+    }
+
+    /* Form */
+    .form{ border:1px solid var(--border); border-radius: 14px; padding: 14px; background:#fff; margin-top: 10px; }
+    .field{ display:flex; flex-direction:column; gap:6px; margin: 10px 0; }
+    label{ font-weight: 800; }
+    input[type="text"], textarea, select{ width:100%; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; font: inherit; background:#fff; }
+    textarea{ min-height: 110px; resize: vertical; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 08</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#passo">Prática</a>
+          <a href="#entrega">Entrega 2</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo01.html" role="menuitem"><span>Cap. 01 — Tipos, licenças e história</span><span class="pill">01</span></a>
+              <a href="capitulo02.html" role="menuitem"><span>Cap. 02 — SL hoje: aplicações e ecossistema</span><span class="pill">02</span></a>
+              <a href="capitulo03.html" role="menuitem"><span>Cap. 03 — Linux e distribuições (pesquisa)</span><span class="pill">03</span></a>
+              <a href="capitulo04.html" role="menuitem"><span>Cap. 04 — VM + instalação Linux Mint</span><span class="pill">04</span></a>
+              <a href="capitulo05.html" role="menuitem"><span>Cap. 05 — Interfaces gráficas</span><span class="pill">05</span></a>
+              <a href="capitulo06.html" role="menuitem"><span>Cap. 06 — Pacotes, lojas, Snap/Flatpak</span><span class="pill">06</span></a>
+              <a href="capitulo07.html" role="menuitem"><span>Cap. 07 — Boot e systemd</span><span class="pill">07</span></a>
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo14.html" role="menuitem"><span>Cap. 14 — Manutenção preventiva</span><span class="pill">14</span></a>
+              <a href="capitulo15.html" role="menuitem"><span>Cap. 15 — Backup e restauração</span><span class="pill">15</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 08 — FHS e Estrutura de Diretórios no Linux (arquivos e pastas do sistema)</h1>
+          <p class="subtitle">
+            Agora você vai aprender <strong>onde ficam as coisas</strong> no Linux: configurações, programas, logs, dispositivos e dados.
+            O padrão chamado <strong>FHS</strong> (Filesystem Hierarchy Standard) organiza o sistema e é base do suporte.
+            Este capítulo fecha o <strong>2º bimestre</strong> (Caps 05–08) e traz a <strong>Entrega 2 do Projeto Integrador</strong>.
+          </p>
+
+          <div class="badges">
+            <span class="badge">FHS</span>
+            <span class="badge">/etc</span>
+            <span class="badge">/var/log</span>
+            <span class="badge">/home</span>
+            <span class="badge">/usr</span>
+            <span class="badge">/bin /sbin /lib</span>
+            <span class="badge">/proc /sys</span>
+            <span class="badge">Diagnóstico</span>
+            <span class="badge">Entrega 2</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Explicar o que é o <strong>FHS</strong> e por que ele padroniza a estrutura do Linux.</li>
+                <li>Identificar os diretórios principais e o propósito de cada um (ex.: <code>/etc</code>, <code>/var</code>, <code>/home</code>, <code>/usr</code>).</li>
+                <li>Localizar <strong>arquivos de configuração</strong> e <strong>logs</strong> essenciais para suporte.</li>
+                <li>Diferenciar dados persistentes (<code>/home</code>, <code>/var</code>) de dados temporários (<code>/tmp</code>, <code>/run</code>).</li>
+                <li>Realizar uma prática guiada: mapear diretórios, coletar evidências e criar um mini-inventário do sistema.</li>
+                <li>Entregar a <strong>Entrega 2</strong> (Projeto Integrador): inventário + evidências do bimestre.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>VM Linux Mint instalada e atualizada (Cap. 04).</li>
+                <li>Noções de interface (Cap. 05) e pacotes (Cap. 06).</li>
+                <li>Noções de boot/systemd e logs (Cap. 07).</li>
+              </ul>
+              <div class="callout ok">
+                <strong>Dica:</strong> antes da prática, crie um snapshot “B2-Entrega2-PreFHS” para garantir retorno rápido.
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#mapa">🗺️ Mapa FHS</a>
+            <a href="#passo">🧭 Passo a passo</a>
+            <a href="#troubles">🛠️ Troubleshooting</a>
+            <a href="#atividades">🧪 Atividades</a>
+            <a href="#entrega">📦 Projeto Integrador — Entrega 2</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo07.html">← Voltar ao Cap. 07</a>
+            <a class="btn dark" href="capitulo09.html">Próximo: Cap. 09 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <!-- TEORIA -->
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Teoria: o que é FHS e por que isso importa no suporte</h2>
+
+          <h3>1.1 FHS (Filesystem Hierarchy Standard)</h3>
+          <p>
+            O <strong>FHS</strong> é um padrão que define como as pastas do Linux são organizadas: onde ficam programas, bibliotecas,
+            configurações, logs, dispositivos e dados do usuário. Isso ajuda porque, mesmo mudando a distribuição, você encontra as coisas
+            em lugares semelhantes.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai localizar configs em <code>/etc</code>, logs em <code>/var/log</code>
+            e binários em <code>/usr/bin</code>.
+          </div>
+
+          <h3>1.2 Caminhos absolutos x relativos (conceito rápido)</h3>
+          <p>
+            Um <strong>caminho absoluto</strong> começa pela raiz <code>/</code> (ex.: <code>/etc/hosts</code>). Um <strong>caminho relativo</strong>
+            depende da pasta atual (ex.: <code>Documents</code> dentro do seu <code>/home</code>). Para suporte, caminhos absolutos evitam ambiguidade.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Você vai usar <code>pwd</code> e navegar com <code>cd</code> para perceber a diferença.
+          </div>
+
+          <h3>1.3 Persistência: o que permanece após reiniciar</h3>
+          <p>
+            Nem tudo no sistema é permanente. Pastas como <code>/home</code> e <code>/var</code> guardam dados persistentes.
+            Já <code>/tmp</code> e <code>/run</code> tendem a conter dados temporários. Saber isso evita que você salve um arquivo importante
+            num local que “some”.
+          </p>
+          <div class="callout warn">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai comparar <code>/tmp</code> com <code>/home</code> e observar o papel de <code>/run</code>.
+          </div>
+
+          <h3>1.4 Configuração vs dados vs logs</h3>
+          <p>
+            Pense em três grupos: <strong>configurações</strong> (como o sistema deve se comportar — geralmente em <code>/etc</code>),
+            <strong>dados</strong> (conteúdo de usuário e de aplicações — <code>/home</code>, <code>/var/lib</code>) e
+            <strong>logs</strong> (histórico do que aconteceu — <code>/var/log</code> e <code>journalctl</code>).
+          </p>
+          <div class="callout ok">
+            <strong>Regra prática:</strong> quando um serviço falha, você olha status (systemctl) + logs (journalctl e/ou /var/log) + config (/etc).
+          </div>
+
+        </div>
+      </section>
+
+      <!-- MAPA FHS -->
+      <section id="mapa" class="card">
+        <div class="content">
+          <h2>2) Mapa do FHS: principais diretórios e para que servem</h2>
+
+          <table class="table" aria-label="Mapa de diretórios Linux (FHS)">
+            <thead>
+              <tr>
+                <th>Diretório</th>
+                <th>Para que serve</th>
+                <th>Exemplos</th>
+                <th>No suporte, eu olho aqui quando…</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>/</strong></td>
+                <td>Raiz: ponto inicial de tudo</td>
+                <td>/etc, /home, /var…</td>
+                <td>Preciso entender a estrutura geral do sistema</td>
+              </tr>
+              <tr>
+                <td><strong>/home</strong></td>
+                <td>Pastas de usuários (dados pessoais)</td>
+                <td>/home/aluno/Downloads</td>
+                <td>Arquivos do usuário, perfis, documentos, configurações locais</td>
+              </tr>
+              <tr>
+                <td><strong>/etc</strong></td>
+                <td>Configurações do sistema (texto)</td>
+                <td>/etc/hosts, /etc/fstab</td>
+                <td>Serviço não sobe, rede/hosts, configurações gerais</td>
+              </tr>
+              <tr>
+                <td><strong>/var</strong></td>
+                <td>Dados variáveis (mudam com o tempo)</td>
+                <td>/var/log, /var/lib</td>
+                <td>Logs, filas, bancos locais, caches de serviços</td>
+              </tr>
+              <tr>
+                <td><strong>/var/log</strong></td>
+                <td>Logs de sistema e serviços (arquivos)</td>
+                <td>syslog, auth.log (varia)</td>
+                <td>Investigar erro, autenticação, falhas recorrentes</td>
+              </tr>
+              <tr>
+                <td><strong>/usr</strong></td>
+                <td>Aplicações e bibliotecas “de usuário” do sistema</td>
+                <td>/usr/bin, /usr/lib</td>
+                <td>Onde ficam comandos e libs instaladas por pacotes</td>
+              </tr>
+              <tr>
+                <td><strong>/bin</strong>, <strong>/sbin</strong></td>
+                <td>Comandos essenciais (muitas distros hoje fazem links para /usr/bin)</td>
+                <td>ls, cp, ip (varia)</td>
+                <td>Ferramentas básicas disponíveis mesmo em modo de recuperação</td>
+              </tr>
+              <tr>
+                <td><strong>/lib</strong></td>
+                <td>Bibliotecas essenciais (também pode ser link para /usr/lib)</td>
+                <td>libs do sistema</td>
+                <td>Problemas de dependência/execução (raros no básico)</td>
+              </tr>
+              <tr>
+                <td><strong>/tmp</strong></td>
+                <td>Arquivos temporários</td>
+                <td>arquivos de sessão</td>
+                <td>Testes rápidos; lembrar que pode ser limpo</td>
+              </tr>
+              <tr>
+                <td><strong>/run</strong></td>
+                <td>Dados temporários de runtime (na RAM)</td>
+                <td>sockets, pidfiles</td>
+                <td>Serviços e sessões; dados que somem ao reiniciar</td>
+              </tr>
+              <tr>
+                <td><strong>/boot</strong></td>
+                <td>Arquivos de boot (kernel/initramfs/grub)</td>
+                <td>vmlinuz, initrd…</td>
+                <td>Problemas de boot/atualização de kernel (avançado)</td>
+              </tr>
+              <tr>
+                <td><strong>/dev</strong></td>
+                <td>Dispositivos (arquivos especiais)</td>
+                <td>/dev/sda, /dev/null</td>
+                <td>Diagnóstico de disco/dispositivos (mais adiante)</td>
+              </tr>
+              <tr>
+                <td><strong>/proc</strong>, <strong>/sys</strong></td>
+                <td>Informações do kernel/hardware (pseudo-sistemas)</td>
+                <td>/proc/cpuinfo</td>
+                <td>Coletar informações do sistema sem instalar nada</td>
+              </tr>
+              <tr>
+                <td><strong>/media</strong>, <strong>/mnt</strong></td>
+                <td>Montagem de mídias e montagens manuais</td>
+                <td>pendrives, discos</td>
+                <td>Usuário conectou pendrive e não encontra arquivos</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout ok">
+            <strong>Memória rápida:</strong> <code>/etc</code> (config), <code>/var/log</code> (logs), <code>/home</code> (dados do usuário), <code>/usr</code> (programas).
+          </div>
+        </div>
+      </section>
+
+      <!-- PASSO A PASSO -->
+      <section id="passo" class="card">
+        <div class="content">
+          <h2>3) Passo a passo prático (VM): explorar e documentar a estrutura do sistema</h2>
+          <p class="muted">Objetivo: você saber “onde procurar” rapidamente e registrar evidências para suporte.</p>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">1</span> Preparar pasta do capítulo e mini-inventário</span><span class="pill">Organização</span></div>
+            <ol class="list">
+              <li>Crie a pasta <code>SOSL/cap08</code> no seu <code>/home</code>.</li>
+              <li>Crie o arquivo <code>inventario-fhs-cap08.md</code> com o cabeçalho:</li>
+            </ol>
+            <pre><code># Inventário FHS — Capítulo 08
+
+Data:
+VM/Host:
+Usuário:
+Resumo:
+</code></pre>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">2</span> Descobrir onde você está e listar a raiz</span><span class="pill">Navegação</span></div>
+            <pre><code># Mostrar o caminho atual
+pwd
+
+# Listar conteúdo da raiz
+ls -lah /
+
+# Ver tamanho aproximado de diretórios de topo
+sudo du -h --max-depth=1 / 2>/dev/null | sort -h</code></pre>
+            <p class="code-hint">Se <code>du</code> demorar, interrompa com Ctrl+C — em VM é normal variar.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">3</span> Conhecer /etc: config e arquivos importantes</span><span class="pill">Config</span></div>
+            <pre><code># Listar arquivos de configuração
+ls -lah /etc | head -n 30
+
+# Ver arquivos clássicos (somente leitura)
+cat /etc/os-release
+cat /etc/hosts
+
+# Ver fstab (montagens)
+cat /etc/fstab</code></pre>
+            <div class="callout warn">
+              <strong>Não edite agora.</strong> O foco é localizar e entender. Edição de configs será abordada com mais segurança no Cap. 12.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">4</span> Conhecer /var/log e journal: onde ficam evidências</span><span class="pill">Logs</span></div>
+            <pre><code># Listar logs (varia por distro)
+ls -lah /var/log | head -n 40
+
+# Ver últimas linhas de alguns logs (se existirem)
+# (Pode não existir em todas as distros)
+[ -f /var/log/syslog ] && tail -n 30 /var/log/syslog
+[ -f /var/log/auth.log ] && tail -n 30 /var/log/auth.log
+
+# Logs via systemd journal (boot atual)
+journalctl -b --no-pager | tail -n 40</code></pre>
+            <p class="code-hint">Você já viu journalctl no Cap. 07. Aqui você conecta: logs em arquivos e logs no journal.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">5</span> /home: dados do usuário e configurações “ocultas”</span><span class="pill">Usuário</span></div>
+            <pre><code># Ir para home e listar
+cd ~
+ls -lah | head -n 40
+
+# Ver pastas ocultas (configurações do usuário)
+ls -lah | grep '^d' | head -n 20
+
+# Exemplos de pastas de configuração do usuário (podem existir)
+ls -lah ~/.config 2>/dev/null | head -n 30</code></pre>
+            <div class="callout">
+              <strong>Onde vou aplicar isso?</strong> Em suporte, muitas preferências do usuário ficam em <code>~/.config</code>.
+              Saber disso ajuda a resetar configurações sem formatar o sistema.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">6</span> /usr, /bin e onde moram os comandos</span><span class="pill">Binários</span></div>
+            <pre><code># Onde está um comando? (ex.: ls, systemctl)
+which ls
+which systemctl
+
+# Listar alguns binários
+ls -lah /usr/bin | head -n 20
+
+# Ver links simbólicos (ex.: /bin → /usr/bin em muitas distros)
+ls -lah /bin
+ls -lah /sbin
+ls -lah /lib</code></pre>
+            <p class="code-hint">Não se preocupe se /bin aparecer como link. O importante é entender o propósito e saber localizar executáveis.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">7</span> /proc e /sys: coletar informações sem “instalar nada”</span><span class="pill">Kernel</span></div>
+            <pre><code># CPU
+cat /proc/cpuinfo | head -n 20
+
+# Memória
+cat /proc/meminfo | head -n 20
+
+# Informações de versão do kernel
+cat /proc/version
+
+# Dispositivos (exemplo)
+ls -lah /sys/class | head -n 20</code></pre>
+            <div class="callout ok">
+              <strong>Onde vou aplicar isso?</strong> Quando alguém pedir “qual CPU? quanta RAM? qual kernel?”, você consegue responder com evidência.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">8</span> (Opcional) Instalar tree e gerar um mapa visual</span><span class="pill">Tree</span></div>
+            <p class="muted">Se você já dominou pacotes (Cap. 06), pode instalar <code>tree</code> para visualizar pastas.</p>
+            <pre><code># Instalar tree (opcional)
+sudo apt update
+sudo apt install -y tree
+
+# Gerar uma árvore do seu diretório SOSL
+cd ~
+tree -L 3 SOSL | head -n 120</code></pre>
+            <p class="code-hint">Se não quiser instalar nada, pule. O essencial é compreender a estrutura.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">9</span> Fechar com um resumo (documentação do técnico)</span><span class="pill">Resumo</span></div>
+            <ol class="list">
+              <li>No seu <code>inventario-fhs-cap08.md</code>, registre:</li>
+              <ul class="list">
+                <li>5 diretórios principais e o que você encontrou.</li>
+                <li>1 evidência de config (<code>/etc/os-release</code>), 1 evidência de log (<code>journalctl</code>) e 1 evidência de hardware (<code>/proc</code>).</li>
+                <li>Conclusão: “onde procurar” para problemas de rede, login e aplicativos.</li>
+              </ul>
+            </ol>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TROUBLESHOOTING -->
+      <section id="troubles" class="card">
+        <div class="content">
+          <h2>4) Troubleshooting: onde procurar quando algo dá errado</h2>
+
+          <h3>4.1 “Aplicativo não abre / erro ao executar”</h3>
+          <ul class="list">
+            <li>Confirme se está instalado: <code>which app</code> / <code>dpkg -l | grep -i app</code>.</li>
+            <li>Verifique logs: <code>journalctl -b -p err</code> e/ou logs em <code>/var/log</code>.</li>
+            <li>Confira permissões e pastas do usuário: <code>/home</code> e <code>~/.config</code>.</li>
+          </ul>
+
+          <h3>4.2 “Serviço não sobe” (systemd)</h3>
+          <ul class="list">
+            <li>Status: <code>systemctl status nome</code></li>
+            <li>Logs: <code>journalctl -u nome -b</code></li>
+            <li>Config: geralmente em <code>/etc</code> (arquivo/pasta do serviço)</li>
+          </ul>
+
+          <h3>4.3 “Disco cheio”</h3>
+          <ul class="list">
+            <li>Verifique <code>/var</code> (caches e logs crescem): <code>sudo du -h --max-depth=1 /var | sort -h</code></li>
+            <li>Verifique pasta do usuário: <code>du -h --max-depth=1 ~ | sort -h</code></li>
+            <li>Em VM, verifique tamanho do disco virtual e snapshots.</li>
+          </ul>
+
+          <div class="callout ok">
+            <strong>Modelo mental:</strong> problema → (config em /etc) + (logs em /var/log/journal) + (dados em /home/var) + (binários em /usr/bin).
+          </div>
+        </div>
+      </section>
+
+      <!-- ATIVIDADES -->
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>5) Atividades práticas sugeridas (2–3)</h2>
+          <ul class="list">
+            <li><strong>Atividade 1 — Mapa FHS pessoal:</strong> crie uma tabela no seu arquivo com 10 diretórios e descreva 1 exemplo de arquivo em cada.</li>
+            <li><strong>Atividade 2 — Evidência de logs:</strong> capture 15 linhas de <code>journalctl -b</code> e explique o que cada coluna representa (hora, serviço, mensagem).</li>
+            <li><strong>Atividade 3 — Diagnóstico rápido:</strong> simule um problema (“rede caiu”) e escreva um checklist de onde você olharia primeiro (systemctl + journalctl + /etc).</li>
+          </ul>
+
+          <h3>Pesquisas complementares</h3>
+          <ul class="list">
+            <li>O que é link simbólico e por que /bin pode apontar para /usr/bin.</li>
+            <li>Diferença entre /var/cache, /var/lib e /var/log.</li>
+            <li>Por que /proc e /sys não são pastas “reais” (pseudo-filesystems).</li>
+            <li>O que é fstab e por que uma configuração errada pode atrapalhar o boot.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PROJETO INTEGRADOR ENTREGA 2 -->
+      <section id="entrega" class="card">
+        <div class="content">
+          <h2>6) Projeto Integrador — Entrega 2 (Bimestre 2)</h2>
+          <p>
+            <strong>Entrega 2: “Inventário e Evidências do Sistema (B2)”</strong>
+            — você vai consolidar o que aprendeu nos Caps 05–08: interface, pacotes, boot/systemd e FHS.
+            O foco é produzir documentação mínima de suporte que qualquer técnico deveria conseguir entregar.
+          </p>
+
+          <div class="grid-2">
+            <div>
+              <h3>O que entregar</h3>
+              <ul class="list">
+                <li><strong>Relatório</strong> (Markdown/PDF) com inventário + evidências.</li>
+                <li><strong>Mapa FHS</strong>: 10 diretórios com descrição e exemplo de arquivo.</li>
+                <li><strong>Pacotes</strong>: lista de 5 softwares instalados (nome + origem: repo/flatpak/snap se aplicável).</li>
+                <li><strong>Boot</strong>: saída de <code>systemd-analyze</code> + top 5 do <code>blame</code>.</li>
+                <li><strong>Serviço</strong>: status de 1 serviço (ex.: NetworkManager ou bluetooth) + 10 linhas de log.</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Critérios de avaliação (rubrica rápida)</h3>
+              <ul class="list">
+                <li><strong>Completude:</strong> todos os itens presentes e coerentes.</li>
+                <li><strong>Evidências:</strong> prints/saídas de comandos para sustentar o relatório.</li>
+                <li><strong>Organização:</strong> estrutura clara e linguagem técnica simples.</li>
+                <li><strong>Boas práticas:</strong> fontes confiáveis, sem alterações perigosas.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="callout warn">
+            <strong>Não é “print por print”.</strong> Evidência é usada para sustentar uma afirmação (versão, erro, estado, etc.).
+          </div>
+
+          <h3>Modelo de relatório (copie e preencha)</h3>
+          <pre><code># Entrega 2 — Inventário e Evidências do Sistema (Bimestre 2)
+
+Aluno/Grupo:
+Data:
+VM (nome) / Host (config):
+
+## 1) Interface e ferramentas (Cap. 05)
+- Ambiente gráfico (DE):
+- Gerenciador de arquivos:
+- Ferramentas usadas: Settings / Update Manager / System Monitor
+
+## 2) Pacotes e lojas (Cap. 06)
+- 5 softwares instalados (nome + origem: repo/flatpak/snap):
+  1)
+  2)
+  3)
+  4)
+  5)
+
+## 3) Boot e systemd (Cap. 07)
+- systemd-analyze:
+- Top 5 (blame):
+- Serviço analisado:
+- systemctl status (resumo):
+- 10 linhas de log (journalctl):
+
+## 4) FHS (Cap. 08)
+- Mapa de 10 diretórios + exemplo de arquivo em cada.
+- Onde procurar: config/log/dados/binários (resumo em 5 linhas).
+
+## Evidências anexadas
+- Prints e/ou trechos de terminal (listar quais)
+
+Conclusão (impacto para suporte):
+</code></pre>
+
+          <h3>Formulário (salva no navegador e exporta)</h3>
+          <p class="muted">Preencha e exporte em Markdown/JSON para anexar na entrega.</p>
+
+          <div class="form" id="form08">
+            <div class="row">
+              <div class="field">
+                <label for="aluno">Aluno/Grupo</label>
+                <input id="aluno" type="text" placeholder="Nome(s)" />
+              </div>
+              <div class="field">
+                <label for="data">Data</label>
+                <input id="data" type="text" placeholder="dd/mm/aaaa" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="vm">VM/Host (resumo)</label>
+                <input id="vm" type="text" placeholder="Ex.: SOSL-LinuxMint (4GB, 2vCPU) / Host: Windows 11" />
+              </div>
+              <div class="field">
+                <label for="de">Ambiente gráfico (DE)</label>
+                <input id="de" type="text" placeholder="Ex.: Cinnamon" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="softs">5 softwares instalados (nome + origem)</label>
+              <textarea id="softs" placeholder="1) VLC — repo\n2) GIMP — repo\n..."></textarea>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="boot">Boot (systemd-analyze + top 5 blame)</label>
+                <textarea id="boot" placeholder="Cole a saída resumida e top 5"></textarea>
+              </div>
+              <div class="field">
+                <label for="svc">Serviço analisado (status + 10 linhas de log)</label>
+                <textarea id="svc" placeholder="Service: NetworkManager\nStatus: ...\nLogs: ..."></textarea>
+              </div>
+            </div>
+            <div class="field">
+              <label for="fhs">Mapa FHS (10 diretórios + exemplo)</label>
+              <textarea id="fhs" placeholder="/etc — configs (ex.: /etc/hosts)\n/var/log — logs (ex.: syslog/journal)\n..."></textarea>
+            </div>
+            <div class="field">
+              <label for="evid">Evidências (prints/trechos) — liste</label>
+              <textarea id="evid" placeholder="1) Print System Settings\n2) Print Update Manager\n3) Terminal systemd-analyze\n..."></textarea>
+            </div>
+            <div class="field">
+              <label for="concl">Conclusão (impacto para suporte)</label>
+              <textarea id="concl" placeholder="Resumo do que aprendeu e como aplicaria em atendimento técnico."></textarea>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="saveEntrega" type="button">Salvar</button>
+              <button class="btn ghost" id="loadEntrega" type="button">Carregar</button>
+              <button class="btn dark" id="clearEntrega" type="button">Limpar</button>
+              <button class="btn dark" id="exportMd" type="button">Exportar Markdown</button>
+              <button class="btn dark" id="exportJson" type="button">Exportar JSON</button>
+            </div>
+
+            <div id="msg08" class="callout" style="display:none"></div>
+            <pre id="out08" style="display:none"></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>7) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz08">
+
+            <div class="q" data-answer="d" data-topic="FHS">
+              <div class="q-hd"><span>1) O que o FHS define principalmente?</span><span class="pill">FHS</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q1" value="a"> O modelo de placa de vídeo da VM.</label>
+                  <label class="opt"><input type="radio" name="q1" value="b"> A senha padrão do usuário.</label>
+                  <label class="opt"><input type="radio" name="q1" value="c"> O formato do arquivo .iso.</label>
+                  <label class="opt"><input type="radio" name="q1" value="d"> Como os diretórios do Linux são organizados (programas, configs, logs, dados).</label>
+                  <label class="opt"><input type="radio" name="q1" value="e"> Apenas atalhos do ambiente gráfico.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Etc">
+              <div class="q-hd"><span>2) Onde geralmente ficam configurações do sistema (arquivos de texto)?</span><span class="pill">/etc</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q2" value="a"> /etc</label>
+                  <label class="opt"><input type="radio" name="q2" value="b"> /home</label>
+                  <label class="opt"><input type="radio" name="q2" value="c"> /tmp</label>
+                  <label class="opt"><input type="radio" name="q2" value="d"> /proc</label>
+                  <label class="opt"><input type="radio" name="q2" value="e"> /media</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="Logs">
+              <div class="q-hd"><span>3) Onde normalmente ficam logs em arquivos (além do journal)?</span><span class="pill">Logs</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q3" value="a"> /usr/bin</label>
+                  <label class="opt"><input type="radio" name="q3" value="b"> /home</label>
+                  <label class="opt"><input type="radio" name="q3" value="c"> /var/log</label>
+                  <label class="opt"><input type="radio" name="q3" value="d"> /dev</label>
+                  <label class="opt"><input type="radio" name="q3" value="e"> /boot</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Home">
+              <div class="q-hd"><span>4) Qual diretório guarda dados dos usuários?</span><span class="pill">/home</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q4" value="a"> /run</label>
+                  <label class="opt"><input type="radio" name="q4" value="b"> /home</label>
+                  <label class="opt"><input type="radio" name="q4" value="c"> /proc</label>
+                  <label class="opt"><input type="radio" name="q4" value="d"> /bin</label>
+                  <label class="opt"><input type="radio" name="q4" value="e"> /sys</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="TmpRun">
+              <div class="q-hd"><span>5) Qual afirmação sobre /tmp e /run é mais correta?</span><span class="pill">Temporários</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q5" value="a"> São pastas de programas permanentes.</label>
+                  <label class="opt"><input type="radio" name="q5" value="b"> Guardam somente arquivos do bootloader.</label>
+                  <label class="opt"><input type="radio" name="q5" value="c"> São equivalentes a /home e nunca mudam.</label>
+                  <label class="opt"><input type="radio" name="q5" value="d"> Contêm apenas drivers de vídeo.</label>
+                  <label class="opt"><input type="radio" name="q5" value="e"> Guardam dados temporários; /run costuma ser runtime e pode sumir ao reiniciar.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="ProcSys">
+              <div class="q-hd"><span>6) /proc e /sys são usados principalmente para:</span><span class="pill">Kernel</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q6" value="a"> Expor informações do kernel/hardware (pseudo-filesystems) e ajudar em diagnóstico.</label>
+                  <label class="opt"><input type="radio" name="q6" value="b"> Guardar filmes e músicas do usuário.</label>
+                  <label class="opt"><input type="radio" name="q6" value="c"> Instalar pacotes .deb.</label>
+                  <label class="opt"><input type="radio" name="q6" value="d"> Armazenar logs em arquivos.</label>
+                  <label class="opt"><input type="radio" name="q6" value="e"> Substituir /etc nas configurações.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="Absolute">
+              <div class="q-hd"><span>7) Um caminho absoluto é aquele que:</span><span class="pill">Caminho</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q7" value="a"> Depende da pasta atual para funcionar.</label>
+                  <label class="opt"><input type="radio" name="q7" value="b"> Nunca usa barra “/”.</label>
+                  <label class="opt"><input type="radio" name="q7" value="c"> Começa pela raiz “/” (ex.: /etc/hosts).</label>
+                  <label class="opt"><input type="radio" name="q7" value="d"> Só funciona com sudo.</label>
+                  <label class="opt"><input type="radio" name="q7" value="e"> É o mesmo que um atalho no desktop.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="Trouble">
+              <div class="q-hd"><span>8) Se um serviço falha, qual é uma sequência de diagnóstico coerente?</span><span class="pill">Método</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q8" value="a"> Apagar /etc e reiniciar.</label>
+                  <label class="opt"><input type="radio" name="q8" value="b"> Formatar o disco imediatamente.</label>
+                  <label class="opt"><input type="radio" name="q8" value="c"> Ignorar logs e tentar várias coisas sem registrar.</label>
+                  <label class="opt"><input type="radio" name="q8" value="d"> Ver status (systemctl) + ver logs (journalctl / /var/log) + conferir config (/etc) e então agir.</label>
+                  <label class="opt"><input type="radio" name="q8" value="e"> Instalar um novo desktop environment.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="DiskFull">
+              <div class="q-hd"><span>9) Se o disco está cheio, qual diretório costuma ser um suspeito frequente?</span><span class="pill">Disco</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q9" value="a"> /proc</label>
+                  <label class="opt"><input type="radio" name="q9" value="b"> /var</label>
+                  <label class="opt"><input type="radio" name="q9" value="c"> /dev</label>
+                  <label class="opt"><input type="radio" name="q9" value="d"> /boot (sempre, em qualquer caso)</label>
+                  <label class="opt"><input type="radio" name="q9" value="e"> /sys</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Proximo">
+              <div class="q-hd"><span>10) Qual é o foco principal do Capítulo 09?</span><span class="pill">Sequência</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q10" value="a"> Linha de comando (CLI) — comandos básicos e navegação prática.</label>
+                  <label class="opt"><input type="radio" name="q10" value="b"> Apenas interfaces gráficas.</label>
+                  <label class="opt"><input type="radio" name="q10" value="c"> Apenas pacotes e lojas.</label>
+                  <label class="opt"><input type="radio" name="q10" value="d"> Apenas boot e systemd.</label>
+                  <label class="opt"><input type="radio" name="q10" value="e"> Apenas implantação em rede.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" id="quizScoreBox" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CHECKLIST -->
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>8) Checklist do aluno (interativo)</h2>
+          <p class="muted">Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist08">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu entendo</strong> o que é FHS e por que ele existe.</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu consigo</strong> localizar configs em /etc e explicar um exemplo.</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu consigo</strong> localizar logs em /var/log e no journal (journalctl).</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu diferencio</strong> dados persistentes (home/var) de temporários (tmp/run).</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu explorei</strong> /usr, /bin e usei which para localizar comandos.</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu consultei</strong> /proc e /sys para evidências de hardware/kernel.</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu produzi</strong> o inventário FHS em SOSL/cap08.</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu preenchi</strong> a Entrega 2 (relatório e evidências).</label></div>
+            <div class="check-item"><input type="checkbox" id="c9"><label for="c9"><strong>Eu fiz</strong> pelo menos 1 atividade prática sugerida.</label></div>
+            <div class="check-item"><input type="checkbox" id="c10"><label for="c10"><strong>Eu respondi</strong> o quiz e revisei os tópicos em que errei.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo07.html">← Voltar ao Cap. 07</a>
+            <a class="btn dark" href="capitulo09.html">Ir para Cap. 09 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz08');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'FHS': 'Revise 1.1: FHS padroniza a organização de diretórios do Linux.',
+        'Etc': 'Revise o mapa: /etc guarda configurações do sistema.',
+        'Logs': 'Revise o mapa: /var/log guarda logs em arquivos; journalctl no journal.',
+        'Home': 'Revise o mapa: /home guarda dados dos usuários.',
+        'TmpRun': 'Revise 1.3: /tmp e /run são temporários; /run é runtime e pode sumir ao reiniciar.',
+        'ProcSys': 'Revise 2 e passo 7: /proc e /sys expõem infos do kernel/hardware.',
+        'Absolute': 'Revise 1.2: caminho absoluto começa em /.',
+        'Trouble': 'Revise 4: status + logs + config, depois ação controlada.',
+        'DiskFull': 'Revise 4.3: /var costuma crescer com logs e dados variáveis.',
+        'Proximo': 'Revise o sumário: Cap. 09 é CLI — comandos básicos.'
+      };
+      return map[topic] || 'Revise as seções de teoria e prática deste capítulo.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist08');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap08_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+
+    // =============================
+    // ENTREGA 2 (localStorage)
+    // =============================
+    const keyEntrega = 'sosl_cap08_entrega2_v1';
+    const e = {
+      aluno: document.getElementById('aluno'),
+      data: document.getElementById('data'),
+      vm: document.getElementById('vm'),
+      de: document.getElementById('de'),
+      softs: document.getElementById('softs'),
+      boot: document.getElementById('boot'),
+      svc: document.getElementById('svc'),
+      fhs: document.getElementById('fhs'),
+      evid: document.getElementById('evid'),
+      concl: document.getElementById('concl'),
+      msg: document.getElementById('msg08'),
+      out: document.getElementById('out08')
+    };
+
+    function showMsg(kind, html){
+      e.msg.style.display = 'block';
+      e.msg.classList.remove('ok','warn','bad');
+      e.msg.classList.add(kind);
+      e.msg.innerHTML = html;
+      setTimeout(() => { e.msg.style.display = 'none'; }, 3500);
+    }
+
+    function collectEntrega(){
+      return {
+        aluno: e.aluno.value.trim(),
+        data: e.data.value.trim(),
+        vm: e.vm.value.trim(),
+        de: e.de.value.trim(),
+        softs: e.softs.value.trim(),
+        boot: e.boot.value.trim(),
+        svc: e.svc.value.trim(),
+        fhs: e.fhs.value.trim(),
+        evid: e.evid.value.trim(),
+        concl: e.concl.value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function writeEntrega(obj){ localStorage.setItem(keyEntrega, JSON.stringify(obj)); }
+    function readEntrega(){
+      const raw = localStorage.getItem(keyEntrega);
+      if(!raw) return null;
+      try{ return JSON.parse(raw); }catch(err){ return null; }
+    }
+
+    function fillEntrega(obj){
+      if(!obj) return;
+      e.aluno.value = obj.aluno || '';
+      e.data.value = obj.data || '';
+      e.vm.value = obj.vm || '';
+      e.de.value = obj.de || '';
+      e.softs.value = obj.softs || '';
+      e.boot.value = obj.boot || '';
+      e.svc.value = obj.svc || '';
+      e.fhs.value = obj.fhs || '';
+      e.evid.value = obj.evid || '';
+      e.concl.value = obj.concl || '';
+    }
+
+    function clearEntrega(){
+      e.aluno.value=''; e.data.value=''; e.vm.value=''; e.de.value='Cinnamon';
+      e.softs.value=''; e.boot.value=''; e.svc.value=''; e.fhs.value=''; e.evid.value=''; e.concl.value='';
+      e.out.style.display='none'; e.out.textContent='';
+    }
+
+    function toMarkdown(obj){
+      return `# Entrega 2 — Inventário e Evidências do Sistema (Bimestre 2)\n\n`+
+        `- **Aluno/Grupo:** ${obj.aluno || '—'}\n`+
+        `- **Data:** ${obj.data || '—'}\n`+
+        `- **VM/Host:** ${obj.vm || '—'}\n`+
+        `- **DE:** ${obj.de || '—'}\n\n`+
+        `## 1) Pacotes (5 softwares)\n${obj.softs || ''}\n\n`+
+        `## 2) Boot (systemd-analyze + top 5 blame)\n${obj.boot || ''}\n\n`+
+        `## 3) Serviço analisado (status + logs)\n${obj.svc || ''}\n\n`+
+        `## 4) Mapa FHS (10 diretórios + exemplo)\n${obj.fhs || ''}\n\n`+
+        `## Evidências anexadas\n${obj.evid || ''}\n\n`+
+        `## Conclusão\n${obj.concl || ''}\n\n`+
+        `> Atualizado em: ${obj.updatedAt || '—'}\n`;
+    }
+
+    document.getElementById('saveEntrega')?.addEventListener('click', () => {
+      const obj = collectEntrega();
+      if(!obj.aluno || !obj.fhs || !obj.softs){
+        showMsg('warn','<strong>Preencha pelo menos:</strong> Aluno/Grupo, 5 softwares e Mapa FHS.');
+        return;
+      }
+      writeEntrega(obj);
+      showMsg('ok','<strong>Entrega 2 salva no navegador!</strong>');
+    });
+
+    document.getElementById('loadEntrega')?.addEventListener('click', () => {
+      const obj = readEntrega();
+      if(!obj){ showMsg('warn','<strong>Nenhum registro salvo ainda.</strong>'); return; }
+      fillEntrega(obj);
+      showMsg('ok','<strong>Registro carregado.</strong>');
+    });
+
+    document.getElementById('clearEntrega')?.addEventListener('click', () => {
+      clearEntrega();
+      localStorage.removeItem(keyEntrega);
+      showMsg('ok','<strong>Registro limpo.</strong>');
+    });
+
+    document.getElementById('exportMd')?.addEventListener('click', () => {
+      const obj = collectEntrega();
+      const md = toMarkdown(obj);
+      e.out.style.display='block';
+      e.out.textContent = md;
+      navigator.clipboard?.writeText(md);
+      showMsg('ok','<strong>Markdown gerado e copiado.</strong>');
+    });
+
+    document.getElementById('exportJson')?.addEventListener('click', () => {
+      const obj = collectEntrega();
+      const json = JSON.stringify(obj, null, 2);
+      e.out.style.display='block';
+      e.out.textContent = json;
+      navigator.clipboard?.writeText(json);
+      showMsg('ok','<strong>JSON gerado e copiado.</strong>');
+    });
+
+    // auto load
+    const obj0 = readEntrega();
+    if(obj0) fillEntrega(obj0);
+    if(!e.de.value) e.de.value = 'Cinnamon';
+
+  </script>
+
+</body>
+</html>

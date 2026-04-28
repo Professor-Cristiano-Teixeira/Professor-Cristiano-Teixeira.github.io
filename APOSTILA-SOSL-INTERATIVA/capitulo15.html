@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1' />
+  <title>Capítulo 15 — Backup e Restauração no Linux — SOSL</title>
+  <meta name='description' content='Capítulo 15 da apostila SOSL: Backup e Restauração — conceitos (3-2-1), tipos (full/incremental), ferramentas (tar/rsync), verificação (sha256), compressão e restauração, com passo a passo, atividades, quiz e checklist.' />
+
+  <!-- arquivo: capitulo15.html -->
+
+  <style>
+    :root{--pw-red:#0b1f3a;--pw-red-dark:#071528;--pw-gray:#3f3f3f;--pw-gray-dark:#2f2f2f;--bg:#fff;--surface:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;--link:var(--pw-red);--shadow:0 10px 28px rgba(0,0,0,.08);--radius:16px;--maxw:1120px;--hero:linear-gradient(180deg,rgba(11,31,58,.12),rgba(11,31,58,0));--ok:#065f46;--ok-bg:#ecfdf5;--warn:#92400e;--warn-bg:#fffbeb;--bad:#991b1b;--bad-bg:#fef2f2;--code-bg:#0f172a;--code-fg:#e5e7eb;--code-border:#0b1220;--code-muted:#94a3b8}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";line-height:1.55;background:var(--bg);color:var(--text)}a{color:var(--link)}a:hover{color:var(--pw-red-dark)}
+
+    header{position:sticky;top:0;z-index:1000}.nav{background:var(--pw-red);color:#fff;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}.nav .wrap{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:800;letter-spacing:.2px}.logo{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:inline-flex;align-items:center;justify-content:center;font-weight:900}
+    .hamburger{display:none;appearance:none;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .menu{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.menu a{text-decoration:none;color:#fff;padding:10px;border-radius:12px;font-weight:650;opacity:.95}.menu a:hover{background:rgba(255,255,255,.12)}.menu a.secondary{opacity:.9}.menu-gap{flex:1 1 auto}
+
+    .dropdown{position:relative}.dropdown-toggle{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .dropdown-menu{position:absolute;right:0;top:46px;min-width:290px;background:#fff;color:var(--text);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;display:none;max-height:60vh;overflow:auto}.dropdown.open .dropdown-menu{display:block}
+    .dropdown-menu a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border-radius:12px;color:var(--text);text-decoration:none;font-weight:650}.dropdown-menu a:hover{background:#f3f4f6}
+    .pill{font-size:.75rem;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted);white-space:nowrap}
+
+    .hero{background:var(--hero);padding:18px 16px;border-bottom:1px solid var(--border)}main{padding:22px 16px 50px}.container{max-width:var(--maxw);margin:0 auto}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}.content{padding:20px}
+
+    h1{margin:0 0 6px;font-size:clamp(1.55rem,2.2vw,2.05rem)}h2{margin:22px 0 10px;font-size:clamp(1.2rem,1.6vw,1.5rem)}h3{margin:16px 0 6px;font-size:1.05rem}h4{margin:12px 0 6px;font-size:1.0rem}
+    .subtitle{color:var(--muted);margin:0 0 10px}.muted{color:var(--muted)}.small{font-size:.92rem}
+
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px}.badge{font-size:.82rem;padding:6px 10px;border-radius:999px;background:rgba(11,31,58,.08);border:1px solid rgba(11,31,58,.18);color:var(--pw-red-dark);font-weight:800}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:980px){.grid-2{grid-template-columns:1fr}}
+
+    .callout{border:1px solid var(--border);border-left:6px solid rgba(11,31,58,.55);background:rgba(11,31,58,.04);border-radius:14px;padding:12px 14px;margin:12px 0}
+    .callout.ok{border-left-color:rgba(6,95,70,.7);background:var(--ok-bg)}.callout.warn{border-left-color:rgba(146,64,14,.7);background:var(--warn-bg)}.callout.bad{border-left-color:rgba(153,27,27,.7);background:var(--bad-bg)}
+
+    .list{margin:10px 0 0;padding-left:18px}.list li{margin:7px 0}
+    .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.toc a{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(11,31,58,.2);border-radius:999px;background:rgba(11,31,58,.04);color:var(--pw-red-dark);font-weight:800;text-decoration:none;font-size:.86rem}.toc a:hover{background:rgba(11,31,58,.08)}
+
+    pre{margin:10px 0;background:var(--code-bg);color:var(--code-fg);padding:14px;border-radius:12px;overflow:auto;border:1px solid var(--code-border);box-shadow:0 6px 18px rgba(0,0,0,.15)}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}pre code{font-size:.92rem}.code-hint{color:var(--code-muted);font-size:.86rem;margin-top:6px}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;padding:10px 12px;border-radius:12px;font-weight:850;border:1px solid transparent;cursor:pointer;user-select:none}
+    .btn.primary{background:var(--pw-red);color:#fff;border-color:var(--pw-red)}.btn.primary:hover{background:var(--pw-red-dark);border-color:var(--pw-red-dark)}
+    .btn.dark{background:var(--pw-gray);color:#fff;border-color:var(--pw-gray)}.btn.dark:hover{background:var(--pw-gray-dark);border-color:var(--pw-gray-dark)}
+    .btn.ghost{background:transparent;color:var(--pw-red);border-color:rgba(11,31,58,.35)}.btn.ghost:hover{background:rgba(11,31,58,.06)}
+
+    .table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;border:1px solid var(--border);margin:10px 0}.table th,.table td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}.table th{background:rgba(11,31,58,.06);font-weight:900}.table tr:last-child td{border-bottom:0}
+
+    .step{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin:12px 0}.step .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:950}.step .num{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:999px;background:rgba(11,31,58,.10);border:1px solid rgba(11,31,58,.22);color:var(--pw-red-dark);font-weight:950}
+
+    .quiz{margin-top:6px}.q{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0;background:#fff}.q-hd{padding:12px 14px;background:rgba(11,31,58,.06);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;font-weight:900}.q-bd{padding:12px 14px 14px}.opts{display:grid;gap:8px;margin-top:8px}
+    .opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#fff}.opt:hover{background:#f9fafb}.opt input{margin-top:3px}
+    .feedback{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;border:1px solid var(--border);background:#f9fafb}.feedback.show{display:block}.feedback.ok{border-color:rgba(6,95,70,.25);background:var(--ok-bg);color:var(--ok)}.feedback.bad{border-color:rgba(153,27,27,.25);background:var(--bad-bg);color:var(--bad)}.q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+    .checklist{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin-top:10px}.check-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--border)}.check-item:last-child{border-bottom:0}
+    .progress{margin-top:10px;height:10px;background:#f3f4f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}.progress>div{height:100%;width:0%;background:linear-gradient(90deg,rgba(11,31,58,.92),rgba(11,31,58,.55))}
+
+    .skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}.skip-link:focus{left:10px;top:10px;width:auto;height:auto;padding:10px 12px;background:#fff;border:2px solid var(--pw-red);border-radius:12px;z-index:2000}
+
+    @media(max-width:860px){.hamburger{display:inline-flex}.menu{display:none;width:100%;padding-top:10px}.menu.show{display:flex}.dropdown-menu{left:0;right:auto}}
+    footer{border-top:1px solid var(--border);padding:18px 16px}
+  </style>
+</head>
+<body>
+  <a href='#conteudo' class='skip-link'>Pular para o conteúdo</a>
+
+  <header>
+    <nav class='nav' role='navigation' aria-label='Navegação principal'>
+      <div class='wrap'>
+        <a class='brand' href='index.html' aria-label='Voltar ao Index'><span class='logo' aria-hidden='true'>SOSL</span><span>Apostila • Cap. 15</span></a>
+
+        <button class='hamburger' id='hamburgerBtn' aria-expanded='false' aria-controls='mainMenu'>☰ Menu</button>
+
+        <div class='menu' id='mainMenu'>
+          <a href='index.html' class='secondary'>Index</a>
+          <a href='plano.html'>Plano do Curso</a>
+          <a href='#teoria'>Teoria</a>
+          <a href='#ferramentas'>Ferramentas</a>
+          <a href='#passo'>Passo a passo</a>
+          <a href='#quiz'>Quiz</a>
+          <a href='#checklist'>Checklist</a>
+          <span class='menu-gap'></span>
+
+          <div class='dropdown' id='chaptersDropdown'>
+            <button class='dropdown-toggle' aria-haspopup='true' aria-expanded='false'>Capítulos ▼</button>
+            <div class='dropdown-menu' role='menu' aria-label='Lista de capítulos'>
+              <a href='capitulo12.html' role='menuitem'><span>Cap. 12 — Configs, processos e rede</span><span class='pill'>12</span></a>
+              <a href='capitulo13.html' role='menuitem'><span>Cap. 13 — Shell Script</span><span class='pill'>13</span></a>
+              <a href='capitulo14.html' role='menuitem'><span>Cap. 14 — Manutenção preventiva</span><span class='pill'>14</span></a>
+              <a href='capitulo15.html' role='menuitem'><span>Cap. 15 — Backup e restauração</span><span class='pill'>15</span></a>
+              <a href='capitulo16.html' role='menuitem'><span>Cap. 16 — Implantação</span><span class='pill'>16</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class='hero'>
+    <div class='container'>
+      <div class='card'>
+        <div class='content'>
+          <h1 id='conteudo'>Capítulo 15 — Backup e Restauração no Linux</h1>
+          <p class='subtitle'>Backup não é “copiar e torcer”. É um processo com <strong>política</strong>, <strong>verificação</strong> e <strong>teste de restauração</strong>. Neste capítulo você aprende conceitos (3-2-1), cria backups com <code>tar</code> e <code>rsync</code>, verifica integridade com <code>sha256sum</code> e restaura com evidência.</p>
+
+          <div class='badges'>
+            <span class='badge'>3-2-1</span>
+            <span class='badge'>full/incremental</span>
+            <span class='badge'>tar (.tar.gz)</span>
+            <span class='badge'>rsync</span>
+            <span class='badge'>sha256sum</span>
+            <span class='badge'>restauração</span>
+            <span class='badge'>logs/relatório</span>
+          </div>
+
+          <div class='grid-2'>
+            <div>
+              <h2 style='margin-top:0'>Objetivos de aprendizagem</h2>
+              <ul class='list'>
+                <li>Explicar o que é backup e por que restauração testada é a parte mais importante.</li>
+                <li>Aplicar a regra <strong>3-2-1</strong> e diferenciar cópia vs backup.</li>
+                <li>Criar backup compactado com <code>tar</code> e manter evidência (hash).</li>
+                <li>Fazer espelhamento/backup incremental com <code>rsync</code> (conceito e prática).</li>
+                <li>Restaurar arquivos e validar integridade com <code>sha256sum</code>.</li>
+                <li>Gerar relatório “ticket-ready” do backup e da restauração.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style='margin-top:0'>Pré-requisitos</h2>
+              <ul class='list'>
+                <li>Cap. 10: arquivos/diretórios e pipes (tee).</li>
+                <li>Cap. 11: permissões (o que precisa de sudo e o que não).</li>
+                <li>Cap. 14: manutenção preventiva e registros.</li>
+                <li>Cap. 13 (opcional): automatizar rotina com script.</li>
+              </ul>
+              <div class='callout warn'><strong>Segurança:</strong> nunca teste backup em pastas do sistema. Use <code>~/SOSL/cap15</code> (laboratório). Remoção e restauração devem ser feitas em diretórios de teste.</div>
+            </div>
+          </div>
+
+          <div class='toc'>
+            <a href='#teoria'>📚 Teoria</a>
+            <a href='#ferramentas'>🧰 Ferramentas</a>
+            <a href='#passo'>🧪 Passo a passo</a>
+            <a href='#atividades'>🧩 Atividades</a>
+            <a href='#pesquisas'>🔎 Pesquisas</a>
+            <a href='#quiz'>📝 Quiz</a>
+            <a href='#checklist'>☑️ Checklist</a>
+          </div>
+
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo14.html'>← Voltar ao Cap. 14</a>
+            <a class='btn dark' href='capitulo16.html'>Próximo: Cap. 16 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class='container'>
+
+      <section id='teoria' class='card'>
+        <div class='content'>
+          <h2>1) Teoria: backup é processo + prova de restauração</h2>
+
+          <h3>1.1 Cópia x Backup</h3>
+          <p><strong>Cópia</strong> é apenas duplicar um arquivo. <strong>Backup</strong> é um conjunto de cópias planejadas com versão, verificação e restauração. Uma cópia sem verificação pode estar corrompida e você só descobre no dia do desastre.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Você vai gerar um arquivo de hash (<code>.sha256</code>) e validar depois da restauração.</div>
+
+          <h3>1.2 Regra 3-2-1</h3>
+          <p>A regra 3-2-1 diz: <strong>3</strong> cópias dos dados, em <strong>2</strong> mídias diferentes, com <strong>1</strong> cópia fora do equipamento (offsite). Em laboratório você simula isso com “origem”, “backup local” e “backup externo” (pasta separada).</p>
+          <div class='callout ok'><strong>Onde vou aplicar isso?</strong> No passo a passo você cria duas cópias (tar e rsync) e registra onde cada uma fica.</div>
+
+          <h3>1.3 Tipos: full, incremental e diferencial</h3>
+          <p><strong>Full</strong> (completo) copia tudo. <strong>Incremental</strong> copia apenas o que mudou desde o último backup (pode exigir cadeia para restaurar). <strong>Diferencial</strong> copia o que mudou desde o último full (cresce ao longo do tempo, restauração mais simples que incremental).</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Você fará um backup full com <code>tar</code> e um incremental/espelhamento com <code>rsync</code>.</div>
+
+          <h3>1.4 Integridade e verificação</h3>
+          <p>Backup bom é verificável. Uma forma simples é gerar hash (<code>sha256sum</code>) do arquivo de backup e conferir antes e depois. Outra prática é testar a restauração em um diretório de teste.</p>
+          <div class='callout ok'><strong>Onde vou aplicar isso?</strong> Você vai comparar o hash do arquivo <code>.tar.gz</code> e conferir se o conteúdo restaurado bate com o original.</div>
+
+          <h3>1.5 O erro clássico: nunca testou restaurar</h3>
+          <p>A maioria dos “backups falhados” é descoberta no dia em que se precisa restaurar. Por isso, toda rotina deve incluir <strong>teste de restauração</strong> e evidência (log/relatório).</p>
+          <div class='callout warn'><strong>Onde vou aplicar isso?</strong> No laboratório, você vai apagar um arquivo de teste e restaurar do backup.</div>
+        </div>
+      </section>
+
+      <section id='ferramentas' class='card'>
+        <div class='content'>
+          <h2>2) Ferramentas do capítulo (o que cada uma faz)</h2>
+
+          <table class='table' aria-label='Ferramentas de backup'>
+            <thead><tr><th>Ferramenta</th><th>Para que serve</th><th>Quando usar</th></tr></thead>
+            <tbody>
+              <tr><td><code>tar</code></td><td>Empacotar (e compactar) diretórios em um arquivo único</td><td>Backup full, transferência, arquivamento</td></tr>
+              <tr><td><code>rsync</code></td><td>Sincronizar/espelhar diretórios com eficiência</td><td>Incremental, espelhamento, cópia recorrente</td></tr>
+              <tr><td><code>sha256sum</code></td><td>Gerar/validar hash de integridade</td><td>Provar que o backup não corrompeu</td></tr>
+              <tr><td><code>gzip</code></td><td>Compactação (tar.gz)</td><td>Reduzir tamanho</td></tr>
+              <tr><td><code>tee</code></td><td>Salvar evidência enquanto mostra na tela</td><td>Relatório e logs</td></tr>
+            </tbody>
+          </table>
+
+          <h3>2.1 Exemplos rápidos</h3>
+          <pre><code># criar tar.gz
+# tar -czf saida.tar.gz pasta/
+
+# listar conteúdo do tar.gz sem extrair
+# tar -tzf saida.tar.gz | head
+
+# rsync (espelho simples)
+# rsync -av --delete origem/ destino/
+
+# hash
+# sha256sum saida.tar.gz > saida.tar.gz.sha256
+# sha256sum -c saida.tar.gz.sha256
+</code></pre>
+          <div class='callout warn'><strong>Cuidado com --delete no rsync:</strong> ele apaga no destino o que não existe na origem. Use apenas quando você tem certeza do alvo (em pasta de teste).</div>
+        </div>
+      </section>
+
+      <section id='passo' class='card'>
+        <div class='content'>
+          <h2>3) Passo a passo (prático): backup com tar + rsync + restauração validada</h2>
+          <p class='muted'>Objetivo: criar uma pasta de dados, gerar backups (tar/rsync), apagar algo e restaurar com evidência e verificação.</p>
+          <div class='callout ok'><strong>Resultado final:</strong> <code>~/SOSL/cap15/relatorio-cap15.txt</code> + arquivos de backup em <code>~/SOSL/cap15/backups</code>.</div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>1</span> Preparar estrutura do capítulo</span><span class='pill'>Setup</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap15/{dados,backups,restaurado,espelho}
+R=~/SOSL/cap15/relatorio-cap15.txt
+: > "$R"
+</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>2</span> Criar dados de teste (origem)</span><span class='pill'>Dados</span></div>
+            <pre><code>cd ~/SOSL/cap15/dados
+mkdir -p docs fotos
+printf "Contrato v1
+" > docs/contrato.txt
+printf "Notas do suporte
+" > docs/notas.txt
+
+# simular "foto" como arquivo de bytes (sem depender de imagens reais)
+head -c 20480 /dev/urandom > fotos/img01.bin
+head -c 10240 /dev/urandom > fotos/img02.bin
+
+ls -lahR ~/SOSL/cap15/dados | tee -a "$R"
+</code></pre>
+            <div class='callout'><strong>Onde vou aplicar isso?</strong> Você cria um conjunto de arquivos “realista” para praticar backup e restauração.</div>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>3</span> Backup FULL com tar.gz + hash (integridade)</span><span class='pill'>tar</span></div>
+            <pre><code>cd ~/SOSL/cap15
+TS=$(date '+%Y%m%d_%H%M%S')
+BK=~/SOSL/cap15/backups/backup_full_$TS.tar.gz
+
+# criar o tar.gz (full)
+tar -czf "$BK" -C ~/SOSL/cap15 dados
+
+# gerar hash para verificação
+sha256sum "$BK" > "$BK.sha256"
+
+{
+  echo "
+[BACKUP FULL - tar.gz]";
+  echo "Arquivo: $BK";
+  ls -lah "$BK" "$BK.sha256";
+  echo "Conteúdo (amostra):";
+  tar -tzf "$BK" | head;
+  echo "Verificação (sha256):";
+  sha256sum -c "$BK.sha256";
+} | tee -a "$R"
+</code></pre>
+            <p class='code-hint'>O hash confirma que o arquivo de backup não mudou/corrompeu.</p>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>4</span> Backup/espelho com rsync (incremental/recorrente)</span><span class='pill'>rsync</span></div>
+            <pre><code># espelhar dados para ~/SOSL/cap15/espelho
+rsync -av ~/SOSL/cap15/dados/ ~/SOSL/cap15/espelho/ | tee -a "$R"
+
+# conferir
+ls -lahR ~/SOSL/cap15/espelho | head -n 40 | tee -a "$R"
+</code></pre>
+            <div class='callout ok'><strong>Onde vou aplicar isso?</strong> Em rotinas recorrentes: rsync copia só o que mudou, economizando tempo.</div>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>5</span> Simular incidente: apagar/alterar arquivo (apenas no laboratório)</span><span class='pill'>Incidente</span></div>
+            <pre><code># apagar um arquivo e alterar outro
+rm -i ~/SOSL/cap15/dados/docs/notas.txt
+printf "Contrato v2 (alterado)
+" > ~/SOSL/cap15/dados/docs/contrato.txt
+
+{
+  echo "
+[INCIDENTE SIMULADO]";
+  echo "notas.txt removido e contrato.txt alterado";
+  ls -lah ~/SOSL/cap15/dados/docs;
+} | tee -a "$R"
+</code></pre>
+            <div class='callout warn'><strong>Boa prática:</strong> incidentes reais pedem evidência antes de ação. Aqui é simulação controlada.</div>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>6</span> Restaurar do tar.gz (full) para diretório restaurado</span><span class='pill'>Restore</span></div>
+            <pre><code># escolher o backup mais recente
+BK_LAST=$(ls -t ~/SOSL/cap15/backups/backup_full_*.tar.gz | head -n 1)
+
+# restaurar em ~/SOSL/cap15/restaurado
+mkdir -p ~/SOSL/cap15/restaurado
+rm -rf ~/SOSL/cap15/restaurado/*
+
+tar -xzf "$BK_LAST" -C ~/SOSL/cap15/restaurado
+
+{
+  echo "
+[RESTAURAÇÃO - tar.gz]";
+  echo "Backup usado: $BK_LAST";
+  echo "Verificação do hash do backup:";
+  sha256sum -c "$BK_LAST.sha256";
+  echo "Arquivos restaurados (amostra):";
+  ls -lahR ~/SOSL/cap15/restaurado/dados/docs;
+} | tee -a "$R"
+</code></pre>
+            <p class='code-hint'>Repare que restauramos em uma pasta separada. Isso evita sobrescrever dados até você confirmar.</p>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>7</span> Restaurar usando o espelho rsync (opção rápida)</span><span class='pill'>rsync</span></div>
+            <pre><code># recuperar arquivos apagados/alterados a partir do espelho
+rsync -av ~/SOSL/cap15/espelho/ ~/SOSL/cap15/dados/ | tee -a "$R"
+
+{
+  echo "
+[RESTAURAÇÃO - rsync]";
+  echo "Estado atual de docs após rsync:";
+  ls -lah ~/SOSL/cap15/dados/docs;
+} | tee -a "$R"
+</code></pre>
+            <div class='callout ok'><strong>Onde vou aplicar isso?</strong> Em recuperação rápida: rsync repõe arquivos sumidos e atualiza os alterados.</div>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>8</span> Encerrar relatório (conclusão e evidências)</span><span class='pill'>Final</span></div>
+            <pre><code>{
+  echo "
+[CONCLUSÃO]";
+  echo "- Backup FULL criado com tar.gz e verificado por sha256";
+  echo "- Espelho criado com rsync";
+  echo "- Incidente simulado e restauração testada (tar + rsync)";
+  echo "- Próxima melhoria: automatizar e adotar 3-2-1";
+} | tee -a "$R"
+
+less "$R"
+</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <section id='atividades' class='card'>
+        <div class='content'>
+          <h2>4) Atividades práticas sugeridas (2–3)</h2>
+          <ul class='list'>
+            <li><strong>Atividade 1 — Política 3-2-1:</strong> descreva uma política 3-2-1 para um laboratório escolar (onde fica cada cópia e com que frequência).</li>
+            <li><strong>Atividade 2 — Incremental simples:</strong> crie dois backups full em dias diferentes e compare tamanho/tempo. Depois, use rsync para copiar só o que mudou e explique a diferença.</li>
+            <li><strong>Atividade 3 — Script de backup:</strong> usando Cap. 13, crie <code>backup_cap15.sh</code> que recebe ORIGEM e DESTINO, gera tar.gz + sha256 e salva um log em <code>~/SOSL/cap15/backups</code>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id='pesquisas' class='card'>
+        <div class='content'>
+          <h2>5) Pesquisas complementares (2–5)</h2>
+          <ul class='list'>
+            <li>O que é RPO e RTO (noções básicas) e como isso muda a estratégia de backup.</li>
+            <li>Diferença entre backup incremental e diferencial na prática (tempo e restauração).</li>
+            <li>Criptografia de backup (conceito) e por que senhas/keys devem ser tratadas com cuidado.</li>
+            <li>Snapshots (Btrfs/LVM) — quando ajudam e quando não substituem backup.</li>
+            <li>Ferramentas populares de backup (ex.: Borg, Restic) e por que são usadas.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id='quiz' class='card'>
+        <div class='content'>
+          <h2>6) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class='muted'>Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class='quiz' id='quiz15'>
+            <div class='q' data-answer='c' data-topic='copia'><div class='q-hd'><span>1) A principal diferença entre cópia e backup é:</span><span class='pill'>Conceito</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q1' value='a'> Cópia sempre é comprimida</label>
+              <label class='opt'><input type='radio' name='q1' value='b'> Backup nunca pode ser restaurado</label>
+              <label class='opt'><input type='radio' name='q1' value='c'> Backup inclui processo, verificação e restauração</label>
+              <label class='opt'><input type='radio' name='q1' value='d'> Cópia é feita só por root</label>
+              <label class='opt'><input type='radio' name='q1' value='e'> Backup não precisa de evidência</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='321'><div class='q-hd'><span>2) Regra 3-2-1 significa:</span><span class='pill'>3-2-1</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q2' value='a'> 3 usuários, 2 pastas, 1 senha</label>
+              <label class='opt'><input type='radio' name='q2' value='b'> 3 cópias, 2 mídias, 1 offsite</label>
+              <label class='opt'><input type='radio' name='q2' value='c'> 3 backups diários, 2 semanais, 1 mensal</label>
+              <label class='opt'><input type='radio' name='q2' value='d'> 3 discos, 2 roteadores, 1 servidor</label>
+              <label class='opt'><input type='radio' name='q2' value='e'> 3 compressões, 2 criptografias, 1 verificação</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='full'><div class='q-hd'><span>3) Backup full é:</span><span class='pill'>Tipos</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q3' value='a'> Cópia completa de tudo</label>
+              <label class='opt'><input type='radio' name='q3' value='b'> Cópia apenas do que mudou desde ontem</label>
+              <label class='opt'><input type='radio' name='q3' value='c'> Cópia apenas de logs</label>
+              <label class='opt'><input type='radio' name='q3' value='d'> Cópia sem compressão obrigatória</label>
+              <label class='opt'><input type='radio' name='q3' value='e'> Um espelho que apaga o original</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='inc'><div class='q-hd'><span>4) Backup incremental copia:</span><span class='pill'>Tipos</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q4' value='a'> Sempre tudo novamente</label>
+              <label class='opt'><input type='radio' name='q4' value='b'> Apenas arquivos ocultos</label>
+              <label class='opt'><input type='radio' name='q4' value='c'> Apenas arquivos com extensão .bak</label>
+              <label class='opt'><input type='radio' name='q4' value='d'> O que mudou desde o último backup</label>
+              <label class='opt'><input type='radio' name='q4' value='e'> Somente arquivos do /etc</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='e' data-topic='tar'><div class='q-hd'><span>5) O comando <code>tar -czf</code> normalmente faz:</span><span class='pill'>tar</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q5' value='a'> Exibe processos</label>
+              <label class='opt'><input type='radio' name='q5' value='b'> Remove pacotes</label>
+              <label class='opt'><input type='radio' name='q5' value='c'> Configura IP</label>
+              <label class='opt'><input type='radio' name='q5' value='d'> Calcula hash SHA256</label>
+              <label class='opt'><input type='radio' name='q5' value='e'> Cria um arquivo tar compactado (tar.gz)</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='list'><div class='q-hd'><span>6) Para listar o conteúdo de um tar.gz sem extrair, usa-se:</span><span class='pill'>tar</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q6' value='a'> tar -xzf</label>
+              <label class='opt'><input type='radio' name='q6' value='b'> tar -tzf</label>
+              <label class='opt'><input type='radio' name='q6' value='c'> rsync -av</label>
+              <label class='opt'><input type='radio' name='q6' value='d'> df -h</label>
+              <label class='opt'><input type='radio' name='q6' value='e'> journalctl -b</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='rsync'><div class='q-hd'><span>7) Qual ferramenta é mais usada para sincronizar diretórios com eficiência?</span><span class='pill'>rsync</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q7' value='a'> rsync</label>
+              <label class='opt'><input type='radio' name='q7' value='b'> chmod</label>
+              <label class='opt'><input type='radio' name='q7' value='c'> whoami</label>
+              <label class='opt'><input type='radio' name='q7' value='d'> uname</label>
+              <label class='opt'><input type='radio' name='q7' value='e'> rm</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='c' data-topic='hash'><div class='q-hd'><span>8) Para verificar integridade do backup, um método simples é:</span><span class='pill'>Integridade</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q8' value='a'> Apagar o original</label>
+              <label class='opt'><input type='radio' name='q8' value='b'> Rodar df -h</label>
+              <label class='opt'><input type='radio' name='q8' value='c'> Gerar e checar hash (sha256sum)</label>
+              <label class='opt'><input type='radio' name='q8' value='d'> Trocar permissões para 777</label>
+              <label class='opt'><input type='radio' name='q8' value='e'> Reiniciar o sistema</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='restore'><div class='q-hd'><span>9) A parte mais importante de uma estratégia de backup é:</span><span class='pill'>Restauração</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q9' value='a'> Ter o arquivo mais bonito</label>
+              <label class='opt'><input type='radio' name='q9' value='b'> Fazer backup sem verificar</label>
+              <label class='opt'><input type='radio' name='q9' value='c'> Guardar tudo só no mesmo PC</label>
+              <label class='opt'><input type='radio' name='q9' value='d'> Testar restauração e registrar evidências</label>
+              <label class='opt'><input type='radio' name='q9' value='e'> Apagar logs do sistema</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='proximo'><div class='q-hd'><span>10) O Capítulo 16 foca em:</span><span class='pill'>Sequência</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q10' value='a'> Implantação (imagem/sistema + entrega final do projeto)</label>
+              <label class='opt'><input type='radio' name='q10' value='b'> Somente licenças</label>
+              <label class='opt'><input type='radio' name='q10' value='c'> Somente interfaces</label>
+              <label class='opt'><input type='radio' name='q10' value='d'> Somente boot</label>
+              <label class='opt'><input type='radio' name='q10' value='e'> Somente logs</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+          </div>
+
+          <div class='callout ok' style='margin-top:14px'><strong>Seu progresso no quiz:</strong> <span id='quizScore'>0</span>/10 respondidas corretamente. <span class='muted'>(Você pode tentar quantas vezes quiser.)</span></div>
+        </div>
+      </section>
+
+      <section id='checklist' class='card'>
+        <div class='content'>
+          <h2>7) Checklist do aluno (interativo)</h2>
+          <p class='muted'>Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class='checklist' id='checklist15'>
+            <div class='check-item'><input type='checkbox' id='c1'><label for='c1'><strong>Eu explico</strong> a diferença entre cópia e backup.</label></div>
+            <div class='check-item'><input type='checkbox' id='c2'><label for='c2'><strong>Eu entendo</strong> a regra 3-2-1.</label></div>
+            <div class='check-item'><input type='checkbox' id='c3'><label for='c3'><strong>Eu criei</strong> um backup full com tar.gz.</label></div>
+            <div class='check-item'><input type='checkbox' id='c4'><label for='c4'><strong>Eu gerei</strong> e validei hash sha256 do backup.</label></div>
+            <div class='check-item'><input type='checkbox' id='c5'><label for='c5'><strong>Eu fiz</strong> espelho/backup recorrente com rsync.</label></div>
+            <div class='check-item'><input type='checkbox' id='c6'><label for='c6'><strong>Eu simulei</strong> incidente (apagar/alterar arquivo) em laboratório.</label></div>
+            <div class='check-item'><input type='checkbox' id='c7'><label for='c7'><strong>Eu restaurei</strong> do tar para pasta separada e validei.</label></div>
+            <div class='check-item'><input type='checkbox' id='c8'><label for='c8'><strong>Eu restaurei</strong> usando rsync e conferi resultado.</label></div>
+            <div class='check-item'><input type='checkbox' id='c9'><label for='c9'><strong>Eu gerei</strong> o relatório cap15 com evidências (tee).</label></div>
+            <div class='check-item'><input type='checkbox' id='c10'><label for='c10'><strong>Eu respondi</strong> o quiz e revisei onde errei.</label></div>
+
+            <div class='progress' aria-label='Progresso do checklist'><div id='checkProg'></div></div>
+            <p class='small muted' style='margin:10px 0 0'>Progresso: <strong><span id='checkPct'>0%</span></strong></p>
+
+            <div class='actions'>
+              <button class='btn primary' id='saveBtn' type='button'>Salvar</button>
+              <button class='btn ghost' id='loadBtn' type='button'>Carregar</button>
+              <button class='btn dark' id='clearBtn' type='button'>Limpar</button>
+            </div>
+          </div>
+
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo14.html'>← Voltar ao Cap. 14</a>
+            <a class='btn dark' href='capitulo16.html'>Ir para Cap. 16 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class='container'>
+      <div style='display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between'>
+        <div class='small muted'>© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class='small'><a href='#conteudo' style='text-decoration:none;color:var(--link)'>Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Menu mobile
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    hamburgerBtn?.addEventListener('click', () => {
+      const isOpen = mainMenu.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Quiz
+    const quiz = document.getElementById('quiz15');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+    function explain(topic){
+      const map = {
+        copia: 'Revise 1.1: backup inclui processo, verificação e restauração.',
+        321: 'Revise 1.2: 3 cópias, 2 mídias, 1 offsite.',
+        full: 'Revise 1.3: full copia tudo.',
+        inc: 'Revise 1.3: incremental copia mudanças desde o último backup.',
+        tar: 'Revise 2: tar -czf cria tar.gz.',
+        list: 'Revise 2: tar -tzf lista conteúdo sem extrair.',
+        rsync: 'Revise 2: rsync sincroniza diretórios eficientemente.',
+        hash: 'Revise 1.4: sha256 prova integridade.',
+        restore: 'Revise 1.5: testar restauração é o mais importante.',
+        proximo: 'Cap. 16: implantação + entrega final do projeto.'
+      };
+      return map[topic] || 'Revise teoria e prática do capítulo.';
+    }
+    function getSelected(qEl){ return qEl.querySelector('input[type="radio"]:checked')?.value || null; }
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+    function clearFeedback(qEl){ const fb=qEl.querySelector('.feedback'); fb.classList.remove('ok','bad','show'); fb.innerHTML=''; }
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz?.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){ setFeedback(qEl,false,'<strong>Escolha uma alternativa.</strong>'); return; }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){ correctCount += 1; setCounted(qEl,true); updateScore(); }
+            const human = ok ? `<strong>Correto!</strong> ✅` : `<strong>Incorreto.</strong> ❌ Correto: <strong>${ans.toUpperCase()}</strong>.`;
+            const tip = `<div style="margin-top:6px" class="muted"><strong>Dica:</strong> ${explain(topic)}</div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            setFeedback(qEl,true,`<strong>Gabarito:</strong> <strong>${ans.toUpperCase()}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // Checklist
+    const checklist = document.getElementById('checklist15');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const key = 'sosl_cap15_checklist_v1';
+
+    function compute(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c=>c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+    function save(){
+      const data={};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>data[c.id]=c.checked);
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    function load(){
+      const raw=localStorage.getItem(key); if(!raw) return;
+      try{ const data=JSON.parse(raw); checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>{ if(typeof data[c.id]==='boolean') c.checked=data[c.id]; }); }catch(e){}
+      compute();
+    }
+    function clearAll(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+      localStorage.removeItem(key); compute();
+    }
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>c.addEventListener('change',()=>{compute();save();}));
+    document.getElementById('saveBtn')?.addEventListener('click',()=>{save();compute();});
+    document.getElementById('loadBtn')?.addEventListener('click',()=>load());
+    document.getElementById('clearBtn')?.addEventListener('click',()=>clearAll());
+    compute(); load();
+  </script>
+</body>
+</html>

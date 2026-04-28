@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 05 — Interfaces Gráficas no Linux (GNOME, KDE, XFCE, Cinnamon) — SOSL</title>
+  <meta name="description" content="Capítulo 05 da apostila SOSL: interfaces gráficas no Linux, ambientes (GNOME, KDE, XFCE, Cinnamon), tendências e ferramentas comuns de gerenciamento via GUI." />
+
+  <!-- arquivo: capitulo05.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+      --code-accent:#38bdf8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 280px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    h4{ margin: 12px 0 6px; font-size: 1.0rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 980px){ .grid-2,.grid-3{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    /* Code blocks */
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Steps */
+    .step{
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background:#fff;
+      margin: 12px 0;
+    }
+    .step .hd{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight: 950; }
+    .step .num{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:34px;
+      height:34px;
+      padding:0 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.10);
+      border: 1px solid rgba(11,31,58,.22);
+      color: var(--pw-red-dark);
+      font-weight: 950;
+    }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Chips */
+    .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px; }
+    .chip{ font-size: .78rem; padding: 4px 10px; border-radius: 999px; background:#f3f4f6; border: 1px solid var(--border); color:#374151; font-weight: 800; }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 05</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#comparativo">Comparativo</a>
+          <a href="#gui">Ferramentas GUI</a>
+          <a href="#passo">Passo a passo</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo01.html" role="menuitem"><span>Cap. 01 — Tipos, licenças e história</span><span class="pill">01</span></a>
+              <a href="capitulo02.html" role="menuitem"><span>Cap. 02 — SL hoje: aplicações e ecossistema</span><span class="pill">02</span></a>
+              <a href="capitulo03.html" role="menuitem"><span>Cap. 03 — Linux e distribuições (pesquisa)</span><span class="pill">03</span></a>
+              <a href="capitulo04.html" role="menuitem"><span>Cap. 04 — VM + instalação Linux Mint</span><span class="pill">04</span></a>
+              <a href="capitulo05.html" role="menuitem"><span>Cap. 05 — Interfaces gráficas</span><span class="pill">05</span></a>
+              <a href="capitulo06.html" role="menuitem"><span>Cap. 06 — Pacotes, lojas, Snap/Flatpak</span><span class="pill">06</span></a>
+              <a href="capitulo07.html" role="menuitem"><span>Cap. 07 — Boot e systemd</span><span class="pill">07</span></a>
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo14.html" role="menuitem"><span>Cap. 14 — Manutenção preventiva</span><span class="pill">14</span></a>
+              <a href="capitulo15.html" role="menuitem"><span>Cap. 15 — Backup e restauração</span><span class="pill">15</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 05 — Interfaces Gráficas no Linux (GNOME, KDE, XFCE e Cinnamon)</h1>
+          <p class="subtitle">
+            Com a VM pronta (Cap. 04), você vai aprender como funcionam os <strong>ambientes gráficos</strong> do Linux, suas diferenças e como usar ferramentas
+            de gerenciamento via GUI. A prática deste capítulo foca em <strong>explorar o Linux Mint (Cinnamon)</strong> e entender equivalências em GNOME/KDE/XFCE.
+          </p>
+
+          <div class="badges">
+            <span class="badge">Desktop Environment (DE)</span>
+            <span class="badge">Window Manager</span>
+            <span class="badge">Wayland &amp; X11 (conceito)</span>
+            <span class="badge">GNOME</span>
+            <span class="badge">KDE Plasma</span>
+            <span class="badge">XFCE</span>
+            <span class="badge">Cinnamon</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Entender o que é um <strong>Ambiente de Desktop</strong> (Desktop Environment) e seus componentes.</li>
+                <li>Diferenciar <strong>DE</strong>, <strong>Window Manager</strong> e <strong>Display Server</strong> (X11/Wayland) em nível introdutório.</li>
+                <li>Conhecer características de GNOME, KDE Plasma, XFCE e Cinnamon (tradicionais) e tendências modernas.</li>
+                <li>Identificar (apenas citar) os programas GUI mais comuns para administração em cada ambiente.</li>
+                <li>Executar práticas de exploração do ambiente gráfico e alternar para modo texto (TTY) com segurança.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>VM do Cap. 04 instalada e atualizada.</li>
+                <li>Login funcionando e internet opcional para ajustes.</li>
+                <li>Pasta compartilhada (opcional) para salvar evidências.</li>
+              </ul>
+              <div class="callout ok">
+                <strong>Dica:</strong> se estiver inseguro, crie um snapshot antes de customizações grandes.
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#comparativo">⚖️ Comparativo</a>
+            <a href="#modernas">✨ Tendências modernas</a>
+            <a href="#gui">🧰 Ferramentas GUI</a>
+            <a href="#passo">🧭 Passo a passo</a>
+            <a href="#atividades">🧪 Atividades</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo04.html">← Voltar ao Cap. 04</a>
+            <a class="btn dark" href="capitulo06.html">Próximo: Cap. 06 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Teoria: o que compõe uma interface gráfica no Linux</h2>
+
+          <h3>1.1 Desktop Environment (DE) — Ambiente de Desktop</h3>
+          <p>
+            Um <strong>Ambiente de Desktop</strong> é o “conjunto da experiência gráfica”: painel, menu, área de trabalho, gerenciador de janelas,
+            configurações, temas, atalhos e aplicativos integrados (gerenciador de arquivos, configurações, etc.).
+            Exemplos populares são GNOME, KDE Plasma, XFCE e Cinnamon.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai localizar configurações (painel, atalhos, idioma/teclado),
+            aprender a identificar o gerenciador de arquivos e o gerenciador de tarefas/monitor do sistema.
+          </div>
+
+          <h3>1.2 Window Manager (WM) — Gerenciador de Janelas</h3>
+          <p>
+            O <strong>Window Manager</strong> é o componente que controla como as janelas aparecem e se comportam: mover, redimensionar, minimizar,
+            maximizar, efeitos visuais e organização (inclusive mosaico/tiling em alguns casos). Muitos DEs incluem seu próprio WM.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Você vai testar recursos de janelas (atalhos, áreas de trabalho, encaixe de janelas)
+            e perceber como isso muda entre ambientes.
+          </div>
+
+          <h3>1.3 Display Server — X11 e Wayland (conceito)</h3>
+          <p>
+            O <strong>Display Server</strong> (servidor de exibição) é a base que permite desenhar na tela e receber entrada de teclado/mouse.
+            Historicamente, o Linux usou o <strong>X11</strong> (X.Org). Mais recentemente, muitos ambientes migram para <strong>Wayland</strong>,
+            que busca simplificar e melhorar segurança e desempenho.
+          </p>
+          <p>
+            Para o suporte inicial, você não precisa dominar os detalhes. O que importa é saber que alguns problemas gráficos podem mudar
+            dependendo de X11/Wayland (ex.: compartilhamento de tela, alguns drivers, comportamento de aplicativos antigos).
+          </p>
+          <div class="callout warn">
+            <strong>Onde vou aplicar isso?</strong> No troubleshooting de GUI, você vai aprender a identificar se algo pode estar ligado
+            a driver/vídeo e a ajustar configurações do VirtualBox (memória de vídeo/3D) antes de culpar o Linux.
+          </div>
+
+          <h3>1.4 Componentes que você deve reconhecer (lista rápida)</h3>
+          <ul class="list">
+            <li><strong>Launcher/Menu</strong>: onde você abre programas.</li>
+            <li><strong>Painel</strong>: indicadores, relógio, área de notificação.</li>
+            <li><strong>Área de trabalho</strong> e <strong>workspaces</strong> (áreas de trabalho virtuais).</li>
+            <li><strong>File Manager</strong>: gerenciador de arquivos (pastas).</li>
+            <li><strong>Settings</strong>: central de configurações.</li>
+            <li><strong>Terminal</strong>: acesso à linha de comando (você usará muito a partir do Cap. 09).</li>
+          </ul>
+
+        </div>
+      </section>
+
+      <section id="comparativo" class="card">
+        <div class="content">
+          <h2>2) Interfaces tradicionais: características e quando usar</h2>
+
+          <table class="table" aria-label="Comparativo de ambientes gráficos">
+            <thead>
+              <tr>
+                <th>Ambiente</th>
+                <th>Perfil/ideia</th>
+                <th>Pontos fortes</th>
+                <th>Pontos de atenção</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>GNOME</strong></td>
+                <td>Interface moderna e consistente, foco em simplicidade</td>
+                <td>Experiência coesa; boa integração; foco em produtividade</td>
+                <td>Customização via extensões; pode exigir hardware um pouco melhor</td>
+              </tr>
+              <tr>
+                <td><strong>KDE Plasma</strong></td>
+                <td>Muito configurável, rico em recursos</td>
+                <td>Altíssima personalização; várias ferramentas integradas</td>
+                <td>Muitas opções podem confundir iniciantes; precisa organizar bem</td>
+              </tr>
+              <tr>
+                <td><strong>XFCE</strong></td>
+                <td>Leve e estável, foco em desempenho</td>
+                <td>Ótimo para hardware modesto; simples e rápido</td>
+                <td>Visual mais tradicional; menos “brilhos” e integrações avançadas</td>
+              </tr>
+              <tr>
+                <td><strong>Cinnamon</strong></td>
+                <td>Tradicional e amigável (tipo “menu + painel”), foco em usabilidade</td>
+                <td>Fácil para quem vem de Windows; bom equilíbrio desempenho/recursos</td>
+                <td>Algumas customizações exigem atenção para não bagunçar o ambiente</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout ok">
+            <strong>No nosso curso:</strong> vamos usar <strong>Cinnamon (Linux Mint)</strong> como ambiente principal,
+            porque é amigável, reduz barreiras e ajuda a focar em suporte e administração.
+          </div>
+
+          <h3>2.1 Como reconhecer em qual ambiente você está</h3>
+          <p>
+            Normalmente, o menu, o painel e as “Configurações” indicam o ambiente. No Linux Mint, a edição Cinnamon já vem com identidade própria.
+            Em outras distros, GNOME e KDE têm aparência bem característica.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo, você vai abrir “Sobre este sistema” e registrar informações do ambiente.
+          </div>
+        </div>
+      </section>
+
+      <section id="modernas" class="card">
+        <div class="content">
+          <h2>3) Interfaces modernas e tendências com potencial de desenvolvimento</h2>
+
+          <h3>3.1 Wayland como caminho padrão</h3>
+          <p>
+            Muitos ambientes caminham para usar Wayland como padrão, buscando melhor segurança e uma arquitetura mais simples.
+            Em termos práticos, você pode notar diferenças em captura de tela, compartilhamento, drivers e compatibilidade com apps antigos.
+          </p>
+
+          <h3>3.2 Compositores “tiling” e fluxos de produtividade</h3>
+          <p>
+            Além de DEs completos, existem <strong>compositores/WM</strong> com foco em produtividade, como os modelos de janelas em mosaico (tiling).
+            Eles são populares entre usuários avançados e DevOps por reduzir uso do mouse e aumentar velocidade com atalhos.
+          </p>
+          <div class="callout warn">
+            <strong>Importante:</strong> este curso não exige usar tiling WM. O objetivo é você entender que existem diferentes abordagens
+            e que suporte deve considerar o perfil do usuário.
+          </div>
+
+          <h3>3.3 Desktops “imutáveis” (conceito)</h3>
+          <p>
+            Algumas propostas modernas usam uma base “imutável”, onde o sistema base muda por imagens/atualizações controladas,
+            reduzindo o risco de “quebrar o sistema” por alterações manuais. Isso ajuda a padronizar ambientes e aumentar confiabilidade.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Mais adiante, em implantação (Cap. 16), você verá que padronizar é essencial.
+            O conceito de “imutável” se conecta à ideia de imagens e implantação controlada.
+          </div>
+
+          <h3>3.4 Acessibilidade e UX como prioridade</h3>
+          <p>
+            Uma tendência importante é melhorar acessibilidade (leitores de tela, alto contraste, atalhos) e usabilidade.
+            Para suporte, isso significa saber localizar ajustes de acessibilidade e adaptar o ambiente ao usuário.
+          </p>
+
+        </div>
+      </section>
+
+      <section id="gui" class="card">
+        <div class="content">
+          <h2>4) Gerenciamento de sistemas via interface gráfica (apenas citar)</h2>
+          <p>
+            Abaixo estão exemplos de aplicativos comuns de gerenciamento em cada ambiente. A ideia é você reconhecer nomes e equivalências.
+            No laboratório do curso, o foco será no Mint/Cinnamon, mas você deve saber “o equivalente” em GNOME/KDE/XFCE.
+          </p>
+
+          <div class="grid-2">
+            <div>
+              <h3>GNOME (exemplos comuns)</h3>
+              <div class="chips">
+                <span class="chip">GNOME Settings</span>
+                <span class="chip">GNOME Software</span>
+                <span class="chip">Files (Nautilus)</span>
+                <span class="chip">Disks</span>
+                <span class="chip">System Monitor</span>
+                <span class="chip">Terminal</span>
+              </div>
+              <p class="small muted">Observação: muitos recursos extras vêm via extensões do GNOME Shell.</p>
+            </div>
+            <div>
+              <h3>KDE Plasma (exemplos comuns)</h3>
+              <div class="chips">
+                <span class="chip">System Settings</span>
+                <span class="chip">Discover</span>
+                <span class="chip">Dolphin</span>
+                <span class="chip">KInfoCenter</span>
+                <span class="chip">KDE Partition Manager</span>
+                <span class="chip">Konsole</span>
+              </div>
+              <p class="small muted">Observação: KDE costuma ter ferramentas equivalentes para quase tudo, com alto nível de ajuste.</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>XFCE (exemplos comuns)</h3>
+              <div class="chips">
+                <span class="chip">Settings Manager</span>
+                <span class="chip">Thunar</span>
+                <span class="chip">Task Manager</span>
+                <span class="chip">Terminal (Xfce4-terminal)</span>
+                <span class="chip">Power Manager</span>
+              </div>
+              <p class="small muted">Observação: XFCE costuma ser modular; algumas distros escolhem apps externos para completar.</p>
+            </div>
+            <div>
+              <h3>Cinnamon (Linux Mint) — foco do curso</h3>
+              <div class="chips">
+                <span class="chip">System Settings</span>
+                <span class="chip">Software Manager</span>
+                <span class="chip">Update Manager</span>
+                <span class="chip">Nemo</span>
+                <span class="chip">Driver Manager</span>
+                <span class="chip">System Monitor</span>
+                <span class="chip">Terminal</span>
+              </div>
+              <p class="small muted">Observação: o Mint oferece gerenciadores próprios que ajudam o aluno iniciante.</p>
+            </div>
+          </div>
+
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso?</strong> No passo a passo você vai abrir e usar (ao menos uma vez) Settings, File Manager,
+            Update Manager e System Monitor, para construir familiaridade.
+          </div>
+        </div>
+      </section>
+
+      <section id="passo" class="card">
+        <div class="content">
+          <h2>5) Passo a passo prático (Mint Cinnamon na VM)</h2>
+          <p class="muted">Objetivo: explorar o ambiente gráfico, configurar o básico e treinar alternância GUI ↔ modo texto sem medo.</p>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">1</span> Conferir ambiente, versão e informações básicas</span><span class="pill">Inventário</span></div>
+            <ol class="list">
+              <li>Abra o menu do Cinnamon (ícone no canto inferior esquerdo).</li>
+              <li>Procure por <strong>System Info</strong> / <strong>Informações do Sistema</strong> ou <strong>About</strong> / <strong>Sobre</strong>.</li>
+              <li>Anote: versão do Mint, nome da edição (Cinnamon), arquitetura (64-bit).</li>
+              <li>Abra o <strong>Terminal</strong> e rode (opcional):</li>
+            </ol>
+            <pre><code># (opcional) Informações rápidas do sistema
+uname -a
+lsb_release -a 2>/dev/null || cat /etc/os-release</code></pre>
+            <p class="code-hint">Você ainda não precisa dominar comandos — o foco é reconhecer que o terminal complementa a GUI.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">2</span> Navegar e organizar arquivos com o Nemo (gerenciador de arquivos)</span><span class="pill">Arquivos</span></div>
+            <ol class="list">
+              <li>Abra o <strong>Nemo</strong> (ícone de pasta ou pelo menu).</li>
+              <li>Crie uma pasta no seu <code>Home</code>: <code>SOSL</code> → dentro dela <code>cap05</code>.</li>
+              <li>Crie um arquivo texto simples chamado <code>anotacoes-cap05.txt</code> e escreva: “Ambiente: Cinnamon”.</li>
+              <li>Se você configurou pasta compartilhada (Cap. 04), localize-a no Nemo e copie o arquivo para lá.</li>
+            </ol>
+            <div class="callout">
+              <strong>Onde vou aplicar isso?</strong> A partir do Cap. 09, você vai registrar logs e comandos.
+              Saber organizar a pasta do curso é parte do profissionalismo do suporte.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">3</span> Configurações essenciais: teclado, idioma, data/hora e tela</span><span class="pill">Settings</span></div>
+            <ol class="list">
+              <li>Abra <strong>System Settings</strong> (Configurações do Sistema).</li>
+              <li>Verifique e ajuste (se necessário):</li>
+              <ul class="list">
+                <li><strong>Keyboard</strong>: layout ABNT2, atalhos básicos.</li>
+                <li><strong>Language</strong>: idioma do sistema (se o curso exigir).</li>
+                <li><strong>Date &amp; Time</strong>: fuso horário.</li>
+                <li><strong>Display</strong>: resolução adequada para a VM.</li>
+              </ul>
+              <li>Registre 1 print mostrando a tela de configurações (para evidência).</li>
+            </ol>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">4</span> Atualizações e drivers (GUI do Mint)</span><span class="pill">Manutenção</span></div>
+            <ol class="list">
+              <li>Abra o <strong>Update Manager</strong> e confirme se está tudo atualizado.</li>
+              <li>Abra o <strong>Driver Manager</strong> e observe se há drivers recomendados (em VM geralmente é simples).</li>
+              <li>Registre 1 print do Update Manager (ou relatório curto na sua pasta).</li>
+            </ol>
+            <div class="callout warn">
+              <strong>Boa prática:</strong> em máquinas reais, mudanças de driver devem ser registradas. Em VM, isso serve para treino de processo.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">5</span> Monitorar o sistema pelo System Monitor</span><span class="pill">Diagnóstico</span></div>
+            <ol class="list">
+              <li>Abra o <strong>System Monitor</strong>.</li>
+              <li>Observe: CPU, memória e processos.</li>
+              <li>Abra 2 aplicativos ao mesmo tempo (ex.: navegador e editor de texto) e veja o impacto.</li>
+              <li>Anote no seu arquivo <code>anotacoes-cap05.txt</code> o que consumiu mais RAM.</li>
+            </ol>
+            <div class="callout">
+              <strong>Onde vou aplicar isso?</strong> Quando chegarmos a processos (Cap. 12) e monitoramento mais avançado,
+              você já terá intuição do que está acontecendo.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">6</span> Alternar para modo texto (TTY) e voltar para a GUI</span><span class="pill">Sem GUI</span></div>
+            <div class="callout warn">
+              <strong>Atenção (VirtualBox):</strong> em VM, algumas teclas podem conflitar com a “Host Key”.
+              Se <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd> não funcionar, tente liberar o mouse/teclado com a Host Key (geralmente <kbd>Right Ctrl</kbd>).
+            </div>
+            <ol class="list">
+              <li>Na VM, pressione <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>F3</kbd> para ir para um terminal de texto.</li>
+              <li>Faça login com seu usuário e senha.</li>
+              <li>Digite <code>whoami</code> e pressione Enter (apenas para confirmar).</li>
+              <li>Digite <code>exit</code> (opcional) ou volte para a interface gráfica com <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>F2</kbd> (às vezes <kbd>F1</kbd> ou <kbd>F7</kbd> depende da distro).</li>
+            </ol>
+            <pre><code># Comandos simples no TTY
+whoami
+pwd
+exit</code></pre>
+            <p class="code-hint">Você não precisa decorar agora. O objetivo é perder o medo do modo texto (você vai usar muito a partir do Cap. 09).</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">7</span> Snapshot recomendado (opcional, mas útil)</span><span class="pill">Snapshot</span></div>
+            <p>
+              Se você fez ajustes de interface e quer preservar o estado “Cap05 pronto”, crie um snapshot chamado <code>B2-Cap05-GUI</code>.
+              Isso ajuda se você testar coisas e bagunçar o desktop.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>6) Atividades práticas sugeridas (sem entregar projeto completo)</h2>
+          <ul class="list">
+            <li><strong>Atividade 1 — Perfil de usuário:</strong> configure o desktop do Cinnamon para um perfil “Atendimento” (atalhos na área de trabalho, navegador, pasta SOSL, wallpaper simples). Registre prints.</li>
+            <li><strong>Atividade 2 — Produtividade:</strong> configure 3 atalhos de teclado úteis (abrir terminal, screenshot, alternar janelas) e explique onde ajuda no suporte.</li>
+            <li><strong>Atividade 3 — Comparação guiada:</strong> pesquise (sem instalar) 3 diferenças visuais/funcionais entre GNOME e KDE (com base em fontes oficiais/prints) e registre no seu caderno.</li>
+          </ul>
+
+          <h3>Pesquisas complementares</h3>
+          <ul class="list">
+            <li>O que muda de X11 para Wayland (em termos de segurança e compatibilidade).</li>
+            <li>O que é compositor e por que efeitos (sombras/animações) podem impactar desempenho em VM.</li>
+            <li>Como funcionam “workspaces” e por que ajudam na organização do trabalho.</li>
+            <li>Como identificar o gerenciador de arquivos e o monitor do sistema em diferentes DEs.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>7) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz05">
+
+            <div class="q" data-answer="b" data-topic="DE">
+              <div class="q-hd"><span>1) O que é um Desktop Environment (DE)?</span><span class="pill">Conceito</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q1" value="a"> Apenas um navegador web.</label>
+                  <label class="opt"><input type="radio" name="q1" value="b"> Conjunto da experiência gráfica: painel, menu, configurações, apps integrados e comportamento de janelas.</label>
+                  <label class="opt"><input type="radio" name="q1" value="c"> Um tipo de licença de software.</label>
+                  <label class="opt"><input type="radio" name="q1" value="d"> Um antivírus obrigatório do Linux.</label>
+                  <label class="opt"><input type="radio" name="q1" value="e"> Apenas o kernel Linux.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="WM">
+              <div class="q-hd"><span>2) Qual é o papel do Window Manager (WM)?</span><span class="pill">Janela</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q2" value="a"> Controlar o roteador da rede.</label>
+                  <label class="opt"><input type="radio" name="q2" value="b"> Atualizar a BIOS automaticamente.</label>
+                  <label class="opt"><input type="radio" name="q2" value="c"> Controlar comportamento das janelas: mover, redimensionar, foco, efeitos e organização.</label>
+                  <label class="opt"><input type="radio" name="q2" value="d"> Ser o único responsável por instalar aplicativos.</label>
+                  <label class="opt"><input type="radio" name="q2" value="e"> Trocar o kernel Linux.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="X11Wayland">
+              <div class="q-hd"><span>3) X11 e Wayland são exemplos de:</span><span class="pill">Base gráfica</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q3" value="a"> Servidores de exibição (display server) / base de desenho na tela e entrada.</label>
+                  <label class="opt"><input type="radio" name="q3" value="b"> Linguagens de programação para scripts.</label>
+                  <label class="opt"><input type="radio" name="q3" value="c"> Formatos de pacote (snap/flatpak).</label>
+                  <label class="opt"><input type="radio" name="q3" value="d"> Tipos de sistema de arquivos.</label>
+                  <label class="opt"><input type="radio" name="q3" value="e"> Placas de rede virtuais.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="Cinnamon">
+              <div class="q-hd"><span>4) Por que o curso usa o Cinnamon (Linux Mint) como ambiente principal?</span><span class="pill">Curso</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q4" value="a"> Porque é o único ambiente disponível no Linux.</label>
+                  <label class="opt"><input type="radio" name="q4" value="b"> Porque impede o uso do terminal.</label>
+                  <label class="opt"><input type="radio" name="q4" value="c"> Porque funciona apenas com hardware caro.</label>
+                  <label class="opt"><input type="radio" name="q4" value="d"> Porque é amigável, tradicional e reduz barreiras para focar em suporte e administração.</label>
+                  <label class="opt"><input type="radio" name="q4" value="e"> Porque não permite atualização de software.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="KDE">
+              <div class="q-hd"><span>5) Qual característica é mais associada ao KDE Plasma?</span><span class="pill">KDE</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q5" value="a"> Não tem configurações.</label>
+                  <label class="opt"><input type="radio" name="q5" value="b"> Só funciona em servidores sem interface.</label>
+                  <label class="opt"><input type="radio" name="q5" value="c"> É sempre mais leve que qualquer outro ambiente.</label>
+                  <label class="opt"><input type="radio" name="q5" value="d"> É um display server, não um ambiente desktop.</label>
+                  <label class="opt"><input type="radio" name="q5" value="e"> Grande capacidade de personalização e muitas ferramentas integradas.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="XFCE">
+              <div class="q-hd"><span>6) Qual característica é mais associada ao XFCE?</span><span class="pill">XFCE</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q6" value="a"> Leveza e bom desempenho em hardware modesto.</label>
+                  <label class="opt"><input type="radio" name="q6" value="b"> Interface obrigatória baseada em extensões.</label>
+                  <label class="opt"><input type="radio" name="q6" value="c"> Necessita GPU dedicada para funcionar.</label>
+                  <label class="opt"><input type="radio" name="q6" value="d"> É um tipo de gerenciador de pacotes.</label>
+                  <label class="opt"><input type="radio" name="q6" value="e"> Não possui gerenciador de arquivos.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Nemo">
+              <div class="q-hd"><span>7) No Cinnamon (Mint), o gerenciador de arquivos padrão mais comum é:</span><span class="pill">Apps</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q7" value="a"> Dolphin</label>
+                  <label class="opt"><input type="radio" name="q7" value="b"> Nemo</label>
+                  <label class="opt"><input type="radio" name="q7" value="c"> Thunar</label>
+                  <label class="opt"><input type="radio" name="q7" value="d"> Explorer</label>
+                  <label class="opt"><input type="radio" name="q7" value="e"> Finder</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="TTY">
+              <div class="q-hd"><span>8) Qual é o objetivo de acessar um TTY (modo texto) durante o aprendizado?</span><span class="pill">TTY</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q8" value="a"> Desinstalar o ambiente gráfico.</label>
+                  <label class="opt"><input type="radio" name="q8" value="b"> Apagar o disco virtual.</label>
+                  <label class="opt"><input type="radio" name="q8" value="c"> Instalar drivers automaticamente.</label>
+                  <label class="opt"><input type="radio" name="q8" value="d"> Perder o medo do modo texto e saber que o sistema pode ser administrado mesmo sem GUI.</label>
+                  <label class="opt"><input type="radio" name="q8" value="e"> Trocar o kernel para uma versão antiga.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="GUItools">
+              <div class="q-hd"><span>9) Qual combinação de ferramentas GUI do Mint é mais ligada a manutenção inicial?</span><span class="pill">Ferramentas</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q9" value="a"> Nemo + Wallpapers</label>
+                  <label class="opt"><input type="radio" name="q9" value="b"> Jogos + Editor de vídeo</label>
+                  <label class="opt"><input type="radio" name="q9" value="c"> Update Manager + Driver Manager + System Settings</label>
+                  <label class="opt"><input type="radio" name="q9" value="d"> Apenas navegador</label>
+                  <label class="opt"><input type="radio" name="q9" value="e"> Apenas terminal (sem GUI)</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Proximo">
+              <div class="q-hd"><span>10) Qual é o foco principal do próximo capítulo (Cap. 06)?</span><span class="pill">Sequência</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q10" value="a"> Gerenciadores de pacotes, lojas e formatos Snap/Flatpak.</label>
+                  <label class="opt"><input type="radio" name="q10" value="b"> Apenas história do software livre.</label>
+                  <label class="opt"><input type="radio" name="q10" value="c"> Apenas boot e systemd.</label>
+                  <label class="opt"><input type="radio" name="q10" value="d"> Apenas usuários e permissões.</label>
+                  <label class="opt"><input type="radio" name="q10" value="e"> Apenas backup e restauração.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" id="quizScoreBox" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>8) Checklist do aluno (interativo)</h2>
+          <p class="muted">Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist05">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu consigo</strong> explicar o que é um Desktop Environment (DE).</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu sei</strong> diferenciar DE, WM e Display Server (X11/Wayland) em nível básico.</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu conheço</strong> pontos fortes e limitações de GNOME, KDE, XFCE e Cinnamon.</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu identifiquei</strong> as ferramentas GUI principais do Cinnamon (Settings, Nemo, Update Manager, System Monitor).</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu organizei</strong> minha pasta SOSL/cap05 e registrei anotações.</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu consegui</strong> acessar um TTY e voltar para a GUI com segurança.</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu fiz</strong> pelo menos 1 atividade prática sugerida.</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu respondi</strong> o quiz e revisei os tópicos em que errei.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo04.html">← Voltar ao Cap. 04</a>
+            <a class="btn dark" href="capitulo06.html">Ir para Cap. 06 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz05');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'DE': 'Revise 1.1: DE é o conjunto da experiência gráfica (painel/menu/config/apps integrados).',
+        'WM': 'Revise 1.2: WM controla comportamento das janelas e organização.',
+        'X11Wayland': 'Revise 1.3: X11 e Wayland são servidores de exibição/base gráfica.',
+        'Cinnamon': 'Revise 2 e o topo: Cinnamon é amigável e bom para laboratório.',
+        'KDE': 'Revise tabela comparativa: KDE é altamente personalizável e completo.',
+        'XFCE': 'Revise tabela comparativa: XFCE é leve e estável para hardware modesto.',
+        'Nemo': 'Revise 4: no Cinnamon, o gerenciador de arquivos comum é Nemo.',
+        'TTY': 'Revise passo 6: TTY treina administração sem GUI e reduz medo do terminal.',
+        'GUItools': 'Revise 4 e passo 4: Update/Driver/Settings são base de manutenção inicial.',
+        'Proximo': 'Revise o sumário: Cap. 06 trata pacotes, lojas e formatos Snap/Flatpak.'
+      };
+      return map[topic] || 'Revise as seções de teoria e prática deste capítulo.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist05');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap05_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+
+  </script>
+
+</body>
+</html>

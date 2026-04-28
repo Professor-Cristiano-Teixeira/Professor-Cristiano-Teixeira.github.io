@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1' />
+  <title>Capítulo 14 — Manutenção Preventiva no Linux — SOSL</title>
+  <meta name='description' content='Capítulo 14 da apostila SOSL: manutenção preventiva — atualização segura, limpeza, checagem de disco, logs/journal, serviços, agendamento e relatório, com prática guiada, quiz e checklist.' />
+  <!-- arquivo: capitulo14.html -->
+  <style>
+    :root{--pw-red:#0b1f3a;--pw-red-dark:#071528;--pw-gray:#3f3f3f;--pw-gray-dark:#2f2f2f;--bg:#fff;--surface:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;--link:var(--pw-red);--shadow:0 10px 28px rgba(0,0,0,.08);--radius:16px;--maxw:1120px;--hero:linear-gradient(180deg,rgba(11,31,58,.12),rgba(11,31,58,0));--ok:#065f46;--ok-bg:#ecfdf5;--warn:#92400e;--warn-bg:#fffbeb;--bad:#991b1b;--bad-bg:#fef2f2;--code-bg:#0f172a;--code-fg:#e5e7eb;--code-border:#0b1220;--code-muted:#94a3b8}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.55;background:var(--bg);color:var(--text)}a{color:var(--link)}a:hover{color:var(--pw-red-dark)}
+    header{position:sticky;top:0;z-index:1000}.nav{background:var(--pw-red);color:#fff;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}.nav .wrap{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:800}.logo{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:inline-flex;align-items:center;justify-content:center;font-weight:900}
+    .hamburger{display:none;appearance:none;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .menu{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.menu a{text-decoration:none;color:#fff;padding:10px;border-radius:12px;font-weight:650;opacity:.95}.menu a:hover{background:rgba(255,255,255,.12)}.menu a.secondary{opacity:.9}.menu-gap{flex:1 1 auto}
+    .dropdown{position:relative}.dropdown-toggle{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .dropdown-menu{position:absolute;right:0;top:46px;min-width:290px;background:#fff;color:var(--text);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;display:none;max-height:60vh;overflow:auto}.dropdown.open .dropdown-menu{display:block}
+    .dropdown-menu a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border-radius:12px;color:var(--text);text-decoration:none;font-weight:650}.dropdown-menu a:hover{background:#f3f4f6}
+    .pill{font-size:.75rem;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted);white-space:nowrap}
+    .hero{background:var(--hero);padding:18px 16px;border-bottom:1px solid var(--border)}main{padding:22px 16px 50px}.container{max-width:var(--maxw);margin:0 auto}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}.content{padding:20px}
+    h1{margin:0 0 6px;font-size:clamp(1.55rem,2.2vw,2.05rem)}h2{margin:22px 0 10px;font-size:clamp(1.2rem,1.6vw,1.5rem)}h3{margin:16px 0 6px;font-size:1.05rem}.subtitle{color:var(--muted);margin:0 0 10px}.muted{color:var(--muted)}.small{font-size:.92rem}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px}.badge{font-size:.82rem;padding:6px 10px;border-radius:999px;background:rgba(11,31,58,.08);border:1px solid rgba(11,31,58,.18);color:var(--pw-red-dark);font-weight:800}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:980px){.grid-2{grid-template-columns:1fr}}
+    .callout{border:1px solid var(--border);border-left:6px solid rgba(11,31,58,.55);background:rgba(11,31,58,.04);border-radius:14px;padding:12px 14px;margin:12px 0}.callout.ok{border-left-color:rgba(6,95,70,.7);background:var(--ok-bg)}.callout.warn{border-left-color:rgba(146,64,14,.7);background:var(--warn-bg)}.callout.bad{border-left-color:rgba(153,27,27,.7);background:var(--bad-bg)}
+    .list{margin:10px 0 0;padding-left:18px}.list li{margin:7px 0}
+    .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.toc a{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(11,31,58,.2);border-radius:999px;background:rgba(11,31,58,.04);color:var(--pw-red-dark);font-weight:800;text-decoration:none;font-size:.86rem}.toc a:hover{background:rgba(11,31,58,.08)}
+    pre{margin:10px 0;background:var(--code-bg);color:var(--code-fg);padding:14px;border-radius:12px;overflow:auto;border:1px solid var(--code-border);box-shadow:0 6px 18px rgba(0,0,0,.15)}code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}pre code{font-size:.92rem}.code-hint{color:var(--code-muted);font-size:.86rem;margin-top:6px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;padding:10px 12px;border-radius:12px;font-weight:850;border:1px solid transparent;cursor:pointer;user-select:none}
+    .btn.primary{background:var(--pw-red);color:#fff;border-color:var(--pw-red)}.btn.primary:hover{background:var(--pw-red-dark);border-color:var(--pw-red-dark)}
+    .btn.dark{background:var(--pw-gray);color:#fff;border-color:var(--pw-gray)}.btn.dark:hover{background:var(--pw-gray-dark);border-color:var(--pw-gray-dark)}
+    .btn.ghost{background:transparent;color:var(--pw-red);border-color:rgba(11,31,58,.35)}.btn.ghost:hover{background:rgba(11,31,58,.06)}
+    .table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;border:1px solid var(--border);margin:10px 0}.table th,.table td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}.table th{background:rgba(11,31,58,.06);font-weight:900}.table tr:last-child td{border-bottom:0}
+    .step{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin:12px 0}.step .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:950}.step .num{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:999px;background:rgba(11,31,58,.10);border:1px solid rgba(11,31,58,.22);color:var(--pw-red-dark);font-weight:950}
+    .quiz{margin-top:6px}.q{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0;background:#fff}.q-hd{padding:12px 14px;background:rgba(11,31,58,.06);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;font-weight:900}.q-bd{padding:12px 14px 14px}.opts{display:grid;gap:8px;margin-top:8px}
+    .opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#fff}.opt:hover{background:#f9fafb}.opt input{margin-top:3px}
+    .feedback{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;border:1px solid var(--border);background:#f9fafb}.feedback.show{display:block}.feedback.ok{border-color:rgba(6,95,70,.25);background:var(--ok-bg);color:var(--ok)}.feedback.bad{border-color:rgba(153,27,27,.25);background:var(--bad-bg);color:var(--bad)}.q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .checklist{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin-top:10px}.check-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--border)}.check-item:last-child{border-bottom:0}
+    .progress{margin-top:10px;height:10px;background:#f3f4f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}.progress>div{height:100%;width:0%;background:linear-gradient(90deg,rgba(11,31,58,.92),rgba(11,31,58,.55))}
+    .skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}.skip-link:focus{left:10px;top:10px;width:auto;height:auto;padding:10px 12px;background:#fff;border:2px solid var(--pw-red);border-radius:12px;z-index:2000}
+    @media(max-width:860px){.hamburger{display:inline-flex}.menu{display:none;width:100%;padding-top:10px}.menu.show{display:flex}.dropdown-menu{left:0;right:auto}}
+    footer{border-top:1px solid var(--border);padding:18px 16px}
+  </style>
+</head>
+<body>
+  <a href='#conteudo' class='skip-link'>Pular para o conteúdo</a>
+  <header>
+    <nav class='nav' role='navigation' aria-label='Navegação principal'>
+      <div class='wrap'>
+        <a class='brand' href='index.html' aria-label='Voltar ao Index'><span class='logo' aria-hidden='true'>SOSL</span><span>Apostila • Cap. 14</span></a>
+        <button class='hamburger' id='hamburgerBtn' aria-expanded='false' aria-controls='mainMenu'>☰ Menu</button>
+        <div class='menu' id='mainMenu'>
+          <a href='index.html' class='secondary'>Index</a>
+          <a href='plano.html'>Plano do Curso</a>
+          <a href='#teoria'>Teoria</a>
+          <a href='#passo'>Prática</a>
+          <a href='#quiz'>Quiz</a>
+          <a href='#checklist'>Checklist</a>
+          <span class='menu-gap'></span>
+          <div class='dropdown' id='chaptersDropdown'>
+            <button class='dropdown-toggle' aria-haspopup='true' aria-expanded='false'>Capítulos ▼</button>
+            <div class='dropdown-menu' role='menu' aria-label='Lista de capítulos'>
+              <a href='capitulo13.html' role='menuitem'><span>Cap. 13 — Shell Script</span><span class='pill'>13</span></a>
+              <a href='capitulo14.html' role='menuitem'><span>Cap. 14 — Manutenção preventiva</span><span class='pill'>14</span></a>
+              <a href='capitulo15.html' role='menuitem'><span>Cap. 15 — Backup e restauração</span><span class='pill'>15</span></a>
+              <a href='capitulo16.html' role='menuitem'><span>Cap. 16 — Implantação</span><span class='pill'>16</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class='hero'>
+    <div class='container'>
+      <div class='card'>
+        <div class='content'>
+          <h1 id='conteudo'>Capítulo 14 — Manutenção Preventiva no Linux</h1>
+          <p class='subtitle'>Manutenção preventiva evita incidentes: <strong>atualizar com segurança</strong>, <strong>controlar disco e logs</strong>, <strong>validar serviços</strong> e <strong>registrar evidências</strong>. Você vai executar uma rotina completa e gerar um relatório “ticket-ready”.</p>
+
+          <div class='badges'>
+            <span class='badge'>apt update/upgrade</span><span class='badge'>df/du</span><span class='badge'>systemctl --failed</span><span class='badge'>journalctl</span><span class='badge'>autoremove/clean</span><span class='badge'>cron/timers</span><span class='badge'>relatório</span>
+          </div>
+
+          <div class='grid-2'>
+            <div>
+              <h2 style='margin-top:0'>Objetivos</h2>
+              <ul class='list'>
+                <li>Aplicar uma rotina preventiva (check → ação → validação → relatório).</li>
+                <li>Atualizar e limpar de forma responsável (sem “quebrar” o sistema).</li>
+                <li>Medir e investigar uso de disco (df/du) e controlar crescimento.</li>
+                <li>Checar falhas de serviços e registrar erros relevantes (systemctl/journal).</li>
+                <li>Planejar agendamento com log (cron ou timer).</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style='margin-top:0'>Pré-requisitos</h2>
+              <ul class='list'>
+                <li>Cap. 06 (pacotes) e Cap. 07 (systemd/journal).</li>
+                <li>Cap. 10 (arquivos/filtros) e Cap. 13 (script — opcional).</li>
+              </ul>
+              <div class='callout warn'><strong>Segurança:</strong> se possível, crie snapshot antes. Evite remover pacotes sem entender.</div>
+            </div>
+          </div>
+
+          <div class='toc'>
+            <a href='#teoria'>📚 Teoria</a>
+            <a href='#rotina'>🧭 Rotina</a>
+            <a href='#limpeza'>🧹 Limpeza</a>
+            <a href='#logs'>🧾 Logs</a>
+            <a href='#agendar'>⏱️ Agendar</a>
+            <a href='#passo'>🧪 Passo a passo</a>
+            <a href='#atividades'>🧩 Atividades</a>
+            <a href='#quiz'>📝 Quiz</a>
+            <a href='#checklist'>☑️ Checklist</a>
+          </div>
+
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo13.html'>← Voltar ao Cap. 13</a>
+            <a class='btn dark' href='capitulo15.html'>Próximo: Cap. 15 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class='container'>
+
+      <section id='teoria' class='card'>
+        <div class='content'>
+          <h2>1) Teoria: manutenção preventiva é método</h2>
+
+          <h3>1.1 O que é manutenção preventiva?</h3>
+          <p>É um conjunto de rotinas para <strong>reduzir falhas</strong> e manter estabilidade: atualização, checagem de recursos, controle de logs e validação de serviços. O foco é prevenir incidentes.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> No passo a passo você seguirá uma sequência fixa e produzirá evidência em arquivo.</div>
+
+          <h3>1.2 Atualização segura = mudança controlada</h3>
+          <p>Atualizar é uma mudança. A prática profissional é: snapshot/backup, atualização, validação e registro (antes/depois). Assim você sabe o que mudou e consegue justificar em um ticket.</p>
+          <div class='callout warn'><strong>Onde vou aplicar isso?</strong> Você registrará df, serviços falhados e erros do journal antes e depois.</div>
+
+          <h3>1.3 Disco cheio derruba serviços</h3>
+          <p>Quando o disco enche, atualizações falham e logs não gravam. Use <code>df -h</code> para ver “quanto falta” e <code>du</code> para descobrir “quem está ocupando”.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Você vai listar top diretórios em /var e no seu home, e registrar no relatório.</div>
+
+          <h3>1.4 Logs são evidência (não apague tudo)</h3>
+          <p>Logs explicam o que aconteceu. Manutenção correta controla tamanho com rotação (logrotate) e limpeza do journal por tempo/tamanho (<code>vacuum</code>), sem perder histórico útil.</p>
+          <div class='callout ok'><strong>Onde vou aplicar isso?</strong> Você vai medir <code>journalctl --disk-usage</code> e aplicar um vacuum controlado.</div>
+
+          <h3>1.5 Agendamento com responsabilidade</h3>
+          <p>Cron e timers automatizam rotinas, mas devem gerar logs. “Rodou e ninguém viu” vira problema.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Você vai criar um exemplo de agendamento para gerar relatório semanal com log.</div>
+        </div>
+      </section>
+
+      <section id='rotina' class='card'>
+        <div class='content'>
+          <h2>2) Rotina preventiva recomendada</h2>
+          <table class='table'>
+            <thead><tr><th>Etapa</th><th>Exemplos</th><th>Objetivo</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Checar</strong></td><td><code>uptime</code>, <code>df -h</code>, <code>systemctl --failed</code></td><td>risco imediato</td></tr>
+              <tr><td><strong>Atualizar</strong></td><td><code>apt update</code>, <code>apt upgrade</code></td><td>segurança/bugs</td></tr>
+              <tr><td><strong>Limpar</strong></td><td><code>apt autoremove</code>, <code>apt clean</code></td><td>reduzir lixo</td></tr>
+              <tr><td><strong>Logs</strong></td><td><code>journalctl -p err</code>, <code>--disk-usage</code>, <code>--vacuum</code></td><td>evidência + controle</td></tr>
+              <tr><td><strong>Validar</strong></td><td><code>systemctl --failed</code>, journal de erros</td><td>confirmar estabilidade</td></tr>
+              <tr><td><strong>Registrar</strong></td><td><code>tee</code> em arquivo</td><td>auditoria/ticket</td></tr>
+            </tbody>
+          </table>
+          <div class='callout ok'><strong>Dica:</strong> Faça toda semana. Em servidor, a frequência pode ser maior, seguindo política.</div>
+        </div>
+      </section>
+
+      <section id='limpeza' class='card'>
+        <div class='content'>
+          <h2>3) Limpeza responsável</h2>
+
+          <h3>3.1 Limpeza de pacotes (Mint/Ubuntu)</h3>
+          <pre><code>sudo apt autoremove
+sudo apt clean</code></pre>
+          <div class='callout warn'><strong>Onde vou aplicar isso?</strong> Você vai medir df antes/depois e registrar o impacto.</div>
+
+          <h3>3.2 Encontrar consumo de disco (du + sort)</h3>
+          <pre><code>sudo du -h --max-depth=1 /var 2>/dev/null | sort -h | tail -n 15
+
+du -h --max-depth=1 ~ 2>/dev/null | sort -h | tail -n 15</code></pre>
+          <p class='code-hint'>Top consumidores comuns: caches, logs, downloads e snapshots de apps.</p>
+        </div>
+      </section>
+
+      <section id='logs' class='card'>
+        <div class='content'>
+          <h2>4) Logs e serviços</h2>
+
+          <h3>4.1 Serviços falhados e erros</h3>
+          <pre><code>systemctl --failed
+journalctl -b -p err --no-pager | tail -n 60</code></pre>
+
+          <h3>4.2 Journal: tamanho e vacuum controlado</h3>
+          <pre><code>journalctl --disk-usage
+sudo journalctl --vacuum-time=7d
+journalctl --disk-usage</code></pre>
+          <div class='callout bad'><strong>Não</strong> use “apagar tudo” como manutenção. Controle é diferente de apagar histórico.</div>
+
+          <h3>4.3 Identificar logs grandes em /var/log</h3>
+          <pre><code>sudo find /var/log -type f -printf '%s %p
+' 2>/dev/null | sort -n | tail -n 10</code></pre>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> No passo a passo você vai anexar os maiores logs ao relatório.</div>
+        </div>
+      </section>
+
+      <section id='agendar' class='card'>
+        <div class='content'>
+          <h2>5) Agendar rotina (cron)</h2>
+          <p>O cron agenda comandos por horário. Sempre redirecione para log.</p>
+          <pre><code>crontab -e
+# Exemplo semanal (domingo 08:00):
+# 0 8 * * 0 /home/$USER/SOSL/cap13/scripts/diag.sh >> /home/$USER/SOSL/cap14/cron.log 2>&1</code></pre>
+          <div class='callout ok'><strong>Boa prática:</strong> o log do cron é sua auditoria. Sem isso, você não prova que rodou.</div>
+        </div>
+      </section>
+
+      <section id='passo' class='card'>
+        <div class='content'>
+          <h2>6) Passo a passo: rotina completa + relatório “ticket-ready”</h2>
+          <p class='muted'>Você vai gerar <code>~/SOSL/cap14/manutencao-cap14.txt</code> com checagens, ações e validação.</p>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>1</span> Preparar pasta e arquivo</span><span class='pill'>Setup</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap14
+R=~/SOSL/cap14/manutencao-cap14.txt
+: > "$R"</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>2</span> Checagem antes</span><span class='pill'>Antes</span></div>
+            <pre><code>{
+  echo "MANUTENÇÃO PREVENTIVA — CAP. 14";
+  echo "Data: $(date)";
+  echo "Usuário: $(whoami)";
+  echo "Host: $(hostname)";
+  echo "
+[ANTES] uptime:"; uptime;
+  echo "
+[ANTES] df -h:"; df -h;
+  echo "
+[ANTES] serviços falhados:"; systemctl --failed;
+  echo "
+[ANTES] erros (boot):"; journalctl -b -p err --no-pager | tail -n 30;
+} | tee -a "$R"</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>3</span> Atualização segura</span><span class='pill'>Update</span></div>
+            <pre><code>{
+  echo "
+[AÇÃO] apt update/upgrade";
+  sudo apt update;
+  sudo apt -y upgrade;
+} | tee -a "$R"</code></pre>
+            <p class='code-hint'>Se houver atualização grande (kernel), registre e reinicie depois (se necessário).</p>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>4</span> Limpeza (autoremove/clean) + df depois</span><span class='pill'>Clean</span></div>
+            <pre><code>{
+  echo "
+[AÇÃO] limpeza";
+  sudo apt -y autoremove;
+  sudo apt clean;
+  echo "
+[DEPOIS] df -h:"; df -h;
+} | tee -a "$R"</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>5</span> Análise de consumo (du)</span><span class='pill'>Disk</span></div>
+            <pre><code>{
+  echo "
+[ANÁLISE] Top /var:";
+  sudo du -h --max-depth=1 /var 2>/dev/null | sort -h | tail -n 15;
+  echo "
+[ANÁLISE] Top ~:";
+  du -h --max-depth=1 ~ 2>/dev/null | sort -h | tail -n 15;
+} | tee -a "$R"</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>6</span> Logs (tamanho + vacuum)</span><span class='pill'>Logs</span></div>
+            <pre><code>{
+  echo "
+[LOGS] journal tamanho:";
+  journalctl --disk-usage;
+  echo "
+[AÇÃO] vacuum 7 dias:";
+  sudo journalctl --vacuum-time=7d;
+  echo "
+[LOGS] journal tamanho após:";
+  journalctl --disk-usage;
+  echo "
+[LOGS] maiores arquivos em /var/log:";
+  sudo find /var/log -type f -printf '%s %p
+' 2>/dev/null | sort -n | tail -n 10;
+} | tee -a "$R"</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>7</span> Validação final</span><span class='pill'>Depois</span></div>
+            <pre><code>{
+  echo "
+[DEPOIS] serviços falhados:";
+  systemctl --failed;
+  echo "
+[DEPOIS] erros (boot):";
+  journalctl -b -p err --no-pager | tail -n 30;
+  echo "
+[CONCLUSÃO]";
+  echo "- Atualizou?";
+  echo "- Limpou?";
+  echo "- Melhorou df?";
+  echo "- Há falhas?";
+  echo "- Próximas ações:";
+} | tee -a "$R"
+
+less "$R"</code></pre>
+          </div>
+
+          <div class='callout ok'><strong>Entrega do capítulo:</strong> envie o arquivo <code>manutencao-cap14.txt</code> como evidência.</div>
+        </div>
+      </section>
+
+      <section id='atividades' class='card'>
+        <div class='content'>
+          <h2>7) Atividades práticas sugeridas</h2>
+          <ul class='list'>
+            <li><strong>Atividade 1:</strong> transforme o passo a passo em um script <code>manutencao.sh</code> (Cap. 13) que gere relatório automaticamente.</li>
+            <li><strong>Atividade 2:</strong> simule “disco cheio” criando arquivos grandes em <code>~/SOSL/cap14</code> e depois recupere espaço com du/remoção segura.</li>
+            <li><strong>Atividade 3:</strong> crie um agendamento cron semanal para rodar o script e gravar log.</li>
+          </ul>
+          <h3>Pesquisas complementares</h3>
+          <ul class='list'>
+            <li>Como o logrotate funciona e onde ficam configs.</li>
+            <li>Diferença entre cron e systemd timers.</li>
+            <li>Atualizações de segurança: por que priorizar.</li>
+            <li>Monitoramento proativo (alertas de disco e serviços).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id='quiz' class='card'>
+        <div class='content'>
+          <h2>8) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class='muted'>Responda e veja feedback por questão.</p>
+          <div class='quiz' id='quiz14'>
+            <div class='q' data-answer='d' data-topic='conceito'><div class='q-hd'><span>1) Objetivo principal da manutenção preventiva:</span><span class='pill'>Conceito</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q1' value='a'> Apagar logs sempre</label>
+              <label class='opt'><input type='radio' name='q1' value='b'> Instalar apps sem critério</label>
+              <label class='opt'><input type='radio' name='q1' value='c'> Evitar atualizar</label>
+              <label class='opt'><input type='radio' name='q1' value='d'> Reduzir falhas com rotina e evidência</label>
+              <label class='opt'><input type='radio' name='q1' value='e'> Trocar tema</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='mudanca'><div class='q-hd'><span>2) Antes de atualizar, o mais correto é:</span><span class='pill'>Mudança</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q2' value='a'> Atualizar sem registrar</label>
+              <label class='opt'><input type='radio' name='q2' value='b'> Snapshot/backup e registro antes/depois</label>
+              <label class='opt'><input type='radio' name='q2' value='c'> chmod 777 /etc</label>
+              <label class='opt'><input type='radio' name='q2' value='d'> Apagar /var/log</label>
+              <label class='opt'><input type='radio' name='q2' value='e'> Formatar</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='df'><div class='q-hd'><span>3) Comando para uso de espaço por filesystem:</span><span class='pill'>Disco</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q3' value='a'> df -h</label>
+              <label class='opt'><input type='radio' name='q3' value='b'> ps aux</label>
+              <label class='opt'><input type='radio' name='q3' value='c'> ip route</label>
+              <label class='opt'><input type='radio' name='q3' value='d'> chmod</label>
+              <label class='opt'><input type='radio' name='q3' value='e'> whoami</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='c' data-topic='du'><div class='q-hd'><span>4) Para descobrir “quem ocupa espaço”, use:</span><span class='pill'>du</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q4' value='a'> uname</label>
+              <label class='opt'><input type='radio' name='q4' value='b'> ping</label>
+              <label class='opt'><input type='radio' name='q4' value='c'> du</label>
+              <label class='opt'><input type='radio' name='q4' value='d'> man</label>
+              <label class='opt'><input type='radio' name='q4' value='e'> lsblk</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='e' data-topic='failed'><div class='q-hd'><span>5) Listar serviços falhados:</span><span class='pill'>systemd</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q5' value='a'> rm -r</label>
+              <label class='opt'><input type='radio' name='q5' value='b'> tail -f</label>
+              <label class='opt'><input type='radio' name='q5' value='c'> ip -br a</label>
+              <label class='opt'><input type='radio' name='q5' value='d'> cut -d:</label>
+              <label class='opt'><input type='radio' name='q5' value='e'> systemctl --failed</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='journal'><div class='q-hd'><span>6) Ver espaço do journal:</span><span class='pill'>journal</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q6' value='a'> journalctl -b</label>
+              <label class='opt'><input type='radio' name='q6' value='b'> journalctl --disk-usage</label>
+              <label class='opt'><input type='radio' name='q6' value='c'> apt clean</label>
+              <label class='opt'><input type='radio' name='q6' value='d'> ps aux</label>
+              <label class='opt'><input type='radio' name='q6' value='e'> du -h ~</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='vacuum'><div class='q-hd'><span>7) vacuum-time=7d significa:</span><span class='pill'>Vacuum</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q7' value='a'> Desligar PC</label>
+              <label class='opt'><input type='radio' name='q7' value='b'> Instalar pacotes</label>
+              <label class='opt'><input type='radio' name='q7' value='c'> Apagar todos logs sempre</label>
+              <label class='opt'><input type='radio' name='q7' value='d'> Manter apenas logs dos últimos 7 dias</label>
+              <label class='opt'><input type='radio' name='q7' value='e'> Mudar permissões</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='autoremove'><div class='q-hd'><span>8) Remover dependências não usadas:</span><span class='pill'>apt</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q8' value='a'> apt autoremove</label>
+              <label class='opt'><input type='radio' name='q8' value='b'> apt update</label>
+              <label class='opt'><input type='radio' name='q8' value='c'> apt search</label>
+              <label class='opt'><input type='radio' name='q8' value='d'> apt install</label>
+              <label class='opt'><input type='radio' name='q8' value='e'> apt show</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='c' data-topic='cron'><div class='q-hd'><span>9) Agendamento clássico no Linux:</span><span class='pill'>Agendar</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q9' value='a'> grep</label>
+              <label class='opt'><input type='radio' name='q9' value='b'> chmod</label>
+              <label class='opt'><input type='radio' name='q9' value='c'> cron (crontab)</label>
+              <label class='opt'><input type='radio' name='q9' value='d'> ls</label>
+              <label class='opt'><input type='radio' name='q9' value='e'> du</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='next'><div class='q-hd'><span>10) Capítulo 15 aborda:</span><span class='pill'>Sequência</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q10' value='a'> Boot e systemd</label>
+              <label class='opt'><input type='radio' name='q10' value='b'> Interfaces gráficas</label>
+              <label class='opt'><input type='radio' name='q10' value='c'> Shell Script</label>
+              <label class='opt'><input type='radio' name='q10' value='d'> Backup e restauração</label>
+              <label class='opt'><input type='radio' name='q10' value='e'> Implantação</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+          </div>
+
+          <div class='callout ok' style='margin-top:14px'><strong>Seu progresso no quiz:</strong> <span id='quizScore'>0</span>/10 corretas.</div>
+        </div>
+      </section>
+
+      <section id='checklist' class='card'>
+        <div class='content'>
+          <h2>9) Checklist do aluno (interativo)</h2>
+          <p class='muted'>Marque o que você concluiu.</p>
+          <div class='checklist' id='checklist14'>
+            <div class='check-item'><input type='checkbox' id='c1'><label for='c1'><strong>Eu entendo</strong> o objetivo da manutenção preventiva.</label></div>
+            <div class='check-item'><input type='checkbox' id='c2'><label for='c2'><strong>Eu registrei</strong> a checagem antes (uptime/df/systemctl/journal).</label></div>
+            <div class='check-item'><input type='checkbox' id='c3'><label for='c3'><strong>Eu atualizei</strong> com apt update/upgrade e registrei.</label></div>
+            <div class='check-item'><input type='checkbox' id='c4'><label for='c4'><strong>Eu limpei</strong> com autoremove/clean e comparei df antes/depois.</label></div>
+            <div class='check-item'><input type='checkbox' id='c5'><label for='c5'><strong>Eu analisei</strong> consumo com du/sort.</label></div>
+            <div class='check-item'><input type='checkbox' id='c6'><label for='c6'><strong>Eu controlei</strong> logs do journal com disk-usage e vacuum.</label></div>
+            <div class='check-item'><input type='checkbox' id='c7'><label for='c7'><strong>Eu validei</strong> serviços falhados após manutenção.</label></div>
+            <div class='check-item'><input type='checkbox' id='c8'><label for='c8'><strong>Eu gerei</strong> o relatório em ~/SOSL/cap14.</label></div>
+            <div class='check-item'><input type='checkbox' id='c9'><label for='c9'><strong>Eu planejei</strong> um agendamento cron com log.</label></div>
+            <div class='check-item'><input type='checkbox' id='c10'><label for='c10'><strong>Eu respondi</strong> o quiz e revisei erros.</label></div>
+            <div class='progress'><div id='checkProg'></div></div>
+            <p class='small muted' style='margin:10px 0 0'>Progresso: <strong><span id='checkPct'>0%</span></strong></p>
+            <div class='actions'>
+              <button class='btn primary' id='saveBtn' type='button'>Salvar</button>
+              <button class='btn ghost' id='loadBtn' type='button'>Carregar</button>
+              <button class='btn dark' id='clearBtn' type='button'>Limpar</button>
+            </div>
+          </div>
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo13.html'>← Voltar ao Cap. 13</a>
+            <a class='btn dark' href='capitulo15.html'>Ir para Cap. 15 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class='container'>
+      <div style='display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between'>
+        <div class='small muted'>© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class='small'><a href='#conteudo' style='text-decoration:none;color:var(--link)'>Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Menu mobile
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    hamburgerBtn?.addEventListener('click', () => {
+      const isOpen = mainMenu.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Quiz
+    const quiz = document.getElementById('quiz14');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+    function explain(topic){
+      const map = {
+        conceito:'Manutenção preventiva reduz falhas com rotina + evidência.',
+        mudanca:'Mudança controlada: snapshot/backup + registro.',
+        df:'df -h mostra uso do filesystem.',
+        du:'du identifica quem ocupa espaço.',
+        failed:'systemctl --failed lista unidades com falha.',
+        journal:'journalctl --disk-usage mostra tamanho do journal.',
+        vacuum:'vacuum-time mantém apenas logs recentes.',
+        autoremove:'apt autoremove remove dependências não usadas.',
+        cron:'cron (crontab) agenda comandos.',
+        next:'Cap. 15: backup e restauração.'
+      };
+      return map[topic] || 'Revise teoria e prática.';
+    }
+    function getSelected(qEl){ return qEl.querySelector('input[type="radio"]:checked')?.value || null; }
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+    function clearFeedback(qEl){ const fb=qEl.querySelector('.feedback'); fb.classList.remove('ok','bad','show'); fb.innerHTML=''; }
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz?.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){ setFeedback(qEl,false,'<strong>Escolha uma alternativa.</strong>'); return; }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){ correctCount += 1; setCounted(qEl,true); updateScore(); }
+            const human = ok ? `<strong>Correto!</strong> ✅` : `<strong>Incorreto.</strong> ❌ Correto: <strong>${ans.toUpperCase()}</strong>.`;
+            const tip = `<div style="margin-top:6px" class="muted"><strong>Dica:</strong> ${explain(topic)}</div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            setFeedback(qEl,true,`<strong>Gabarito:</strong> <strong>${ans.toUpperCase()}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // Checklist
+    const checklist = document.getElementById('checklist14');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const key = 'sosl_cap14_checklist_v1';
+
+    function compute(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c=>c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+    function save(){
+      const data={};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>data[c.id]=c.checked);
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    function load(){
+      const raw=localStorage.getItem(key); if(!raw) return;
+      try{ const data=JSON.parse(raw); checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>{ if(typeof data[c.id]==='boolean') c.checked=data[c.id]; }); }catch(e){}
+      compute();
+    }
+    function clearAll(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+      localStorage.removeItem(key); compute();
+    }
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>c.addEventListener('change',()=>{compute();save();}));
+    document.getElementById('saveBtn')?.addEventListener('click',()=>{save();compute();});
+    document.getElementById('loadBtn')?.addEventListener('click',()=>load());
+    document.getElementById('clearBtn')?.addEventListener('click',()=>clearAll());
+    compute(); load();
+  </script>
+</body>
+</html>

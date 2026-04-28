@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1' />
+  <title>Capítulo 16 — Implantação (deploy) e Entrega Final do Projeto Integrador — SOSL</title>
+  <meta name='description' content='Capítulo 16 da apostila SOSL: Implantação (deploy) — baseline, pós-instalação, hardening básico, padronização, exportação de imagem (OVA) e Entrega 4 (final) do Projeto Integrador, com passo a passo, atividades, quiz e checklist.' />
+
+  <!-- arquivo: capitulo16.html -->
+
+  <style>
+    :root{--pw-red:#0b1f3a;--pw-red-dark:#071528;--pw-gray:#3f3f3f;--pw-gray-dark:#2f2f2f;--bg:#fff;--surface:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;--link:var(--pw-red);--shadow:0 10px 28px rgba(0,0,0,.08);--radius:16px;--maxw:1120px;--hero:linear-gradient(180deg,rgba(11,31,58,.12),rgba(11,31,58,0));--ok:#065f46;--ok-bg:#ecfdf5;--warn:#92400e;--warn-bg:#fffbeb;--bad:#991b1b;--bad-bg:#fef2f2;--code-bg:#0f172a;--code-fg:#e5e7eb;--code-border:#0b1220;--code-muted:#94a3b8}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";line-height:1.55;background:var(--bg);color:var(--text)}
+    a{color:var(--link)}a:hover{color:var(--pw-red-dark)}
+
+    header{position:sticky;top:0;z-index:1000}
+    .nav{background:var(--pw-red);color:#fff;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
+    .nav .wrap{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:800;letter-spacing:.2px}
+    .logo{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:inline-flex;align-items:center;justify-content:center;font-weight:900}
+    .hamburger{display:none;appearance:none;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .menu{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .menu a{text-decoration:none;color:#fff;padding:10px;border-radius:12px;font-weight:650;opacity:.95}
+    .menu a:hover{background:rgba(255,255,255,.12)}
+    .menu a.secondary{opacity:.9}
+    .menu-gap{flex:1 1 auto}
+
+    .dropdown{position:relative}
+    .dropdown-toggle{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .dropdown-menu{position:absolute;right:0;top:46px;min-width:290px;background:#fff;color:var(--text);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;display:none;max-height:60vh;overflow:auto}
+    .dropdown.open .dropdown-menu{display:block}
+    .dropdown-menu a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border-radius:12px;color:var(--text);text-decoration:none;font-weight:650}
+    .dropdown-menu a:hover{background:#f3f4f6}
+    .pill{font-size:.75rem;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted);white-space:nowrap}
+
+    .hero{background:var(--hero);padding:18px 16px;border-bottom:1px solid var(--border)}
+    main{padding:22px 16px 50px}
+    .container{max-width:var(--maxw);margin:0 auto}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}
+    .content{padding:20px}
+
+    h1{margin:0 0 6px;font-size:clamp(1.55rem,2.2vw,2.05rem)}
+    h2{margin:22px 0 10px;font-size:clamp(1.2rem,1.6vw,1.5rem)}
+    h3{margin:16px 0 6px;font-size:1.05rem}
+    h4{margin:12px 0 6px;font-size:1.0rem}
+    .subtitle{color:var(--muted);margin:0 0 10px}
+    .muted{color:var(--muted)}
+    .small{font-size:.92rem}
+
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px}
+    .badge{font-size:.82rem;padding:6px 10px;border-radius:999px;background:rgba(11,31,58,.08);border:1px solid rgba(11,31,58,.18);color:var(--pw-red-dark);font-weight:800}
+
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:980px){.grid-2{grid-template-columns:1fr}}
+
+    .callout{border:1px solid var(--border);border-left:6px solid rgba(11,31,58,.55);background:rgba(11,31,58,.04);border-radius:14px;padding:12px 14px;margin:12px 0}
+    .callout.ok{border-left-color:rgba(6,95,70,.7);background:var(--ok-bg)}
+    .callout.warn{border-left-color:rgba(146,64,14,.7);background:var(--warn-bg)}
+    .callout.bad{border-left-color:rgba(153,27,27,.7);background:var(--bad-bg)}
+
+    .list{margin:10px 0 0;padding-left:18px}
+    .list li{margin:7px 0}
+
+    .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .toc a{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(11,31,58,.2);border-radius:999px;background:rgba(11,31,58,.04);color:var(--pw-red-dark);font-weight:800;text-decoration:none;font-size:.86rem}
+    .toc a:hover{background:rgba(11,31,58,.08)}
+
+    pre{margin:10px 0;background:var(--code-bg);color:var(--code-fg);padding:14px;border-radius:12px;overflow:auto;border:1px solid var(--code-border);box-shadow:0 6px 18px rgba(0,0,0,.15)}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    pre code{font-size:.92rem}
+    .code-hint{color:var(--code-muted);font-size:.86rem;margin-top:6px}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;padding:10px 12px;border-radius:12px;font-weight:850;border:1px solid transparent;cursor:pointer;user-select:none}
+    .btn.primary{background:var(--pw-red);color:#fff;border-color:var(--pw-red)}
+    .btn.primary:hover{background:var(--pw-red-dark);border-color:var(--pw-red-dark)}
+    .btn.dark{background:var(--pw-gray);color:#fff;border-color:var(--pw-gray)}
+    .btn.dark:hover{background:var(--pw-gray-dark);border-color:var(--pw-gray-dark)}
+    .btn.ghost{background:transparent;color:var(--pw-red);border-color:rgba(11,31,58,.35)}
+    .btn.ghost:hover{background:rgba(11,31,58,.06)}
+
+    .table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;border:1px solid var(--border);margin:10px 0}
+    .table th,.table td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
+    .table th{background:rgba(11,31,58,.06);font-weight:900}
+    .table tr:last-child td{border-bottom:0}
+
+    .step{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin:12px 0}
+    .step .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:950}
+    .step .num{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:999px;background:rgba(11,31,58,.10);border:1px solid rgba(11,31,58,.22);color:var(--pw-red-dark);font-weight:950}
+
+    .form{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff;margin-top:10px}
+    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+    label{font-weight:800}
+    input[type='text'], textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;font:inherit;background:#fff}
+    textarea{min-height:110px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:980px){.row{grid-template-columns:1fr}}
+
+    .quiz{margin-top:6px}.q{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0;background:#fff}
+    .q-hd{padding:12px 14px;background:rgba(11,31,58,.06);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;font-weight:900}
+    .q-bd{padding:12px 14px 14px}.opts{display:grid;gap:8px;margin-top:8px}
+    .opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#fff}
+    .opt:hover{background:#f9fafb}.opt input{margin-top:3px}
+    .feedback{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;border:1px solid var(--border);background:#f9fafb}
+    .feedback.show{display:block}.feedback.ok{border-color:rgba(6,95,70,.25);background:var(--ok-bg);color:var(--ok)}.feedback.bad{border-color:rgba(153,27,27,.25);background:var(--bad-bg);color:var(--bad)}
+    .q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+    .checklist{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin-top:10px}
+    .check-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--border)}
+    .check-item:last-child{border-bottom:0}
+    .progress{margin-top:10px;height:10px;background:#f3f4f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+    .progress>div{height:100%;width:0%;background:linear-gradient(90deg,rgba(11,31,58,.92),rgba(11,31,58,.55))}
+
+    .skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .skip-link:focus{left:10px;top:10px;width:auto;height:auto;padding:10px 12px;background:#fff;border:2px solid var(--pw-red);border-radius:12px;z-index:2000}
+
+    @media(max-width:860px){.hamburger{display:inline-flex}.menu{display:none;width:100%;padding-top:10px}.menu.show{display:flex}.dropdown-menu{left:0;right:auto}}
+    footer{border-top:1px solid var(--border);padding:18px 16px}
+  </style>
+</head>
+<body>
+
+  <a href='#conteudo' class='skip-link'>Pular para o conteúdo</a>
+
+  <header>
+    <nav class='nav' role='navigation' aria-label='Navegação principal'>
+      <div class='wrap'>
+        <a class='brand' href='index.html' aria-label='Voltar ao Index'>
+          <span class='logo' aria-hidden='true'>SOSL</span>
+          <span>Apostila • Cap. 16</span>
+        </a>
+
+        <button class='hamburger' id='hamburgerBtn' aria-expanded='false' aria-controls='mainMenu'>☰ Menu</button>
+
+        <div class='menu' id='mainMenu'>
+          <a href='index.html' class='secondary'>Index</a>
+          <a href='plano.html'>Plano do Curso</a>
+          <a href='#teoria'>Teoria</a>
+          <a href='#baseline'>Baseline</a>
+          <a href='#hardening'>Hardening</a>
+          <a href='#imagem'>Imagem/Export</a>
+          <a href='#passo'>Passo a passo</a>
+          <a href='#entrega'>Entrega 4</a>
+          <a href='#quiz'>Quiz</a>
+          <a href='#checklist'>Checklist</a>
+          <span class='menu-gap'></span>
+
+          <div class='dropdown' id='chaptersDropdown'>
+            <button class='dropdown-toggle' aria-haspopup='true' aria-expanded='false'>Capítulos ▼</button>
+            <div class='dropdown-menu' role='menu' aria-label='Lista de capítulos'>
+              <a href='capitulo12.html' role='menuitem'><span>Cap. 12 — Configs, processos e rede</span><span class='pill'>12</span></a>
+              <a href='capitulo13.html' role='menuitem'><span>Cap. 13 — Shell Script</span><span class='pill'>13</span></a>
+              <a href='capitulo14.html' role='menuitem'><span>Cap. 14 — Manutenção preventiva</span><span class='pill'>14</span></a>
+              <a href='capitulo15.html' role='menuitem'><span>Cap. 15 — Backup e restauração</span><span class='pill'>15</span></a>
+              <a href='capitulo16.html' role='menuitem'><span>Cap. 16 — Implantação (final)</span><span class='pill'>16</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class='hero'>
+    <div class='container'>
+      <div class='card'>
+        <div class='content'>
+          <h1 id='conteudo'>Capítulo 16 — Implantação (deploy) e Entrega Final do Projeto Integrador</h1>
+          <p class='subtitle'>Neste último capítulo você junta tudo: prepara uma máquina (ou VM) com um <strong>baseline</strong> padronizado, aplica <strong>hardening básico</strong>, valida serviços, cria evidências e <strong>exporta uma imagem</strong> pronta para entregar. Ao final, você faz a <strong>Entrega 4</strong> (final) do Projeto Integrador — seu “kit de suporte Linux”.</p>
+
+          <div class='badges'>
+            <span class='badge'>baseline</span>
+            <span class='badge'>pós-instalação</span>
+            <span class='badge'>padronização</span>
+            <span class='badge'>hardening básico</span>
+            <span class='badge'>ufw</span>
+            <span class='badge'>usuários/permissões</span>
+            <span class='badge'>scripts</span>
+            <span class='badge'>backup</span>
+            <span class='badge'>manutenção</span>
+            <span class='badge'>export OVA</span>
+            <span class='badge'>Entrega 4</span>
+          </div>
+
+          <div class='grid-2'>
+            <div>
+              <h2 style='margin-top:0'>Objetivos de aprendizagem</h2>
+              <ul class='list'>
+                <li>Entender o que é implantação e por que padronização evita retrabalho.</li>
+                <li>Aplicar um baseline: contas, pacotes essenciais, atualizações, diretórios e scripts.</li>
+                <li>Aplicar hardening básico: firewall, princípio do menor privilégio e evidências.</li>
+                <li>Gerar documentação e relatório de implantação (o que foi feito e por quê).</li>
+                <li>Exportar uma imagem/entrega (por exemplo OVA) para replicar a instalação.</li>
+                <li>Consolidar todo o curso na Entrega 4 do Projeto Integrador.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style='margin-top:0'>Pré-requisitos</h2>
+              <ul class='list'>
+                <li>Cap. 04 (VM e instalação), Cap. 06 (pacotes), Cap. 07 (systemd/logs).</li>
+                <li>Cap. 09–12 (CLI + diagnóstico), Cap. 11 (usuários/permissões).</li>
+                <li>Cap. 13 (scripts), Cap. 14 (manutenção) e Cap. 15 (backup/restauração).</li>
+              </ul>
+              <div class='callout warn'><strong>Segurança:</strong> implantação envolve mudanças. Faça snapshot e registre cada passo. Use pastas de laboratório em <code>~/SOSL</code>.</div>
+            </div>
+          </div>
+
+          <div class='toc'>
+            <a href='#teoria'>📚 Teoria</a>
+            <a href='#baseline'>🧱 Baseline</a>
+            <a href='#hardening'>🛡️ Hardening</a>
+            <a href='#imagem'>📦 Imagem/Export</a>
+            <a href='#passo'>🧪 Passo a passo</a>
+            <a href='#atividades'>🧩 Atividades</a>
+            <a href='#entrega'>🏁 Projeto Integrador — Entrega 4</a>
+            <a href='#quiz'>📝 Quiz</a>
+            <a href='#checklist'>☑️ Checklist</a>
+          </div>
+
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo15.html'>← Voltar ao Cap. 15</a>
+            <a class='btn dark' href='index.html'>Ir para o Index →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class='container'>
+
+      <section id='teoria' class='card'>
+        <div class='content'>
+          <h2>1) Teoria: implantação é entregar um padrão pronto para repetir</h2>
+
+          <h3>1.1 O que é implantação (deploy)?</h3>
+          <p>Implantação é o processo de preparar um ambiente (máquina/VM) para uso real: instalar, configurar, validar e documentar. Em suporte, implantação bem feita reduz chamados porque o ambiente nasce padronizado e previsível.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> No passo a passo você vai montar um baseline e gerar um relatório de implantação.</div>
+
+          <h3>1.2 Baseline: o “mínimo aceitável”</h3>
+          <p><strong>Baseline</strong> é o conjunto mínimo de configurações e ferramentas que todo ambiente deve ter (ex.: usuário padrão, atualizações, utilitários, scripts de diagnóstico, estrutura de pastas, políticas). Sem baseline, cada máquina vira um “caso único”.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Você vai criar uma estrutura <code>~/SOSL</code>, instalar pacotes úteis e incluir seus scripts (Cap. 13) e rotinas (Cap. 14/15).</div>
+
+          <h3>1.3 Hardening básico: reduzir a superfície de ataque</h3>
+          <p><strong>Hardening</strong> é aplicar medidas simples que aumentam segurança: manter atualizado, usar firewall, reduzir permissões, desativar serviços desnecessários e registrar alterações. Não é “paranoia”: é prevenção.</p>
+          <div class='callout ok'><strong>Onde vou aplicar isso?</strong> Você vai ativar o firewall (ufw), revisar sudo e registrar evidências.</div>
+
+          <h3>1.4 Documentação e evidência</h3>
+          <p>Implantação sem documentação não é implantável: você não consegue repetir nem auditar. Evidência inclui comandos, versões e resultados (df, systemctl, logs, pacotes instalados).</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Você vai gerar um relatório “ticket-ready” e exportar um pacote final da entrega.</div>
+
+          <h3>1.5 Imagem (golden image) e exportação</h3>
+          <p>Uma <strong>imagem padrão</strong> (golden image) é uma instalação pronta para replicar. Em VM, uma forma prática é exportar a máquina como <strong>OVA</strong>. Em ambientes físicos, pode-se usar clonagem/imagens, mas aqui o foco é o conceito e a prática em VM.</p>
+          <div class='callout warn'><strong>Onde vou aplicar isso?</strong> Você vai limpar o básico, validar e exportar sua VM (ou gerar evidência de como exportaria).</div>
+        </div>
+      </section>
+
+      <section id='baseline' class='card'>
+        <div class='content'>
+          <h2>2) Baseline: checklist técnico do que uma máquina deve ter</h2>
+
+          <h3>2.1 Checklist de baseline (sugestão)</h3>
+          <table class='table' aria-label='Checklist de baseline'>
+            <thead><tr><th>Categoria</th><th>Itens</th><th>Evidência</th></tr></thead>
+            <tbody>
+              <tr><td>Identidade</td><td>hostname, usuário padrão, grupos</td><td><code>hostname</code>, <code>id</code></td></tr>
+              <tr><td>Atualização</td><td>apt update/upgrade, limpeza</td><td>log do apt + versões</td></tr>
+              <tr><td>Ferramentas</td><td>htop, curl, git (opcional), dnsutils (opcional)</td><td><code>dpkg -l</code> / versões</td></tr>
+              <tr><td>Diagnóstico</td><td>script diag (Cap. 13) + relatório</td><td>arquivo de saída</td></tr>
+              <tr><td>Segurança</td><td>ufw ativo, sudo consciente</td><td><code>ufw status</code>, <code>sudo -l</code></td></tr>
+              <tr><td>Backup</td><td>rotina de backup (Cap. 15) + teste</td><td>tar/sha256 + restauração</td></tr>
+              <tr><td>Manutenção</td><td>rotina (Cap. 14) + agendamento</td><td>relatório + cron/timer</td></tr>
+            </tbody>
+          </table>
+
+          <div class='callout ok'><strong>Meta do capítulo:</strong> sua entrega final deve mostrar evidência de cada categoria acima.</div>
+        </div>
+      </section>
+
+      <section id='hardening' class='card'>
+        <div class='content'>
+          <h2>3) Hardening básico (seguro para laboratório)</h2>
+
+          <h3>3.1 Firewall (ufw) — ativar e conferir</h3>
+          <pre><code># ver status
+sudo ufw status verbose
+
+# habilitar (se já estiver habilitado, ele avisa)
+sudo ufw enable
+
+# conferir
+sudo ufw status verbose
+</code></pre>
+          <div class='callout warn'><strong>Observação:</strong> em VM de laboratório, isso é seguro. Em servidor real, regras devem ser planejadas (portas necessárias).</div>
+
+          <h3>3.2 Menor privilégio: usar sudo apenas quando necessário</h3>
+          <pre><code># ver permissões de sudo do usuário atual
+sudo -l
+</code></pre>
+          <p class='code-hint'>Em suporte, você registra quando usou sudo e por quê (mudança controlada).</p>
+
+          <h3>3.3 Serviços falhados e logs de erro</h3>
+          <pre><code>systemctl --failed
+journalctl -b -p err --no-pager | tail -n 50
+</code></pre>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Antes de exportar imagem/entrega, você valida que não há falhas óbvias.</div>
+        </div>
+      </section>
+
+      <section id='imagem' class='card'>
+        <div class='content'>
+          <h2>4) Imagem/Exportação (conceito + prática em VM)</h2>
+
+          <h3>4.1 O que é OVA?</h3>
+          <p>OVA é um pacote que representa uma VM exportada (config + disco). Serve para distribuir a “máquina pronta” para outra pessoa importar e usar.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Na Entrega 4 você pode anexar a OVA (ou, se o tamanho impedir, anexar evidência do processo e a configuração).</div>
+
+          <h3>4.2 Pré-export (limpeza mínima e validação)</h3>
+          <ul class='list'>
+            <li>Executar atualização/limpeza (Cap. 14).</li>
+            <li>Validar serviços falhados e erros do journal.</li>
+            <li>Rodar seu script de diagnóstico (Cap. 13) e guardar o relatório.</li>
+            <li>Organizar <code>~/SOSL</code> e remover arquivos temporários de testes (sem apagar evidências).</li>
+          </ul>
+
+          <h3>4.3 Exportar no VirtualBox (passo conceitual)</h3>
+          <ol class='list'>
+            <li>Desligue a VM (Power Off).</li>
+            <li>No VirtualBox: <strong>Arquivo → Exportar Appliance</strong>.</li>
+            <li>Escolha a VM e exporte como <strong>.ova</strong>.</li>
+            <li>Registre: nome do arquivo, tamanho e data no relatório final.</li>
+          </ol>
+          <div class='callout warn'><strong>Nota:</strong> se a plataforma de envio tiver limite de tamanho, envie o relatório + scripts + evidências e apenas descreva/print o processo de exportação.</div>
+        </div>
+      </section>
+
+      <section id='passo' class='card'>
+        <div class='content'>
+          <h2>5) Passo a passo (prático): baseline + hardening + relatório de implantação</h2>
+          <p class='muted'>Objetivo: gerar um relatório completo de implantação em <code>~/SOSL/cap16/implantacao-cap16.txt</code>, com evidências para compor a Entrega 4.</p>
+          <div class='callout ok'><strong>Resultado esperado:</strong> relatório + organização da pasta SOSL + evidências de scripts/backup/manutenção.</div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>1</span> Preparar pasta do capítulo e relatório</span><span class='pill'>Setup</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap16
+R=~/SOSL/cap16/implantacao-cap16.txt
+: > "$R"
+</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>2</span> Identidade e inventário (evidência inicial)</span><span class='pill'>Inventário</span></div>
+            <pre><code>{
+  echo "IMPLANTAÇÃO — CAP. 16";
+  echo "Data: $(date)";
+  echo "Usuário: $(whoami)";
+  echo "Host: $(hostname)";
+  echo "
+[SO]";
+  cat /etc/os-release;
+  echo "
+[KERNEL]";
+  uname -a;
+  echo "
+[USUÁRIO/GRUPOS]";
+  id;
+  echo "
+[DISCO]";
+  df -h;
+} | tee -a "$R"
+</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>3</span> Atualizar e instalar ferramentas base (registrar)</span><span class='pill'>Baseline</span></div>
+            <pre><code>{
+  echo "
+[BASELINE] Atualização e ferramentas";
+  sudo apt update;
+  sudo apt -y upgrade;
+  # ferramentas úteis (se alguma já existir, não tem problema)
+  sudo apt -y install htop curl git ufw;
+  echo "
+[VERSÕES]";
+  htop --version 2>/dev/null || true;
+  curl --version | head -n 1;
+  git --version 2>/dev/null || true;
+} | tee -a "$R"
+</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>4</span> Incluir seus scripts e evidências (Caps 13–15)</span><span class='pill'>Integração</span></div>
+            <p class='muted'>Se você já criou scripts nos capítulos, apenas registre o caminho e execute para gerar evidência.</p>
+            <pre><code>{
+  echo "
+[SCRIPTS]";
+  echo "Listando scripts (se existirem):";
+  ls -lah ~/SOSL/cap13/scripts 2>/dev/null || true;
+  echo "
+Executando diag.sh (se existir):";
+  if [ -x ~/SOSL/cap13/scripts/diag.sh ]; then
+    ~/SOSL/cap13/scripts/diag.sh;
+    ls -t ~/SOSL/cap13/saidas/diagnostico_*.txt | head -n 1;
+  else
+    echo "diag.sh não encontrado (ok se você não fez o cap13).";
+  fi
+} | tee -a "$R"
+</code></pre>
+            <div class='callout'><strong>Onde vou aplicar isso?</strong> A Entrega 4 exige evidência de automação/diagnóstico e relatórios.</div>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>5</span> Hardening básico: UFW + validação de falhas</span><span class='pill'>Hardening</span></div>
+            <pre><code>{
+  echo "
+[HARDENING] Firewall (ufw)";
+  sudo ufw status verbose || true;
+  sudo ufw enable || true;
+  sudo ufw status verbose || true;
+
+  echo "
+[VALIDAÇÃO] Serviços falhados";
+  systemctl --failed;
+
+  echo "
+[LOGS] Erros do boot";
+  journalctl -b -p err --no-pager | tail -n 40;
+} | tee -a "$R"
+</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>6</span> Checklist de exportação (evidência para OVA)</span><span class='pill'>Export</span></div>
+            <pre><code>{
+  echo "
+[EXPORTAÇÃO] Checklist pré-export";
+  echo "- VM atualizada e limpa (apt).";
+  echo "- UFW habilitado (se aplicável).";
+  echo "- systemctl --failed revisado.";
+  echo "- Relatórios em ~/SOSL preservados.";
+  echo "
+[OBS] Para exportar OVA: VirtualBox → Arquivo → Exportar Appliance.";
+} | tee -a "$R"
+
+less "$R"
+</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <section id='atividades' class='card'>
+        <div class='content'>
+          <h2>6) Atividades práticas sugeridas (2–3)</h2>
+          <ul class='list'>
+            <li><strong>Atividade 1 — Script de baseline:</strong> crie <code>baseline.sh</code> que instala ferramentas, ativa UFW e gera um relatório em <code>~/SOSL/cap16</code> (use Cap. 13).</li>
+            <li><strong>Atividade 2 — Checklist de importação:</strong> escreva um guia (1 página) explicando como importar a OVA e validar o ambiente (comandos).</li>
+            <li><strong>Atividade 3 — Cenário de validação:</strong> simule um chamado (rede lenta, disco cheio, permissão) e use seus scripts/relatórios para resolver e documentar.</li>
+          </ul>
+
+          <h3>Pesquisas complementares (2–5)</h3>
+          <ul class='list'>
+            <li>Diferença entre snapshot de VM e backup (quando cada um é adequado).</li>
+            <li>Systemd timers vs cron para rotinas de manutenção.</li>
+            <li>O que é “golden image” e como controlar versões de imagem.</li>
+            <li>Firewall: regras básicas (permitir/negir portas) e auditoria.</li>
+            <li>Inventário automatizado: como gerar relatório padronizado em escala.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id='entrega' class='card'>
+        <div class='content'>
+          <h2>7) Projeto Integrador — Entrega 4 (Final • Bimestre 4)</h2>
+          <p><strong>Entrega 4: “Kit de Suporte Linux + Implantação”</strong> — consolida todo o curso (Caps 01–16). A ideia é entregar algo que você poderia usar no estágio/empresa: uma VM padronizada + documentação + scripts + evidências. </p>
+
+          <div class='grid-2'>
+            <div>
+              <h3>O que entregar</h3>
+              <ul class='list'>
+                <li><strong>Relatório final</strong> (Markdown/PDF): visão geral + evidências.</li>
+                <li><strong>Relatórios técnicos</strong>: cap12 (diagnóstico), cap14 (manutenção), cap15 (backup) e cap16 (implantação).</li>
+                <li><strong>Scripts</strong>: diag.sh (Cap. 13) + um script de baseline/manutenção/backup (se você criou).</li>
+                <li><strong>Evidências</strong>: outputs/prints de terminal (comandos e resultados).</li>
+                <li><strong>Entrega de imagem</strong>: OVA exportada (se possível) ou evidência/documentação do export/import.</li>
+                <li><strong>Guia rápido</strong>: como usar o kit (5–10 passos) + como restaurar backup.</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Critérios (rubrica rápida)</h3>
+              <ul class='list'>
+                <li><strong>Padronização:</strong> baseline claro e repetível.</li>
+                <li><strong>Segurança:</strong> UFW/menor privilégio e mudanças registradas.</li>
+                <li><strong>Confiabilidade:</strong> backup com verificação + teste de restauração.</li>
+                <li><strong>Operação:</strong> manutenção com evidência e (opcional) agendamento.</li>
+                <li><strong>Clareza:</strong> documentação simples, objetiva e completa.</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Modelo de relatório final (copie e preencha)</h3>
+          <pre><code># Entrega 4 — Kit de Suporte Linux + Implantação (Final)
+
+Aluno/Grupo:
+Data:
+VM/Host (config):
+
+## 1) O que está sendo entregue
+- Pasta SOSL (estrutura):
+- Scripts incluídos:
+- Relatórios incluídos:
+- OVA/export (se aplicável):
+
+## 2) Evidências principais
+- Diagnóstico (Cap. 12):
+- Permissões/Grupo (Cap. 11):
+- Manutenção (Cap. 14):
+- Backup + restauração (Cap. 15):
+- Implantação + hardening (Cap. 16):
+
+## 3) Guia rápido de uso (passo a passo)
+1.
+2.
+...
+
+## 4) Conclusão
+- O que aprendeu e como aplicaria em um cenário real.
+</code></pre>
+
+          <h3>Formulário (salva no navegador e exporta)</h3>
+          <p class='muted'>Preencha e exporte em Markdown/JSON para anexar na entrega.</p>
+
+          <div class='form' id='form16'>
+            <div class='row'>
+              <div class='field'><label for='aluno'>Aluno/Grupo</label><input id='aluno' type='text' placeholder='Nome(s)' /></div>
+              <div class='field'><label for='data'>Data</label><input id='data' type='text' placeholder='dd/mm/aaaa' /></div>
+            </div>
+            <div class='field'><label for='vm'>VM/Host (config)</label><input id='vm' type='text' placeholder='Ex.: Mint 4GB / 2 vCPU / 40GB' /></div>
+            <div class='field'><label for='entrega_itens'>O que está sendo entregue</label><textarea id='entrega_itens' placeholder='Estrutura SOSL, scripts, relatórios, OVA/export...'></textarea></div>
+            <div class='field'><label for='evidencias'>Evidências principais</label><textarea id='evidencias' placeholder='Links/caminhos/prints e resumo por capítulo'></textarea></div>
+            <div class='field'><label for='guia'>Guia rápido de uso</label><textarea id='guia' placeholder='Passo a passo curto (5–10 passos)'></textarea></div>
+            <div class='field'><label for='conclusao'>Conclusão</label><textarea id='conclusao' placeholder='O que aprendeu e como aplicaria'></textarea></div>
+
+            <div class='actions'>
+              <button class='btn primary' id='saveEntrega' type='button'>Salvar</button>
+              <button class='btn ghost' id='loadEntrega' type='button'>Carregar</button>
+              <button class='btn dark' id='clearEntrega' type='button'>Limpar</button>
+              <button class='btn dark' id='exportMd' type='button'>Exportar Markdown</button>
+              <button class='btn dark' id='exportJson' type='button'>Exportar JSON</button>
+            </div>
+
+            <div id='msg16' class='callout' style='display:none'></div>
+            <pre id='out16' style='display:none'></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <section id='quiz' class='card'>
+        <div class='content'>
+          <h2>8) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class='muted'>Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class='quiz' id='quiz16'>
+            <div class='q' data-answer='b' data-topic='deploy'><div class='q-hd'><span>1) Implantação (deploy) é principalmente:</span><span class='pill'>Deploy</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q1' value='a'> Trocar papel de parede</label>
+              <label class='opt'><input type='radio' name='q1' value='b'> Preparar, validar e documentar um ambiente para uso</label>
+              <label class='opt'><input type='radio' name='q1' value='c'> Apagar logs sempre</label>
+              <label class='opt'><input type='radio' name='q1' value='d'> Instalar qualquer coisa sem padrão</label>
+              <label class='opt'><input type='radio' name='q1' value='e'> Desativar atualizações</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='c' data-topic='baseline'><div class='q-hd'><span>2) Baseline significa:</span><span class='pill'>Baseline</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q2' value='a'> Um vírus do Linux</label>
+              <label class='opt'><input type='radio' name='q2' value='b'> Um tipo de log</label>
+              <label class='opt'><input type='radio' name='q2' value='c'> Conjunto mínimo padronizado de configurações e ferramentas</label>
+              <label class='opt'><input type='radio' name='q2' value='d'> Um comando de rede</label>
+              <label class='opt'><input type='radio' name='q2' value='e'> Um editor de texto</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='hardening'><div class='q-hd'><span>3) Hardening básico tem como objetivo:</span><span class='pill'>Segurança</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q3' value='a'> Deixar o PC mais bonito</label>
+              <label class='opt'><input type='radio' name='q3' value='b'> Abrir todas as portas</label>
+              <label class='opt'><input type='radio' name='q3' value='c'> Desligar atualizações</label>
+              <label class='opt'><input type='radio' name='q3' value='d'> Reduzir a superfície de ataque com medidas simples</label>
+              <label class='opt'><input type='radio' name='q3' value='e'> Apagar evidências</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='ufw'><div class='q-hd'><span>4) Qual comando habilita o firewall UFW?</span><span class='pill'>ufw</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q4' value='a'> sudo ufw enable</label>
+              <label class='opt'><input type='radio' name='q4' value='b'> sudo apt enable ufw</label>
+              <label class='opt'><input type='radio' name='q4' value='c'> ufw --install</label>
+              <label class='opt'><input type='radio' name='q4' value='d'> systemctl enable ufw</label>
+              <label class='opt'><input type='radio' name='q4' value='e'> chmod +x ufw</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='e' data-topic='evidencia'><div class='q-hd'><span>5) Em implantação, evidência importante inclui:</span><span class='pill'>Evidência</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q5' value='a'> Apenas uma frase “deu certo”</label>
+              <label class='opt'><input type='radio' name='q5' value='b'> Somente o wallpaper</label>
+              <label class='opt'><input type='radio' name='q5' value='c'> Só o nome do aluno</label>
+              <label class='opt'><input type='radio' name='q5' value='d'> Só a data do dia</label>
+              <label class='opt'><input type='radio' name='q5' value='e'> Comandos, versões e resultados (logs/relatórios)</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='snapshot'><div class='q-hd'><span>6) Snapshot de VM é:</span><span class='pill'>VM</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q6' value='a'> Um backup 3-2-1 completo e definitivo</label>
+              <label class='opt'><input type='radio' name='q6' value='b'> Um ponto de retorno rápido (útil, mas não substitui backup externo)</label>
+              <label class='opt'><input type='radio' name='q6' value='c'> Uma regra de firewall</label>
+              <label class='opt'><input type='radio' name='q6' value='d'> Um comando do bash</label>
+              <label class='opt'><input type='radio' name='q6' value='e'> Um tipo de usuário</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='c' data-topic='ova'><div class='q-hd'><span>7) Exportar uma VM em OVA serve para:</span><span class='pill'>OVA</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q7' value='a'> Apagar a VM</label>
+              <label class='opt'><input type='radio' name='q7' value='b'> Atualizar o kernel</label>
+              <label class='opt'><input type='radio' name='q7' value='c'> Distribuir/replicar uma VM pronta para importar</label>
+              <label class='opt'><input type='radio' name='q7' value='d'> Desativar o firewall</label>
+              <label class='opt'><input type='radio' name='q7' value='e'> Criar usuários automaticamente no host</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='backup'><div class='q-hd'><span>8) Uma boa implantação inclui backup porque:</span><span class='pill'>Backup</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q8' value='a'> Mudanças podem falhar e dados precisam ser recuperáveis</label>
+              <label class='opt'><input type='radio' name='q8' value='b'> Backup melhora a cor da interface</label>
+              <label class='opt'><input type='radio' name='q8' value='c'> Backup desativa atualizações</label>
+              <label class='opt'><input type='radio' name='q8' value='d'> Backup é só para Windows</label>
+              <label class='opt'><input type='radio' name='q8' value='e'> Backup substitui documentação</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='validacao'><div class='q-hd'><span>9) Uma validação útil antes de entregar/exportar é:</span><span class='pill'>Validação</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q9' value='a'> Apagar /var/log</label>
+              <label class='opt'><input type='radio' name='q9' value='b'> Dar chmod 777 em tudo</label>
+              <label class='opt'><input type='radio' name='q9' value='c'> Desativar ufw</label>
+              <label class='opt'><input type='radio' name='q9' value='d'> Conferir systemctl --failed e erros do journal</label>
+              <label class='opt'><input type='radio' name='q9' value='e'> Remover evidências</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='entrega'><div class='q-hd'><span>10) A Entrega 4 (final) deve conter:</span><span class='pill'>Projeto</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q10' value='a'> Apenas um print do desktop</label>
+              <label class='opt'><input type='radio' name='q10' value='b'> Documentação + scripts + relatórios + evidências (+ OVA se possível)</label>
+              <label class='opt'><input type='radio' name='q10' value='c'> Apenas um arquivo .txt vazio</label>
+              <label class='opt'><input type='radio' name='q10' value='d'> Somente a lista de pacotes</label>
+              <label class='opt'><input type='radio' name='q10' value='e'> Somente o histórico do navegador</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+          </div>
+
+          <div class='callout ok' style='margin-top:14px'><strong>Seu progresso no quiz:</strong> <span id='quizScore'>0</span>/10 respondidas corretamente. <span class='muted'>(Você pode tentar quantas vezes quiser.)</span></div>
+        </div>
+      </section>
+
+      <section id='checklist' class='card'>
+        <div class='content'>
+          <h2>9) Checklist do aluno (interativo)</h2>
+          <p class='muted'>Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class='checklist' id='checklist16'>
+            <div class='check-item'><input type='checkbox' id='c1'><label for='c1'><strong>Eu entendo</strong> o que é implantação e por que padronizar.</label></div>
+            <div class='check-item'><input type='checkbox' id='c2'><label for='c2'><strong>Eu gerei</strong> o relatório de implantação em <code>~/SOSL/cap16</code>.</label></div>
+            <div class='check-item'><input type='checkbox' id='c3'><label for='c3'><strong>Eu apliquei</strong> baseline (atualização + ferramentas base).</label></div>
+            <div class='check-item'><input type='checkbox' id='c4'><label for='c4'><strong>Eu integrei</strong> scripts/relatórios dos Caps 12–15 (evidências).</label></div>
+            <div class='check-item'><input type='checkbox' id='c5'><label for='c5'><strong>Eu ativei</strong> o UFW e registrei status.</label></div>
+            <div class='check-item'><input type='checkbox' id='c6'><label for='c6'><strong>Eu validei</strong> systemctl --failed e journal de erros antes da entrega.</label></div>
+            <div class='check-item'><input type='checkbox' id='c7'><label for='c7'><strong>Eu organizei</strong> a pasta <code>~/SOSL</code> com evidências preservadas.</label></div>
+            <div class='check-item'><input type='checkbox' id='c8'><label for='c8'><strong>Eu planejei</strong> a exportação OVA (ou registrei evidência do processo).</label></div>
+            <div class='check-item'><input type='checkbox' id='c9'><label for='c9'><strong>Eu preenchi</strong> e exportei o relatório da Entrega 4 (formulário).</label></div>
+            <div class='check-item'><input type='checkbox' id='c10'><label for='c10'><strong>Eu respondi</strong> o quiz e revisei onde errei.</label></div>
+
+            <div class='progress' aria-label='Progresso do checklist'><div id='checkProg'></div></div>
+            <p class='small muted' style='margin:10px 0 0'>Progresso: <strong><span id='checkPct'>0%</span></strong></p>
+
+            <div class='actions'>
+              <button class='btn primary' id='saveBtn' type='button'>Salvar</button>
+              <button class='btn ghost' id='loadBtn' type='button'>Carregar</button>
+              <button class='btn dark' id='clearBtn' type='button'>Limpar</button>
+            </div>
+          </div>
+
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo15.html'>← Voltar ao Cap. 15</a>
+            <a class='btn dark' href='index.html'>Voltar ao Index →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class='container'>
+      <div style='display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between'>
+        <div class='small muted'>© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class='small'><a href='#conteudo' style='text-decoration:none;color:var(--link)'>Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Menu mobile
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    hamburgerBtn?.addEventListener('click', () => {
+      const isOpen = mainMenu.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Quiz
+    const quiz = document.getElementById('quiz16');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+    function explain(topic){
+      const map = {
+        deploy: 'Revise 1.1: deploy = preparar, validar e documentar.',
+        baseline: 'Revise 1.2/2: baseline = mínimo padronizado.',
+        hardening: 'Revise 1.3: hardening reduz superfície de ataque.',
+        ufw: 'Revise 3.1: ufw enable habilita firewall.',
+        evidencia: 'Revise 1.4: evidência = comandos, versões e resultados.',
+        snapshot: 'Revise 4: snapshot ajuda, mas não substitui backup 3-2-1.',
+        ova: 'Revise 4: OVA distribui VM pronta.',
+        backup: 'Revise 1.3/Entrega: backup ajuda a recuperar de falhas.',
+        validacao: 'Revise 3.3: systemctl/journal para validar.',
+        entrega: 'Revise 7: entrega final = docs + scripts + relatórios + evidências (+ OVA se possível).'
+      };
+      return map[topic] || 'Revise teoria e passo a passo.';
+    }
+    function getSelected(qEl){ return qEl.querySelector("input[type='radio']:checked")?.value || null; }
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+    function clearFeedback(qEl){ const fb=qEl.querySelector('.feedback'); fb.classList.remove('ok','bad','show'); fb.innerHTML=''; }
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz?.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+      qEl.querySelectorAll("button[data-action]").forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){ setFeedback(qEl,false,'<strong>Escolha uma alternativa.</strong>'); return; }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){ correctCount += 1; setCounted(qEl,true); updateScore(); }
+            const human = ok ? `<strong>Correto!</strong> ✅` : `<strong>Incorreto.</strong> ❌ Correto: <strong>${ans.toUpperCase()}</strong>.`;
+            const tip = `<div style="margin-top:6px" class="muted"><strong>Dica:</strong> ${explain(topic)}</div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            setFeedback(qEl,true,`<strong>Gabarito:</strong> <strong>${ans.toUpperCase()}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll("input[type='radio']").forEach(i=>i.checked=false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // Checklist
+    const checklist = document.getElementById('checklist16');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const keyCheck = 'sosl_cap16_checklist_v1';
+
+    function compute(){
+      const checks = checklist.querySelectorAll("input[type='checkbox']");
+      const total = checks.length;
+      const done = Array.from(checks).filter(c=>c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+    function save(){
+      const data={};
+      checklist.querySelectorAll("input[type='checkbox']").forEach(c=>data[c.id]=c.checked);
+      localStorage.setItem(keyCheck, JSON.stringify(data));
+    }
+    function load(){
+      const raw=localStorage.getItem(keyCheck); if(!raw) return;
+      try{ const data=JSON.parse(raw); checklist.querySelectorAll("input[type='checkbox']").forEach(c=>{ if(typeof data[c.id]==='boolean') c.checked=data[c.id]; }); }catch(e){}
+      compute();
+    }
+    function clearAll(){
+      checklist.querySelectorAll("input[type='checkbox']").forEach(c=>c.checked=false);
+      localStorage.removeItem(keyCheck); compute();
+    }
+    checklist.querySelectorAll("input[type='checkbox']").forEach(c=>c.addEventListener('change',()=>{compute();save();}));
+    document.getElementById('saveBtn')?.addEventListener('click',()=>{save();compute();});
+    document.getElementById('loadBtn')?.addEventListener('click',()=>load());
+    document.getElementById('clearBtn')?.addEventListener('click',()=>clearAll());
+    compute(); load();
+
+    // Entrega 4 (localStorage + export)
+    const keyEntrega = 'sosl_cap16_entrega4_v1';
+    const el = {
+      aluno: document.getElementById('aluno'),
+      data: document.getElementById('data'),
+      vm: document.getElementById('vm'),
+      itens: document.getElementById('entrega_itens'),
+      evid: document.getElementById('evidencias'),
+      guia: document.getElementById('guia'),
+      conc: document.getElementById('conclusao'),
+      msg: document.getElementById('msg16'),
+      out: document.getElementById('out16')
+    };
+
+    function showMsg(kind, html){
+      el.msg.style.display='block';
+      el.msg.classList.remove('ok','warn','bad');
+      el.msg.classList.add(kind);
+      el.msg.innerHTML = html;
+      setTimeout(()=>{ el.msg.style.display='none'; }, 3500);
+    }
+
+    function collect(){
+      return {
+        aluno: el.aluno.value.trim(),
+        data: el.data.value.trim(),
+        vm: el.vm.value.trim(),
+        itens: el.itens.value.trim(),
+        evidencias: el.evid.value.trim(),
+        guia: el.guia.value.trim(),
+        conclusao: el.conc.value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function fill(obj){
+      if(!obj) return;
+      el.aluno.value = obj.aluno || '';
+      el.data.value = obj.data || '';
+      el.vm.value = obj.vm || '';
+      el.itens.value = obj.itens || '';
+      el.evid.value = obj.evidencias || '';
+      el.guia.value = obj.guia || '';
+      el.conc.value = obj.conclusao || '';
+    }
+
+    function write(obj){ localStorage.setItem(keyEntrega, JSON.stringify(obj)); }
+    function read(){
+      const raw = localStorage.getItem(keyEntrega);
+      if(!raw) return null;
+      try{ return JSON.parse(raw); }catch(e){ return null; }
+    }
+
+    function toMarkdown(obj){
+      return `# Entrega 4 — Kit de Suporte Linux + Implantação (Final)
+
+`+
+        `- **Aluno/Grupo:** ${obj.aluno || '—'}
+`+
+        `- **Data:** ${obj.data || '—'}
+`+
+        `- **VM/Host (config):** ${obj.vm || '—'}
+
+`+
+        `## 1) O que está sendo entregue
+${obj.itens || ''}
+
+`+
+        `## 2) Evidências principais
+${obj.evidencias || ''}
+
+`+
+        `## 3) Guia rápido de uso
+${obj.guia || ''}
+
+`+
+        `## 4) Conclusão
+${obj.conclusao || ''}
+
+`+
+        `> Atualizado em: ${obj.updatedAt || '—'}
+`;
+    }
+
+    document.getElementById('saveEntrega')?.addEventListener('click', () => {
+      const obj = collect();
+      if(!obj.aluno || !obj.itens || !obj.evidencias){
+        showMsg('warn','<strong>Preencha pelo menos:</strong> Aluno/Grupo, “O que está sendo entregue” e “Evidências”.');
+        return;
+      }
+      write(obj);
+      showMsg('ok','<strong>Entrega 4 salva no navegador!</strong>');
+    });
+
+    document.getElementById('loadEntrega')?.addEventListener('click', () => {
+      const obj = read();
+      if(!obj){ showMsg('warn','<strong>Nenhum registro salvo ainda.</strong>'); return; }
+      fill(obj);
+      showMsg('ok','<strong>Registro carregado.</strong>');
+    });
+
+    document.getElementById('clearEntrega')?.addEventListener('click', () => {
+      localStorage.removeItem(keyEntrega);
+      fill({});
+      el.out.style.display='none'; el.out.textContent='';
+      showMsg('ok','<strong>Registro limpo.</strong>');
+    });
+
+    document.getElementById('exportMd')?.addEventListener('click', () => {
+      const md = toMarkdown(collect());
+      el.out.style.display='block';
+      el.out.textContent = md;
+      navigator.clipboard?.writeText(md);
+      showMsg('ok','<strong>Markdown gerado e copiado.</strong>');
+    });
+
+    document.getElementById('exportJson')?.addEventListener('click', () => {
+      const json = JSON.stringify(collect(), null, 2);
+      el.out.style.display='block';
+      el.out.textContent = json;
+      navigator.clipboard?.writeText(json);
+      showMsg('ok','<strong>JSON gerado e copiado.</strong>');
+    });
+
+    const obj0 = read();
+    if(obj0) fill(obj0);
+  </script>
+
+</body>
+</html>

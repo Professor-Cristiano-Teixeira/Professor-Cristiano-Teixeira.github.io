@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1' />
+  <title>Capítulo 13 — Shell Script (automação no Linux) — SOSL</title>
+  <meta name='description' content='Capítulo 13 da apostila SOSL: Shell Script (Bash) — variáveis, parâmetros, testes, if/case, loops, funções, pipes, logs e boas práticas, com prática guiada e quiz.' />
+  <!-- arquivo: capitulo13.html -->
+  <style>
+    :root{--pw-red:#0b1f3a;--pw-red-dark:#071528;--pw-gray:#3f3f3f;--pw-gray-dark:#2f2f2f;--bg:#fff;--surface:#fff;--text:#111827;--muted:#6b7280;--border:#e5e7eb;--link:var(--pw-red);--shadow:0 10px 28px rgba(0,0,0,.08);--radius:16px;--maxw:1120px;--hero:linear-gradient(180deg,rgba(11,31,58,.12),rgba(11,31,58,0));--ok:#065f46;--ok-bg:#ecfdf5;--warn:#92400e;--warn-bg:#fffbeb;--bad:#991b1b;--bad-bg:#fef2f2;--code-bg:#0f172a;--code-fg:#e5e7eb;--code-border:#0b1220;--code-muted:#94a3b8}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.55;background:var(--bg);color:var(--text)}a{color:var(--link)}a:hover{color:var(--pw-red-dark)}
+    header{position:sticky;top:0;z-index:1000}.nav{background:var(--pw-red);color:#fff;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12)}.nav .wrap{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:800}.logo{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);display:inline-flex;align-items:center;justify-content:center;font-weight:900}
+    .hamburger{display:none;appearance:none;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .menu{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.menu a{text-decoration:none;color:#fff;padding:10px;border-radius:12px;font-weight:650;opacity:.95}.menu a:hover{background:rgba(255,255,255,.12)}.menu a.secondary{opacity:.9}.menu-gap{flex:1 1 auto}
+    .dropdown{position:relative}.dropdown-toggle{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .dropdown-menu{position:absolute;right:0;top:46px;min-width:290px;background:#fff;color:var(--text);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;display:none;max-height:60vh;overflow:auto}.dropdown.open .dropdown-menu{display:block}
+    .dropdown-menu a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border-radius:12px;color:var(--text);text-decoration:none;font-weight:650}.dropdown-menu a:hover{background:#f3f4f6}
+    .pill{font-size:.75rem;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted);white-space:nowrap}
+    .hero{background:var(--hero);padding:18px 16px;border-bottom:1px solid var(--border)}main{padding:22px 16px 50px}.container{max-width:var(--maxw);margin:0 auto}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}.content{padding:20px}
+    h1{margin:0 0 6px;font-size:clamp(1.55rem,2.2vw,2.05rem)}h2{margin:22px 0 10px;font-size:clamp(1.2rem,1.6vw,1.5rem)}h3{margin:16px 0 6px;font-size:1.05rem}.subtitle{color:var(--muted);margin:0 0 10px}.muted{color:var(--muted)}.small{font-size:.92rem}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px}.badge{font-size:.82rem;padding:6px 10px;border-radius:999px;background:rgba(11,31,58,.08);border:1px solid rgba(11,31,58,.18);color:var(--pw-red-dark);font-weight:800}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:980px){.grid-2{grid-template-columns:1fr}}
+    .callout{border:1px solid var(--border);border-left:6px solid rgba(11,31,58,.55);background:rgba(11,31,58,.04);border-radius:14px;padding:12px 14px;margin:12px 0}.callout.ok{border-left-color:rgba(6,95,70,.7);background:var(--ok-bg)}.callout.warn{border-left-color:rgba(146,64,14,.7);background:var(--warn-bg)}.callout.bad{border-left-color:rgba(153,27,27,.7);background:var(--bad-bg)}
+    .list{margin:10px 0 0;padding-left:18px}.list li{margin:7px 0}
+    .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.toc a{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(11,31,58,.2);border-radius:999px;background:rgba(11,31,58,.04);color:var(--pw-red-dark);font-weight:800;text-decoration:none;font-size:.86rem}.toc a:hover{background:rgba(11,31,58,.08)}
+    pre{margin:10px 0;background:var(--code-bg);color:var(--code-fg);padding:14px;border-radius:12px;overflow:auto;border:1px solid var(--code-border);box-shadow:0 6px 18px rgba(0,0,0,.15)}code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}pre code{font-size:.92rem}.code-hint{color:var(--code-muted);font-size:.86rem;margin-top:6px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;padding:10px 12px;border-radius:12px;font-weight:850;border:1px solid transparent;cursor:pointer;user-select:none}
+    .btn.primary{background:var(--pw-red);color:#fff;border-color:var(--pw-red)}.btn.primary:hover{background:var(--pw-red-dark);border-color:var(--pw-red-dark)}
+    .btn.dark{background:var(--pw-gray);color:#fff;border-color:var(--pw-gray)}.btn.dark:hover{background:var(--pw-gray-dark);border-color:var(--pw-gray-dark)}
+    .btn.ghost{background:transparent;color:var(--pw-red);border-color:rgba(11,31,58,.35)}.btn.ghost:hover{background:rgba(11,31,58,.06)}
+    .table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;border:1px solid var(--border);margin:10px 0}.table th,.table td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}.table th{background:rgba(11,31,58,.06);font-weight:900}.table tr:last-child td{border-bottom:0}
+    .step{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin:12px 0}.step .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:950}.step .num{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:999px;background:rgba(11,31,58,.10);border:1px solid rgba(11,31,58,.22);color:var(--pw-red-dark);font-weight:950}
+    .quiz{margin-top:6px}.q{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0;background:#fff}.q-hd{padding:12px 14px;background:rgba(11,31,58,.06);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;font-weight:900}.q-bd{padding:12px 14px 14px}.opts{display:grid;gap:8px;margin-top:8px}
+    .opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:#fff}.opt:hover{background:#f9fafb}.opt input{margin-top:3px}
+    .feedback{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;border:1px solid var(--border);background:#f9fafb}.feedback.show{display:block}.feedback.ok{border-color:rgba(6,95,70,.25);background:var(--ok-bg);color:var(--ok)}.feedback.bad{border-color:rgba(153,27,27,.25);background:var(--bad-bg);color:var(--bad)}.q-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .checklist{border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff;margin-top:10px}.check-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--border)}.check-item:last-child{border-bottom:0}
+    .progress{margin-top:10px;height:10px;background:#f3f4f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}.progress>div{height:100%;width:0%;background:linear-gradient(90deg,rgba(11,31,58,.92),rgba(11,31,58,.55))}
+    .skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}.skip-link:focus{left:10px;top:10px;width:auto;height:auto;padding:10px 12px;background:#fff;border:2px solid var(--pw-red);border-radius:12px;z-index:2000}
+    @media(max-width:860px){.hamburger{display:inline-flex}.menu{display:none;width:100%;padding-top:10px}.menu.show{display:flex}.dropdown-menu{left:0;right:auto}}
+    footer{border-top:1px solid var(--border);padding:18px 16px}
+  </style>
+</head>
+<body>
+  <a href='#conteudo' class='skip-link'>Pular para o conteúdo</a>
+  <header>
+    <nav class='nav' role='navigation' aria-label='Navegação principal'>
+      <div class='wrap'>
+        <a class='brand' href='index.html' aria-label='Voltar ao Index'><span class='logo' aria-hidden='true'>SOSL</span><span>Apostila • Cap. 13</span></a>
+        <button class='hamburger' id='hamburgerBtn' aria-expanded='false' aria-controls='mainMenu'>☰ Menu</button>
+        <div class='menu' id='mainMenu'>
+          <a href='index.html' class='secondary'>Index</a>
+          <a href='plano.html'>Plano do Curso</a>
+          <a href='#teoria'>Teoria</a>
+          <a href='#passo'>Prática</a>
+          <a href='#quiz'>Quiz</a>
+          <a href='#checklist'>Checklist</a>
+          <span class='menu-gap'></span>
+          <div class='dropdown' id='chaptersDropdown'>
+            <button class='dropdown-toggle' aria-haspopup='true' aria-expanded='false'>Capítulos ▼</button>
+            <div class='dropdown-menu' role='menu' aria-label='Lista de capítulos'>
+              <a href='capitulo12.html' role='menuitem'><span>Cap. 12 — Configs, processos e rede</span><span class='pill'>12</span></a>
+              <a href='capitulo13.html' role='menuitem'><span>Cap. 13 — Shell Script</span><span class='pill'>13</span></a>
+              <a href='capitulo14.html' role='menuitem'><span>Cap. 14 — Manutenção preventiva</span><span class='pill'>14</span></a>
+              <a href='capitulo15.html' role='menuitem'><span>Cap. 15 — Backup e restauração</span><span class='pill'>15</span></a>
+              <a href='capitulo16.html' role='menuitem'><span>Cap. 16 — Implantação</span><span class='pill'>16</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class='hero'>
+    <div class='container'>
+      <div class='card'>
+        <div class='content'>
+          <h1 id='conteudo'>Capítulo 13 — Shell Script (automação no Linux)</h1>
+          <p class='subtitle'>Você vai aprender a automatizar tarefas de suporte com <strong>scripts Bash</strong>: variáveis, argumentos, testes, decisões, loops, funções e logs. O objetivo é produzir rotinas repetíveis e relatórios “ticket-ready”.</p>
+
+          <div class='badges'>
+            <span class='badge'>bash</span><span class='badge'>shebang</span><span class='badge'>set -euo pipefail</span><span class='badge'>$1..$#</span><span class='badge'>if/case</span><span class='badge'>for/while</span><span class='badge'>funções</span><span class='badge'>tee/log</span>
+          </div>
+
+          <div class='grid-2'>
+            <div>
+              <h2 style='margin-top:0'>Objetivos</h2>
+              <ul class='list'>
+                <li>Criar scripts executáveis com shebang e permissões corretas.</li>
+                <li>Usar variáveis e parâmetros (<code>$1</code>, <code>$@</code>, <code>$#</code>).</li>
+                <li>Validar entrada com testes (<code>[ ]</code>) e códigos de saída.</li>
+                <li>Aplicar decisões (<code>if</code>/<code>case</code>) e repetições (<code>for</code>/<code>while</code>).</li>
+                <li>Gerar logs e relatórios com <code>tee</code> e redirecionamento.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style='margin-top:0'>Pré-requisitos</h2>
+              <ul class='list'>
+                <li>Cap. 09–10: CLI, pipes/filtros e organização de arquivos.</li>
+                <li>Cap. 11: permissões (executar scripts) e sudo consciente.</li>
+                <li>Cap. 12: diagnóstico (configs/processos/rede) — será automatizado.</li>
+              </ul>
+              <div class='callout warn'><strong>Segurança:</strong> scripts executam ações em massa. Teste em pasta de laboratório e registre logs.</div>
+            </div>
+          </div>
+
+          <div class='toc'>
+            <a href='#teoria'>📚 Teoria</a>
+            <a href='#fundamentos'>🧱 Fundamentos</a>
+            <a href='#passo'>🧪 Passo a passo</a>
+            <a href='#atividades'>🧩 Atividades</a>
+            <a href='#quiz'>📝 Quiz</a>
+            <a href='#checklist'>☑️ Checklist</a>
+          </div>
+
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo12.html'>← Voltar ao Cap. 12</a>
+            <a class='btn dark' href='capitulo14.html'>Próximo: Cap. 14 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class='container'>
+
+      <section id='teoria' class='card'>
+        <div class='content'>
+          <h2>1) Teoria: por que Shell Script é essencial no suporte</h2>
+
+          <h3>1.1 O que é um script?</h3>
+          <p>Um <strong>script</strong> é um arquivo de texto com comandos que o shell executa em sequência. Ele padroniza tarefas e reduz erro humano.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> No passo a passo você criará um script que gera relatório de diagnóstico automaticamente.</div>
+
+          <h3>1.2 Shebang e permissão de execução</h3>
+          <p>O <strong>shebang</strong> indica o interpretador (ex.: <code>#!/usr/bin/env bash</code>). Para executar com <code>./script.sh</code>, use <code>chmod +x</code>.</p>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> Você vai criar <code>diag.sh</code> e torná-lo executável.</div>
+
+          <h3>1.3 Variáveis, aspas e parâmetros</h3>
+          <p>Variáveis guardam valores (<code>VAR=valor</code>). Use aspas em <code>"$VAR"</code> para preservar espaços. Parâmetros são argumentos: <code>$1</code>, <code>$2</code>, <code>$@</code> e <code>$#</code>.</p>
+          <div class='callout warn'><strong>Erro comum:</strong> esquecer aspas em caminhos com espaço.</div>
+
+          <h3>1.4 Testes e códigos de saída</h3>
+          <p>Testes com <code>[ ]</code> validam condições (arquivo existe, diretório existe). Códigos de saída: <code>0</code> = sucesso; outros = erro.</p>
+          <pre><code>echo $?   # status do último comando</code></pre>
+          <div class='callout'><strong>Onde vou aplicar isso?</strong> O script de backup simples vai validar parâmetros e sair com códigos diferentes.</div>
+        </div>
+      </section>
+
+      <section id='fundamentos' class='card'>
+        <div class='content'>
+          <h2>2) Fundamentos do Bash (kit mínimo)</h2>
+
+          <h3>2.1 Estrutura mínima e modo seguro</h3>
+          <pre><code>#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Olá"</code></pre>
+          <p class='code-hint'><code>set -euo pipefail</code>: falha em erros, variáveis não definidas e pipelines quebrados.</p>
+
+          <h3>2.2 Testes mais usados</h3>
+          <table class='table'>
+            <thead><tr><th>Teste</th><th>Significado</th><th>Exemplo</th></tr></thead>
+            <tbody>
+              <tr><td><code>[ -f ARQ ]</code></td><td>arquivo existe</td><td><code>[ -f /etc/hosts ]</code></td></tr>
+              <tr><td><code>[ -d DIR ]</code></td><td>diretório existe</td><td><code>[ -d ~/SOSL ]</code></td></tr>
+              <tr><td><code>[ $# -ne 2 ]</code></td><td>qtd de argumentos diferente de 2</td><td><code>[ $# -ne 2 ]</code></td></tr>
+              <tr><td><code>[ -z STR ]</code></td><td>string vazia</td><td><code>[ -z "${1:-}" ]</code></td></tr>
+            </tbody>
+          </table>
+
+          <h3>2.3 if e case (decisão)</h3>
+          <pre><code>if [ -f "/etc/hosts" ]; then
+  echo "ok"
+else
+  echo "faltando"
+fi
+
+case "${1:-diag}" in
+  diag) echo "modo diag";;
+  net)  echo "modo rede";;
+  *)    echo "uso: script {diag|net}"; exit 2;;
+esac</code></pre>
+        </div>
+      </section>
+
+      <section id='passo' class='card'>
+        <div class='content'>
+          <h2>3) Passo a passo prático: scripts de diagnóstico e backup simples</h2>
+          <p class='muted'>Você vai criar dois scripts em <code>~/SOSL/cap13/scripts</code> e gerar saídas em <code>~/SOSL/cap13/saidas</code>.</p>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>1</span> Preparar estrutura</span><span class='pill'>Setup</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap13/{scripts,saidas}
+cd ~/SOSL/cap13</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>2</span> Criar diag.sh (relatório automático)</span><span class='pill'>Script</span></div>
+            <pre><code>cat &gt; ~/SOSL/cap13/scripts/diag.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUT_DIR="$HOME/SOSL/cap13/saidas"
+mkdir -p "$OUT_DIR"
+OUT_FILE="$OUT_DIR/diagnostico_$(date '+%Y%m%d_%H%M%S').txt"
+
+section(){ echo "
+==== $* ====" | tee -a "$OUT_FILE"; }
+log(){ echo "[$(date '+%F %T')] $*" | tee -a "$OUT_FILE"; }
+
+log "DIAGNÓSTICO (Cap. 13) — host=$(hostname) user=$(whoami)"
+section "SO/KERNEL"; { cat /etc/os-release; uname -a; } | tee -a "$OUT_FILE" &gt;/dev/null
+section "UPTIME/MEM"; { uptime; free -h; } | tee -a "$OUT_FILE" &gt;/dev/null
+section "TOP CPU"; ps aux --sort=-%cpu | head -n 11 | tee -a "$OUT_FILE" &gt;/dev/null
+section "TOP MEM"; ps aux --sort=-%mem | head -n 11 | tee -a "$OUT_FILE" &gt;/dev/null
+section "REDE"; { ip -br a; ip route; } | tee -a "$OUT_FILE" &gt;/dev/null
+section "PING"; (ping -c 2 8.8.8.8 || true) | tee -a "$OUT_FILE" &gt;/dev/null
+section "LOGS"; (journalctl -b -p warning..err --no-pager | tail -n 40 || true) | tee -a "$OUT_FILE" &gt;/dev/null
+log "Relatório: $OUT_FILE"
+EOF
+
+chmod +x ~/SOSL/cap13/scripts/diag.sh</code></pre>
+            <div class='callout'><strong>Onde vou aplicar isso?</strong> Você roda e anexa o relatório em um chamado.</div>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>3</span> Executar o diagnóstico</span><span class='pill'>Execução</span></div>
+            <pre><code>~/SOSL/cap13/scripts/diag.sh
+ls -t ~/SOSL/cap13/saidas/diagnostico_*.txt | head -n 1
+</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>4</span> Criar backup_simples.sh (validação + log)</span><span class='pill'>Backup</span></div>
+            <pre><code>cat &gt; ~/SOSL/cap13/scripts/backup_simples.sh &lt;&lt'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+USO="Uso: backup_simples.sh ORIGEM DESTINO"
+if [ $# -ne 2 ]; then echo "$USO" >&2; exit 2; fi
+
+ORIG="$1"; DEST="$2"
+if [ ! -e "$ORIG" ]; then echo "ERRO: origem não existe: $ORIG" >&2; exit 3; fi
+
+mkdir -p "$DEST"
+LOG="$HOME/SOSL/cap13/saidas/backup_$(date '+%Y%m%d_%H%M%S').log"
+log(){ echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
+
+log "Backup iniciado"; log "Origem: $ORIG"; log "Destino: $DEST"
+cp -a "$ORIG" "$DEST/"
+log "Backup concluído"; log "Log: $LOG"
+EOF
+
+chmod +x ~/SOSL/cap13/scripts/backup_simples.sh</code></pre>
+            <div class='callout warn'><strong>Obs.:</strong> backup real com retenção e verificação será aprofundado no Cap. 15.</div>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>5</span> Testar backup em pasta de laboratório</span><span class='pill'>Teste</span></div>
+            <pre><code>mkdir -p ~/SOSL/cap13/teste_origem
+printf "A
+" &gt; ~/SOSL/cap13/teste_origem/a.txt
+printf "B
+" &gt; ~/SOSL/cap13/teste_origem/b.txt
+
+~/SOSL/cap13/scripts/backup_simples.sh ~/SOSL/cap13/teste_origem ~/SOSL/cap13/teste_destino
+ls -lah ~/SOSL/cap13/teste_destino
+ls -lah ~/SOSL/cap13/saidas | grep backup_ | tail</code></pre>
+          </div>
+
+          <div class='step'>
+            <div class='hd'><span><span class='num'>6</span> Desafio (sem gabarito): modo net</span><span class='pill'>Desafio</span></div>
+            <p class='muted'>Adicione ao <code>diag.sh</code> um menu com <code>case</code> para rodar somente a parte de rede quando receber <code>net</code> como argumento.</p>
+            <ul class='list'>
+              <li>Dica: <code>case "${1:-diag}" in ... esac</code></li>
+              <li>Ex.: <code>./diag.sh net</code> gera relatório só com IP/rota/ping.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id='atividades' class='card'>
+        <div class='content'>
+          <h2>4) Atividades práticas sugeridas</h2>
+          <ul class='list'>
+            <li><strong>Atividade 1:</strong> script que remove apenas <code>.tmp</code> em uma pasta (com confirmação <code>read</code> e <code>rm -i</code>).</li>
+            <li><strong>Atividade 2:</strong> melhorar o backup para aceitar múltiplas origens usando <code>$@</code>.</li>
+            <li><strong>Atividade 3:</strong> script que lista arquivos recentes em <code>/var/log</code> (find + relatório com tee).</li>
+          </ul>
+          <h3>Pesquisas complementares</h3>
+          <ul class='list'>
+            <li>Diferença entre <code>$*</code> e <code>$@</code>.</li>
+            <li>Como capturar saída em variável: <code>var=$(comando)</code>.</li>
+            <li>Quando usar <code>set -e</code> e quando evitar.</li>
+            <li>Como agendar scripts com cron ou systemd timers.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id='quiz' class='card'>
+        <div class='content'>
+          <h2>5) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class='muted'>Responda e veja feedback por questão.</p>
+          <div class='quiz' id='quiz13'>
+            <div class='q' data-answer='c' data-topic='shebang'><div class='q-hd'><span>1) O shebang serve para:</span><span class='pill'>Bash</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q1' value='a'> Instalar pacotes</label>
+              <label class='opt'><input type='radio' name='q1' value='b'> Trocar permissões</label>
+              <label class='opt'><input type='radio' name='q1' value='c'> Indicar o interpretador do script</label>
+              <label class='opt'><input type='radio' name='q1' value='d'> Reiniciar o sistema</label>
+              <label class='opt'><input type='radio' name='q1' value='e'> Criar usuário</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback' aria-live='polite'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='chmodx'><div class='q-hd'><span>2) Para executar com ./script.sh, use:</span><span class='pill'>Exec</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q2' value='a'> chmod 777 script.sh</label>
+              <label class='opt'><input type='radio' name='q2' value='b'> chmod +x script.sh</label>
+              <label class='opt'><input type='radio' name='q2' value='c'> chown script.sh</label>
+              <label class='opt'><input type='radio' name='q2' value='d'> rm -rf script.sh</label>
+              <label class='opt'><input type='radio' name='q2' value='e'> apt install script.sh</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='params'><div class='q-hd'><span>3) $1 é:</span><span class='pill'>Args</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q3' value='a'> Primeiro argumento</label>
+              <label class='opt'><input type='radio' name='q3' value='b'> PID</label>
+              <label class='opt'><input type='radio' name='q3' value='c'> Usuário atual</label>
+              <label class='opt'><input type='radio' name='q3' value='d'> Caminho atual</label>
+              <label class='opt'><input type='radio' name='q3' value='e'> Código de saída</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='e' data-topic='set'><div class='q-hd'><span>4) Conjunto recomendado para falhar cedo:</span><span class='pill'>Safety</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q4' value='a'> set +x</label>
+              <label class='opt'><input type='radio' name='q4' value='b'> export PATH=/</label>
+              <label class='opt'><input type='radio' name='q4' value='c'> chmod 777 *</label>
+              <label class='opt'><input type='radio' name='q4' value='d'> rm -rf /</label>
+              <label class='opt'><input type='radio' name='q4' value='e'> set -euo pipefail</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='test'><div class='q-hd'><span>5) Teste para diretório existente:</span><span class='pill'>Test</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q5' value='a'> [ -f DIR ]</label>
+              <label class='opt'><input type='radio' name='q5' value='b'> [ -z DIR ]</label>
+              <label class='opt'><input type='radio' name='q5' value='c'> [ -n DIR ]</label>
+              <label class='opt'><input type='radio' name='q5' value='d'> [ -d DIR ]</label>
+              <label class='opt'><input type='radio' name='q5' value='e'> [ -gt DIR ]</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='exit'><div class='q-hd'><span>6) Código de saída de sucesso:</span><span class='pill'>Exit</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q6' value='a'> 1</label>
+              <label class='opt'><input type='radio' name='q6' value='b'> 0</label>
+              <label class='opt'><input type='radio' name='q6' value='c'> 404</label>
+              <label class='opt'><input type='radio' name='q6' value='d'> 255</label>
+              <label class='opt'><input type='radio' name='q6' value='e'> -1</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='a' data-topic='quotes'><div class='q-hd'><span>7) Aspas em "$VAR" servem para:</span><span class='pill'>Quotes</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q7' value='a'> Preservar espaços/evitar expansão</label>
+              <label class='opt'><input type='radio' name='q7' value='b'> Deixar mais lento</label>
+              <label class='opt'><input type='radio' name='q7' value='c'> Rodar como root</label>
+              <label class='opt'><input type='radio' name='q7' value='d'> Apagar logs</label>
+              <label class='opt'><input type='radio' name='q7' value='e'> Não muda nada</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='c' data-topic='tee'><div class='q-hd'><span>8) tee faz:</span><span class='pill'>tee</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q8' value='a'> Apagar arquivo</label>
+              <label class='opt'><input type='radio' name='q8' value='b'> Compactar arquivo</label>
+              <label class='opt'><input type='radio' name='q8' value='c'> Mostrar na tela e gravar em arquivo</label>
+              <label class='opt'><input type='radio' name='q8' value='d'> Mudar permissões</label>
+              <label class='opt'><input type='radio' name='q8' value='e'> Criar usuário</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='d' data-topic='case'><div class='q-hd'><span>9) Estrutura para menu por argumento:</span><span class='pill'>case</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q9' value='a'> grep</label>
+              <label class='opt'><input type='radio' name='q9' value='b'> chmod</label>
+              <label class='opt'><input type='radio' name='q9' value='c'> ps</label>
+              <label class='opt'><input type='radio' name='q9' value='d'> case</label>
+              <label class='opt'><input type='radio' name='q9' value='e'> df</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+
+            <div class='q' data-answer='b' data-topic='next'><div class='q-hd'><span>10) Capítulo 14 aborda principalmente:</span><span class='pill'>Sequência</span></div><div class='q-bd'><div class='opts'>
+              <label class='opt'><input type='radio' name='q10' value='a'> Instalação de VM</label>
+              <label class='opt'><input type='radio' name='q10' value='b'> Manutenção preventiva</label>
+              <label class='opt'><input type='radio' name='q10' value='c'> Licenças</label>
+              <label class='opt'><input type='radio' name='q10' value='d'> Interfaces gráficas</label>
+              <label class='opt'><input type='radio' name='q10' value='e'> Implantação</label>
+            </div><div class='q-actions'><button class='btn primary' data-action='submit'>Enviar Resposta</button><button class='btn ghost' data-action='show'>Ver Gabarito</button><button class='btn dark' data-action='reset'>Limpar</button></div><div class='feedback'></div></div></div>
+          </div>
+
+          <div class='callout ok' style='margin-top:14px'><strong>Seu progresso no quiz:</strong> <span id='quizScore'>0</span>/10 corretas.</div>
+        </div>
+      </section>
+
+      <section id='checklist' class='card'>
+        <div class='content'>
+          <h2>6) Checklist do aluno (interativo)</h2>
+          <p class='muted'>Marque o que você concluiu.</p>
+          <div class='checklist' id='checklist13'>
+            <div class='check-item'><input type='checkbox' id='c1'><label for='c1'><strong>Eu criei</strong> scripts em ~/SOSL/cap13.</label></div>
+            <div class='check-item'><input type='checkbox' id='c2'><label for='c2'><strong>Eu usei</strong> shebang e chmod +x.</label></div>
+            <div class='check-item'><input type='checkbox' id='c3'><label for='c3'><strong>Eu entendo</strong> $1, $@ e $#.</label></div>
+            <div class='check-item'><input type='checkbox' id='c4'><label for='c4'><strong>Eu validei</strong> entradas com testes e exit codes.</label></div>
+            <div class='check-item'><input type='checkbox' id='c5'><label for='c5'><strong>Eu gerei</strong> relatórios/logs com tee.</label></div>
+            <div class='check-item'><input type='checkbox' id='c6'><label for='c6'><strong>Eu executei</strong> diag.sh e localizei o arquivo gerado.</label></div>
+            <div class='check-item'><input type='checkbox' id='c7'><label for='c7'><strong>Eu testei</strong> backup_simples.sh em pasta de laboratório.</label></div>
+            <div class='check-item'><input type='checkbox' id='c8'><label for='c8'><strong>Eu tentei</strong> o desafio do modo net.</label></div>
+            <div class='check-item'><input type='checkbox' id='c9'><label for='c9'><strong>Eu fiz</strong> pelo menos 1 atividade sugerida.</label></div>
+            <div class='check-item'><input type='checkbox' id='c10'><label for='c10'><strong>Eu respondi</strong> o quiz e revisei erros.</label></div>
+            <div class='progress'><div id='checkProg'></div></div>
+            <p class='small muted' style='margin:10px 0 0'>Progresso: <strong><span id='checkPct'>0%</span></strong></p>
+            <div class='actions'>
+              <button class='btn primary' id='saveBtn' type='button'>Salvar progresso</button>
+              <button class='btn ghost' id='loadBtn' type='button'>Carregar</button>
+              <button class='btn dark' id='clearBtn' type='button'>Limpar</button>
+            </div>
+          </div>
+          <div class='actions'>
+            <a class='btn ghost' href='capitulo12.html'>← Voltar ao Cap. 12</a>
+            <a class='btn dark' href='capitulo14.html'>Ir para Cap. 14 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class='container'>
+      <div style='display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between'>
+        <div class='small muted'>© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class='small'><a href='#conteudo' style='text-decoration:none;color:var(--link)'>Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Menu mobile
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    hamburgerBtn?.addEventListener('click', () => {
+      const isOpen = mainMenu.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Dropdown capítulos
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => { e.stopPropagation(); setDropdown(!chaptersDropdown.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if(!chaptersDropdown.contains(e.target)) setDropdown(false); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape') setDropdown(false); });
+    }
+
+    // Quiz
+    const quiz = document.getElementById('quiz13');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+    function explain(topic){
+      const map = {
+        shebang: 'Shebang define o interpretador do script.',
+        chmodx: 'chmod +x torna o script executável.',
+        params: '$1 é o primeiro argumento.',
+        set: 'set -euo pipefail ajuda a falhar cedo.',
+        test: '[ -d DIR ] testa diretório.',
+        exit: '0 = sucesso; outros = erro.',
+        quotes: 'Aspas preservam espaços e evitam expansão.',
+        tee: 'tee mostra na tela e grava em arquivo.',
+        case: 'case é ótimo para menus por argumento.',
+        next: 'Cap. 14: manutenção preventiva.'
+      };
+      return map[topic] || 'Revise teoria e prática.';
+    }
+    function getSelected(qEl){ return qEl.querySelector('input[type="radio"]:checked')?.value || null; }
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+    function clearFeedback(qEl){ const fb=qEl.querySelector('.feedback'); fb.classList.remove('ok','bad','show'); fb.innerHTML=''; }
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz?.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){ setFeedback(qEl,false,'<strong>Escolha uma alternativa.</strong>'); return; }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){ correctCount += 1; setCounted(qEl,true); updateScore(); }
+            const human = ok ? `<strong>Correto!</strong> ✅` : `<strong>Incorreto.</strong> ❌ Correto: <strong>${ans.toUpperCase()}</strong>.`;
+            const tip = `<div style="margin-top:6px" class="muted"><strong>Dica:</strong> ${explain(topic)}</div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            setFeedback(qEl,true,`<strong>Gabarito:</strong> <strong>${ans.toUpperCase()}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // Checklist
+    const checklist = document.getElementById('checklist13');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const key = 'sosl_cap13_checklist_v1';
+
+    function compute(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c=>c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+    function save(){
+      const data={};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>data[c.id]=c.checked);
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    function load(){
+      const raw=localStorage.getItem(key); if(!raw) return;
+      try{ const data=JSON.parse(raw); checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>{ if(typeof data[c.id]==='boolean') c.checked=data[c.id]; }); }catch(e){}
+      compute();
+    }
+    function clear(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+      localStorage.removeItem(key); compute();
+    }
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c=>c.addEventListener('change',()=>{compute();save();}));
+    document.getElementById('saveBtn')?.addEventListener('click',()=>{save();compute();});
+    document.getElementById('loadBtn')?.addEventListener('click',()=>load());
+    document.getElementById('clearBtn')?.addEventListener('click',()=>clear());
+    compute(); load();
+  </script>
+</body>
+</html>

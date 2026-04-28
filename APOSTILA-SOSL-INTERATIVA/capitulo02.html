@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 02 — Software Livre Hoje: aplicações, ecossistema e curadoria de notícias (SOSL)</title>
+  <meta name="description" content="Capítulo 02 da apostila SOSL: usos atuais do software livre, ecossistema (comunidades, fundações e empresas) e metodologia de curadoria de notícias com fontes." />
+
+  <!-- arquivo: capitulo02.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+    }
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 280px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 980px){ .grid-2,.grid-3{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Form */
+    .form{
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background:#fff;
+      margin-top: 10px;
+    }
+    .field{ display:flex; flex-direction:column; gap:6px; margin: 10px 0; }
+    label{ font-weight: 800; }
+    input[type="text"], input[type="date"], textarea, select{
+      width:100%;
+      padding: 10px 12px;
+      border:1px solid var(--border);
+      border-radius: 12px;
+      font: inherit;
+      background:#fff;
+    }
+    textarea{ min-height: 110px; resize: vertical; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
+
+    /* News list */
+    .news-item{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background:#fff;
+      margin: 10px 0;
+    }
+    .news-top{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+    .news-title{ font-weight: 950; }
+    .news-meta{ color: var(--muted); font-size: .92rem; }
+    .news-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px; }
+    .chip{ font-size: .78rem; padding: 4px 10px; border-radius: 999px; background:#f3f4f6; border: 1px solid var(--border); color:#374151; font-weight: 800; }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 02</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#curadoria">Curadoria</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo01.html" role="menuitem"><span>Cap. 01 — Tipos, licenças e história</span><span class="pill">01</span></a>
+              <a href="capitulo02.html" role="menuitem"><span>Cap. 02 — SL hoje: aplicações e ecossistema</span><span class="pill">02</span></a>
+              <a href="capitulo03.html" role="menuitem"><span>Cap. 03 — Linux e distribuições (pesquisa)</span><span class="pill">03</span></a>
+              <a href="capitulo04.html" role="menuitem"><span>Cap. 04 — VM + instalação Linux Mint</span><span class="pill">04</span></a>
+              <a href="capitulo05.html" role="menuitem"><span>Cap. 05 — Interfaces gráficas</span><span class="pill">05</span></a>
+              <a href="capitulo06.html" role="menuitem"><span>Cap. 06 — Pacotes, lojas, Snap/Flatpak</span><span class="pill">06</span></a>
+              <a href="capitulo07.html" role="menuitem"><span>Cap. 07 — Boot e systemd</span><span class="pill">07</span></a>
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo14.html" role="menuitem"><span>Cap. 14 — Manutenção preventiva</span><span class="pill">14</span></a>
+              <a href="capitulo15.html" role="menuitem"><span>Cap. 15 — Backup e restauração</span><span class="pill">15</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 02 — Software Livre Hoje: aplicações, ecossistema e curadoria de notícias</h1>
+          <p class="subtitle">
+            Agora que você já entende licenças e a ideia de liberdade (Cap. 01), este capítulo mostra <strong>onde o software livre está no mundo real</strong>
+            e como acompanhar <strong>novidades com fontes confiáveis</strong>.
+          </p>
+
+          <div class="badges">
+            <span class="badge">Aplicações atuais</span>
+            <span class="badge">Fundações e comunidades</span>
+            <span class="badge">Governança</span>
+            <span class="badge">Segurança e cadeia de suprimentos</span>
+            <span class="badge">Curadoria de notícias</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Identificar <strong>onde</strong> o software livre é usado hoje (servidores, nuvem, desktop, mobile, embarcados).</li>
+                <li>Entender <strong>quem</strong> compõe o ecossistema (comunidades, fundações, empresas, mantenedores).</li>
+                <li>Compreender conceitos de <strong>governança</strong> e como projetos evoluem (releases, manutenção, roadmap).</li>
+                <li>Reconhecer riscos e cuidados de <strong>segurança</strong> em software de terceiros (cadeia de suprimentos).</li>
+                <li>Aprender uma metodologia de <strong>curadoria de notícias</strong> com referências (sem cair em boatos).</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>Ter concluído o Cap. 01 (tipos de software e licenças).</li>
+                <li>Saber ler um texto técnico e extrair ideias-chave.</li>
+                <li>Não é necessário laboratório Linux aqui — isso começa no Cap. 04.</li>
+              </ul>
+              <div class="callout warn">
+                <strong>Nota sobre notícias “recentes”:</strong> esta apostila foi projetada para funcionar offline.
+                Por isso, a seção de curadoria ensina <strong>como</strong> obter notícias atuais e registrar as fontes.
+                Assim, seu material fica sempre atualizado, mesmo que o capítulo seja impresso.
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#aplicacoes">🌍 Aplicações atuais</a>
+            <a href="#ecossistema">🧑‍🤝‍🧑 Ecossistema</a>
+            <a href="#governanca">🧭 Governança</a>
+            <a href="#seguranca">🛡️ Segurança</a>
+            <a href="#curadoria">📰 Curadoria</a>
+            <a href="#atividades">🧪 Atividades</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo01.html">← Voltar ao Cap. 01</a>
+            <a class="btn dark" href="capitulo03.html">Próximo: Cap. 03 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Por que o software livre virou peça central da computação moderna?</h2>
+          <p>
+            O software livre não é apenas “um tipo de licença”: ele virou um <strong>modelo de produção</strong> e um <strong>ecossistema</strong>.
+            Ao permitir colaboração e reuso, projetos amadurecem rapidamente, recebem auditoria pública e podem ser mantidos por comunidades e empresas.
+            Isso faz com que o software livre esteja presente em praticamente toda a infraestrutura digital: internet, servidores, redes, cloud, automação,
+            ciência de dados e até em dispositivos que você usa todos os dias.
+          </p>
+          <p>
+            Para um técnico de suporte, isso tem um impacto direto: você vai lidar com ferramentas open source mesmo quando o sistema final é proprietário.
+            Ex.: uma aplicação pode ser fechada, mas usar bibliotecas abertas; um roteador pode ter interface proprietária, mas rodar kernel Linux internamente;
+            um serviço em nuvem pode usar contêineres, orquestração e monitoramento de projetos abertos.
+          </p>
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso no curso?</strong> No Cap. 06 você aprende sobre pacotes/lojas (como o ecossistema distribui software),
+            no Cap. 09–12 você usa ferramentas de diagnóstico e administração que existem graças à cultura de reutilização e colaboração.
+          </div>
+
+          <h3>Pausa de checagem</h3>
+          <ul class="list">
+            <li>Você consegue citar 3 lugares onde o software livre aparece “sem você perceber”?</li>
+            <li>Você entende por que empresas investem em projetos abertos?</li>
+            <li>Você entende a diferença entre “usar software livre” e “contribuir para software livre”?</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="aplicacoes" class="card">
+        <div class="content">
+          <h2>2) Aplicações do software livre nos tempos atuais</h2>
+
+          <h3>2.1 Infraestrutura e servidores (o coração da internet)</h3>
+          <p>
+            A maioria dos serviços que compõem a internet moderna (sites, APIs, bancos de dados, caches, filas, balanceadores) roda sobre uma base
+            que historicamente foi muito influenciada por software livre. Mesmo quando uma empresa compra um produto comercial, é comum que ele seja
+            construído sobre componentes abertos.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Quando você estudar processos, serviços e logs (Cap. 07 e Cap. 12), você estará lidando com a lógica
+            típica de servidores e serviços em background.
+          </div>
+
+          <h3>2.2 Nuvem, contêineres e DevOps</h3>
+          <p>
+            O crescimento de cloud e DevOps foi acompanhado por ferramentas abertas de automação, empacotamento e entrega contínua. Contêineres
+            e orquestração (conceitualmente) ajudam a padronizar ambientes e escalar aplicações. Para suporte, isso significa que “o sistema” muitas vezes
+            é um conjunto de serviços e scripts, e não apenas uma instalação “monolítica”.
+          </p>
+
+          <h3>2.3 Desktop e educação</h3>
+          <p>
+            Em ambientes educacionais, software livre é muito usado por reduzir custo, permitir redistribuição controlada e oferecer ferramentas completas
+            para aprendizado (editores, IDEs, navegadores, suítes de escritório, ferramentas de rede). Além disso, o aluno pode replicar em casa o mesmo
+            ambiente do laboratório, o que favorece estudo autônomo.
+          </p>
+
+          <h3>2.4 Dispositivos móveis e embarcados (IoT)</h3>
+          <p>
+            Muitos dispositivos (TVs, roteadores, centrais multimídia, equipamentos industriais) usam componentes de sistemas operacionais livres.
+            Em geral, isso ocorre por disponibilidade, estabilidade e capacidade de adaptação. Para suporte, isso cria um cenário interessante:
+            você pode precisar diagnosticar sistemas “fechados” que internamente usam componentes “abertos”.
+          </p>
+
+          <h3>2.5 Ciência, dados e inteligência artificial (visão geral)</h3>
+          <p>
+            Na ciência e em dados, a cultura de reprodutibilidade (publicar métodos e ferramentas) combina muito bem com software livre.
+            Bibliotecas e ferramentas abertas permitem que comunidades validem resultados e evoluam soluções. Isso não significa que tudo é aberto,
+            mas que há uma base comum compartilhada.
+          </p>
+
+          <table class="table" aria-label="Mapa de aplicações por área">
+            <thead>
+              <tr>
+                <th>Área</th>
+                <th>Como o software livre aparece</th>
+                <th>O que isso muda para o suporte</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Servidores &amp; Internet</strong></td>
+                <td>Serviços, ferramentas de rede, servidores web, bancos</td>
+                <td>Diagnóstico por logs, serviços, permissões e automação</td>
+              </tr>
+              <tr>
+                <td><strong>Nuvem &amp; DevOps</strong></td>
+                <td>Automação, infraestrutura como código, contêineres</td>
+                <td>Padronização de ambientes, scripts e monitoramento</td>
+              </tr>
+              <tr>
+                <td><strong>Educação</strong></td>
+                <td>Ambiente replicável e ferramentas completas</td>
+                <td>Facilita suporte e reduz dependência de licenças pagas</td>
+              </tr>
+              <tr>
+                <td><strong>Embarcados/IoT</strong></td>
+                <td>Kernel e utilitários em dispositivos</td>
+                <td>Suporte pode envolver rede, logs e limitações de firmware</td>
+              </tr>
+              <tr>
+                <td><strong>Dados</strong></td>
+                <td>Bibliotecas e ferramentas reprodutíveis</td>
+                <td>Ambientes podem exigir versões específicas e gestão de dependências</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout warn">
+            <strong>Conceito para guardar:</strong> software livre é um <em>meio</em> (modelo e base tecnológica), não um fim. O objetivo é resolver problemas com
+            sustentabilidade e autonomia.
+          </div>
+        </div>
+      </section>
+
+      <section id="ecossistema" class="card">
+        <div class="content">
+          <h2>3) Quem compõe o ecossistema do software livre?</h2>
+
+          <h3>3.1 Comunidades</h3>
+          <p>
+            Comunidades são grupos de pessoas que usam, testam, documentam e desenvolvem um projeto. Nem todo mundo programa: há quem traduza,
+            escreva documentação, crie tutoriais, reporte bugs, produza materiais didáticos e ajude outros usuários. Em projetos grandes, a comunidade é
+            essencial para qualidade e suporte.
+          </p>
+
+          <h3>3.2 Mantenedores (maintainers)</h3>
+          <p>
+            Mantenedores são pessoas (ou equipes) responsáveis por aceitar contribuições, revisar mudanças e garantir que o projeto evolua de forma
+            segura e consistente. Muitos gargalos e problemas de sustentabilidade vêm do fato de que poucos mantenedores cuidam de muitos componentes.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> Quando você aprender pacotes (Cap. 06), pense: por trás do repositório existe uma cadeia de mantenedores,
+            revisões e assinaturas/validações.
+          </div>
+
+          <h3>3.3 Empresas</h3>
+          <p>
+            Empresas podem investir em software livre por interesse direto (usar em produtos/infraestrutura) ou por estratégia (atrair talentos,
+            influenciar padrões, reduzir custos e aumentar compatibilidade). Muitas contribuem com código, infraestrutura, eventos e financiamento.
+          </p>
+
+          <h3>3.4 Fundações e organizações</h3>
+          <p>
+            Fundações existem para dar suporte institucional: governança, recursos, infraestrutura, eventos e regras. Algumas são focadas em manter
+            projetos e ecossistemas, outras em promover segurança e boas práticas.
+          </p>
+
+          <h3>3.5 Usuários e organizações usuárias</h3>
+          <p>
+            Quem usa também influencia: reportando problemas, financiando, priorizando melhorias e adotando boas práticas de segurança e conformidade.
+            Em suporte técnico, você é a ponte entre usuário final e o ecossistema (por exemplo, traduzindo um erro em um relato claro para suporte).
+          </p>
+
+          <div class="callout ok">
+            <strong>Resumo rápido:</strong> ecossistema = pessoas + processos + ferramentas + governança. Sem governança e processos, o projeto vira “código solto”.
+          </div>
+        </div>
+      </section>
+
+      <section id="governanca" class="card">
+        <div class="content">
+          <h2>4) Governança: como projetos abertos decidem e evoluem</h2>
+
+          <h3>4.1 Modelos comuns de governança</h3>
+          <p>
+            Governança é o conjunto de regras sobre como decisões são tomadas. Isso inclui: quem aprova mudanças, como releases são feitos, como conflitos
+            são resolvidos e quais são as políticas de contribuição.
+          </p>
+
+          <table class="table" aria-label="Modelos de governança">
+            <thead>
+              <tr>
+                <th>Modelo</th>
+                <th>Como funciona (resumo)</th>
+                <th>Ponto forte</th>
+                <th>Ponto de atenção</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Comunitário</strong></td>
+                <td>Decisões distribuídas; regras claras de contribuição</td>
+                <td>Pluralidade e continuidade</td>
+                <td>Pode ser mais lento em mudanças grandes</td>
+              </tr>
+              <tr>
+                <td><strong>Fundação</strong></td>
+                <td>Uma entidade coordena e financia infraestrutura e processos</td>
+                <td>Estabilidade e recursos</td>
+                <td>Exige burocracia e alinhamento</td>
+              </tr>
+              <tr>
+                <td><strong>Corporate-led</strong></td>
+                <td>Empresa lidera roadmap e decisões principais</td>
+                <td>Velocidade e direção clara</td>
+                <td>Risco de decisões alinhadas ao interesse do fornecedor</td>
+              </tr>
+              <tr>
+                <td><strong>Open core</strong></td>
+                <td>Núcleo aberto + extensões proprietárias</td>
+                <td>Monetização e escala</td>
+                <td>Dependência do “extra fechado”</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>4.2 Ciclo de releases e manutenção</h3>
+          <p>
+            Projetos maduros têm calendário de releases e políticas de suporte. Para você, isso significa:
+            <strong>nem sempre o “mais novo” é o melhor</strong>. Em suporte, muitas vezes o ideal é uma versão estável (LTS) ou
+            uma distribuição com ciclos previsíveis.
+          </p>
+
+          <h3>4.3 Etiqueta de contribuição (mesmo sem programar)</h3>
+          <ul class="list">
+            <li><strong>Relato de problema:</strong> descreva cenário, passos, evidências (logs/prints), versão e ambiente.</li>
+            <li><strong>Reprodutibilidade:</strong> “como reproduzir o erro” é ouro em suporte.</li>
+            <li><strong>Respeito e clareza:</strong> mantenedores são humanos; comunicação clara acelera solução.</li>
+            <li><strong>Documentação:</strong> um bom tutorial pode valer mais que uma linha de código.</li>
+          </ul>
+
+          <div class="callout">
+            <strong>Onde vou aplicar isso?</strong> No Cap. 12 você aprenderá a coletar informações e logs.
+            Isso te transforma em um “usuário profissional”: você reporta problemas com qualidade.
+          </div>
+        </div>
+      </section>
+
+      <section id="seguranca" class="card">
+        <div class="content">
+          <h2>5) Segurança e cadeia de suprimentos (supply chain) — visão essencial</h2>
+
+          <h3>5.1 O que é “cadeia de suprimentos” em software?</h3>
+          <p>
+            Quando você instala um programa, raramente instala “uma coisa só”. Normalmente você instala um conjunto de dependências
+            (bibliotecas, módulos, plugins). A cadeia de suprimentos é esse caminho de componentes, fornecedores e dependências.
+            Em software livre, isso pode envolver muitos projetos pequenos mantidos por poucas pessoas.
+          </p>
+
+          <h3>5.2 Riscos comuns (sem alarmismo)</h3>
+          <ul class="list">
+            <li><strong>Dependência desatualizada:</strong> componente antigo com vulnerabilidade conhecida.</li>
+            <li><strong>Pacote malicioso:</strong> tentativa de se passar por pacote legítimo.</li>
+            <li><strong>Configuração insegura:</strong> serviço exposto indevidamente, permissões fracas.</li>
+            <li><strong>Atualização quebrando ambiente:</strong> falta de controle de versões e testes.</li>
+          </ul>
+
+          <h3>5.3 SBOM (conceito)</h3>
+          <p>
+            <strong>SBOM</strong> (Software Bill of Materials) é como uma “lista de ingredientes” do software: quais componentes existem,
+            versões e licenças. Organizações usam isso para auditoria e resposta a incidentes.
+          </p>
+
+          <div class="callout ok">
+            <strong>Onde vou aplicar isso no curso?</strong> No Cap. 06 (pacotes) você verá dependências e repositórios.
+            No Cap. 14 (manutenção) você verá atualização e prevenção.
+          </div>
+
+          <div class="callout warn">
+            <strong>Regra prática:</strong> prefira repositórios oficiais, mantenha atualizações e registre mudanças.
+            Em laboratório (Cap. 04+), isso será parte do seu processo de suporte.
+          </div>
+        </div>
+      </section>
+
+      <section id="curadoria" class="card">
+        <div class="content">
+          <h2>6) Curadoria de notícias (metodologia para manter a apostila sempre atual)</h2>
+
+          <div class="callout warn">
+            <strong>Transparência:</strong> a ferramenta de busca automática não retornou resultados nesta execução.
+            Por isso, este capítulo te ensina um método <em>independente de ferramentas</em> para coletar notícias atuais e registrar fontes.
+            (Você pode usar navegador, portais e sites oficiais quando estiver online.)
+          </div>
+
+          <h3>6.1 O que é curadoria (no contexto do curso)</h3>
+          <p>
+            Curadoria é selecionar informações relevantes, validar fontes e registrar de forma útil.
+            No SOSL, a curadoria não é “copiar notícia”: é entender <strong>impacto prático</strong> para suporte e infraestrutura.
+          </p>
+
+          <h3>6.2 Fontes recomendadas (tipos)</h3>
+          <ul class="list">
+            <li><strong>Fontes oficiais:</strong> blogs e páginas de projetos (releases, comunicados).</li>
+            <li><strong>Fundações/organizações:</strong> relatórios, iniciativas e guias.</li>
+            <li><strong>Boletins de segurança:</strong> comunicados de vulnerabilidade e correções.</li>
+            <li><strong>Portais técnicos:</strong> artigos com autoria e referências claras.</li>
+          </ul>
+
+          <h3>6.3 Critérios simples para validar uma notícia (check rápido)</h3>
+          <table class="table" aria-label="Critérios de validação">
+            <thead>
+              <tr>
+                <th>Critério</th>
+                <th>Pergunta</th>
+                <th>Exemplo de evidência</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Autor/Origem</strong></td>
+                <td>Quem publicou? tem responsabilidade técnica?</td>
+                <td>Blog oficial / comunicado / artigo assinado</td>
+              </tr>
+              <tr>
+                <td><strong>Data</strong></td>
+                <td>É recente? é atualização de algo antigo?</td>
+                <td>Data visível + versão/release citado</td>
+              </tr>
+              <tr>
+                <td><strong>Prova</strong></td>
+                <td>Há link para anúncio oficial, release notes, CVE?</td>
+                <td>Documento técnico ou repositório oficial</td>
+              </tr>
+              <tr>
+                <td><strong>Impacto</strong></td>
+                <td>O que muda para usuário/suporte?</td>
+                <td>Correção, nova função, mudança de padrão</td>
+              </tr>
+              <tr>
+                <td><strong>Viés</strong></td>
+                <td>O texto tenta vender algo ou é informativo?</td>
+                <td>Separar fato de opinião</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>6.4 Passo a passo: registrar uma notícia no “Painel SOSL” (sem laboratório Linux)</h3>
+          <ol class="list">
+            <li><strong>Escolha o tema</strong>: Linux, desktop, pacotes, segurança, comunidade, educação, nuvem.</li>
+            <li><strong>Encontre 1 fonte principal</strong>: de preferência oficial ou técnica, com data.</li>
+            <li><strong>Confirme com 1 evidência</strong>: release note, comunicado, repositório, boletim.</li>
+            <li><strong>Resuma em 5 linhas</strong>: o que aconteceu, com quais versões, e por quê.</li>
+            <li><strong>Explique o impacto prático</strong>: o que um técnico deve fazer/observar.</li>
+            <li><strong>Classifique</strong>: área (segurança, desktop, infra etc.) e nível de urgência.</li>
+            <li><strong>Registre a referência</strong>: título, autor/entidade, data, link (quando disponível).</li>
+          </ol>
+
+          <div class="callout ok">
+            <strong>Dica:</strong> se você não tiver link (por estar offline), registre ao menos: <em>nome da fonte</em>, <em>data</em> e <em>onde encontrou</em>
+            para conseguir recuperar depois.
+          </div>
+
+          <h3>6.5 Painel de Curadoria (salva no navegador)</h3>
+          <p class="muted">Preencha os campos e clique em <strong>Salvar notícia</strong>. Você pode exportar em Markdown ou JSON.</p>
+
+          <div class="form" id="curForm">
+            <div class="row">
+              <div class="field">
+                <label for="nTitle">Título</label>
+                <input id="nTitle" type="text" placeholder="Ex.: Projeto X lança versão Y com melhorias Z" />
+              </div>
+              <div class="field">
+                <label for="nDate">Data</label>
+                <input id="nDate" type="date" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="nSource">Fonte (site/projeto/entidade)</label>
+                <input id="nSource" type="text" placeholder="Ex.: Blog oficial do projeto / Fundação / Portal técnico" />
+              </div>
+              <div class="field">
+                <label for="nLink">Link (opcional)</label>
+                <input id="nLink" type="text" placeholder="Cole o link quando estiver online" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="nArea">Área</label>
+                <select id="nArea">
+                  <option value="Infraestrutura">Infraestrutura</option>
+                  <option value="Desktop">Desktop</option>
+                  <option value="Segurança">Segurança</option>
+                  <option value="Pacotes/Distribuição">Pacotes/Distribuição</option>
+                  <option value="Comunidade/Governança">Comunidade/Governança</option>
+                  <option value="Educação">Educação</option>
+                  <option value="Dados/IA">Dados/IA</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="nUrg">Urgência</label>
+                <select id="nUrg">
+                  <option value="Baixa">Baixa</option>
+                  <option value="Média">Média</option>
+                  <option value="Alta">Alta</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="nSummary">Resumo (até 5 linhas)</label>
+              <textarea id="nSummary" placeholder="O que aconteceu? Quais versões? Por quê? (objetivo)" ></textarea>
+            </div>
+            <div class="field">
+              <label for="nImpact">Impacto prático para suporte</label>
+              <textarea id="nImpact" placeholder="O que um técnico deve observar/fazer? Há risco? há benefício?" ></textarea>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="saveNews" type="button">Salvar notícia</button>
+              <button class="btn ghost" id="clearForm" type="button">Limpar formulário</button>
+              <button class="btn dark" id="exportMd" type="button">Exportar Markdown</button>
+              <button class="btn dark" id="exportJson" type="button">Exportar JSON</button>
+            </div>
+
+            <div id="curMsg" class="callout" style="display:none"></div>
+          </div>
+
+          <h3 style="margin-top:18px">Notícias registradas</h3>
+          <div id="newsList" aria-live="polite"></div>
+
+          <div class="actions" style="margin-top:12px">
+            <button class="btn ghost" id="loadNews" type="button">Carregar do navegador</button>
+            <button class="btn dark" id="wipeNews" type="button">Apagar tudo</button>
+          </div>
+
+          <pre id="exportBox" style="display:none"></pre>
+
+        </div>
+      </section>
+
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>7) Sugestões de atividades (sem laboratório Linux)</h2>
+          <ul class="list">
+            <li><strong>Atividade 1 — Mapa do ecossistema:</strong> escolha um projeto aberto e descreva: comunidade, mantenedores, como contribui, como são releases e quem usa.</li>
+            <li><strong>Atividade 2 — Curadoria em dupla:</strong> registre 2 notícias (temas diferentes). Para cada uma: resumo, impacto e uma evidência extra (ex.: release/correção).</li>
+            <li><strong>Atividade 3 — Segurança consciente:</strong> encontre um exemplo de vulnerabilidade (qualquer software), e descreva: causa, impacto e ação recomendada (atualizar? mitigar?).</li>
+          </ul>
+          <div class="callout warn">
+            <strong>Sem prática de VM ainda:</strong> guarde energia para o Cap. 04.
+            Aqui, o objetivo é você aprender a pensar como técnico: contexto, evidência, documentação e impacto.
+          </div>
+
+          <h3>Pesquisas complementares (2–5 itens)</h3>
+          <ul class="list">
+            <li>O que é governança em projetos de software e por que ela evita “decisões no improviso”.</li>
+            <li>O que significa “maintainer burnout” (sobrecarga de mantenedores) e como isso afeta segurança e qualidade.</li>
+            <li>O conceito de SBOM e por que organizações pedem “lista de componentes” em softwares.</li>
+            <li>Como distinguir artigo técnico de marketing (sinais de viés e ausência de evidências).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>8) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz02">
+
+            <div class="q" data-answer="c" data-topic="Aplicações">
+              <div class="q-hd"><span>1) Qual afirmação melhor representa a presença do software livre hoje?</span><span class="pill">Aplicações</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q1" value="a"> Software livre só aparece em desktops pessoais.</label>
+                  <label class="opt"><input type="radio" name="q1" value="b"> Software livre é usado apenas em projetos acadêmicos sem impacto real.</label>
+                  <label class="opt"><input type="radio" name="q1" value="c"> Software livre está presente em infraestrutura, nuvem, internet, dispositivos e ferramentas de suporte.</label>
+                  <label class="opt"><input type="radio" name="q1" value="d"> Software livre não pode ser usado em empresas.</label>
+                  <label class="opt"><input type="radio" name="q1" value="e"> Software livre é sinônimo de “aplicativo grátis”.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Ecossistema">
+              <div class="q-hd"><span>2) Qual conjunto descreve melhor o ecossistema do software livre?</span><span class="pill">Ecossistema</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q2" value="a"> Apenas programadores e empresas.</label>
+                  <label class="opt"><input type="radio" name="q2" value="b"> Comunidades, mantenedores, empresas, fundações e usuários/organizações usuárias.</label>
+                  <label class="opt"><input type="radio" name="q2" value="c"> Apenas usuários finais que baixam aplicativos.</label>
+                  <label class="opt"><input type="radio" name="q2" value="d"> Somente o sistema operacional Linux.</label>
+                  <label class="opt"><input type="radio" name="q2" value="e"> Apenas sites de notícias e influencers.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Governança">
+              <div class="q-hd"><span>3) O que “governança” significa em um projeto aberto?</span><span class="pill">Governança</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q3" value="a"> Regras e processos de decisão: quem aprova mudanças, como releases são feitos e como conflitos são resolvidos.</label>
+                  <label class="opt"><input type="radio" name="q3" value="b"> Apenas o design gráfico do site do projeto.</label>
+                  <label class="opt"><input type="radio" name="q3" value="c"> Um antivírus embutido obrigatório.</label>
+                  <label class="opt"><input type="radio" name="q3" value="d"> Proibição de participação de empresas.</label>
+                  <label class="opt"><input type="radio" name="q3" value="e"> Um arquivo único chamado GOVERNANCE que contém o código-fonte.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="Mantenedores">
+              <div class="q-hd"><span>4) Qual é uma responsabilidade típica de mantenedores (maintainers)?</span><span class="pill">Maintainers</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q4" value="a"> Vender licenças obrigatórias para cada usuário.</label>
+                  <label class="opt"><input type="radio" name="q4" value="b"> Impedir que usuários relatem bugs.</label>
+                  <label class="opt"><input type="radio" name="q4" value="c"> Bloquear atualizações para manter estabilidade.</label>
+                  <label class="opt"><input type="radio" name="q4" value="d"> Revisar contribuições, aceitar mudanças e manter coerência e segurança do projeto.</label>
+                  <label class="opt"><input type="radio" name="q4" value="e"> Garantir que todo software do projeto seja proprietário.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Segurança">
+              <div class="q-hd"><span>5) No contexto de software, “cadeia de suprimentos” se refere principalmente a:</span><span class="pill">Supply chain</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q5" value="a"> Cabos e peças de hardware do laboratório.</label>
+                  <label class="opt"><input type="radio" name="q5" value="b"> Conjunto de dependências, componentes e fornecedores envolvidos na construção/instalação de um software.</label>
+                  <label class="opt"><input type="radio" name="q5" value="c"> Apenas o download do instalador principal.</label>
+                  <label class="opt"><input type="radio" name="q5" value="d"> A compra de licenças em lojas.</label>
+                  <label class="opt"><input type="radio" name="q5" value="e"> O tipo de teclado usado no sistema.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="SBOM">
+              <div class="q-hd"><span>6) O que SBOM significa de forma simples?</span><span class="pill">SBOM</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q6" value="a"> Um antivírus específico do Linux.</label>
+                  <label class="opt"><input type="radio" name="q6" value="b"> Um comando do terminal para criar usuários.</label>
+                  <label class="opt"><input type="radio" name="q6" value="c"> Um tipo de licença de software.</label>
+                  <label class="opt"><input type="radio" name="q6" value="d"> Um repositório de pacotes para distribuição.</label>
+                  <label class="opt"><input type="radio" name="q6" value="e"> Uma “lista de ingredientes” do software: componentes, versões e, às vezes, licenças.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="Curadoria">
+              <div class="q-hd"><span>7) Qual é o principal objetivo da curadoria de notícias neste curso?</span><span class="pill">Curadoria</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q7" value="a"> Copiar o texto completo das notícias para a apostila.</label>
+                  <label class="opt"><input type="radio" name="q7" value="b"> Encontrar a notícia mais engraçada da semana.</label>
+                  <label class="opt"><input type="radio" name="q7" value="c"> Selecionar, validar e registrar informações com impacto prático para suporte e infraestrutura.</label>
+                  <label class="opt"><input type="radio" name="q7" value="d"> Evitar qualquer leitura de fontes oficiais.</label>
+                  <label class="opt"><input type="radio" name="q7" value="e"> Publicar notícias sem checar autoria e data.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Validação">
+              <div class="q-hd"><span>8) Qual combinação de critérios é mais adequada para validar uma notícia técnica?</span><span class="pill">Validação</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q8" value="a"> Autor/origem + data + evidência (release/comunicado) + impacto prático.</label>
+                  <label class="opt"><input type="radio" name="q8" value="b"> Número de curtidas + comentários + memes.</label>
+                  <label class="opt"><input type="radio" name="q8" value="c"> Tamanho do texto e quantidade de anúncios.</label>
+                  <label class="opt"><input type="radio" name="q8" value="d"> Somente a opinião do autor.</label>
+                  <label class="opt"><input type="radio" name="q8" value="e"> Apenas a cor do site e a quantidade de imagens.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="Releases">
+              <div class="q-hd"><span>9) Em suporte, por que “nem sempre o mais novo é o melhor”?</span><span class="pill">Releases</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q9" value="a"> Porque versões novas nunca têm correções de segurança.</label>
+                  <label class="opt"><input type="radio" name="q9" value="b"> Porque versões novas são sempre ilegais.</label>
+                  <label class="opt"><input type="radio" name="q9" value="c"> Porque software livre proíbe atualização.</label>
+                  <label class="opt"><input type="radio" name="q9" value="d"> Porque estabilidade, compatibilidade e políticas de suporte (LTS) podem ser mais importantes que novidades.</label>
+                  <label class="opt"><input type="radio" name="q9" value="e"> Porque versões antigas sempre têm mais recursos.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Contribuição">
+              <div class="q-hd"><span>10) Qual é um bom exemplo de contribuição para um projeto open source sem programar?</span><span class="pill">Contribuição</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q10" value="a"> Remover créditos do autor e republicar o projeto.</label>
+                  <label class="opt"><input type="radio" name="q10" value="b"> Melhorar documentação, criar tutorial, traduzir ou relatar bug com passos reproduzíveis.</label>
+                  <label class="opt"><input type="radio" name="q10" value="c"> Postar apenas opinião sem evidências e exigir correção imediata.</label>
+                  <label class="opt"><input type="radio" name="q10" value="d"> Vender o código como proprietário sem respeitar licenças.</label>
+                  <label class="opt"><input type="radio" name="q10" value="e"> Ignorar atualizações e recomendar versões vulneráveis.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" id="quizScoreBox" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>9) Checklist de estudo (interativo)</h2>
+          <p class="muted">Marque o que você conseguiu fazer. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist02">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu consigo</strong> citar aplicações atuais do software livre em pelo menos 3 áreas.</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu entendo</strong> o papel de comunidades, mantenedores, empresas e fundações.</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu consigo</strong> explicar o que é governança e por que ela importa para qualidade e continuidade.</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu reconheço</strong> riscos básicos de cadeia de suprimentos e por que dependências importam.</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu sei</strong> o que é SBOM em termos simples.</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu consigo</strong> aplicar critérios para validar uma notícia técnica (autor, data, evidência, impacto).</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu registrei</strong> pelo menos 1 notícia no painel com resumo e impacto prático.</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu respondi</strong> o quiz e revisei os tópicos em que errei.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo01.html">← Voltar ao Cap. 01</a>
+            <a class="btn dark" href="capitulo03.html">Ir para Cap. 03 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz02');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'Aplicações': 'Revise a seção 2 (Aplicações atuais) e a tabela “Mapa de aplicações”.',
+        'Ecossistema': 'Revise a seção 3 (Ecossistema): comunidade, mantenedores, empresas e fundações.',
+        'Governança': 'Revise a seção 4 (Governança): regras de decisão e ciclos de release.',
+        'Mantenedores': 'Revise 3.2: mantenedores revisam e garantem consistência e segurança.',
+        'Segurança': 'Revise 5.1–5.2: dependências, componentes e riscos de supply chain.',
+        'SBOM': 'Revise 5.3: SBOM como lista de ingredientes do software.',
+        'Curadoria': 'Revise 6.1: curadoria = selecionar, validar e registrar impacto.',
+        'Validação': 'Revise 6.3: autor, data, evidência e impacto.',
+        'Releases': 'Revise 4.2: estabilidade/LTS vs novidade.',
+        'Contribuição': 'Revise 4.3: documentação e bug report reproduzível são contribuições valiosas.'
+      };
+      return map[topic] || 'Revise a teoria do capítulo para reforçar este conceito.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist02');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap02_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+
+    // =============================
+    // CURADORIA - Painel (localStorage)
+    // =============================
+    const curKey = 'sosl_curadoria_v1';
+    const els = {
+      title: document.getElementById('nTitle'),
+      date: document.getElementById('nDate'),
+      source: document.getElementById('nSource'),
+      link: document.getElementById('nLink'),
+      area: document.getElementById('nArea'),
+      urg: document.getElementById('nUrg'),
+      summary: document.getElementById('nSummary'),
+      impact: document.getElementById('nImpact'),
+      msg: document.getElementById('curMsg'),
+      list: document.getElementById('newsList'),
+      exportBox: document.getElementById('exportBox')
+    };
+
+    function showMsg(kind, html){
+      els.msg.style.display = 'block';
+      els.msg.classList.remove('ok','warn','bad');
+      els.msg.classList.add(kind);
+      els.msg.innerHTML = html;
+      setTimeout(() => { els.msg.style.display = 'none'; }, 3500);
+    }
+
+    function readStore(){
+      const raw = localStorage.getItem(curKey);
+      if(!raw) return [];
+      try{ return JSON.parse(raw) || []; }catch(e){ return []; }
+    }
+
+    function writeStore(arr){
+      localStorage.setItem(curKey, JSON.stringify(arr));
+    }
+
+    function clearForm(){
+      els.title.value = '';
+      els.date.value = '';
+      els.source.value = '';
+      els.link.value = '';
+      els.area.value = 'Infraestrutura';
+      els.urg.value = 'Baixa';
+      els.summary.value = '';
+      els.impact.value = '';
+    }
+
+    function renderList(){
+      const items = readStore();
+      if(items.length === 0){
+        els.list.innerHTML = '<p class="muted">Nenhuma notícia registrada ainda. Use o formulário acima para salvar a primeira.</p>';
+        return;
+      }
+      const html = items
+        .slice()
+        .sort((a,b) => (b.date||'').localeCompare(a.date||''))
+        .map((n, idx) => {
+          const safeLink = n.link ? `<div class="news-meta"><strong>Link:</strong> ${escapeHtml(n.link)}</div>` : '';
+          return `
+            <div class="news-item" data-idx="${idx}">
+              <div class="news-top">
+                <div>
+                  <div class="news-title">${escapeHtml(n.title || '(sem título)')}</div>
+                  <div class="news-meta">${escapeHtml(n.source || 'Fonte não informada')} • ${escapeHtml(n.date || 'data não informada')} • Urgência: <strong>${escapeHtml(n.urg||'')}</strong></div>
+                  ${safeLink}
+                </div>
+                <div class="actions" style="margin:0">
+                  <button class="btn ghost" type="button" data-act="copy" data-i="${idx}">Copiar MD</button>
+                  <button class="btn dark" type="button" data-act="del" data-i="${idx}">Excluir</button>
+                </div>
+              </div>
+              <div style="margin-top:10px">
+                <p style="margin:0"><strong>Resumo:</strong> ${escapeHtml(n.summary||'')}</p>
+                <p style="margin:8px 0 0"><strong>Impacto:</strong> ${escapeHtml(n.impact||'')}</p>
+              </div>
+              <div class="news-tags">
+                <span class="chip">${escapeHtml(n.area||'')}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      els.list.innerHTML = html;
+
+      els.list.querySelectorAll('button[data-act]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const act = btn.dataset.act;
+          const i = Number(btn.dataset.i);
+          const itemsNow = readStore();
+          const item = itemsNow[i];
+          if(!item) return;
+          if(act === 'del'){
+            itemsNow.splice(i,1);
+            writeStore(itemsNow);
+            renderList();
+            showMsg('ok', '<strong>Notícia excluída.</strong>');
+          }
+          if(act === 'copy'){
+            const md = toMarkdown(item);
+            navigator.clipboard?.writeText(md);
+            showMsg('ok', '<strong>Markdown copiado.</strong> Cole no seu painel (painel.md).');
+          }
+        });
+      });
+    }
+
+    function escapeHtml(str){
+      return String(str||'')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+    }
+
+    function toMarkdown(n){
+      const linkLine = n.link ? `- **Link:** ${n.link}\n` : '';
+      return `### ${n.title || '(sem título)'}\n` +
+        `- **Data:** ${n.date || '—'}\n` +
+        `- **Fonte:** ${n.source || '—'}\n` +
+        linkLine +
+        `- **Área:** ${n.area || '—'}\n` +
+        `- **Urgência:** ${n.urg || '—'}\n\n` +
+        `**Resumo (até 5 linhas):**\n${n.summary || ''}\n\n` +
+        `**Impacto prático para suporte:**\n${n.impact || ''}\n`;
+    }
+
+    function exportMarkdownAll(){
+      const items = readStore();
+      const header = `# Painel SOSL — Curadoria de Notícias\n\n` +
+                     `> Atualize este painel semanalmente. Para cada notícia: fonte, data, evidência e impacto.\n\n`;
+      const body = items.map(toMarkdown).join('\n\n---\n\n');
+      return header + (body || '_Sem registros ainda._');
+    }
+
+    document.getElementById('saveNews')?.addEventListener('click', () => {
+      const title = els.title.value.trim();
+      const date = els.date.value;
+      const source = els.source.value.trim();
+      const link = els.link.value.trim();
+      const area = els.area.value;
+      const urg = els.urg.value;
+      const summary = els.summary.value.trim();
+      const impact = els.impact.value.trim();
+
+      if(!title || !source || !summary || !impact){
+        showMsg('warn', '<strong>Preencha pelo menos:</strong> Título, Fonte, Resumo e Impacto.');
+        return;
+      }
+
+      const items = readStore();
+      items.push({ title, date, source, link, area, urg, summary, impact });
+      writeStore(items);
+      renderList();
+      clearForm();
+      showMsg('ok', '<strong>Notícia salva!</strong>');
+    });
+
+    document.getElementById('clearForm')?.addEventListener('click', () => clearForm());
+    document.getElementById('loadNews')?.addEventListener('click', () => { renderList(); showMsg('ok','<strong>Registros carregados.</strong>'); });
+    document.getElementById('wipeNews')?.addEventListener('click', () => {
+      localStorage.removeItem(curKey);
+      renderList();
+      showMsg('ok','<strong>Todos os registros foram apagados.</strong>');
+    });
+
+    document.getElementById('exportMd')?.addEventListener('click', () => {
+      const md = exportMarkdownAll();
+      els.exportBox.style.display = 'block';
+      els.exportBox.textContent = md;
+      navigator.clipboard?.writeText(md);
+      showMsg('ok','<strong>Markdown gerado e copiado.</strong>');
+    });
+
+    document.getElementById('exportJson')?.addEventListener('click', () => {
+      const json = JSON.stringify(readStore(), null, 2);
+      els.exportBox.style.display = 'block';
+      els.exportBox.textContent = json;
+      navigator.clipboard?.writeText(json);
+      showMsg('ok','<strong>JSON gerado e copiado.</strong>');
+    });
+
+    renderList();
+  </script>
+
+</body>
+</html>

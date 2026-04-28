@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 — VM + Instalação do Linux Mint no VirtualBox (Projeto Integrador • Entrega 1) — SOSL</title>
+  <meta name="description" content="Capítulo 04 da apostila SOSL: criação de máquina virtual no VirtualBox e instalação do Linux Mint, com prática guiada e Entrega 1 do Projeto Integrador." />
+
+  <!-- arquivo: capitulo04.html -->
+
+  <style>
+    :root{
+      /* Cor principal (Azul Navy) */
+      --pw-red:#0b1f3a;
+      --pw-red-dark:#071528;
+      --pw-gray:#3f3f3f;
+      --pw-gray-dark:#2f2f2f;
+
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --link:var(--pw-red);
+      --shadow: 0 10px 28px rgba(0,0,0,.08);
+      --radius: 16px;
+      --maxw: 1120px;
+      --hero: linear-gradient(180deg, rgba(11,31,58,.12), rgba(11,31,58,0));
+
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --warn:#92400e;
+      --warn-bg:#fffbeb;
+      --bad:#991b1b;
+      --bad-bg:#fef2f2;
+
+      --code-bg:#0f172a;
+      --code-fg:#e5e7eb;
+      --code-border:#0b1220;
+      --code-muted:#94a3b8;
+      --code-accent:#38bdf8;
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{ color: var(--link); }
+    a:hover{ color: var(--pw-red-dark); }
+
+    /* Header/Nav */
+    header{ position: sticky; top:0; z-index: 1000; }
+    .nav{
+      background: var(--pw-red);
+      color:#fff;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .nav .wrap{
+      max-width: var(--maxw);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:#fff;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.20);
+      font-weight: 900;
+    }
+    .hamburger{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+      display:none;
+    }
+    .menu{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .menu a{
+      text-decoration:none;
+      color:#fff;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 650;
+      opacity:.95;
+    }
+    .menu a:hover{ background: rgba(255,255,255,.12); }
+    .menu a.secondary{ opacity:.9; }
+    .menu-gap{ flex: 1 1 auto; }
+
+    /* Dropdown */
+    .dropdown{ position: relative; }
+    .dropdown-toggle{
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 800;
+      cursor:pointer;
+    }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top: 46px;
+      min-width: 280px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:none;
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .dropdown.open .dropdown-menu{ display:block; }
+    .dropdown-menu a{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+    }
+    .dropdown-menu a:hover{ background:#f3f4f6; }
+    .pill{
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .hero{ background: var(--hero); padding: 18px 16px; border-bottom: 1px solid var(--border); }
+    main{ padding: 22px 16px 50px; }
+    .container{ max-width: var(--maxw); margin:0 auto; }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .content{ padding: 20px; }
+
+    h1{ margin:0 0 6px; font-size: clamp(1.55rem, 2.2vw, 2.05rem); }
+    h2{ margin: 22px 0 10px; font-size: clamp(1.2rem, 1.6vw, 1.5rem); }
+    h3{ margin: 16px 0 6px; font-size: 1.05rem; }
+    h4{ margin: 12px 0 6px; font-size: 1.0rem; }
+    .subtitle{ color: var(--muted); margin: 0 0 10px; }
+    .muted{ color: var(--muted); }
+    .small{ font-size: .92rem; }
+
+    .badges{ display:flex; flex-wrap:wrap; gap:8px; margin: 10px 0 12px; }
+    .badge{
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.08);
+      border: 1px solid rgba(11,31,58,.18);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+    }
+
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 980px){ .grid-2,.grid-3{ grid-template-columns: 1fr; } }
+
+    .callout{
+      border: 1px solid var(--border);
+      border-left: 6px solid rgba(11,31,58,.55);
+      background: rgba(11,31,58,.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .callout.ok{ border-left-color: rgba(6,95,70,.7); background: var(--ok-bg); }
+    .callout.warn{ border-left-color: rgba(146,64,14,.7); background: var(--warn-bg); }
+    .callout.bad{ border-left-color: rgba(153,27,27,.7); background: var(--bad-bg); }
+
+    .list{ margin: 10px 0 0; padding-left: 18px; }
+    .list li{ margin: 7px 0; }
+
+    .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px; }
+    .toc a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(11,31,58,.20);
+      border-radius: 999px;
+      background: rgba(11,31,58,.04);
+      color: var(--pw-red-dark);
+      font-weight: 800;
+      text-decoration:none;
+      font-size: .86rem;
+    }
+    .toc a:hover{ background: rgba(11,31,58,.08); }
+
+    /* Code blocks */
+    pre{
+      margin: 10px 0;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px;
+      border-radius: 12px;
+      overflow:auto;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+    code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre code{ font-size: .92rem; }
+    .code-hint{ color: var(--code-muted); font-size: .86rem; margin-top: 6px; }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      border: 1px solid transparent;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn.primary{ background: var(--pw-red); color:#fff; border-color: var(--pw-red); }
+    .btn.primary:hover{ background: var(--pw-red-dark); border-color: var(--pw-red-dark); }
+    .btn.dark{ background: var(--pw-gray); color:#fff; border-color: var(--pw-gray); }
+    .btn.dark:hover{ background: var(--pw-gray-dark); border-color: var(--pw-gray-dark); }
+    .btn.ghost{ background: transparent; color: var(--pw-red); border-color: rgba(11,31,58,.35); }
+    .btn.ghost:hover{ background: rgba(11,31,58,.06); }
+
+    /* Tables */
+    .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: 14px; border:1px solid var(--border); margin: 10px 0; }
+    .table th, .table td{ border-bottom:1px solid var(--border); padding: 10px 10px; text-align:left; vertical-align: top; }
+    .table th{ background: rgba(11,31,58,.06); font-weight: 900; }
+    .table tr:last-child td{ border-bottom:0; }
+
+    /* Steps */
+    .step{
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background:#fff;
+      margin: 12px 0;
+    }
+    .step .hd{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight: 950; }
+    .step .num{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:34px;
+      height:34px;
+      padding:0 10px;
+      border-radius: 999px;
+      background: rgba(11,31,58,.10);
+      border: 1px solid rgba(11,31,58,.22);
+      color: var(--pw-red-dark);
+      font-weight: 950;
+    }
+
+    /* Quiz */
+    .quiz{ margin-top: 6px; }
+    .q{ border: 1px solid var(--border); border-radius: 14px; overflow:hidden; margin: 12px 0; background:#fff; }
+    .q-hd{ padding: 12px 14px; background: rgba(11,31,58,.06); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; font-weight: 900; }
+    .q-bd{ padding: 12px 14px 14px; }
+    .opts{ display:grid; gap: 8px; margin-top: 8px; }
+    .opt{ display:flex; gap:10px; align-items:flex-start; padding: 10px 10px; border: 1px solid var(--border); border-radius: 12px; cursor:pointer; background:#fff; }
+    .opt:hover{ background:#f9fafb; }
+    .opt input{ margin-top: 3px; }
+    .feedback{ display:none; margin-top: 10px; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); background:#f9fafb; }
+    .feedback.show{ display:block; }
+    .feedback.ok{ border-color: rgba(6,95,70,.25); background: var(--ok-bg); color: var(--ok); }
+    .feedback.bad{ border-color: rgba(153,27,27,.25); background: var(--bad-bg); color: var(--bad); }
+    .q-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Checklist */
+    .checklist{ border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; background:#fff; margin-top: 10px; }
+    .check-item{ display:flex; gap:10px; align-items:flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+    .check-item:last-child{ border-bottom:0; }
+    .progress{ margin-top: 10px; height: 10px; background:#f3f4f6; border-radius: 999px; overflow:hidden; border: 1px solid var(--border); }
+    .progress > div{ height:100%; width:0%; background: linear-gradient(90deg, rgba(11,31,58,.92), rgba(11,31,58,.55)); }
+
+    /* Form */
+    .form{ border:1px solid var(--border); border-radius: 14px; padding: 14px; background:#fff; margin-top: 10px; }
+    .field{ display:flex; flex-direction:column; gap:6px; margin: 10px 0; }
+    label{ font-weight: 800; }
+    input[type="text"], textarea, select{ width:100%; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; font: inherit; background:#fff; }
+    textarea{ min-height: 110px; resize: vertical; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 980px){ .row{ grid-template-columns: 1fr; } }
+
+    /* Skip link */
+    .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus{ left:10px; top:10px; width:auto; height:auto; padding:10px 12px; background:#fff; border:2px solid var(--pw-red); border-radius:12px; z-index:2000; }
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hamburger{ display:inline-flex; }
+      .menu{ display:none; width:100%; padding-top: 10px; }
+      .menu.show{ display:flex; }
+      .dropdown-menu{ left:0; right:auto; }
+    }
+
+    footer{ border-top:1px solid var(--border); padding: 18px 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <header>
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Voltar ao Index">
+          <span class="logo" aria-hidden="true">SOSL</span>
+          <span>Apostila • Cap. 04</span>
+        </a>
+
+        <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mainMenu">☰ Menu</button>
+
+        <div class="menu" id="mainMenu">
+          <a href="index.html" class="secondary">Index</a>
+          <a href="plano.html">Plano do Curso</a>
+          <a href="#teoria">Teoria</a>
+          <a href="#passo">Passo a passo</a>
+          <a href="#entrega">Entrega 1</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#checklist">Checklist</a>
+          <span class="menu-gap"></span>
+
+          <div class="dropdown" id="chaptersDropdown">
+            <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Capítulos ▼</button>
+            <div class="dropdown-menu" role="menu" aria-label="Lista de capítulos">
+              <a href="capitulo01.html" role="menuitem"><span>Cap. 01 — Tipos, licenças e história</span><span class="pill">01</span></a>
+              <a href="capitulo02.html" role="menuitem"><span>Cap. 02 — SL hoje: aplicações e ecossistema</span><span class="pill">02</span></a>
+              <a href="capitulo03.html" role="menuitem"><span>Cap. 03 — Linux e distribuições (pesquisa)</span><span class="pill">03</span></a>
+              <a href="capitulo04.html" role="menuitem"><span>Cap. 04 — VM + instalação Linux Mint</span><span class="pill">04</span></a>
+              <a href="capitulo05.html" role="menuitem"><span>Cap. 05 — Interfaces gráficas</span><span class="pill">05</span></a>
+              <a href="capitulo06.html" role="menuitem"><span>Cap. 06 — Pacotes, lojas, Snap/Flatpak</span><span class="pill">06</span></a>
+              <a href="capitulo07.html" role="menuitem"><span>Cap. 07 — Boot e systemd</span><span class="pill">07</span></a>
+              <a href="capitulo08.html" role="menuitem"><span>Cap. 08 — FHS e diretórios</span><span class="pill">08</span></a>
+              <a href="capitulo09.html" role="menuitem"><span>Cap. 09 — CLI (1)</span><span class="pill">09</span></a>
+              <a href="capitulo10.html" role="menuitem"><span>Cap. 10 — CLI (2)</span><span class="pill">10</span></a>
+              <a href="capitulo11.html" role="menuitem"><span>Cap. 11 — Usuários e permissões</span><span class="pill">11</span></a>
+              <a href="capitulo12.html" role="menuitem"><span>Cap. 12 — Configs, processos e rede</span><span class="pill">12</span></a>
+              <a href="capitulo13.html" role="menuitem"><span>Cap. 13 — Shell Script</span><span class="pill">13</span></a>
+              <a href="capitulo14.html" role="menuitem"><span>Cap. 14 — Manutenção preventiva</span><span class="pill">14</span></a>
+              <a href="capitulo15.html" role="menuitem"><span>Cap. 15 — Backup e restauração</span><span class="pill">15</span></a>
+              <a href="capitulo16.html" role="menuitem"><span>Cap. 16 — Implantação</span><span class="pill">16</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="container">
+      <div class="card">
+        <div class="content">
+          <h1 id="conteudo">Capítulo 04 — Criação de VM + Instalação do Linux Mint no VirtualBox</h1>
+          <p class="subtitle">
+            Aqui começam as <strong>práticas de laboratório</strong>. Você vai criar uma máquina virtual no VirtualBox, instalar o <strong>Linux Mint (Cinnamon)</strong>,
+            aplicar configurações essenciais e registrar evidências. Este capítulo também contém a <strong>Entrega 1 do Projeto Integrador</strong>.
+          </p>
+
+          <div class="badges">
+            <span class="badge">VirtualBox</span>
+            <span class="badge">Linux Mint</span>
+            <span class="badge">Instalação guiada</span>
+            <span class="badge">Partições (conceito)</span>
+            <span class="badge">Snapshots</span>
+            <span class="badge">Entrega 1</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h2 style="margin-top:0">Objetivos de aprendizagem</h2>
+              <ul class="list">
+                <li>Criar uma <strong>máquina virtual</strong> (VM) no VirtualBox com parâmetros adequados.</li>
+                <li>Instalar o <strong>Linux Mint (Cinnamon)</strong> em VM de forma correta e reproduzível.</li>
+                <li>Entender conceitos de <strong>disco virtual</strong>, <strong>partições</strong> e <strong>sistema de arquivos</strong> (na prática guiada).</li>
+                <li>Configurar itens essenciais: atualização inicial, idioma/teclado, resolução, integração (Guest Additions quando aplicável).</li>
+                <li>Criar <strong>snapshot</strong> e organizar evidências para suporte.</li>
+                <li>Entregar a <strong>Entrega 1</strong>: laboratório Linux padronizado.</li>
+              </ul>
+            </div>
+            <div>
+              <h2 style="margin-top:0">Pré-requisitos</h2>
+              <ul class="list">
+                <li>VirtualBox instalado no computador (host).</li>
+                <li>ISO do Linux Mint (Cinnamon) já baixada (Cap. 03) e, idealmente, checksum conferido.</li>
+                <li>Host com pelo menos 4GB RAM (recomendado 8GB), espaço livre (25GB+).</li>
+              </ul>
+              <div class="callout warn">
+                <strong>Importante:</strong> use VM para segurança e repetição. Não instale no PC físico do laboratório sem orientação específica.
+              </div>
+            </div>
+          </div>
+
+          <div class="toc" aria-label="Atalhos do capítulo">
+            <a href="#teoria">📚 Teoria</a>
+            <a href="#passo">🧭 Passo a passo</a>
+            <a href="#troubles">🛠️ Troubleshooting</a>
+            <a href="#atividades">🧪 Atividades</a>
+            <a href="#entrega">📦 Projeto Integrador (Entrega 1)</a>
+            <a href="#quiz">📝 Quiz</a>
+            <a href="#checklist">☑️ Checklist</a>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo03.html">← Voltar ao Cap. 03</a>
+            <a class="btn dark" href="capitulo05.html">Próximo: Cap. 05 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section id="teoria" class="card">
+        <div class="content">
+          <h2>1) Teoria essencial (aplicada ao laboratório)</h2>
+
+          <h3>1.1 Virtualização: o que é e por que usamos</h3>
+          <p>
+            <strong>Virtualização</strong> é a técnica de executar um “computador dentro do computador”. O sistema operacional do seu PC é o <strong>host</strong>.
+            Dentro dele, você cria uma <strong>máquina virtual</strong> (VM) que roda um sistema convidado (o <strong>guest</strong>), como o Linux Mint.
+            A VM tem CPU, memória, rede e disco “virtuais”.
+          </p>
+          <p>
+            <strong>Onde vou aplicar isso:</strong> ao criar a VM, você define RAM, CPU, disco e placa de vídeo virtual. No suporte, isso permite reproduzir
+            erros com segurança e voltar atrás rapidamente com snapshots.
+          </p>
+
+          <h3>1.2 Disco virtual e “partições” (conceito + o mínimo necessário)</h3>
+          <p>
+            O disco da VM (por exemplo, um arquivo .vdi) simula um HD/SSD. Durante a instalação, você define como o espaço será usado.
+            Em instalações simples de laboratório, normalmente você deixa o instalador usar o disco inteiro da VM.
+          </p>
+          <p>
+            <strong>Onde vou aplicar isso:</strong> no instalador do Mint, você escolherá a opção de apagar o disco <em>virtual</em> e instalar.
+            Isso não apaga o disco do seu computador real — apenas o arquivo do disco da VM.
+          </p>
+
+          <h3>1.3 Sistema de arquivos (o mínimo para avançar)</h3>
+          <p>
+            Um <strong>sistema de arquivos</strong> organiza dados no disco (pastas, arquivos, permissões). Em Linux, é comum usar ext4 para a partição principal.
+            Você não precisa dominar todos os detalhes agora; no Cap. 08 (FHS/diretórios) isso ficará mais claro.
+          </p>
+          <p>
+            <strong>Onde vou aplicar isso:</strong> ao instalar, você verá escolhas como ext4 e partição swap. Para laboratório, use as opções padrão do instalador.
+          </p>
+
+          <h3>1.4 Snapshots: “voltar no tempo” com segurança</h3>
+          <p>
+            <strong>Snapshot</strong> é um ponto de restauração da VM. Se algo der errado em um laboratório futuro, você volta a um estado anterior.
+            É uma das ferramentas mais poderosas para estudo autônomo.
+          </p>
+          <p>
+            <strong>Onde vou aplicar isso:</strong> ao final da instalação e configuração inicial, você criará o snapshot “B1-Entrega1” (ou nome similar).
+          </p>
+
+          <div class="callout ok">
+            <strong>Dica de ouro do laboratório:</strong> antes de mudanças grandes, crie snapshot. Depois, teste. Se quebrar, restaure.
+          </div>
+        </div>
+      </section>
+
+      <section id="passo" class="card">
+        <div class="content">
+          <h2>2) Passo a passo (prático e detalhado)</h2>
+          <p class="muted">Siga na ordem. Ao final, você terá uma VM funcional com Linux Mint atualizado e pronto para os próximos capítulos.</p>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">1</span> Preparar arquivos e requisitos</span><span class="pill">Pré-lab</span></div>
+            <ul class="list">
+              <li>Confirme que você tem o <strong>VirtualBox</strong> instalado.</li>
+              <li>Tenha a ISO do <strong>Linux Mint Cinnamon</strong> em uma pasta fácil (ex.: <code>SOSL/ISO/</code>).</li>
+              <li>Garanta espaço livre: <strong>25GB</strong> (mínimo) só para a VM.</li>
+              <li>Se possível, confirme o checksum (Cap. 03). Se não, siga, mas registre que não confirmou.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">2</span> Criar a VM no VirtualBox</span><span class="pill">VM</span></div>
+            <ol class="list">
+              <li>Abra o VirtualBox e clique em <strong>New / Novo</strong>.</li>
+              <li><strong>Name:</strong> <code>SOSL-LinuxMint</code> (padronize para facilitar suporte).</li>
+              <li><strong>Type:</strong> Linux • <strong>Version:</strong> Ubuntu (64-bit) (Mint é derivado de Ubuntu).</li>
+              <li><strong>Memory:</strong> 2048 MB (mín.) • recomendado 4096 MB se seu host permitir.</li>
+              <li><strong>Processors:</strong> 2 vCPU (se seu host tiver 4+ núcleos).</li>
+              <li><strong>Virtual Hard Disk:</strong> criar um disco agora.</li>
+              <li><strong>Tipo:</strong> VDI • <strong>Armazenamento:</strong> dinamicamente alocado.</li>
+              <li><strong>Tamanho:</strong> 25 GB (mín.) • recomendado 30–40 GB para laboratório longo.</li>
+            </ol>
+            <div class="callout warn">
+              <strong>Se a opção 64-bit não aparece:</strong> veja o Troubleshooting (virtualização desativada na BIOS/UEFI ou conflito com Hyper-V).
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">3</span> Ajustes recomendados antes de instalar</span><span class="pill">Config</span></div>
+            <ol class="list">
+              <li>Selecione a VM → <strong>Settings</strong>.</li>
+              <li><strong>System → Motherboard:</strong> Boot Order: Optical primeiro, Hard Disk depois.</li>
+              <li><strong>System → Processor:</strong> 2 CPUs (se possível) e habilite PAE/NX.</li>
+              <li><strong>Display:</strong> Video Memory 128 MB; habilite <strong>3D Acceleration</strong> (se houver).</li>
+              <li><strong>Storage:</strong> clique no drive óptico vazio e selecione a <strong>ISO do Linux Mint</strong>.</li>
+              <li><strong>Network:</strong> NAT (padrão) para ter internet. (Bridge só se o professor pedir.)</li>
+            </ol>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">4</span> Iniciar a VM e testar o “modo Live”</span><span class="pill">Live</span></div>
+            <ol class="list">
+              <li>Clique em <strong>Start</strong>.</li>
+              <li>No menu inicial, escolha <strong>Start Linux Mint</strong> (modo live).</li>
+              <li>Quando o desktop carregar, confirme:</li>
+              <ul class="list">
+                <li>Mouse/teclado funcionam.</li>
+                <li>Resolução está aceitável (pode ajustar depois).</li>
+                <li>Internet funciona (ícone de rede ou abra um site).</li>
+              </ul>
+            </ol>
+            <div class="callout ok">
+              <strong>Por que usar o Live?</strong> Ele permite validar o ambiente antes da instalação definitiva no disco virtual.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">5</span> Instalar o Linux Mint (instalador gráfico)</span><span class="pill">Install</span></div>
+            <ol class="list">
+              <li>Clique no ícone <strong>Install Linux Mint</strong> na área de trabalho.</li>
+              <li><strong>Idioma:</strong> Português (Brasil) (se for o padrão do curso).</li>
+              <li><strong>Layout do teclado:</strong> Português (Brasil) ABNT2 (verifique com “ç”).</li>
+              <li><strong>Multimídia (codecs):</strong> pode marcar para instalar (facilita vídeos/áudio).</li>
+              <li><strong>Tipo de instalação:</strong> escolha <strong>Apagar disco e instalar o Linux Mint</strong>.
+                <ul class="list">
+                  <li>Esse “disco” é o <strong>disco virtual</strong> (VDI), não o seu HD real.</li>
+                </ul>
+              </li>
+              <li><strong>Fuso horário:</strong> selecione sua região.</li>
+              <li><strong>Usuário:</strong>
+                <ul class="list">
+                  <li>Nome: seu nome ou “Aluno”</li>
+                  <li>Nome do computador: <code>sosl-vmXX</code> (padrão por aluno)</li>
+                  <li>Usuário: <code>aluno</code> (sugestão)</li>
+                  <li>Senha: crie e <strong>anote</strong>. (Sem senha não há suporte.)</li>
+                </ul>
+              </li>
+              <li>Conclua e aguarde finalizar.</li>
+              <li>Quando pedir, clique em <strong>Restart Now</strong>.</li>
+            </ol>
+            <div class="callout warn">
+              <strong>Se a VM não reiniciar corretamente:</strong> remova a ISO do drive (VirtualBox → Devices → Optical Drives → Remove disk from virtual drive).
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">6</span> Pós-instalação: primeiro boot e atualizações</span><span class="pill">Pós</span></div>
+            <ol class="list">
+              <li>Faça login com o usuário criado.</li>
+              <li>Abra o <strong>Update Manager</strong> (Gerenciador de Atualizações) e aplique atualizações.</li>
+              <li>Reinicie se o sistema solicitar.</li>
+            </ol>
+            <p class="muted">Opcional (via terminal, para treinar comandos simples — ainda sem capítulo de CLI):</p>
+            <pre><code># Atualizar lista de pacotes e atualizar sistema (opcional)
+sudo apt update
+sudo apt upgrade -y</code></pre>
+            <p class="code-hint">Se você não se sentir confortável com terminal ainda, use o Gerenciador de Atualizações (GUI). O terminal será aprofundado no Cap. 09.</p>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">7</span> Integração com o host: resolução, área de transferência e pastas compartilhadas</span><span class="pill">Integração</span></div>
+            <p>
+              Para melhorar a experiência, ative recursos do VirtualBox. Alguns dependem do “Guest Additions”.
+              Em muitos casos, o Mint funciona bem sem ajustes complexos — mas a integração ajuda muito no curso.
+            </p>
+            <ol class="list">
+              <li>VirtualBox (com a VM ligada): menu <strong>Devices</strong> → <strong>Shared Clipboard</strong> → <strong>Bidirectional</strong>.</li>
+              <li><strong>Drag and Drop</strong> → <strong>Bidirectional</strong> (se funcionar bem no seu host).</li>
+              <li><strong>Pasta compartilhada:</strong> Settings → Shared Folders → +
+                <ul class="list">
+                  <li>Folder Path: sua pasta SOSL no host</li>
+                  <li>Marque <strong>Auto-mount</strong> e <strong>Make Permanent</strong></li>
+                </ul>
+              </li>
+            </ol>
+            <div class="callout">
+              <strong>Onde vou aplicar isso?</strong> Nos próximos capítulos, você vai salvar logs, relatórios e scripts.
+              Pasta compartilhada facilita transferir entregas sem “pendrive”.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">8</span> Snapshot (obrigatório para o curso)</span><span class="pill">Snapshot</span></div>
+            <ol class="list">
+              <li>Desligue a VM (ou deixe em estado consistente).</li>
+              <li>No VirtualBox, selecione a VM → aba <strong>Snapshots</strong> → <strong>Take</strong>.</li>
+              <li>Nome sugerido: <code>B1-Entrega1-Base</code></li>
+              <li>Descrição: “Mint instalado e atualizado; pronto para Cap. 05–08”</li>
+            </ol>
+            <div class="callout ok">
+              <strong>Você acabou de criar seu “ponto de retorno”.</strong> Se algo der errado nos próximos labs, restaure esse snapshot.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="hd"><span><span class="num">9</span> Evidências (prints e relatório curto)</span><span class="pill">Evidências</span></div>
+            <p>Para suporte e avaliação, registre evidências mínimas:</p>
+            <ul class="list">
+              <li>Print da tela “About / Sobre” do sistema (versão do Mint).</li>
+              <li>Print do VirtualBox mostrando a VM (nome + hardware básico).</li>
+              <li>Print do Snapshot criado.</li>
+              <li>Um relatório curto (modelo no Projeto Integrador abaixo).</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="troubles" class="card">
+        <div class="content">
+          <h2>3) Troubleshooting (problemas comuns e soluções rápidas)</h2>
+
+          <h3>3.1 Não aparece opção 64-bit</h3>
+          <ul class="list">
+            <li>Verifique se a virtualização está habilitada na BIOS/UEFI (Intel VT-x / AMD-V).</li>
+            <li>No Windows, conflitos podem ocorrer com Hyper-V/WSL2/VBS. Se necessário, desative recursos conforme orientação institucional.</li>
+          </ul>
+
+          <h3>3.2 Tela preta ou travamento na inicialização</h3>
+          <ul class="list">
+            <li>Reduza aceleração 3D (Settings → Display).</li>
+            <li>Aumente Video Memory para 128MB.</li>
+            <li>Tente 1 CPU (em hosts fracos) e verifique se há RAM suficiente.</li>
+          </ul>
+
+          <h3>3.3 Sem internet dentro da VM</h3>
+          <ul class="list">
+            <li>Verifique Network → Adapter 1: NAT (padrão).</li>
+            <li>Reinicie a VM e teste novamente.</li>
+            <li>Se o host está sem internet, a VM também ficará.</li>
+          </ul>
+
+          <h3>3.4 Instalador pede remover mídia</h3>
+          <ul class="list">
+            <li>Remova a ISO do drive óptico virtual (Devices → Optical Drives → Remove disk).</li>
+          </ul>
+
+          <div class="callout warn">
+            <strong>Regra de ouro do suporte:</strong> quando algo falhar, registre: o que você fez, o que esperava, o que aconteceu e prints/logs.
+            Isso vira “ticket” e acelera diagnóstico.
+          </div>
+        </div>
+      </section>
+
+      <section id="atividades" class="card">
+        <div class="content">
+          <h2>4) Atividades práticas derivadas (para treinar autonomia)</h2>
+          <p class="muted">Sem entregar o projeto completo: aqui são exercícios para consolidar a instalação e preparação do laboratório.</p>
+          <ul class="list">
+            <li><strong>Atividade 1 — Padronização:</strong> crie um padrão de nomes para VM, usuário e hostname (ex.: sosl-vm01) e documente o padrão.</li>
+            <li><strong>Atividade 2 — Snapshots inteligentes:</strong> crie 2 snapshots (Base e Pós-Update) e descreva quando restauraria cada um.</li>
+            <li><strong>Atividade 3 — Integração:</strong> configure pasta compartilhada e copie um arquivo do host para a VM e vice-versa. Registre evidências.</li>
+          </ul>
+
+          <h3>Pesquisas complementares</h3>
+          <ul class="list">
+            <li>Diferença entre NAT e Bridge em máquinas virtuais (quando usar cada um).</li>
+            <li>O que é “Guest Additions” e quais recursos ele habilita (clipboard, resolução, pastas).</li>
+            <li>Partições: o que é uma partição e por que o instalador cria mais de uma (ex.: swap).</li>
+            <li>Snapshots vs Backups: por que snapshot não substitui backup real.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="entrega" class="card">
+        <div class="content">
+          <h2>5) Projeto Integrador — Entrega 1 (Bimestre 1)</h2>
+          <p>
+            <strong>Entrega 1: “Laboratório Linux Padronizado”</strong>
+            — objetivo: deixar sua VM pronta, atualizada e documentada para os próximos capítulos.
+          </p>
+
+          <div class="grid-2">
+            <div>
+              <h3>O que entregar</h3>
+              <ul class="list">
+                <li>VM criada e funcional (nome padrão).</li>
+                <li>Linux Mint instalado e atualizado.</li>
+                <li>Snapshot criado: <code>B1-Entrega1-Base</code>.</li>
+                <li>Relatório curto (modelo abaixo) + evidências (prints).</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Critérios de avaliação (rubrica rápida)</h3>
+              <ul class="list">
+                <li><strong>Execução correta:</strong> VM inicia e sistema funciona.</li>
+                <li><strong>Padronização:</strong> nomes, organização, snapshot.</li>
+                <li><strong>Documentação:</strong> relatório e evidências.</li>
+                <li><strong>Boas práticas:</strong> atualizações aplicadas, integridade da ISO (se possível).</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Modelo de relatório (copie e preencha)</h3>
+          <pre><code># Entrega 1 — Laboratório Linux Padronizado (SOSL)
+
+Aluno/Grupo:
+Data:
+Host (PC): (RAM, CPU, SO)
+VirtualBox: (versão)
+
+VM:
+- Nome da VM:
+- RAM / vCPU:
+- Disco virtual:
+- Rede: NAT/Bridge
+
+Instalação:
+- Distro: Linux Mint (Cinnamon)
+- Método: Live + Instalador
+- Opções principais: apagar disco virtual e instalar
+
+Pós-instalação:
+- Atualizações aplicadas? (sim/não)
+- Pasta compartilhada configurada? (sim/não)
+- Clipboard bidirecional? (sim/não)
+
+Snapshot:
+- Nome:
+- Descrição:
+
+Evidências (anexos/prints):
+1) Sobre o sistema
+2) Configurações da VM
+3) Snapshot
+
+Dificuldades encontradas e soluções:
+- (descreva)
+</code></pre>
+
+          <div class="callout ok">
+            <strong>Dica:</strong> guarde este relatório na pasta do curso e mantenha padrão para as próximas entregas (Cap. 08, 12 e 16).
+          </div>
+
+          <h3>Formulário (salva no navegador e exporta)</h3>
+          <p class="muted">Preencha e exporte em Markdown/JSON para anexar na entrega.</p>
+
+          <div class="form" id="form04">
+            <div class="row">
+              <div class="field">
+                <label for="aluno">Aluno/Grupo</label>
+                <input id="aluno" type="text" placeholder="Nome(s)" />
+              </div>
+              <div class="field">
+                <label for="data">Data</label>
+                <input id="data" type="text" placeholder="dd/mm/aaaa" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="host">Host (PC) — RAM/CPU/SO</label>
+                <input id="host" type="text" placeholder="Ex.: 8GB RAM, i5, Windows 11" />
+              </div>
+              <div class="field">
+                <label for="vb">VirtualBox (versão)</label>
+                <input id="vb" type="text" placeholder="Ex.: 7.x" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="vm">VM (nome)</label>
+                <input id="vm" type="text" placeholder="SOSL-LinuxMint" />
+              </div>
+              <div class="field">
+                <label for="rec">Recursos (RAM/vCPU/Disco)</label>
+                <input id="rec" type="text" placeholder="Ex.: 4GB, 2 vCPU, 30GB VDI" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="rede">Rede</label>
+                <select id="rede">
+                  <option value="NAT">NAT</option>
+                  <option value="Bridge">Bridge</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="snap">Snapshot (nome)</label>
+                <input id="snap" type="text" placeholder="B1-Entrega1-Base" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="pos">Pós-instalação (marque o que fez)</label>
+                <textarea id="pos" placeholder="Ex.: Atualizações aplicadas; pasta compartilhada; clipboard bidirecional; reinício."></textarea>
+              </div>
+              <div class="field">
+                <label for="diff">Dificuldades e soluções</label>
+                <textarea id="diff" placeholder="Ex.: 64-bit não aparecia → habilitei VT-x/AMD-V."></textarea>
+              </div>
+            </div>
+            <div class="field">
+              <label for="evid">Evidências (lista de prints)</label>
+              <textarea id="evid" placeholder="1) Sobre o sistema; 2) Config VM; 3) Snapshot; 4) Update Manager."></textarea>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="saveEntrega" type="button">Salvar</button>
+              <button class="btn ghost" id="loadEntrega" type="button">Carregar</button>
+              <button class="btn dark" id="clearEntrega" type="button">Limpar</button>
+              <button class="btn dark" id="exportMd" type="button">Exportar Markdown</button>
+              <button class="btn dark" id="exportJson" type="button">Exportar JSON</button>
+            </div>
+
+            <div id="msg04" class="callout" style="display:none"></div>
+            <pre id="out04" style="display:none"></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="quiz" class="card">
+        <div class="content">
+          <h2>6) Quiz do Capítulo (10 questões • 5 alternativas)</h2>
+          <p class="muted">Marque uma alternativa e clique em <strong>Enviar Resposta</strong>. Você pode ver o gabarito e tentar de novo.</p>
+
+          <div class="quiz" id="quiz04">
+
+            <div class="q" data-answer="c" data-topic="Virtualização">
+              <div class="q-hd"><span>1) Em virtualização, “host” e “guest” significam:</span><span class="pill">Conceito</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q1" value="a"> Host é sempre Linux e guest é sempre Windows.</label>
+                  <label class="opt"><input type="radio" name="q1" value="b"> Host é a placa-mãe e guest é o disco rígido.</label>
+                  <label class="opt"><input type="radio" name="q1" value="c"> Host é o sistema do computador real; guest é o sistema rodando dentro da VM.</label>
+                  <label class="opt"><input type="radio" name="q1" value="d"> Host é o cabo de rede e guest é o roteador.</label>
+                  <label class="opt"><input type="radio" name="q1" value="e"> Host é a ISO e guest é o pendrive.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="Disco virtual">
+              <div class="q-hd"><span>2) Ao escolher “apagar disco e instalar” no instalador, o que é apagado?</span><span class="pill">Disco</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q2" value="a"> O HD real do computador (host) sempre.</label>
+                  <label class="opt"><input type="radio" name="q2" value="b"> O disco virtual da VM (arquivo VDI), não o disco real do host.</label>
+                  <label class="opt"><input type="radio" name="q2" value="c"> Apenas a memória RAM do computador.</label>
+                  <label class="opt"><input type="radio" name="q2" value="d"> Apenas o teclado e mouse.</label>
+                  <label class="opt"><input type="radio" name="q2" value="e"> Apenas o snapshot anterior.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="ISO">
+              <div class="q-hd"><span>3) Por que verificar o checksum (SHA256) da ISO é recomendado?</span><span class="pill">Integridade</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q3" value="a"> Para aumentar a velocidade do Wi‑Fi.</label>
+                  <label class="opt"><input type="radio" name="q3" value="b"> Para trocar automaticamente a interface do sistema.</label>
+                  <label class="opt"><input type="radio" name="q3" value="c"> Para instalar mais programas sem internet.</label>
+                  <label class="opt"><input type="radio" name="q3" value="d"> Para reduzir o consumo de RAM da VM.</label>
+                  <label class="opt"><input type="radio" name="q3" value="e"> Para confirmar que o arquivo baixado está íntegro e corresponde ao original oficial.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="NAT">
+              <div class="q-hd"><span>4) Qual modo de rede é mais simples para ter internet na VM sem configurações extras?</span><span class="pill">Rede</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q4" value="a"> NAT</label>
+                  <label class="opt"><input type="radio" name="q4" value="b"> Bridge (sempre obrigatório)</label>
+                  <label class="opt"><input type="radio" name="q4" value="c"> Desativado</label>
+                  <label class="opt"><input type="radio" name="q4" value="d"> Somente Host-Only</label>
+                  <label class="opt"><input type="radio" name="q4" value="e"> Sem placa de rede</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="Snapshots">
+              <div class="q-hd"><span>5) Qual é a principal vantagem de snapshots em um laboratório?</span><span class="pill">Snapshot</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q5" value="a"> Eles substituem backup externo em qualquer situação.</label>
+                  <label class="opt"><input type="radio" name="q5" value="b"> Eles aumentam a velocidade do processador real.</label>
+                  <label class="opt"><input type="radio" name="q5" value="c"> Eles impedem a necessidade de senha.</label>
+                  <label class="opt"><input type="radio" name="q5" value="d"> Permitem voltar a um estado anterior da VM rapidamente se algo der errado.</label>
+                  <label class="opt"><input type="radio" name="q5" value="e"> Eles trocam automaticamente a distro instalada.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="b" data-topic="64-bit">
+              <div class="q-hd"><span>6) Se a opção 64-bit não aparece no VirtualBox, qual causa é comum?</span><span class="pill">Host</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q6" value="a"> A ISO do Mint é sempre 32-bit.</label>
+                  <label class="opt"><input type="radio" name="q6" value="b"> Virtualização VT-x/AMD-V desativada (BIOS/UEFI) ou conflito com recursos do sistema.</label>
+                  <label class="opt"><input type="radio" name="q6" value="c"> O mouse não está conectado.</label>
+                  <label class="opt"><input type="radio" name="q6" value="d"> Falta de papel na impressora.</label>
+                  <label class="opt"><input type="radio" name="q6" value="e"> O disco virtual é dinâmico.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="e" data-topic="Atualizações">
+              <div class="q-hd"><span>7) Qual é uma boa prática após instalar o Linux Mint?</span><span class="pill">Pós</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q7" value="a"> Desativar atualizações para nunca mudar nada.</label>
+                  <label class="opt"><input type="radio" name="q7" value="b"> Instalar pacotes apenas de sites aleatórios.</label>
+                  <label class="opt"><input type="radio" name="q7" value="c"> Criar usuário sem senha para facilitar.</label>
+                  <label class="opt"><input type="radio" name="q7" value="d"> Não registrar evidências (prints/logs).</label>
+                  <label class="opt"><input type="radio" name="q7" value="e"> Aplicar atualizações iniciais e reiniciar se necessário.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="c" data-topic="Pasta compartilhada">
+              <div class="q-hd"><span>8) Para que serve configurar pasta compartilhada entre host e VM?</span><span class="pill">Integração</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q8" value="a"> Para instalar o Linux no disco real do host.</label>
+                  <label class="opt"><input type="radio" name="q8" value="b"> Para substituir o gerenciador de pacotes.</label>
+                  <label class="opt"><input type="radio" name="q8" value="c"> Para trocar arquivos facilmente (logs, relatórios, scripts) entre host e VM.</label>
+                  <label class="opt"><input type="radio" name="q8" value="d"> Para impedir que a VM use internet.</label>
+                  <label class="opt"><input type="radio" name="q8" value="e"> Para aumentar automaticamente o tamanho do disco.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="a" data-topic="Evidências">
+              <div class="q-hd"><span>9) Qual conjunto de evidências é mais adequado para a Entrega 1?</span><span class="pill">Entrega</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q9" value="a"> Prints do “Sobre o sistema”, configurações da VM e snapshot + relatório curto.</label>
+                  <label class="opt"><input type="radio" name="q9" value="b"> Apenas um áudio dizendo “funcionou”.</label>
+                  <label class="opt"><input type="radio" name="q9" value="c"> Apenas o wallpaper do desktop.</label>
+                  <label class="opt"><input type="radio" name="q9" value="d"> Apenas o nome da distro sem mais nada.</label>
+                  <label class="opt"><input type="radio" name="q9" value="e"> Apenas a ISO original.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="q" data-answer="d" data-topic="Sequência">
+              <div class="q-hd"><span>10) Qual é o próximo assunto principal após concluir este capítulo?</span><span class="pill">Próximo</span></div>
+              <div class="q-bd">
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="q10" value="a"> Apenas licenças novamente.</label>
+                  <label class="opt"><input type="radio" name="q10" value="b"> Apenas trabalho de pesquisa de distros.</label>
+                  <label class="opt"><input type="radio" name="q10" value="c"> Somente backup e restauração.</label>
+                  <label class="opt"><input type="radio" name="q10" value="d"> Interfaces gráficas no Linux e ferramentas comuns por ambiente (Cap. 05).</label>
+                  <label class="opt"><input type="radio" name="q10" value="e"> Shell Script avançado.</label>
+                </div>
+                <div class="q-actions">
+                  <button class="btn primary" data-action="submit">Enviar Resposta</button>
+                  <button class="btn ghost" data-action="show">Ver Gabarito</button>
+                  <button class="btn dark" data-action="reset">Limpar</button>
+                </div>
+                <div class="feedback" aria-live="polite"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout ok" id="quizScoreBox" style="margin-top:14px">
+            <strong>Seu progresso no quiz:</strong> <span id="quizScore">0</span>/10 respondidas corretamente.
+            <span class="muted">(Você pode tentar quantas vezes quiser.)</span>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="checklist" class="card">
+        <div class="content">
+          <h2>7) Checklist de laboratório (interativo)</h2>
+          <p class="muted">Marque o que você concluiu. A barra mostra seu progresso neste capítulo.</p>
+
+          <div class="checklist" id="checklist04">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><strong>Eu instalei</strong> o VirtualBox (ou confirmei que já estava instalado).</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2"><strong>Eu baixei</strong> a ISO do Linux Mint (e registrei a fonte).</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><strong>Eu criei</strong> a VM com nome padrão e recursos adequados (RAM/vCPU/disco).</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><strong>Eu anexei</strong> a ISO e inicializei em modo Live.</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5"><strong>Eu instalei</strong> o Linux Mint no disco virtual e reiniciei corretamente (sem ISO presa).</label></div>
+            <div class="check-item"><input type="checkbox" id="c6"><label for="c6"><strong>Eu atualizei</strong> o sistema (GUI ou terminal) e reiniciei se necessário.</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"><label for="c7"><strong>Eu configurei</strong> integração básica (clipboard e/ou pasta compartilhada).</label></div>
+            <div class="check-item"><input type="checkbox" id="c8"><label for="c8"><strong>Eu criei</strong> snapshot “B1-Entrega1-Base”.</label></div>
+            <div class="check-item"><input type="checkbox" id="c9"><label for="c9"><strong>Eu coletei</strong> evidências (prints) e preenchi o relatório da Entrega 1.</label></div>
+            <div class="check-item"><input type="checkbox" id="c10"><label for="c10"><strong>Eu respondi</strong> o quiz e revisei onde errei.</label></div>
+
+            <div class="progress" aria-label="Progresso do checklist"><div id="checkProg"></div></div>
+            <p class="small muted" style="margin:10px 0 0">Progresso: <strong><span id="checkPct">0%</span></strong></p>
+
+            <div class="actions">
+              <button class="btn primary" id="saveBtn" type="button">Salvar progresso (neste navegador)</button>
+              <button class="btn ghost" id="loadBtn" type="button">Carregar progresso</button>
+              <button class="btn dark" id="clearBtn" type="button">Limpar progresso</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn ghost" href="capitulo03.html">← Voltar ao Cap. 03</a>
+            <a class="btn dark" href="capitulo05.html">Ir para Cap. 05 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <div class="small muted">© SOSL — Sistemas Operacionais e Software Livre — Curso Técnico</div>
+        <div class="small"><a href="#conteudo" style="text-decoration:none;color:var(--link)">Voltar ao topo</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =============================
+    // MENU MOBILE
+    // =============================
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    if(hamburgerBtn && mainMenu){
+      hamburgerBtn.addEventListener('click', () => {
+        const isOpen = mainMenu.classList.toggle('show');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+
+    // =============================
+    // DROPDOWN DE CAPÍTULOS
+    // =============================
+    const chaptersDropdown = document.getElementById('chaptersDropdown');
+    if(chaptersDropdown){
+      const dropToggle = chaptersDropdown.querySelector('.dropdown-toggle');
+      function setDropdown(open){
+        chaptersDropdown.classList.toggle('open', open);
+        dropToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      dropToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setDropdown(!chaptersDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if(!chaptersDropdown.contains(e.target)) setDropdown(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') setDropdown(false);
+      });
+    }
+
+    // =============================
+    // QUIZ
+    // =============================
+    const quiz = document.getElementById('quiz04');
+    const scoreEl = document.getElementById('quizScore');
+    let correctCount = 0;
+
+    function updateScore(){ scoreEl.textContent = String(correctCount); }
+
+    function explain(topic){
+      const map = {
+        'Virtualização': 'Revise Teoria 1.1: host vs guest e por que usamos VM.',
+        'Disco virtual': 'Revise Teoria 1.2: apagar disco significa apagar o disco virtual da VM.',
+        'ISO': 'Revise Cap. 03 e Passo 1: checksum confirma integridade do download.',
+        'NAT': 'Revise Passo 3: NAT é o modo mais simples para internet.',
+        'Snapshots': 'Revise Teoria 1.4 e Passo 8: snapshots são pontos de retorno.',
+        '64-bit': 'Revise Troubleshooting 3.1: habilitar VT-x/AMD-V e evitar conflitos.',
+        'Atualizações': 'Revise Passo 6: atualize via Update Manager ou apt.',
+        'Pasta compartilhada': 'Revise Passo 7: facilita transferir entregas e logs.',
+        'Evidências': 'Revise Passo 9 e Entrega 1: prints + relatório.',
+        'Sequência': 'Revise a navegação: Cap. 05 trata interfaces gráficas e ferramentas.'
+      };
+      return map[topic] || 'Revise as seções de teoria e prática do capítulo.';
+    }
+
+    function getSelected(qEl){
+      const input = qEl.querySelector('input[type="radio"]:checked');
+      return input ? input.value : null;
+    }
+
+    function setFeedback(qEl, ok, msg){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.classList.add('show');
+      fb.classList.add(ok ? 'ok' : 'bad');
+      fb.innerHTML = msg;
+    }
+
+    function clearFeedback(qEl){
+      const fb = qEl.querySelector('.feedback');
+      fb.classList.remove('ok','bad','show');
+      fb.innerHTML = '';
+    }
+
+    function isCounted(qEl){ return qEl.dataset.counted === 'true'; }
+    function setCounted(qEl, v){ qEl.dataset.counted = v ? 'true' : 'false'; }
+
+    quiz.querySelectorAll('.q').forEach((qEl) => {
+      const ans = qEl.dataset.answer;
+      const topic = qEl.dataset.topic || '';
+
+      qEl.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if(action === 'submit'){
+            const sel = getSelected(qEl);
+            if(!sel){
+              setFeedback(qEl, false, '<strong>Escolha uma alternativa.</strong>');
+              return;
+            }
+            const ok = sel === ans;
+            if(ok && !isCounted(qEl)){
+              correctCount += 1;
+              setCounted(qEl, true);
+              updateScore();
+            }
+            const letter = ans.toUpperCase();
+            const human = ok
+              ? `<strong>Correto!</strong> ✅ Você marcou <strong>${sel.toUpperCase()}</strong>.`
+              : `<strong>Incorreto.</strong> ❌ Você marcou <strong>${sel.toUpperCase()}</strong>, mas o correto é <strong>${letter}</strong>.`;
+            const tip = `<div style="margin-top:6px"><span class="muted"><strong>Dica de revisão:</strong> ${explain(topic)}</span></div>`;
+            setFeedback(qEl, ok, human + tip);
+          }
+          if(action === 'show'){
+            const letter = ans.toUpperCase();
+            setFeedback(qEl, true, `<strong>Gabarito:</strong> alternativa <strong>${letter}</strong>.<div style="margin-top:6px" class="muted">${explain(topic)}</div>`);
+          }
+          if(action === 'reset'){
+            qEl.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+            clearFeedback(qEl);
+          }
+        });
+      });
+    });
+    updateScore();
+
+    // =============================
+    // CHECKLIST (localStorage)
+    // =============================
+    const checklist = document.getElementById('checklist04');
+    const progBar = document.getElementById('checkProg');
+    const pctEl = document.getElementById('checkPct');
+    const checkKey = 'sosl_cap04_checklist_v1';
+
+    function computeProgress(){
+      const checks = checklist.querySelectorAll('input[type="checkbox"]');
+      const total = checks.length;
+      const done = Array.from(checks).filter(c => c.checked).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      progBar.style.width = pct + '%';
+      pctEl.textContent = pct + '%';
+    }
+
+    function saveProgress(){
+      const data = {};
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => data[c.id] = c.checked);
+      localStorage.setItem(checkKey, JSON.stringify(data));
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(checkKey);
+      if(!raw) return;
+      try{
+        const data = JSON.parse(raw);
+        checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          if(typeof data[c.id] === 'boolean') c.checked = data[c.id];
+        });
+      }catch(e){}
+      computeProgress();
+    }
+
+    function clearProgress(){
+      checklist.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+      localStorage.removeItem(checkKey);
+      computeProgress();
+    }
+
+    checklist.querySelectorAll('input[type="checkbox"]').forEach(c => {
+      c.addEventListener('change', () => { computeProgress(); saveProgress(); });
+    });
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => { saveProgress(); computeProgress(); });
+    document.getElementById('loadBtn')?.addEventListener('click', () => { loadProgress(); });
+    document.getElementById('clearBtn')?.addEventListener('click', () => { clearProgress(); });
+
+    computeProgress();
+    loadProgress();
+
+    // =============================
+    // ENTREGA 1 (localStorage)
+    // =============================
+    const keyEntrega = 'sosl_cap04_entrega1_v1';
+    const e = {
+      aluno: document.getElementById('aluno'),
+      data: document.getElementById('data'),
+      host: document.getElementById('host'),
+      vb: document.getElementById('vb'),
+      vm: document.getElementById('vm'),
+      rec: document.getElementById('rec'),
+      rede: document.getElementById('rede'),
+      snap: document.getElementById('snap'),
+      pos: document.getElementById('pos'),
+      diff: document.getElementById('diff'),
+      evid: document.getElementById('evid'),
+      msg: document.getElementById('msg04'),
+      out: document.getElementById('out04')
+    };
+
+    function showMsg(kind, html){
+      e.msg.style.display = 'block';
+      e.msg.classList.remove('ok','warn','bad');
+      e.msg.classList.add(kind);
+      e.msg.innerHTML = html;
+      setTimeout(() => { e.msg.style.display = 'none'; }, 3500);
+    }
+
+    function collectEntrega(){
+      return {
+        aluno: e.aluno.value.trim(),
+        data: e.data.value.trim(),
+        host: e.host.value.trim(),
+        vb: e.vb.value.trim(),
+        vm: e.vm.value.trim(),
+        rec: e.rec.value.trim(),
+        rede: e.rede.value,
+        snap: e.snap.value.trim(),
+        pos: e.pos.value.trim(),
+        diff: e.diff.value.trim(),
+        evid: e.evid.value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function writeEntrega(obj){ localStorage.setItem(keyEntrega, JSON.stringify(obj)); }
+    function readEntrega(){
+      const raw = localStorage.getItem(keyEntrega);
+      if(!raw) return null;
+      try{ return JSON.parse(raw); }catch(e){ return null; }
+    }
+
+    function fillEntrega(obj){
+      if(!obj) return;
+      e.aluno.value = obj.aluno || '';
+      e.data.value = obj.data || '';
+      e.host.value = obj.host || '';
+      e.vb.value = obj.vb || '';
+      e.vm.value = obj.vm || '';
+      e.rec.value = obj.rec || '';
+      e.rede.value = obj.rede || 'NAT';
+      e.snap.value = obj.snap || '';
+      e.pos.value = obj.pos || '';
+      e.diff.value = obj.diff || '';
+      e.evid.value = obj.evid || '';
+    }
+
+    function clearEntrega(){
+      e.aluno.value=''; e.data.value=''; e.host.value=''; e.vb.value=''; e.vm.value=''; e.rec.value=''; e.rede.value='NAT';
+      e.snap.value='B1-Entrega1-Base'; e.pos.value=''; e.diff.value=''; e.evid.value='';
+      e.out.style.display='none'; e.out.textContent='';
+    }
+
+    function toMarkdown(obj){
+      return `# Entrega 1 — Laboratório Linux Padronizado (SOSL)\n\n`+
+        `- **Aluno/Grupo:** ${obj.aluno || '—'}\n`+
+        `- **Data:** ${obj.data || '—'}\n`+
+        `- **Host (PC):** ${obj.host || '—'}\n`+
+        `- **VirtualBox:** ${obj.vb || '—'}\n\n`+
+        `## VM\n`+
+        `- **Nome:** ${obj.vm || '—'}\n`+
+        `- **Recursos:** ${obj.rec || '—'}\n`+
+        `- **Rede:** ${obj.rede || '—'}\n\n`+
+        `## Pós-instalação\n${obj.pos || ''}\n\n`+
+        `## Snapshot\n- **Nome:** ${obj.snap || '—'}\n\n`+
+        `## Evidências\n${obj.evid || ''}\n\n`+
+        `## Dificuldades e soluções\n${obj.diff || ''}\n\n`+
+        `> Atualizado em: ${obj.updatedAt || '—'}\n`;
+    }
+
+    document.getElementById('saveEntrega')?.addEventListener('click', () => {
+      const obj = collectEntrega();
+      if(!obj.aluno || !obj.vm || !obj.snap){
+        showMsg('warn','<strong>Preencha pelo menos:</strong> Aluno/Grupo, VM (nome) e Snapshot.');
+        return;
+      }
+      writeEntrega(obj);
+      showMsg('ok','<strong>Entrega salva no navegador!</strong>');
+    });
+
+    document.getElementById('loadEntrega')?.addEventListener('click', () => {
+      const obj = readEntrega();
+      if(!obj){ showMsg('warn','<strong>Nenhum registro salvo ainda.</strong>'); return; }
+      fillEntrega(obj);
+      showMsg('ok','<strong>Registro carregado.</strong>');
+    });
+
+    document.getElementById('clearEntrega')?.addEventListener('click', () => {
+      clearEntrega();
+      localStorage.removeItem(keyEntrega);
+      showMsg('ok','<strong>Registro limpo.</strong>');
+    });
+
+    document.getElementById('exportMd')?.addEventListener('click', () => {
+      const obj = collectEntrega();
+      const md = toMarkdown(obj);
+      e.out.style.display='block';
+      e.out.textContent = md;
+      navigator.clipboard?.writeText(md);
+      showMsg('ok','<strong>Markdown gerado e copiado.</strong>');
+    });
+
+    document.getElementById('exportJson')?.addEventListener('click', () => {
+      const obj = collectEntrega();
+      const json = JSON.stringify(obj, null, 2);
+      e.out.style.display='block';
+      e.out.textContent = json;
+      navigator.clipboard?.writeText(json);
+      showMsg('ok','<strong>JSON gerado e copiado.</strong>');
+    });
+
+    // auto load
+    const obj0 = readEntrega();
+    if(obj0) fillEntrega(obj0);
+    if(!e.snap.value) e.snap.value = 'B1-Entrega1-Base';
+
+  </script>
+
+</body>
+</html>
