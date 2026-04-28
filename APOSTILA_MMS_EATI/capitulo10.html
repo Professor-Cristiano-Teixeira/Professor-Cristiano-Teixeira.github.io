@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo10.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 10 — Entradas e Saídas Digitais no Arduino (I/O Digital)</title>
+  <meta name="description" content="Apostila EATI — Capítulo 10: I/O digital no Arduino (pinMode, digitalRead, digitalWrite), INPUT_PULLUP, pull-up/pull-down, limites elétricos, debouncing, boas práticas e diagnóstico." />
+
+  <!-- Prism para código (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+
+      --ok:#0a7a3b;
+      --bad:#9b2c2c;
+      --warn:#9a6700;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      min-height:72px;padding:10px 0;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{
+      width:48px;height:48px;border-radius:14px;
+      display:grid;place-items:center;
+      color:#fff;font-weight:900;letter-spacing:.04em;
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      box-shadow:0 14px 24px rgba(0,0,238,.20);
+      flex-shrink:0;
+    }
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 12px;border-radius:999px;
+      font-weight:900;font-size:.92rem;
+      border:1px solid transparent;
+      color:var(--text);
+      background:transparent;
+    }
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      color:#fff;border-color:transparent;
+      box-shadow:0 12px 20px rgba(0,0,238,.18);
+    }
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    /* Cards */
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow-lg);
+      overflow:hidden;
+    }
+    .card-inner{padding:22px}
+
+    .hero{
+      border-radius:var(--radius-lg);
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;right:-80px;top:-80px;
+      width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);
+      pointer-events:none;
+    }
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:7px 12px;
+      border-radius:999px;
+      font-weight:900;
+      color:var(--primary-800);
+      font-size:.85rem;
+    }
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .callout{
+      border-left:4px solid var(--primary);
+      background:var(--surface-soft);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .callout strong{color:var(--primary-800)}
+
+    .warning{
+      border-left:4px solid #ffb300;
+      background:rgba(255, 200, 0, .12);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .warning strong{color:var(--warn)}
+
+    .note{
+      border:1px dashed var(--line);
+      background:rgba(238,243,255,.7);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);
+      border-radius:18px;
+      padding:16px;
+    }
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0;color:var(--muted)}
+
+    .formula{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color:#0b1530;
+      overflow:auto;
+      box-shadow:0 6px 14px rgba(23,35,58,.04);
+    }
+
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:980px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    /* Steps */
+    .steps{counter-reset: step}
+    .step{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:16px;
+      margin:12px 0;
+    }
+    .step h4{margin:0 0 8px;color:var(--primary-800)}
+    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
+    .step p{margin:0 0 10px;color:var(--muted)}
+
+    /* Code */
+    pre{border-radius:16px;overflow:auto}
+    pre[class*="language-"]{margin:12px 0}
+
+    /* Quiz */
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;cursor:pointer;
+      color:var(--primary-800);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:var(--ok)} .no{color:var(--bad)}
+    .gabarito{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(0,0,238,.06);
+      border:1px solid rgba(0,0,238,.15);
+      color:var(--muted);
+    }
+
+    /* Checklist */
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    /* Back-to-top */
+    .back-top{
+      position:fixed;right:18px;bottom:18px;z-index:1050;
+      width:50px;height:50px;display:none;place-items:center;
+      border:1px solid var(--line);background:#fff;color:var(--primary-800);
+      border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer;
+    }
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+      table{min-width:760px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 10</strong>
+        <span>Entradas e Saídas Digitais no Arduino (I/O Digital)</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
+      <a href="capitulo09.html" title="Voltar para o Capítulo 09">⬅️ Anterior</a>
+      <a class="primary" href="capitulo11.html" title="Avançar para o Capítulo 11">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">3º Bimestre • Semanas 19–20 • I/O Digital (Entradas e Saídas)</div>
+        <h1>Entradas e Saídas Digitais no Arduino</h1>
+        <p class="meta">
+          Agora que você entende a plataforma (Cap. 09), vamos dominar o que mais aparece em sistemas embarcados: <strong>entradas digitais</strong>
+          (botões, sensores ON/OFF) e <strong>saídas digitais</strong> (LEDs, sinais de controle). Você aprenderá o que realmente acontece no pino,
+          como evitar leituras instáveis (entrada flutuante e ruído), como dimensionar resistores e como diagnosticar falhas típicas.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Explicar o que é um sinal digital e o que significam HIGH/LOW no Arduino.</li>
+              <li>Configurar pinos com <code>pinMode()</code> e usar <code>digitalRead()</code>/<code>digitalWrite()</code>.</li>
+              <li>Entender e aplicar <code>INPUT_PULLUP</code> e resistores pull-up/pull-down.</li>
+              <li>Dimensionar resistor de LED e respeitar limites de corrente do pino.</li>
+              <li>Compreender <strong>debouncing</strong> (bounce) e como reduzir falsos acionamentos.</li>
+              <li>Aplicar checklist de diagnóstico: GND comum, fiação, inversões e ruído.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Cap. 05: níveis lógicos, limiar e entrada flutuante.</li>
+              <li>Cap. 04: segurança e organização de bancada (se for montagem física).</li>
+              <li>Cap. 09: visão geral do Arduino (pinos, alimentação e limites).</li>
+            </ul>
+            <div class="note">
+              <strong>Ferramentas:</strong> Tinkercad Circuits (recomendado) ou Arduino UNO + protoboard.
+              <strong>Observação:</strong> aqui o passo a passo é necessário porque I/O digital é conteúdo prático.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) O que é “digital” no Arduino (HIGH/LOW ≠ True/False automaticamente)</h2>
+        <p>
+          Em I/O digital, o pino assume dois estados. Em geral, <strong>LOW</strong> representa próximo de 0 V (referência GND) e <strong>HIGH</strong>
+          representa próximo de Vcc (por exemplo, 5 V no Arduino UNO). Em programação, você pode tratar HIGH como 1 e LOW como 0,
+          mas é importante lembrar que isso depende de como o circuito foi ligado.
+        </p>
+        <p>
+          Exemplo clássico: com <code>INPUT_PULLUP</code>, o botão solto lê HIGH e pressionado lê LOW (lógica invertida). Isso não é “erro”, é uma escolha
+          de circuito que aumenta estabilidade e reduz componentes.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao interpretar leituras de botões e evitar “inversão” inesperada em projetos.</div>
+
+        <h2>2) Configuração de pinos: <code>pinMode()</code> (entrada, saída e pull-up interno)</h2>
+        <p>
+          Antes de usar um pino, você define seu modo. Isso configura circuitos internos do microcontrolador:
+        </p>
+        <ul>
+          <li><strong>INPUT:</strong> entrada “alta impedância” (sensível a ruído se não houver pull-up/pull-down).</li>
+          <li><strong>INPUT_PULLUP:</strong> entrada com resistor interno puxando para HIGH (evita flutuação).</li>
+          <li><strong>OUTPUT:</strong> saída que força HIGH ou LOW (dentro dos limites elétricos do pino).</li>
+        </ul>
+        <div class="warning"><strong>Erro comum:</strong> ler botão em INPUT sem resistor → valores aleatórios (entrada flutuante).</div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo, ao configurar botões com pull-up e LEDs como saída.</div>
+
+        <h2>3) O que acontece eletricamente no pino (por que precisa de resistor e GND comum)</h2>
+        <p>
+          Uma entrada digital é como um “sensor de tensão”. Se o pino estiver desconectado (flutuando), ele pode captar ruído elétrico
+          do ambiente e alternar entre 0 e 1. Por isso, você precisa <strong>definir</strong> o estado padrão com pull-up ou pull-down.
+        </p>
+        <p>
+          Já uma saída digital fornece ou drena corrente para a carga. LEDs precisam de resistor em série para limitar corrente.
+          Sem resistor, a corrente pode exceder o limite do LED e do pino, causando aquecimento e falha.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao montar LEDs e botões com segurança e estabilidade; e ao diagnosticar falhas intermitentes.</div>
+
+        <h3>3.1 Resistores de LED (dimensionamento técnico)</h3>
+        <p>
+          Para escolher o resistor do LED, use uma forma prática da Lei de Ohm:
+        </p>
+        <div class="formula" aria-label="Cálculo do resistor do LED">R ≈ (Vcc − Vf) / I
+
+Onde:
+- Vcc: tensão da saída (ex.: 5 V)
+- Vf: queda típica no LED (ex.: 2,0 V vermelho; 3,0 V azul/branco)
+- I: corrente desejada (ex.: 5 a 15 mA em prototipagem)
+
+Exemplo (LED vermelho): R ≈ (5 − 2) / 0,01 = 300 Ω → valor comercial próximo: 330 Ω
+        </div>
+        <div class="note"><strong>Regra prática:</strong> 220 Ω a 330 Ω funciona bem para muitos LEDs em 5 V (prototipagem), sem forçar o pino.</div>
+
+        <h2>4) Pull-up e pull-down: como estabilizar entradas</h2>
+        <p>
+          <strong>Pull-up</strong> “puxa” a entrada para HIGH quando nada está conectado. <strong>Pull-down</strong> “puxa” para LOW.
+          A finalidade é evitar flutuação. Com <code>INPUT_PULLUP</code>, você usa um resistor interno (valor típico na ordem de dezenas de kΩ),
+          então basta ligar o botão entre o pino e o GND.
+        </p>
+        <div class="table-wrap" role="region" aria-label="Comparação pull-up e pull-down">
+          <table>
+            <thead>
+              <tr><th>Estratégia</th><th>Ligação do botão</th><th>Leitura quando solto</th><th>Leitura quando pressionado</th><th>Vantagens</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Pull-up interno</strong> (<code>INPUT_PULLUP</code>)</td>
+                <td>Pino ↔ botão ↔ GND</td>
+                <td>HIGH (1)</td>
+                <td>LOW (0)</td>
+                <td>Menos componentes, montagem simples, boa estabilidade</td>
+              </tr>
+              <tr>
+                <td><strong>Pull-down externo</strong> (10 kΩ)</td>
+                <td>Pino ↔ botão ↔ 5V e resistor para GND</td>
+                <td>LOW (0)</td>
+                <td>HIGH (1)</td>
+                <td>Lógica “direta” (pressionado=1), comum em algumas placas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> em todos os projetos com botões/sensores digitais; e no Cap. 11 ao escrever condições claras.</div>
+
+        <h2>5) Bounce (debouncing): por que o botão “aperta várias vezes”</h2>
+        <p>
+          Botões mecânicos não mudam de estado de forma “perfeita”. Ao pressionar, o contato pode vibrar por alguns milissegundos,
+          gerando várias transições rápidas (bounce). O resultado: o programa pode interpretar um único clique como vários.
+        </p>
+        <p>
+          Existem duas formas comuns de debouncing:
+          <strong>software</strong> (ignorar mudanças por um intervalo curto) e <strong>hardware</strong> (RC + Schmitt trigger).
+          No nível técnico médio, um debouncing simples por software já resolve muitas situações.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> quando você implementar contadores/toggle e perceber “pulando números”.</div>
+
+        <h2>6) Diagnóstico rápido de I/O digital (checklist técnico)</h2>
+        <p>
+          Se o circuito não funciona, não chute. Use um checklist:
+        </p>
+        <ul>
+          <li><strong>GND comum:</strong> todos os módulos/LEDs/botões referenciam o mesmo GND?</li>
+          <li><strong>Modo do pino:</strong> INPUT_PULLUP/OUTPUT configurados corretamente?</li>
+          <li><strong>Inversão esperada:</strong> com pull-up, pressionado = LOW (isso foi tratado no código)?</li>
+          <li><strong>Resistor do LED:</strong> existe e está em série?</li>
+          <li><strong>Mau contato:</strong> jumper solto? protoboard em trilha errada?</li>
+          <li><strong>Curto:</strong> Vcc encostando em GND? LED invertido?</li>
+        </ul>
+        <div class="note"><strong>Dica de laboratório:</strong> se estiver em bancada real, use o multímetro para continuidade e para verificar 5 V e GND (Cap. 04).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo prático (necessário): botões estáveis + LEDs com diagnóstico</h2>
+        <p class="meta">
+          Objetivo: montar duas entradas digitais estáveis com <code>INPUT_PULLUP</code> e controlar duas saídas.
+          Você também vai incluir um mini-diagnóstico (simular erro de inversão e corrigir).
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Montagem (hardware)</h4>
+            <p>
+              Use 2 botões e 2 LEDs. O padrão é: botão entre pino e GND (pull-up interno). LED em série com resistor para GND.
+            </p>
+            <ul>
+              <li><strong>Botão A:</strong> pino 2 ↔ botão ↔ GND</li>
+              <li><strong>Botão B:</strong> pino 3 ↔ botão ↔ GND</li>
+              <li><strong>LED A:</strong> pino 9 ↔ resistor (220–330 Ω) ↔ LED ↔ GND</li>
+              <li><strong>LED B:</strong> pino 10 ↔ resistor (220–330 Ω) ↔ LED ↔ GND</li>
+            </ul>
+            <div class="callout"><strong>Aplicação:</strong> você está definindo entradas (pull-up) e limitando corrente nas saídas (resistor do LED).</div>
+          </div>
+
+          <div class="step">
+            <h4>Configuração e lógica (software)</h4>
+            <p>
+              Configure os botões como <code>INPUT_PULLUP</code>. Lembre: solto=HIGH, pressionado=LOW.
+              Para ficar intuitivo, você pode criar variáveis lógicas invertidas: <code>pressed = (read == LOW)</code>.
+            </p>
+            <pre><code class="language-cpp">// EATI - Capítulo 10
+// I/O digital com INPUT_PULLUP (botão solto=HIGH, pressionado=LOW)
+
+const int BTN_A = 2;
+const int BTN_B = 3;
+const int LED_A = 9;
+const int LED_B = 10;
+
+void setup() {
+  pinMode(BTN_A, INPUT_PULLUP);
+  pinMode(BTN_B, INPUT_PULLUP);
+  pinMode(LED_A, OUTPUT);
+  pinMode(LED_B, OUTPUT);
+}
+
+void loop() {
+  bool A_pressionado = (digitalRead(BTN_A) == LOW);
+  bool B_pressionado = (digitalRead(BTN_B) == LOW);
+
+  digitalWrite(LED_A, A_pressionado ? HIGH : LOW);
+  digitalWrite(LED_B, B_pressionado ? HIGH : LOW);
+}
+</code></pre>
+            <div class="note"><strong>Validação:</strong> cada botão deve acender seu LED correspondente sem oscilações.</div>
+          </div>
+
+          <div class="step">
+            <h4>Mini-diagnóstico (erro proposital)</h4>
+            <p>
+              Provoque um erro e corrija, registrando o raciocínio:
+            </p>
+            <ul>
+              <li><strong>Erro 1 (inversão):</strong> troque a condição para <code>== HIGH</code> e observe que fica invertido. Corrija voltando para LOW.</li>
+              <li><strong>Erro 2 (entrada flutuante):</strong> mude para <code>INPUT</code> e observe instabilidade. Corrija retornando para <code>INPUT_PULLUP</code>.</li>
+            </ul>
+            <div class="callout"><strong>Aplicação:</strong> você pratica diagnóstico usando o conhecimento de pull-up e flutuação (Cap. 05).</div>
+          </div>
+
+          <div class="step">
+            <h4>Registro técnico (mínimo)</h4>
+            <p>Registre em 8 a 12 linhas:</p>
+            <ul>
+              <li>Como você montou (pinos usados)</li>
+              <li>O que significa solto=HIGH e pressionado=LOW</li>
+              <li>Qual erro proposital você testou e como corrigiu</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="warning"><strong>Segurança:</strong> não ligue LED sem resistor e mantenha GND comum. Em bancada real, desligue alimentação antes de rearranjar jumpers.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Atividades práticas derivadas (2–3 sugestões)</h2>
+        <ul>
+          <li><strong>Toggle com debouncing:</strong> use um botão para alternar o estado de um LED (liga/desliga) e aplique debouncing simples (tempo mínimo entre cliques).</li>
+          <li><strong>Regra AND/OR:</strong> acenda um terceiro LED se (A AND B) e outro se (A OR B) — conecta com lógica do Cap. 06.</li>
+          <li><strong>Diagnóstico guiado:</strong> o professor entrega um circuito com 1 erro (inversão/pull-up faltando/LED invertido) e você deve encontrar com checklist.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="HIGH/LOW representam níveis de tensão próximos a Vcc e GND, respectivamente, mas a lógica pode inverter dependendo da ligação (ex.: pull-up).">
+          <p><strong>1.</strong> Em I/O digital, a afirmação correta é:</p>
+          <label><input type="radio" name="q1" value="a"> HIGH sempre significa botão pressionado</label>
+          <label><input type="radio" name="q1" value="b"> LOW sempre significa 3,3 V</label>
+          <label><input type="radio" name="q1" value="c"> HIGH/LOW são níveis elétricos e podem representar 1/0 conforme o circuito</label>
+          <label><input type="radio" name="q1" value="d"> HIGH é lido apenas em pinos analógicos</label>
+          <label><input type="radio" name="q1" value="e"> LOW não existe no Arduino</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="INPUT_PULLUP ativa um resistor interno que puxa a entrada para HIGH; o botão liga o pino ao GND quando pressionado.">
+          <p><strong>2.</strong> Usando <code>INPUT_PULLUP</code>, o botão normalmente deve ser ligado:</p>
+          <label><input type="radio" name="q2" value="a"> Entre o pino e 5V</label>
+          <label><input type="radio" name="q2" value="b"> Entre o pino e 3,3 V</label>
+          <label><input type="radio" name="q2" value="c"> Em série com o LED</label>
+          <label><input type="radio" name="q2" value="d"> Entre o pino e o GND</label>
+          <label><input type="radio" name="q2" value="e"> Entre A0 e A5</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Entrada flutuante ocorre quando o pino não está definido em 0 ou 1; ele pode captar ruído e alternar aleatoriamente.">
+          <p><strong>3.</strong> Uma entrada “flutuante” é problemática porque:</p>
+          <label><input type="radio" name="q3" value="a"> Aumenta a tensão da fonte</label>
+          <label><input type="radio" name="q3" value="b"> Pode ler valores instáveis por ruído (0/1 aleatório)</label>
+          <label><input type="radio" name="q3" value="c"> Ela vira automaticamente uma saída PWM</label>
+          <label><input type="radio" name="q3" value="d"> Ela sempre fica em HIGH</label>
+          <label><input type="radio" name="q3" value="e"> Ela sempre fica em LOW</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="Resistor em série com LED limita corrente; sem ele, a corrente pode exceder o limite do LED e do pino.">
+          <p><strong>4.</strong> O resistor em série com um LED é necessário para:</p>
+          <label><input type="radio" name="q4" value="a"> Aumentar a tensão no LED</label>
+          <label><input type="radio" name="q4" value="b"> Transformar digital em analógico</label>
+          <label><input type="radio" name="q4" value="c"> Fazer o LED piscar automaticamente</label>
+          <label><input type="radio" name="q4" value="d"> Substituir o GND</label>
+          <label><input type="radio" name="q4" value="e"> Limitar corrente para proteger LED e pino</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="Bounce é a vibração do contato mecânico do botão, gerando múltiplas transições rápidas.">
+          <p><strong>5.</strong> O fenômeno “bounce” em botões é:</p>
+          <label><input type="radio" name="q5" value="a"> Oscilação mecânica que gera múltiplas leituras ao pressionar</label>
+          <label><input type="radio" name="q5" value="b"> Um tipo de comunicação serial</label>
+          <label><input type="radio" name="q5" value="c"> Um erro exclusivo de sensores analógicos</label>
+          <label><input type="radio" name="q5" value="d"> Um modo de PWM em alta tensão</label>
+          <label><input type="radio" name="q5" value="e"> Um curto permanente no circuito</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Com pull-up, solto=HIGH e pressionado=LOW. A lógica pode ser invertida em código para ficar intuitiva.">
+          <p><strong>6.</strong> Com <code>INPUT_PULLUP</code>, a leitura típica do botão é:</p>
+          <label><input type="radio" name="q6" value="a"> Solto=LOW e pressionado=HIGH</label>
+          <label><input type="radio" name="q6" value="b"> Solto=analógico e pressionado=digital</label>
+          <label><input type="radio" name="q6" value="c"> Solto=flutuante e pressionado=PWM</label>
+          <label><input type="radio" name="q6" value="d"> Solto=HIGH e pressionado=LOW</label>
+          <label><input type="radio" name="q6" value="e"> Solto=EEPROM e pressionado=SRAM</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Sem GND comum, os sinais não compartilham a mesma referência de 0 V e a leitura pode ficar errada.">
+          <p><strong>7.</strong> Se um módulo externo não compartilha o mesmo GND do Arduino, o resultado mais provável é:</p>
+          <label><input type="radio" name="q7" value="a"> Melhorar a precisão do ADC automaticamente</label>
+          <label><input type="radio" name="q7" value="b"> Leituras/sinais incorretos por falta de referência comum</label>
+          <label><input type="radio" name="q7" value="c"> Aumentar a SRAM disponível</label>
+          <label><input type="radio" name="q7" value="d"> O LED acender com brilho máximo sempre</label>
+          <label><input type="radio" name="q7" value="e"> Converter o sinal em PWM automaticamente</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="Diagnóstico começa por fiação, modo do pino, inversão (pull-up) e resistor do LED.">
+          <p><strong>8.</strong> Qual sequência de diagnóstico é mais adequada para um botão que “não funciona”?</p>
+          <label><input type="radio" name="q8" value="a"> Trocar a placa sem testar nada</label>
+          <label><input type="radio" name="q8" value="b"> Aumentar a tensão para “forçar” a leitura</label>
+          <label><input type="radio" name="q8" value="c"> Verificar GND comum, fiação, <code>pinMode</code>, inversão e resistor/LED</label>
+          <label><input type="radio" name="q8" value="d"> Medir resistência com o circuito energizado</label>
+          <label><input type="radio" name="q8" value="e"> Ignorar pull-up/pull-down e usar INPUT sempre</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Sei explicar HIGH/LOW e por que a lógica pode inverter com pull-up.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei usar <code>pinMode</code>, <code>digitalRead</code> e <code>digitalWrite</code> corretamente.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei montar botão estável com <code>INPUT_PULLUP</code> e LED com resistor.</label></li>
+          <li><label><input type="checkbox" class="ck"> Entendo o que é bounce e consigo explicar como reduzir falsos cliques.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo diagnosticar erro de fiação, GND comum e inversão de leitura.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+
+        <h3>Pesquisas complementares</h3>
+        <ul>
+          <li>Debounce por hardware (RC) e Schmitt trigger: por que melhora a estabilidade.</li>
+          <li>Limites de corrente por pino e por placa (por que usar driver para relés/motores).</li>
+          <li>Pull-up interno: variação do valor e impacto em cabos longos/ruído.</li>
+          <li>Open-drain/open-collector e quando faz sentido em eletrônica digital.</li>
+        </ul>
+
+        <div class="note">
+          <strong>Próximo capítulo:</strong> <a href="capitulo11.html"><strong>Capítulo 11 — Estruturas de Decisão (if/else)</strong></a>.
+          Você vai transformar leituras de entradas em regras e comportamentos.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 10</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+</script>
+</body>
+</html>

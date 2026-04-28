@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo06.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 06 — Portas Lógicas e Tabelas Verdade</title>
+  <meta name="description" content="Apostila EATI — Capítulo 06: portas lógicas (AND, OR, NOT, NAND, NOR, XOR, XNOR), tabelas verdade, expressões lógicas e prática em Tinkercad/Arduino com botões e LEDs." />
+
+  <!-- Prism (tema escuro) para código -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+
+      --ok:#0a7a3b;
+      --bad:#9b2c2c;
+      --warn:#9a6700;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:72px;padding:10px 0}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,var(--primary),var(--primary-800));box-shadow:0 14px 24px rgba(0,0,238,.20);flex-shrink:0}
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;font-weight:900;font-size:.92rem;border:1px solid transparent;color:var(--text);background:transparent}
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{background:linear-gradient(135deg,var(--primary),var(--primary-800));color:#fff;border-color:transparent;box-shadow:0 12px 20px rgba(0,0,238,.18)}
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden}
+    .card-inner{padding:22px}
+
+    .hero{border-radius:var(--radius-lg);background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);pointer-events:none}
+
+    .tag{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:999px;font-weight:900;color:var(--primary-800);font-size:.85rem}
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .callout{border-left:4px solid var(--primary);background:var(--surface-soft);border-radius:12px;padding:12px 14px;margin:14px 0}
+    .callout strong{color:var(--primary-800)}
+
+    .warning{border-left:4px solid #ffb300;background:rgba(255, 200, 0, .12);border-radius:12px;padding:12px 14px;margin:14px 0}
+    .warning strong{color:var(--warn)}
+
+    .note{border:1px dashed var(--line);background:rgba(238,243,255,.7);border-radius:12px;padding:12px 14px;margin:14px 0}
+
+    .mini{border:1px solid var(--line);background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);border-radius:18px;padding:16px}
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0;color:var(--muted)}
+
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:900px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    .formula{border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;color:#0b1530;overflow:auto;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+
+    .steps{counter-reset: step}
+    .step{border:1px solid var(--line);background:#fff;border-radius:18px;padding:16px;margin:12px 0}
+    .step h4{margin:0 0 8px;color:var(--primary-800)}
+    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
+    .step p{margin:0 0 10px;color:var(--muted)}
+
+    pre{border-radius:16px;overflow:auto}
+    pre[class*="language-"]{margin:12px 0}
+
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:900;cursor:pointer;color:var(--primary-800);box-shadow:var(--shadow-sm)}
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0;background:#fff}
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:var(--ok)} .no{color:var(--bad)}
+    .gabarito{display:none;margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(0,0,238,.06);border:1px solid rgba(0,0,238,.15);color:var(--muted)}
+
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    .back-top{position:fixed;right:18px;bottom:18px;z-index:1050;width:50px;height:50px;display:none;place-items:center;border:1px solid var(--line);background:#fff;color:var(--primary-800);border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer}
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+      table{min-width:760px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 06</strong>
+        <span>Portas Lógicas e Tabelas Verdade</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
+      <a href="capitulo05.html" title="Voltar para o Capítulo 05">⬅️ Anterior</a>
+      <a class="primary" href="capitulo07.html" title="Avançar para o Capítulo 07">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">2º Bimestre • Semanas 11–12 • Portas Lógicas</div>
+        <h1>Portas Lógicas e Tabelas Verdade</h1>
+        <p class="meta">
+          Neste capítulo você aprende as principais portas lógicas (<strong>AND, OR, NOT, NAND, NOR, XOR, XNOR</strong>), constrói e interpreta <strong>tabelas verdade</strong>
+          e começa a escrever regras em forma de <strong>expressões lógicas</strong>. No passo a passo, você monta um “laboratório de portas” com botões e LEDs no Tinkercad/Arduino
+          e valida os resultados gerando a tabela verdade no Serial Monitor.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Reconhecer e explicar o comportamento de AND, OR, NOT, NAND, NOR, XOR e XNOR.</li>
+              <li>Construir tabela verdade para 1 ou 2 entradas.</li>
+              <li>Relacionar tabela verdade ↔ expressão lógica (leitura e escrita básicas).</li>
+              <li>Implementar portas lógicas em um microcontrolador (lógica em código) e validar com testes.</li>
+              <li>Identificar aplicações em TI: decisões, permissões, alarmes, validações e diagnósticos.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Cap. 05: binário, níveis lógicos, limiar e pull-up/pull-down.</li>
+              <li>Noções básicas de if/else e operadores lógicos (AND/OR/NOT) em programação.</li>
+            </ul>
+            <div class="note">
+              <strong>Ferramentas:</strong> Tinkercad (Arduino + botões + LEDs) ou bancada real.
+              <strong>Observação:</strong> no Cap. 07 você vai aprofundar expressões e simplificação (álgebra booleana).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Porta lógica: o que é e por que existe</h2>
+        <p>
+          Uma <strong>porta lógica</strong> é um bloco que recebe entradas digitais (0/1) e produz uma saída digital (0/1) de acordo com uma regra.
+          Essa regra é descrita por uma <strong>tabela verdade</strong>. Portas lógicas são a base de circuitos digitais: processadores, memórias e controladores
+          são construídos a partir de bilhões de portas/elementos lógicos.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao projetar decisões (se/então) em automação, e ao entender como sinais digitais são combinados em hardware e em código.</div>
+
+        <h2>2) Tabela verdade: a “prova” do comportamento lógico</h2>
+        <p>
+          A <strong>tabela verdade</strong> lista todas as combinações possíveis das entradas e mostra a saída correspondente.
+          Para 1 entrada, há 2 combinações (0 e 1). Para 2 entradas, há 4 combinações (00, 01, 10, 11). Para n entradas, há 2ⁿ combinações.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo, você vai gerar a tabela verdade no Serial Monitor e comparar com os LEDs.</div>
+
+        <h2>3) As portas básicas (com tabelas verdade)</h2>
+        <p>
+          Vamos usar A e B como entradas e Y como saída. Considere que 1 = verdadeiro/ligado e 0 = falso/desligado.
+        </p>
+
+        <h3>3.1 NOT (inversor)</h3>
+        <p>
+          A porta NOT inverte a entrada: se A=1, Y=0; se A=0, Y=1.
+        </p>
+        <div class="table-wrap" role="region" aria-label="Tabela verdade NOT">
+          <table>
+            <thead><tr><th>A</th><th>Y = NOT A</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> em botões com pull-up (pressionado vira 0) e em condições invertidas (alarme quando NÃO há sinal).</div>
+
+        <h3>3.2 AND (E)</h3>
+        <p>
+          AND só dá 1 quando <strong>todas</strong> as entradas são 1.
+        </p>
+        <div class="table-wrap" role="region" aria-label="Tabela verdade AND">
+          <table>
+            <thead><tr><th>A</th><th>B</th><th>Y = A AND B</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> permissões e segurança (só libera se duas condições forem verdadeiras).</div>
+
+        <h3>3.3 OR (OU)</h3>
+        <p>
+          OR dá 1 quando <strong>pelo menos uma</strong> entrada é 1.
+        </p>
+        <div class="table-wrap" role="region" aria-label="Tabela verdade OR">
+          <table>
+            <thead><tr><th>A</th><th>B</th><th>Y = A OR B</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> alarmes e monitoramento (dispara se qualquer sensor detectar problema).</div>
+
+        <h3>3.4 XOR (OU exclusivo)</h3>
+        <p>
+          XOR dá 1 quando as entradas são <strong>diferentes</strong>. É muito usado em comparação e paridade.
+        </p>
+        <div class="table-wrap" role="region" aria-label="Tabela verdade XOR">
+          <table>
+            <thead><tr><th>A</th><th>B</th><th>Y = A XOR B</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> detectar diferença entre dois sinais (comparação), e em lógica de alternância (toggle).</div>
+
+        <h2>4) Portas derivadas: NAND, NOR e XNOR</h2>
+        <p>
+          Portas derivadas são versões invertidas (negadas) das portas básicas. Elas são muito importantes porque, na prática,
+          <strong>NAND</strong> e <strong>NOR</strong> são consideradas portas universais: é possível construir qualquer circuito lógico usando apenas NAND ou apenas NOR.
+          Você vai aprofundar isso no Capítulo 07.
+        </p>
+
+        <div class="table-wrap" role="region" aria-label="Tabela verdade NAND, NOR, XNOR">
+          <table>
+            <thead>
+              <tr>
+                <th>A</th><th>B</th>
+                <th>NAND = NOT(A AND B)</th>
+                <th>NOR = NOT(A OR B)</th>
+                <th>XNOR = NOT(A XOR B)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> em expressões negadas, alarmes invertidos e no projeto de circuitos com componentes limitados (apenas NAND/NOR).</div>
+
+        <h2>5) Expressões lógicas (introdução) e relação com programação</h2>
+        <p>
+          Uma expressão lógica descreve uma regra. Ex.: <strong>Y = A AND B</strong>. Em programação, isso corresponde a operadores lógicos.
+          No Arduino/C/C++: <code>&amp;&amp;</code> (AND), <code>||</code> (OR) e <code>!</code> (NOT). Para bits, existem operadores bitwise: <code>&amp;</code>, <code>|</code>, <code>^</code>.
+        </p>
+        <div class="warning"><strong>Cuidado:</strong> <code>&amp;&amp;</code> e <code>||</code> são lógicos (true/false). <code>&amp;</code>, <code>|</code>, <code>^</code> operam bit a bit (números).</div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo, ao implementar AND/OR/XOR com botões (entradas) e LEDs (saídas).</div>
+
+        <div class="note">
+          <strong>Conexão com o próximo capítulo:</strong> no Capítulo 07 você vai aprender a simplificar expressões (álgebra booleana) e reduzir circuitos.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo prático (Tinkercad/Arduino): “Laboratório de Portas Lógicas” com 2 botões e LEDs</h2>
+        <p class="meta">
+          Objetivo: usar dois botões como entradas A e B e quatro LEDs como saídas de AND, OR, XOR e NOT(A). Depois, gerar a tabela verdade automaticamente no Serial Monitor.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Componentes e ideia do circuito</h4>
+            <p>Você vai montar:</p>
+            <ul>
+              <li>Arduino UNO</li>
+              <li>2 botões (A e B)</li>
+              <li>4 LEDs (AND, OR, XOR, NOT A) + resistores 220 Ω</li>
+              <li>Jumpers e protoboard</li>
+            </ul>
+            <div class="callout"><strong>Aplicação do conceito:</strong> botões geram 0/1; LEDs mostram 0/1; isso permite validar tabelas verdade na prática.</div>
+          </div>
+
+          <div class="step">
+            <h4>Ligar os botões com pull-up interno (sem entrada flutuante)</h4>
+            <p>Conecte cada botão entre o pino e o GND. No código, use <code>INPUT_PULLUP</code>:</p>
+            <ul>
+              <li>Botão A: pino 2 ↔ botão ↔ GND</li>
+              <li>Botão B: pino 3 ↔ botão ↔ GND</li>
+            </ul>
+            <div class="note"><strong>Lembrete:</strong> com pull-up, solto = 1 (HIGH) e pressionado = 0 (LOW). Vamos inverter no código para ficar intuitivo (pressionado = 1).</div>
+          </div>
+
+          <div class="step">
+            <h4>Ligar os LEDs de saída</h4>
+            <p>Monte 4 LEDs com resistor (220 Ω) em série para cada saída:</p>
+            <ul>
+              <li>LED AND → pino 8</li>
+              <li>LED OR → pino 9</li>
+              <li>LED XOR → pino 10</li>
+              <li>LED NOT(A) → pino 11</li>
+              <li>Cátodos (lado curto) → GND</li>
+            </ul>
+            <div class="warning"><strong>Segurança:</strong> sempre use resistor em série com LED para limitar corrente.</div>
+          </div>
+
+          <div class="step">
+            <h4>Código: calcular portas e imprimir tabela verdade</h4>
+            <p>O código abaixo:</p>
+            <ul>
+              <li>Lê botões A e B (normaliza para 0/1 com pressionado=1)</li>
+              <li>Calcula AND/OR/XOR/NOT</li>
+              <li>Atualiza LEDs</li>
+              <li>Imprime estado atual e, ao iniciar, imprime a tabela verdade completa</li>
+            </ul>
+
+            <pre><code class="language-cpp">// EATI - Capítulo 06
+// Laboratório de Portas Lógicas com Arduino
+
+const int BTN_A = 2;
+const int BTN_B = 3;
+
+const int LED_AND = 8;
+const int LED_OR  = 9;
+const int LED_XOR = 10;
+const int LED_NOTA = 11;
+
+bool tabelaImpressa = false;
+
+void printTruthTable() {
+  Serial.println("\nTABELA VERDADE (A, B) -> AND OR XOR NAND NOR XNOR");
+  Serial.println("A B | AND OR XOR | NAND NOR XNOR");
+  for (int A = 0; A &lt;= 1; A++) {
+    for (int B = 0; B &lt;= 1; B++) {
+      int ANDv = A &amp;&amp; B;
+      int ORv  = A || B;
+      int XORv = (A != B);
+      int NANDv = !ANDv;
+      int NORv  = !ORv;
+      int XNORv = !XORv;
+
+      Serial.print(A); Serial.print(" ");
+      Serial.print(B); Serial.print(" |  ");
+      Serial.print(ANDv); Serial.print("   ");
+      Serial.print(ORv);  Serial.print("   ");
+      Serial.print(XORv); Serial.print("  |   ");
+      Serial.print(NANDv); Serial.print("    ");
+      Serial.print(NORv);  Serial.print("    ");
+      Serial.println(XNORv);
+    }
+  }
+  Serial.println("----------------------------------------");
+}
+
+void setup() {
+  pinMode(BTN_A, INPUT_PULLUP);
+  pinMode(BTN_B, INPUT_PULLUP);
+
+  pinMode(LED_AND, OUTPUT);
+  pinMode(LED_OR, OUTPUT);
+  pinMode(LED_XOR, OUTPUT);
+  pinMode(LED_NOTA, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (!tabelaImpressa) {
+    printTruthTable();
+    tabelaImpressa = true;
+  }
+
+  // Com pull-up: solto = HIGH (1), pressionado = LOW (0).
+  // Vamos inverter para ficar intuitivo: pressionado = 1.
+  int A = (digitalRead(BTN_A) == LOW) ? 1 : 0;
+  int B = (digitalRead(BTN_B) == LOW) ? 1 : 0;
+
+  int ANDv = A &amp;&amp; B;
+  int ORv  = A || B;
+  int XORv = (A != B);
+  int NOTA = !A;
+
+  digitalWrite(LED_AND, ANDv);
+  digitalWrite(LED_OR, ORv);
+  digitalWrite(LED_XOR, XORv);
+  digitalWrite(LED_NOTA, NOTA);
+
+  Serial.print("A=" ); Serial.print(A);
+  Serial.print(" B=" ); Serial.print(B);
+  Serial.print(" | AND=" ); Serial.print(ANDv);
+  Serial.print(" OR=" );  Serial.print(ORv);
+  Serial.print(" XOR=" ); Serial.print(XORv);
+  Serial.print(" NOTA=" );Serial.println(NOTA);
+
+  delay(200);
+}
+</code></pre>
+            <div class="note"><strong>Dica:</strong> no Serial Monitor, observe a tabela verdade impressa e compare com os LEDs quando você pressiona os botões.</div>
+          </div>
+
+          <div class="step">
+            <h4>Testes (validação com tabela verdade)</h4>
+            <p>Teste as 4 combinações:</p>
+            <ul>
+              <li>A=0, B=0 (nenhum pressionado)</li>
+              <li>A=1, B=0 (apenas A)</li>
+              <li>A=0, B=1 (apenas B)</li>
+              <li>A=1, B=1 (A e B)</li>
+            </ul>
+            <p>Verifique se os LEDs batem com as tabelas verdade do capítulo (AND/OR/XOR/NOT).</p>
+            <div class="callout"><strong>Aplicação do conceito:</strong> você está validando a lógica comparando a saída real (LED) com a tabela verdade (teoria).</div>
+          </div>
+
+          <div class="step">
+            <h4>Registro técnico (mínimo)</h4>
+            <p>No caderno, registre:</p>
+            <ul>
+              <li>Um desenho simples do circuito (pinos usados)</li>
+              <li>Uma tabela com as 4 combinações (A,B) e os resultados observados nos LEDs</li>
+              <li>Uma conclusão de 6 linhas explicando AND/OR/XOR e a utilidade de NOT</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="warning"><strong>Conexão com TI:</strong> este tipo de lógica aparece em permissões (AND), alarmes (OR), detecção de diferença (XOR) e inversões por pull-up (NOT).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Atividades práticas derivadas (2–3 sugestões)</h2>
+        <ul>
+          <li><strong>Adicionar NAND/NOR/XNOR nos LEDs:</strong> inclua mais 3 LEDs e exiba as portas derivadas também (desafio de expansão do circuito).</li>
+          <li><strong>Alarme lógico:</strong> crie uma regra: alarme liga se (A OR B) AND NOT(A AND B) — isso vira XOR. Explique a equivalência usando tabela verdade.</li>
+          <li><strong>Decisão com 3 entradas:</strong> adicione um terceiro botão C e crie uma regra de “maioria” (liga se pelo menos 2 de 3 estiverem em 1). Gere a tabela verdade (8 linhas).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="Tabela verdade lista todas as combinações de entrada e a saída correspondente.">
+          <p><strong>1.</strong> Uma tabela verdade serve para:</p>
+          <label><input type="radio" name="q1" value="a"> Medir tensão e corrente em um circuito</label>
+          <label><input type="radio" name="q1" value="b"> Calcular potência em resistores</label>
+          <label><input type="radio" name="q1" value="c"> Descrever todas as combinações de entradas e as saídas de uma função lógica</label>
+          <label><input type="radio" name="q1" value="d"> Converter decimal em hexadecimal</label>
+          <label><input type="radio" name="q1" value="e"> Programar microcontroladores automaticamente</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="AND só é 1 quando A=1 e B=1.">
+          <p><strong>2.</strong> A saída de AND é 1 quando:</p>
+          <label><input type="radio" name="q2" value="a"> Qualquer entrada for 1</label>
+          <label><input type="radio" name="q2" value="b"> Todas as entradas forem 1</label>
+          <label><input type="radio" name="q2" value="c"> As entradas forem diferentes</label>
+          <label><input type="radio" name="q2" value="d"> Pelo menos uma entrada for 0</label>
+          <label><input type="radio" name="q2" value="e"> Sempre, independentemente das entradas</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="OR é 1 se pelo menos uma entrada for 1.">
+          <p><strong>3.</strong> A porta OR produz 1 quando:</p>
+          <label><input type="radio" name="q3" value="a"> Pelo menos uma entrada é 1</label>
+          <label><input type="radio" name="q3" value="b"> Ambas as entradas são 0</label>
+          <label><input type="radio" name="q3" value="c"> As entradas são iguais</label>
+          <label><input type="radio" name="q3" value="d"> A entrada A é sempre 0</label>
+          <label><input type="radio" name="q3" value="e"> Nenhuma entrada é 1</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="NOT inverte: 0 vira 1 e 1 vira 0.">
+          <p><strong>4.</strong> A porta NOT faz:</p>
+          <label><input type="radio" name="q4" value="a"> Soma binária</label>
+          <label><input type="radio" name="q4" value="b"> Multiplicação binária</label>
+          <label><input type="radio" name="q4" value="c"> Mantém a entrada igual</label>
+          <label><input type="radio" name="q4" value="d"> Inverte a entrada</label>
+          <label><input type="radio" name="q4" value="e"> Só funciona com duas entradas</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="XOR é 1 quando as entradas são diferentes.">
+          <p><strong>5.</strong> A porta XOR produz 1 quando:</p>
+          <label><input type="radio" name="q5" value="a"> A=0 e B=0</label>
+          <label><input type="radio" name="q5" value="b"> A=1 e B=1</label>
+          <label><input type="radio" name="q5" value="c"> A e B são diferentes</label>
+          <label><input type="radio" name="q5" value="d"> Pelo menos uma entrada é 0</label>
+          <label><input type="radio" name="q5" value="e"> Sempre, independente das entradas</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="NAND = NOT(AND). Só é 0 quando A=1 e B=1.">
+          <p><strong>6.</strong> A porta NAND é:</p>
+          <label><input type="radio" name="q6" value="a"> AND</label>
+          <label><input type="radio" name="q6" value="b"> OR</label>
+          <label><input type="radio" name="q6" value="c"> NOT</label>
+          <label><input type="radio" name="q6" value="d"> XOR</label>
+          <label><input type="radio" name="q6" value="e"> NOT(AND)</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Com INPUT_PULLUP, solto = 1 (HIGH) e pressionado = 0 (LOW). Muitos projetos invertem em código.">
+          <p><strong>7.</strong> Em Arduino com <code>INPUT_PULLUP</code>, um botão solto normalmente lê:</p>
+          <label><input type="radio" name="q7" value="a"> 0 (LOW)</label>
+          <label><input type="radio" name="q7" value="b"> 1 (HIGH)</label>
+          <label><input type="radio" name="q7" value="c"> -1</label>
+          <label><input type="radio" name="q7" value="d"> 2</label>
+          <label><input type="radio" name="q7" value="e"> Oscilando entre 0 e 1 sempre</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="Para 2 entradas existem 2^2=4 combinações; para n entradas existem 2^n.">
+          <p><strong>8.</strong> Uma tabela verdade de 2 entradas tem quantas combinações?</p>
+          <label><input type="radio" name="q8" value="a"> 4</label>
+          <label><input type="radio" name="q8" value="b"> 2</label>
+          <label><input type="radio" name="q8" value="c"> 8</label>
+          <label><input type="radio" name="q8" value="d"> 16</label>
+          <label><input type="radio" name="q8" value="e"> 32</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Sei explicar o que é uma porta lógica e para que serve.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo construir tabela verdade para NOT e para portas com 2 entradas.</label></li>
+          <li><label><input type="checkbox" class="ck"> Diferencio AND, OR, XOR e suas versões negadas (NAND, NOR, XNOR).</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo relacionar expressão lógica com operadores em C/C++ (&&, ||, !).</label></li>
+          <li><label><input type="checkbox" class="ck"> Consegui (ou consigo planejar) o laboratório de portas com botões e LEDs e validar no Serial Monitor.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+
+        <h3>Pesquisas complementares</h3>
+        <ul>
+          <li>Por que NAND e NOR são portas universais.</li>
+          <li>Schmitt trigger e entradas com histerese (estabilidade contra ruído).</li>
+          <li>Operadores lógicos vs bitwise em C/C++ (&&/||/! versus &/|/^).</li>
+          <li>Aplicações de XOR: paridade, comparação e criptografia simples.</li>
+        </ul>
+
+        <div class="note">
+          <strong>Próximo capítulo:</strong> <a href="capitulo07.html"><strong>Capítulo 07 — Álgebra Booleana e Simplificação</strong></a>.
+          Você vai aprender a simplificar expressões e reduzir circuitos.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 06</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+</script>
+</body>
+</html>

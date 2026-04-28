@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo05.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 05 — Fundamentos de Lógica Digital</title>
+  <meta name="description" content="Apostila EATI — Capítulo 05: sinais analógicos e digitais, sistema binário, bits/bytes, níveis lógicos, ruído, pull-up/pull-down, e prática introdutória com Arduino (limiar + visualização binária)." />
+
+  <!-- Prism (tema escuro) para código -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+
+      --ok:#0a7a3b;
+      --bad:#9b2c2c;
+      --warn:#9a6700;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      min-height:72px;padding:10px 0;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{
+      width:48px;height:48px;border-radius:14px;
+      display:grid;place-items:center;
+      color:#fff;font-weight:900;letter-spacing:.04em;
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      box-shadow:0 14px 24px rgba(0,0,238,.20);
+      flex-shrink:0;
+    }
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 12px;border-radius:999px;
+      font-weight:900;font-size:.92rem;
+      border:1px solid transparent;
+      color:var(--text);
+      background:transparent;
+    }
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      color:#fff;border-color:transparent;
+      box-shadow:0 12px 20px rgba(0,0,238,.18);
+    }
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    /* Cards */
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow-lg);
+      overflow:hidden;
+    }
+    .card-inner{padding:22px}
+
+    .hero{
+      border-radius:var(--radius-lg);
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;right:-80px;top:-80px;
+      width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);
+      pointer-events:none;
+    }
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:7px 12px;
+      border-radius:999px;
+      font-weight:900;
+      color:var(--primary-800);
+      font-size:.85rem;
+    }
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .callout{
+      border-left:4px solid var(--primary);
+      background:var(--surface-soft);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .callout strong{color:var(--primary-800)}
+
+    .warning{
+      border-left:4px solid #ffb300;
+      background:rgba(255, 200, 0, .12);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .warning strong{color:var(--warn)}
+
+    .note{
+      border:1px dashed var(--line);
+      background:rgba(238,243,255,.7);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);
+      border-radius:18px;
+      padding:16px;
+    }
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0;color:var(--muted)}
+
+    /* Formula */
+    .formula{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color:#0b1530;
+      overflow:auto;
+      box-shadow:0 6px 14px rgba(23,35,58,.04);
+    }
+
+    /* Table */
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:860px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    /* Steps */
+    .steps{counter-reset: step}
+    .step{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:16px;
+      margin:12px 0;
+    }
+    .step h4{margin:0 0 8px;color:var(--primary-800)}
+    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
+    .step p{margin:0 0 10px;color:var(--muted)}
+
+    /* Code */
+    pre{border-radius:16px;overflow:auto}
+    pre[class*="language-"]{margin:12px 0}
+
+    /* Quiz */
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;cursor:pointer;
+      color:var(--primary-800);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:var(--ok)} .no{color:var(--bad)}
+    .gabarito{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(0,0,238,.06);
+      border:1px solid rgba(0,0,238,.15);
+      color:var(--muted);
+    }
+
+    /* Checklist */
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    /* Back-to-top */
+    .back-top{
+      position:fixed;right:18px;bottom:18px;z-index:1050;
+      width:50px;height:50px;display:none;place-items:center;
+      border:1px solid var(--line);background:#fff;color:var(--primary-800);
+      border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer;
+    }
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+      table{min-width:740px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 05</strong>
+        <span>Fundamentos de Lógica Digital</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
+      <a href="capitulo04.html" title="Voltar para o Capítulo 04">⬅️ Anterior</a>
+      <a class="primary" href="capitulo06.html" title="Avançar para o Capítulo 06">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">2º Bimestre • Semanas 9–10 • Base Digital</div>
+        <h1>Fundamentos de Lógica Digital</h1>
+        <p class="meta">
+          Este capítulo inicia o 2º bimestre e explica a base do funcionamento digital: <strong>sinais analógicos e digitais</strong>, <strong>sistema binário</strong>,
+          <strong>bits e bytes</strong>, <strong>níveis lógicos</strong>, <strong>ruído</strong> e por que precisamos de <strong>pull-up/pull-down</strong>.
+          Você também fará uma prática introdutória em simulação para transformar um sinal analógico em decisão digital e visualizar um número em binário.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Diferenciar sinais analógicos e digitais com exemplos em TI.</li>
+              <li>Entender o sistema binário (base 2) e converter valores simples.</li>
+              <li>Explicar bit, byte e por que hardware trabalha com 0/1.</li>
+              <li>Compreender níveis lógicos, limiar (threshold) e margem de ruído.</li>
+              <li>Entender o problema do “pino flutuante” e o uso de pull-up/pull-down.</li>
+              <li>Aplicar um limiar para converter leitura analógica em decisão digital e exibir um valor em binário.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Cap. 01–04: grandezas elétricas, Ohm, série/paralelo e uso básico do multímetro.</li>
+              <li>Noções iniciais de lógica de programação (if/else) em desenvolvimento paralelo com Programação e Algoritmos.</li>
+            </ul>
+            <div class="note">
+              <strong>Ferramentas:</strong> Tinkercad Circuits (Arduino + protoboard + sensores) ou bancada física (Arduino UNO, LDR, resistores, LEDs).
+              <strong>Observação:</strong> portas lógicas e tabelas verdade serão aprofundadas no Capítulo 06.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Sinais analógicos e sinais digitais</h2>
+        <p>
+          Um <strong>sinal analógico</strong> pode assumir infinitos valores dentro de uma faixa. Ele varia de forma contínua.
+          Exemplos: intensidade de luz em um LDR, temperatura em um sensor analógico, volume em um microfone.
+        </p>
+        <p>
+          Um <strong>sinal digital</strong> trabalha com faixas discretas, normalmente dois estados: <strong>0</strong> e <strong>1</strong>.
+          Em eletrônica digital, esses estados são representados por níveis de tensão (por exemplo, 0 V ≈ 0 e 5 V ≈ 1 em algumas placas).
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao ler sensores (analógico) e tomar decisões automáticas (digital) com Arduino/ESP32 e, mais adiante, com portas lógicas.</div>
+
+        <h3>Por que o mundo digital precisa do analógico?</h3>
+        <p>
+          O computador é digital, mas o mundo físico é analógico. Para conectar os dois, precisamos de conversão:
+          <strong>ADC</strong> (conversor analógico-digital) para ler sensores e <strong>DAC</strong> (digital-analógico) ou PWM para controlar atuadores.
+          No Arduino UNO, a função <code>analogRead()</code> usa um ADC que converte uma tensão em um número.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo deste capítulo, ao transformar luz (analógico) em um número e em um estado 0/1.</div>
+
+        <h2>2) Sistema binário: a linguagem do hardware</h2>
+        <p>
+          O sistema binário (base 2) usa apenas dois dígitos: <strong>0</strong> e <strong>1</strong>. Cada posição representa uma potência de 2.
+          Assim como no decimal usamos potências de 10, no binário usamos potências de 2.
+        </p>
+        <div class="formula" aria-label="Exemplo de pesos binários">
+Bit:   b3  b2  b1  b0
+Peso:   8   4   2   1
+Valor = b3·8 + b2·4 + b1·2 + b0·1
+        </div>
+        <p>
+          Exemplo: <strong>1011</strong> (binário) = 1·8 + 0·4 + 1·2 + 1·1 = <strong>11</strong> (decimal).
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao interpretar estados lógicos, formar tabelas verdade e representar valores/sensores com bits (como faremos no passo a passo).</div>
+
+        <h2>3) Bit, byte e representação de informação</h2>
+        <p>
+          Um <strong>bit</strong> é a menor unidade de informação (0 ou 1). Um <strong>byte</strong> é um conjunto de 8 bits.
+          Com 8 bits, você pode representar de 0 a 255 (2⁸ = 256 valores).
+        </p>
+        <p>
+          Em hardware, bytes e múltiplos de bytes representam dados, endereços de memória e instruções.
+          Em eletrônica aplicada, você não precisa entrar em arquitetura de computadores agora, mas precisa entender que todo sensor, botão ou sinal
+          no fim vira uma representação em bits.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao ler um ADC que entrega valores (0–1023 no UNO) e ao converter esse valor em “faixas” representadas em bits.</div>
+
+        <h2>4) Níveis lógicos, limiar (threshold) e margem de ruído</h2>
+        <p>
+          Em um circuito digital, o estado 0 e o estado 1 não são um único valor exato, e sim uma <strong>faixa de tensão</strong>.
+          Por exemplo, para uma entrada digital, tensões muito próximas de 0 V costumam ser interpretadas como 0, e tensões próximas do Vcc como 1.
+        </p>
+        <p>
+          O <strong>limiar</strong> (threshold) é a região em que o circuito decide se aquilo é 0 ou 1. Se o sinal estiver “no meio” (por ruído ou mau contato),
+          podem ocorrer leituras instáveis. Por isso existe a <strong>margem de ruído</strong>, que é a folga entre as faixas seguras de 0 e 1.
+        </p>
+        <div class="warning"><strong>Problema típico:</strong> sinais com mau contato, fios longos ou ambiente ruidoso podem “balançar” e causar leituras falsas (0 vira 1 e vice-versa).</div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao ajustar um limiar no código e ao entender por que um botão sem pull-up/pull-down “aperta sozinho”.</div>
+
+        <h2>5) Entrada flutuante e pull-up/pull-down (por que precisamos disso)</h2>
+        <p>
+          Uma entrada digital pode ficar <strong>flutuante</strong> quando não está conectada de forma definida ao 0 (GND) ou ao 1 (Vcc).
+          Uma entrada flutuante “pega ruído” do ambiente e pode variar aleatoriamente, gerando leituras falsas.
+        </p>
+        <p>
+          Para evitar isso, usamos resistores de <strong>pull-up</strong> (puxam a entrada para 1 quando nada está pressionado) ou <strong>pull-down</strong>
+          (puxam para 0). No Arduino, é comum usar <strong>pull-up interno</strong> com <code>INPUT_PULLUP</code>, e ligar o botão para GND.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no Capítulo 06 (portas lógicas e entradas) e em qualquer projeto com botões/sensores digitais em Arduino/ESP32.</div>
+
+        <h2>6) Ponte para o próximo capítulo: decisão lógica e tabelas-verdade (visão inicial)</h2>
+        <p>
+          Quando você diz “se a luz estiver baixa, acenda o LED”, você está definindo uma regra lógica.
+          No Capítulo 06, você vai formalizar essas regras com <strong>portas lógicas</strong> e <strong>tabelas verdade</strong>.
+          Neste capítulo, você já começa a pensar em: <strong>entrada</strong> → <strong>decisão</strong> → <strong>saída</strong>.
+        </p>
+        <div class="note"><strong>Resumo:</strong> digital é tratar o mundo em estados (0/1). O segredo é garantir sinais estáveis (pull-up, limiar, margem de ruído) e representar informação (binário).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo prático (Tinkercad): LDR → decisão digital + visualização binária (3 bits)</h2>
+        <p class="meta">
+          Objetivo: ler um sensor analógico (LDR), converter em um valor numérico (ADC), criar uma decisão 0/1 por limiar e exibir uma versão simplificada do valor em binário usando 3 LEDs.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Montagem do divisor de tensão com LDR (entrada analógica)</h4>
+            <p>Monte um divisor de tensão para gerar uma tensão variável no pino A0:</p>
+            <ul>
+              <li>5V → <strong>LDR</strong> → nó central → <strong>resistor 10 kΩ</strong> → GND</li>
+              <li>Nó central → pino <strong>A0</strong> do Arduino</li>
+            </ul>
+            <div class="callout"><strong>Aplicação do conceito:</strong> o LDR muda sua resistência com a luz; o divisor transforma isso em uma tensão analógica lida pelo ADC.</div>
+          </div>
+
+          <div class="step">
+            <h4>Montagem dos LEDs binários (saídas digitais)</h4>
+            <p>Use 3 LEDs com resistores (220 Ω) para representar um número de 0 a 7 em binário:</p>
+            <ul>
+              <li>LED0 (bit 0) → pino 2</li>
+              <li>LED1 (bit 1) → pino 3</li>
+              <li>LED2 (bit 2) → pino 4</li>
+              <li>Todos os cátodos dos LEDs → GND</li>
+            </ul>
+            <div class="callout"><strong>Aplicação do conceito:</strong> saída digital é 0/1. LEDs acesos/apagados representam bits.</div>
+          </div>
+
+          <div class="step">
+            <h4>Código: ADC, limiar e exibição em binário</h4>
+            <p>Use o código abaixo no Arduino (Tinkercad → Code → Text). Ele:</p>
+            <ul>
+              <li>Lê <code>analogRead(A0)</code> (0 a 1023)</li>
+              <li>Aplica um limiar para decidir “claro/escuro” e acende o LED do pino 13</li>
+              <li>Mapeia o valor para 0 a 7 e mostra em binário nos 3 LEDs</li>
+              <li>Mostra dados no Serial Monitor</li>
+            </ul>
+
+            <pre><code class="language-cpp">// EATI - Capítulo 05
+// LDR (A0) -> limiar digital (LED 13) + visualização binária (3 LEDs: 2,3,4)
+
+const int PIN_LDR = A0;
+const int LED_ALERTA = 13;
+
+const int LED_B0 = 2; // bit menos significativo
+const int LED_B1 = 3;
+const int LED_B2 = 4; // bit mais significativo (para 3 bits)
+
+// Ajuste o limiar conforme seu circuito/simulador
+int LIMIAR = 500; // 0..1023 (quanto maior, mais "escuro" costuma ser dependendo do divisor)
+
+void setup() {
+  pinMode(LED_ALERTA, OUTPUT);
+  pinMode(LED_B0, OUTPUT);
+  pinMode(LED_B1, OUTPUT);
+  pinMode(LED_B2, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  int leitura = analogRead(PIN_LDR);  // 0..1023
+
+  // 1) Decisão digital por limiar
+  bool escuro = (leitura &gt; LIMIAR);
+  digitalWrite(LED_ALERTA, escuro ? HIGH : LOW);
+
+  // 2) Reduzir a leitura para 3 bits (0..7)
+  int valor3bits = map(leitura, 0, 1023, 0, 7);
+
+  // 3) Exibir em binário nos LEDs
+  digitalWrite(LED_B0, (valor3bits &amp; 0b001) ? HIGH : LOW);
+  digitalWrite(LED_B1, (valor3bits &amp; 0b010) ? HIGH : LOW);
+  digitalWrite(LED_B2, (valor3bits &amp; 0b100) ? HIGH : LOW);
+
+  // 4) Monitor serial para estudo
+  Serial.print("ADC=" );
+  Serial.print(leitura);
+  Serial.print(" | 3bits=" );
+  Serial.print(valor3bits);
+  Serial.print(" | escuro=" );
+  Serial.println(escuro ? "SIM" : "NAO");
+
+  delay(200);
+}
+</code></pre>
+            <div class="note"><strong>Observação:</strong> dependendo de como você montar o divisor (LDR em cima ou embaixo), a lógica pode inverter. Se ficar ao contrário, troque <code>&gt;</code> por <code>&lt;</code> no limiar.</div>
+          </div>
+
+          <div class="step">
+            <h4>Testes e validação (o que observar)</h4>
+            <p>No Tinkercad, altere a luz no LDR e observe:</p>
+            <ul>
+              <li>O valor ADC mudando no Serial Monitor</li>
+              <li>O LED 13 acendendo quando cruzar o limiar</li>
+              <li>Os 3 LEDs mudando de padrão binário (0 a 7)</li>
+            </ul>
+            <div class="callout"><strong>Aplicação do conceito:</strong> você está transformando um fenômeno analógico em uma decisão digital e representando um número usando bits.</div>
+          </div>
+
+          <div class="step">
+            <h4>Registro técnico (mínimo)</h4>
+            <p>Crie uma pequena tabela no caderno com 5 medições:</p>
+            <ul>
+              <li>Condição de luz (baixa/média/alta)</li>
+              <li>Valor ADC</li>
+              <li>Valor 3 bits (0–7) e bits acesos</li>
+              <li>LED 13 (escuro) aceso/apagado</li>
+              <li>Conclusão (2–3 linhas)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="warning"><strong>Segurança:</strong> na bancada real, confira polaridade dos LEDs e use resistores. Nunca curto-circuite 5V e GND. Se for medir corrente, lembre: multímetro em série (Cap. 04).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Atividades práticas derivadas (2–3 sugestões)</h2>
+        <ul>
+          <li><strong>Botão com pull-up interno:</strong> adicione um botão em uma entrada digital usando <code>INPUT_PULLUP</code> e mostre no Serial Monitor se está pressionado (introduz o tema de entrada flutuante).</li>
+          <li><strong>Faixas (0–3) com 2 bits:</strong> altere o projeto para usar apenas 2 LEDs e mapear a leitura do LDR em 0..3. Compare precisão vs simplicidade.</li>
+          <li><strong>Alarme por histerese (anti “pisca”):</strong> crie dois limiares (liga em 600 e desliga em 450) para evitar oscilação perto do limiar (introdução à margem de ruído/histerese).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Sinal analógico varia continuamente; sinal digital trabalha com estados discretos (0/1).">
+          <p><strong>1.</strong> A afirmação correta sobre sinais analógicos e digitais é:</p>
+          <label><input type="radio" name="q1" value="a"> Analógico só assume 0 e 1</label>
+          <label><input type="radio" name="q1" value="b"> Analógico varia continuamente; digital usa estados discretos</label>
+          <label><input type="radio" name="q1" value="c"> Digital é sempre mais “forte” que analógico</label>
+          <label><input type="radio" name="q1" value="d"> Analógico não existe em sensores</label>
+          <label><input type="radio" name="q1" value="e"> Digital não usa tensão para representar estados</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Em binário, os pesos são potências de 2. 1011 = 8 + 2 + 1 = 11.">
+          <p><strong>2.</strong> O número binário 1011 equivale a:</p>
+          <label><input type="radio" name="q2" value="a"> 9</label>
+          <label><input type="radio" name="q2" value="b"> 10</label>
+          <label><input type="radio" name="q2" value="c"> 12</label>
+          <label><input type="radio" name="q2" value="d"> 11</label>
+          <label><input type="radio" name="q2" value="e"> 13</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="1 byte = 8 bits. Com 8 bits, temos 2^8 = 256 valores.">
+          <p><strong>3.</strong> Um byte corresponde a:</p>
+          <label><input type="radio" name="q3" value="a"> 2 bits</label>
+          <label><input type="radio" name="q3" value="b"> 4 bits</label>
+          <label><input type="radio" name="q3" value="c"> 8 bits</label>
+          <label><input type="radio" name="q3" value="d"> 10 bits</label>
+          <label><input type="radio" name="q3" value="e"> 16 bits</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="Entrada flutuante pode captar ruído e variar aleatoriamente. Pull-up/pull-down define um estado padrão.">
+          <p><strong>4.</strong> O principal problema de uma entrada digital “flutuante” é:</p>
+          <label><input type="radio" name="q4" value="a"> Leituras instáveis por ruído (0/1 aleatório)</label>
+          <label><input type="radio" name="q4" value="b"> Ela vira saída automaticamente</label>
+          <label><input type="radio" name="q4" value="c"> Ela sempre fica em 0</label>
+          <label><input type="radio" name="q4" value="d"> Ela sempre fica em 1</label>
+          <label><input type="radio" name="q4" value="e"> Ela aumenta a potência do circuito</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="ADC converte tensão analógica em valor numérico. No UNO, analogRead retorna 0..1023 (10 bits).">
+          <p><strong>5.</strong> No Arduino UNO, <code>analogRead()</code> retorna tipicamente valores:</p>
+          <label><input type="radio" name="q5" value="a"> 0 a 255</label>
+          <label><input type="radio" name="q5" value="b"> 0 a 31</label>
+          <label><input type="radio" name="q5" value="c"> -1 a 1</label>
+          <label><input type="radio" name="q5" value="d"> 0 a 4095</label>
+          <label><input type="radio" name="q5" value="e"> 0 a 1023</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Threshold/limiar define a fronteira para decidir 0/1; valores perto do limiar podem oscilar por ruído.">
+          <p><strong>6.</strong> O que é um limiar (threshold) em uma decisão digital?</p>
+          <label><input type="radio" name="q6" value="a"> Um tipo de resistor que limita corrente</label>
+          <label><input type="radio" name="q6" value="b"> Um valor de referência para decidir entre 0 e 1</label>
+          <label><input type="radio" name="q6" value="c"> Um cabo que reduz ruído</label>
+          <label><input type="radio" name="q6" value="d"> Um LED que indica potência</label>
+          <label><input type="radio" name="q6" value="e"> Um conversor que transforma 1 em 0</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Pull-up interno (INPUT_PULLUP) puxa a entrada para 1 quando o botão está solto; botão liga a entrada ao GND quando pressionado.">
+          <p><strong>7.</strong> Usando <code>INPUT_PULLUP</code> em um botão, normalmente o botão é ligado:</p>
+          <label><input type="radio" name="q7" value="a"> Ao 5V e a entrada ao GND</label>
+          <label><input type="radio" name="q7" value="b"> Em série com o LED</label>
+          <label><input type="radio" name="q7" value="c"> Direto no pino 13</label>
+          <label><input type="radio" name="q7" value="d"> Entre a entrada e o GND</label>
+          <label><input type="radio" name="q7" value="e"> Entre a entrada e o ADC</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="Debouncing é tratar o “tremor” do contato mecânico para evitar leituras múltiplas ao pressionar.">
+          <p><strong>8.</strong> Debouncing (tratamento de bounce) é importante porque:</p>
+          <label><input type="radio" name="q8" value="a"> Aumenta a tensão da fonte</label>
+          <label><input type="radio" name="q8" value="b"> Diminui a resistência do circuito</label>
+          <label><input type="radio" name="q8" value="c"> Botões mecânicos podem gerar múltiplas transições ao pressionar</label>
+          <label><input type="radio" name="q8" value="d"> Impede o funcionamento do ADC</label>
+          <label><input type="radio" name="q8" value="e"> Troca binário por decimal automaticamente</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Sei diferenciar sinal analógico e digital com exemplos.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo converter binário simples (até 4 bits) para decimal.</label></li>
+          <li><label><input type="checkbox" class="ck"> Entendo bits/bytes e por que 0/1 é usado no hardware.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei explicar limiar (threshold) e por que ruído causa instabilidade.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consegui (ou consigo planejar) a prática LDR → decisão digital + LEDs binários.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+
+        <h3>Pesquisas complementares</h3>
+        <ul>
+          <li>ADC e resolução: o que significa “10 bits” e como isso afeta precisão.</li>
+          <li>Margem de ruído e Schmitt trigger (por que algumas entradas são mais estáveis).</li>
+          <li>Pull-up/pull-down: por que entrada flutuante lê valores aleatórios.</li>
+          <li>Debounce por software e por hardware (RC).</li>
+        </ul>
+
+        <div class="note">
+          <strong>Próximo capítulo:</strong> <a href="capitulo06.html"><strong>Capítulo 06 — Portas Lógicas e Tabelas Verdade</strong></a>.
+          Você vai transformar regras em portas lógicas e aprender a construir tabelas verdade e diagramas.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 05</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+</script>
+</body>
+</html>

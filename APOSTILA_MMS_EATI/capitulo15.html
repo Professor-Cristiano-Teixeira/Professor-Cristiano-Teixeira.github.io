@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo15.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 15 — Temporização com millis() (Sem delay)</title>
+  <meta name="description" content="Apostila EATI — Capítulo 15: temporização no Arduino usando millis(), execução sem delay, controle de tempo, estados e aplicações em projetos profissionais." />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <style>
+    :root{
+      --bg:#f5f7ff; --surface:#ffffff; --surface-soft:#eef3ff; --surface-strong:#e2eaff;
+      --text:#17233a; --muted:#54627e; --line:#d7def7;
+      --primary:#0000ee; --primary-600:#0000cc; --primary-700:#0000aa; --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+      --radius-lg:28px; --container:1100px;
+      --ok:#0a7a3b; --bad:#9b2c2c; --warn:#9a6700;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);line-height:1.75;
+      background:linear-gradient(180deg,#fcfdff 0%,var(--bg) 100%)}
+    a{color:var(--primary);text-decoration:none}
+    a:hover{color:var(--primary-700)}
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:1000}
+    .topbar{display:flex;justify-content:space-between;align-items:center;min-height:72px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .badge{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary-800))}
+    .nav a{padding:9px 12px;border-radius:999px;font-weight:900}
+    .nav a.primary{background:linear-gradient(135deg,var(--primary),var(--primary-800));color:#fff}
+
+    section{padding:18px 0}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg)}
+    .card-inner{padding:22px}
+    .hero{background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(238,243,255,.96));border-bottom:1px solid var(--line)}
+    .tag{display:inline-block;border:1px solid var(--line);padding:7px 12px;border-radius:999px;font-weight:900;color:var(--primary-800)}
+
+    h1{font-size:clamp(2rem,4vw,2.6rem)}
+    h2{color:var(--primary-800)}
+    h3{color:var(--primary-800)}
+    ul{padding-left:18px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .mini{border:1px solid var(--line);border-radius:18px;padding:16px}
+
+    .callout{border-left:4px solid var(--primary);background:var(--surface-soft);border-radius:12px;padding:12px;margin:14px 0}
+    .warning{border-left:4px solid #ffb300;background:rgba(255,200,0,.12);border-radius:12px;padding:12px;margin:14px 0}
+
+    .steps{counter-reset:step}
+    .step{border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
+    .step h4::before{counter-increment:step;content:"Passo " counter(step) " — "}
+
+    pre{border-radius:16px}
+
+    .q{border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0}
+    .btn{padding:8px 14px;border-radius:14px;border:1px solid var(--line);font-weight:900;background:#fff;cursor:pointer}
+    .res{font-weight:900}
+    .ok{color:var(--ok)} .no{color:var(--bad)}
+    .gabarito{display:none;background:rgba(0,0,238,.06);border:1px solid rgba(0,0,238,.15);border-radius:12px;padding:10px;margin-top:8px}
+
+    .checklist li{list-style:none;margin:8px 0}
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html"><div class="badge">EATI</div><div><strong>Capítulo 15</strong><span>Temporização com millis()</span></div></a>
+    <nav class="nav">
+      <a href="index_eati.html">🏠 Index</a>
+      <a href="capitulo14.html">⬅️ Anterior</a>
+      <a class="primary" href="capitulo16.html">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">4º Bimestre • Semanas 29–30 • Temporização</div>
+        <h1>Temporização com millis() — Programação sem delay</h1>
+        <p class="meta">
+          Neste capítulo você aprende a controlar o tempo no Arduino usando <strong>millis()</strong>,
+          evitando o uso de <code>delay()</code>. Esse conceito é essencial para sistemas que precisam
+          executar várias tarefas ao mesmo tempo.
+        </p>
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Entender por que evitar delay().</li>
+              <li>Usar millis() para controle de tempo.</li>
+              <li>Criar temporizações não bloqueantes.</li>
+              <li>Aplicar millis() em projetos reais.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Cap. 09–14: Arduino, decisões, repetição e variáveis.</li>
+              <li>Noções básicas de lógica de programação.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Por que evitar delay()</h2>
+        <p>
+          A função <code>delay()</code> pausa completamente o programa.
+          Durante esse tempo, o Arduino não consegue ler sensores nem responder a eventos.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> em sistemas que precisam responder a botões enquanto executam outras tarefas.</div>
+
+        <h2>2) O que é millis()</h2>
+        <p>
+          A função <code>millis()</code> retorna o tempo, em milissegundos, desde que o Arduino foi ligado.
+          Com ela, conseguimos verificar intervalos de tempo sem travar o programa.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> para criar temporizadores e piscas sem bloquear o loop.</div>
+
+        <h2>3) Temporização não bloqueante</h2>
+        <p>
+          Usando millis(), o loop continua rodando normalmente.
+          Isso permite executar várias lógicas ao mesmo tempo.
+        </p>
+        <div class="warning"><strong>Dica:</strong> millis() é essencial em projetos profissionais e integradores.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo prático: LED piscando com millis()</h2>
+        <p class="meta">Objetivo: piscar um LED sem usar delay().</p>
+        <div class="steps">
+          <div class="step">
+            <h4>Componentes</h4>
+            <ul>
+              <li>Arduino UNO</li>
+              <li>1 LED + resistor 220Ω</li>
+            </ul>
+          </div>
+          <div class="step">
+            <h4>Ligações</h4>
+            <ul>
+              <li>LED → pino 9 ↔ resistor ↔ LED ↔ GND</li>
+            </ul>
+          </div>
+          <div class="step">
+            <h4>Código</h4>
+            <pre><code class="language-cpp">// Capítulo 15 - Temporização com millis
+
+const int LED = 9;
+unsigned long tempoAnterior = 0;
+const long intervalo = 500;
+bool estadoLed = false;
+
+void setup(){
+  pinMode(LED, OUTPUT);
+}
+
+void loop(){
+  unsigned long tempoAtual = millis();
+
+  if(tempoAtual - tempoAnterior >= intervalo){
+    tempoAnterior = tempoAtual;
+    estadoLed = !estadoLed;
+    digitalWrite(LED, estadoLed);
+  }
+}
+</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Atividades práticas derivadas</h2>
+        <ul>
+          <li>Criar dois LEDs piscando em tempos diferentes.</li>
+          <li>Adicionar um botão que pause o pisca.</li>
+          <li>Usar millis() para criar um semáforo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Quiz do Capítulo</h2>
+
+        <div class="q" data-a="c" data-exp="delay pausa todo o programa.">
+          <p><strong>1.</strong> O principal problema do delay() é:</p>
+          <label><input type="radio" name="q1" value="a"> Gastar memória</label>
+          <label><input type="radio" name="q1" value="b"> Diminuir tensão</label>
+          <label><input type="radio" name="q1" value="c"> Bloquear o programa</label>
+          <label><input type="radio" name="q1" value="d"> Desligar o Arduino</label>
+          <label><input type="radio" name="q1" value="e"> Alterar pinos</label>
+          <button class="btn" onclick="check(this)">Enviar resposta</button>
+          <button class="btn" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="millis retorna o tempo desde que o Arduino ligou.">
+          <p><strong>2.</strong> A função millis() retorna:</p>
+          <label><input type="radio" name="q2" value="a"> A tensão do pino</label>
+          <label><input type="radio" name="q2" value="b"> O tempo em milissegundos</label>
+          <label><input type="radio" name="q2" value="c"> A frequência do clock</label>
+          <label><input type="radio" name="q2" value="d"> O número do pino</label>
+          <label><input type="radio" name="q2" value="e"> O tempo em segundos</label>
+          <button class="btn" onclick="check(this)">Enviar resposta</button>
+          <button class="btn" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="millis permite executar várias tarefas sem travar o loop.">
+          <p><strong>3.</strong> A principal vantagem do millis() é:</p>
+          <label><input type="radio" name="q3" value="a"> Não bloquear o programa</label>
+          <label><input type="radio" name="q3" value="b"> Usar menos código</label>
+          <label><input type="radio" name="q3" value="c"> Ser mais simples</label>
+          <label><input type="radio" name="q3" value="d"> Apagar o loop</label>
+          <label><input type="radio" name="q3" value="e"> Evitar variáveis</label>
+          <button class="btn" onclick="check(this)">Enviar resposta</button>
+          <button class="btn" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Sei explicar por que evitar delay().</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei usar millis() corretamente.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo criar temporização não bloqueante.</label></li>
+          <li><label><input type="checkbox" class="ck"> Usei millis() em um projeto.</label></li>
+        </ul>
+        <p id="ckStatus" class="meta">0/4 itens concluídos.</p>
+
+        <h3>Pesquisas complementares</h3>
+        <ul>
+          <li>Comparação entre delay() e millis().</li>
+          <li>Estados e máquinas de estado.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 15</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+  function check(btn){
+    const q=btn.closest('.q');
+    const correct=q.dataset.a; const exp=q.dataset.exp;
+    const sel=q.querySelector('input[type=radio]:checked');
+    const res=q.querySelector('.res'); const gab=q.querySelector('.gabarito');
+    if(!sel){res.textContent=' Selecione uma alternativa.';res.className='res no';return;}
+    if(sel.value===correct){res.textContent=' Correto!';res.className='res ok';}
+    else{res.textContent=' Incorreto.';res.className='res no';}
+    gab.innerHTML='<strong>Gabarito:</strong> '+correct.toUpperCase()+' — '+exp;
+  }
+  function toggleAnswer(btn){const g=btn.closest('.q').querySelector('.gabarito');g.style.display=g.style.display==='block'?'none':'block';}
+  const checks=[...document.querySelectorAll('.ck')]; const st=document.getElementById('ckStatus');
+  function upd(){st.textContent=checks.filter(c=>c.checked).length+'/'+checks.length+' itens concluídos.'}
+  checks.forEach(c=>c.addEventListener('change',upd)); upd();
+</script>
+</body>
+</html>

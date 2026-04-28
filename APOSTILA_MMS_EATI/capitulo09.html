@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo09.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 09 — Fundamentos de Sistemas Embarcados e Plataforma Arduino</title>
+  <meta name="description" content="Apostila EATI — Capítulo 09: fundamentos de sistemas embarcados, microcontroladores, arquitetura do Arduino UNO, memória, clock, I/O, ADC, PWM, comunicação serial e boas práticas." />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+
+      --ok:#0a7a3b;
+      --bad:#9b2c2c;
+      --warn:#9a6700;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      min-height:72px;padding:10px 0;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{
+      width:48px;height:48px;border-radius:14px;
+      display:grid;place-items:center;
+      color:#fff;font-weight:900;letter-spacing:.04em;
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      box-shadow:0 14px 24px rgba(0,0,238,.20);
+      flex-shrink:0;
+    }
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 12px;border-radius:999px;
+      font-weight:900;font-size:.92rem;
+      border:1px solid transparent;
+      color:var(--text);
+      background:transparent;
+    }
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      color:#fff;border-color:transparent;
+      box-shadow:0 12px 20px rgba(0,0,238,.18);
+    }
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    /* Cards */
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow-lg);
+      overflow:hidden;
+    }
+    .card-inner{padding:22px}
+
+    .hero{
+      border-radius:var(--radius-lg);
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;right:-80px;top:-80px;
+      width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);
+      pointer-events:none;
+    }
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:7px 12px;
+      border-radius:999px;
+      font-weight:900;
+      color:var(--primary-800);
+      font-size:.85rem;
+    }
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .callout{
+      border-left:4px solid var(--primary);
+      background:var(--surface-soft);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .callout strong{color:var(--primary-800)}
+
+    .warning{
+      border-left:4px solid #ffb300;
+      background:rgba(255, 200, 0, .12);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .warning strong{color:var(--warn)}
+
+    .note{
+      border:1px dashed var(--line);
+      background:rgba(238,243,255,.7);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);
+      border-radius:18px;
+      padding:16px;
+    }
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0;color:var(--muted)}
+
+    .formula{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color:#0b1530;
+      overflow:auto;
+      box-shadow:0 6px 14px rgba(23,35,58,.04);
+    }
+
+    /* Table */
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:940px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    /* Steps (conceitual) */
+    .steps{counter-reset: step}
+    .step{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:16px;
+      margin:12px 0;
+    }
+    .step h4{margin:0 0 8px;color:var(--primary-800)}
+    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
+    .step p{margin:0 0 10px;color:var(--muted)}
+
+    /* Quiz */
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;cursor:pointer;
+      color:var(--primary-800);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:var(--ok)} .no{color:var(--bad)}
+    .gabarito{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(0,0,238,.06);
+      border:1px solid rgba(0,0,238,.15);
+      color:var(--muted);
+    }
+
+    /* Checklist */
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    /* Back-to-top */
+    .back-top{
+      position:fixed;right:18px;bottom:18px;z-index:1050;
+      width:50px;height:50px;display:none;place-items:center;
+      border:1px solid var(--line);background:#fff;color:var(--primary-800);
+      border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer;
+    }
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+      table{min-width:760px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 09</strong>
+        <span>Fundamentos de Sistemas Embarcados e Plataforma Arduino</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
+      <a href="capitulo08.html" title="Voltar para o Capítulo 08">⬅️ Anterior</a>
+      <a class="primary" href="capitulo10.html" title="Avançar para o Capítulo 10">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">3º Bimestre • Semanas 17–18 • Sistemas Embarcados + Arduino</div>
+        <h1>Fundamentos de Sistemas Embarcados e Plataforma Arduino</h1>
+        <p class="meta">
+          Este capítulo abre o 3º bimestre. Você vai entender o que é um <strong>sistema embarcado</strong>, como um <strong>microcontrolador</strong>
+          se diferencia de um microprocessador, e como a placa <strong>Arduino UNO</strong> organiza recursos como pinos, memórias e comunicação.
+          O objetivo é que você consiga estudar de forma autônoma e use esse conhecimento para montar e programar sistemas reais nos próximos capítulos.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Definir “sistema embarcado” e reconhecer exemplos em TI e automação.</li>
+              <li>Distinguir microcontrolador x microprocessador e entender impactos práticos.</li>
+              <li>Identificar blocos do Arduino UNO: MCU, clock, memórias, I/O e alimentação.</li>
+              <li>Compreender níveis lógicos (5 V / 3,3 V), limites de corrente e cuidados básicos.</li>
+              <li>Entender interfaces: Serial (UART), I²C e SPI — para que servem e quando usar.</li>
+              <li>Relacionar ADC e PWM com sensores e atuadores.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Cap. 05–08: lógica digital, entrada flutuante, tabelas verdade e projeto de decisão simples.</li>
+              <li>Cap. 04: organização de bancada e medições com segurança (quando em bancada real).</li>
+            </ul>
+            <div class="note">
+              <strong>Ferramentas recomendadas:</strong> Tinkercad Circuits (simulação) e/ou Arduino IDE (bancada).
+              <strong>Observação:</strong> neste capítulo o foco é conceitual; a prática de I/O digital começa no Cap. 10.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Sistemas embarcados: conceito e características</h2>
+        <p>
+          Um <strong>sistema embarcado</strong> é um computador dedicado a uma função específica dentro de um produto. Ele costuma operar com recursos limitados
+          (energia, memória, processamento) e precisa ser confiável, repetível e, muitas vezes, trabalhar em tempo real.
+          Exemplos em TI e automação: roteadores, câmeras IP, impressoras, controladores de temperatura, fechaduras digitais e sensores industriais.
+        </p>
+        <p>
+          Em vez de “abrir programas” como em um PC, um embarcado executa uma aplicação principal continuamente — lendo entradas, decidindo e acionando saídas.
+          Por isso, conceitos como <strong>nível lógico</strong>, <strong>tempo de resposta</strong> e <strong>consumo</strong> são essenciais.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao projetar sistemas que respondem a botões e sensores sem travar (Cap. 15) e ao documentar um projeto final (Cap. 16).</div>
+
+        <h2>2) Microcontrolador x microprocessador (visão técnica)</h2>
+        <p>
+          Um <strong>microcontrolador (MCU)</strong> integra em um único chip o processador, memória e periféricos (I/O, timers, ADC, comunicação). Ele é pensado
+          para controle e automação. Já um <strong>microprocessador (MPU)</strong> (como em PCs e muitos SBCs) normalmente depende de componentes externos
+          (memória RAM, armazenamento, etc.) e é otimizado para desempenho e sistemas operacionais complexos.
+        </p>
+        <p>
+          Na prática: MCU = baixo consumo, custo menor, inicialização rápida e controle direto de pinos. MPU = mais potência, multitarefa avançada,
+          mas exige mais energia e complexidade. O Arduino UNO usa MCU, então você controla o hardware em nível baixo e aprende fundamentos sólidos.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender por que o Arduino “liga e roda” imediatamente e por que recursos (memória) são limitados.</div>
+
+        <h2>3) Anatomia do Arduino UNO: blocos essenciais</h2>
+        <p>
+          A placa Arduino UNO é um conjunto de componentes em torno do microcontrolador <strong>ATmega328P</strong>. Entender os blocos evita erros comuns:
+          pinos errados, alimentação inadequada e uso incorreto de interfaces.
+        </p>
+
+        <h3>3.1 Clock e tempo de execução</h3>
+        <p>
+          O clock é o “ritmo” do microcontrolador — ele define quantas operações o chip consegue fazer por segundo. No UNO, é comum trabalhar com
+          clock na casa de dezenas de MHz. Isso impacta timers, comunicação e a precisão de funções de tempo.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender temporização com <em>millis()</em> e a estabilidade de leituras (Cap. 15).</div>
+
+        <h3>3.2 Memórias: Flash, SRAM e EEPROM</h3>
+        <p>
+          Em microcontroladores, memória é limitada e tem funções diferentes:
+        </p>
+        <ul>
+          <li><strong>Flash:</strong> onde o programa (sketch) fica gravado. Não se apaga quando desliga.</li>
+          <li><strong>SRAM:</strong> memória de trabalho (variáveis em tempo de execução). É pequena e pode “estourar” se você usar muitas strings/arrays.</li>
+          <li><strong>EEPROM:</strong> guarda dados pequenos que precisam persistir (configurações). Não se apaga quando desliga.</li>
+        </ul>
+        <div class="warning"><strong>Erro típico:</strong> usar muitas Strings pode consumir SRAM e causar travamentos e resets inesperados.</div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao organizar variáveis e escopo (Cap. 14) e ao montar projetos maiores (Cap. 16).</div>
+
+        <h3>3.3 Bootloader e upload do programa</h3>
+        <p>
+          O <strong>bootloader</strong> é um pequeno programa gravado na placa que permite enviar (upload) o seu código via USB/serial.
+          Ele facilita o desenvolvimento porque você não precisa de um gravador externo para programar o chip.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender por que escolher a placa/porta correta no Arduino IDE e por que às vezes o upload falha.</div>
+
+        <h2>4) Pinos e periféricos: o que cada tipo faz</h2>
+        <p>
+          Um erro comum é tratar todos os pinos como iguais. No Arduino, há pinos digitais, analógicos (ADC) e pinos com funções especiais
+          (PWM e comunicação). Entender isso é essencial para planejar qualquer projeto.
+        </p>
+
+        <h3>4.1 Pinos digitais (0/1)</h3>
+        <p>
+          Pinos digitais trabalham com <strong>LOW</strong> (0) e <strong>HIGH</strong> (1). Eles servem para ler botões, fim de curso e sensores digitais
+          (entrada), e para acionar LEDs, relés (via driver), transistores e sinais de controle (saída).
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no Cap. 10 (entradas e saídas digitais) e Cap. 11 (decisão com if/else).</div>
+
+        <h3>4.2 Entrada analógica e ADC (0–1023)</h3>
+        <p>
+          O Arduino converte uma tensão analógica em um número digital usando um <strong>ADC</strong> (conversor analógico-digital).
+          No UNO, é comum ver leituras entre 0 e 1023 (resolução típica de 10 bits), dependendo da referência e da tensão aplicada.
+          Isso permite ler sensores como LDR, potenciômetro e alguns módulos analógicos.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> em projetos com sensores analógicos e limiares (como no Cap. 05 e em extensões de automação).</div>
+
+        <h3>4.3 PWM (simulação de analógico na saída)</h3>
+        <p>
+          PWM (Pulse Width Modulation) não é “analógico puro”: é um sinal digital que alterna rapidamente entre 0 e 1.
+          Mudando a largura do pulso (duty cycle), você controla a energia média entregue — útil para dimmer de LED e controle de velocidade de motor DC.
+          Em muitas placas, alguns pinos são marcados com ~ indicando PWM.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> em controle de brilho/velocidade e em temporização avançada (Cap. 15).</div>
+
+        <h2>5) Comunicação: como a placa conversa com o mundo</h2>
+        <p>
+          Sistemas embarcados raramente ficam isolados. Eles precisam comunicar com sensores, displays e outros módulos.
+          No Arduino, as interfaces mais comuns são:
+        </p>
+
+        <div class="table-wrap" role="region" aria-label="Interfaces de comunicação">
+          <table>
+            <thead>
+              <tr>
+                <th>Interface</th>
+                <th>Uso típico</th>
+                <th>Características</th>
+                <th>Aplicação em projetos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>UART/Serial</strong></td>
+                <td>Debug, monitor serial, módulos simples</td>
+                <td>Ponto a ponto; fácil para iniciar</td>
+                <td>Registrar leituras e erros (diagnóstico)</td>
+              </tr>
+              <tr>
+                <td><strong>I²C</strong></td>
+                <td>Displays (OLED/LCD), sensores</td>
+                <td>2 fios (SDA/SCL), vários dispositivos no barramento</td>
+                <td>Expandir sensores com poucos fios</td>
+              </tr>
+              <tr>
+                <td><strong>SPI</strong></td>
+                <td>Cartão SD, sensores rápidos</td>
+                <td>Mais rápido; usa 3+ fios (MOSI/MISO/SCK/CS)</td>
+                <td>Leitura/gravação de dados e periféricos mais exigentes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao depurar com Serial Monitor e ao integrar módulos em projetos finais.</div>
+
+        <h2>6) Alimentação, níveis lógicos e limites — segurança técnica</h2>
+        <p>
+          Um circuito bom não é só “funcionar”: ele precisa ser seguro e estável. Placas têm limites de corrente por pino e limites de tensão.
+          Em geral, o Arduino UNO trabalha com lógica de <strong>5 V</strong>. Já muitos módulos modernos trabalham em <strong>3,3 V</strong>.
+          Misturar tensões sem cuidado pode queimar o módulo ou causar leituras erradas.
+        </p>
+        <ul>
+          <li><strong>Regra prática:</strong> sempre consulte o módulo (datasheet) para tensão de alimentação e nível lógico.</li>
+          <li><strong>Saídas:</strong> use resistor para LED e driver (transistor/relé) para cargas maiores.</li>
+          <li><strong>GND comum:</strong> fontes diferentes precisam compartilhar o mesmo GND para referência.</li>
+        </ul>
+        <div class="warning"><strong>Erro típico:</strong> ligar diretamente motor/relé no pino do Arduino sem driver → risco de sobrecorrente e ruído elétrico.</div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao montar circuitos nos Cap. 10–12 e no Projeto Final (Cap. 16).</div>
+
+        <h2>7) Modelo mental para programar embarcados</h2>
+        <p>
+          Em embarcados, pense sempre em: <strong>entradas → processamento → saídas</strong>. O programa roda em loop, então você precisa decidir
+          quando ler, quando atualizar e como lidar com tempo. Por isso, evoluímos de decisões simples (Cap. 11) para repetição (Cap. 12),
+          funções (Cap. 13), escopo (Cap. 14) e temporização não bloqueante (Cap. 15).
+        </p>
+        <div class="note"><strong>Resumo do capítulo:</strong> Arduino é uma plataforma para aprender sistemas embarcados com controle direto do hardware. Entender arquitetura, pinos, memória e comunicação evita erros e acelera seus projetos.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Passo a passo conceitual (sem código), conforme solicitado -->
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo conceitual (sem código): preparando seu “mapa mental” do Arduino</h2>
+        <p class="meta">Objetivo: conseguir olhar para a placa (real ou no simulador) e identificar o que é essencial antes de programar.</p>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Identificar alimentação e referência (GND)</h4>
+            <p>Localize os pinos <strong>5V</strong>, <strong>3.3V</strong> (se houver) e <strong>GND</strong>. Entenda que o GND é a referência de 0 V do sistema.</p>
+            <ul>
+              <li>Em qualquer circuito, tudo “volta” pelo GND.</li>
+              <li>Se usar mais de uma fonte/módulo, confirme GND comum.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h4>Separar pinos por função</h4>
+            <p>Marque mentalmente três grupos: <strong>digitais</strong>, <strong>analógicos (A0–A5)</strong> e <strong>comunicação</strong>.</p>
+            <ul>
+              <li>Digitais: botões, LEDs, sinais 0/1</li>
+              <li>Analógicos: sensores variáveis (potenciômetro, LDR)</li>
+              <li>Comunicação: Serial, I²C, SPI (para módulos)</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h4>Entender limites e proteção</h4>
+            <p>Antes de ligar qualquer coisa:</p>
+            <ul>
+              <li>LED sempre com resistor.</li>
+              <li>Cargas (motor/relé) com driver (transistor + diodo).</li>
+              <li>Evite misturar 5 V e 3,3 V sem conversão.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h4>Definir o fluxo do programa (mental)</h4>
+            <p>Pense em como o loop vai funcionar:</p>
+            <ul>
+              <li>Ler entradas</li>
+              <li>Aplicar regras (decisão)</li>
+              <li>Atualizar saídas</li>
+              <li>Controlar tempo (sem travar) — depois com millis()</li>
+            </ul>
+            <div class="callout"><strong>Aplicação:</strong> este fluxo será implementado no Cap. 10 e refinado até o Cap. 15.</div>
+          </div>
+        </div>
+
+        <div class="note"><strong>Entrega sugerida (opcional):</strong> uma foto/print da placa com setas marcando 5V, GND, pinos digitais, A0–A5 e um comentário de 6 linhas sobre por que isso evita erros.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Sistema embarcado é um computador dedicado a uma função específica dentro de um produto/processo.">
+          <p><strong>1.</strong> Um sistema embarcado é melhor definido como:</p>
+          <label><input type="radio" name="q1" value="a"> Um PC com vários programas abertos</label>
+          <label><input type="radio" name="q1" value="b"> Um servidor de arquivos na rede</label>
+          <label><input type="radio" name="q1" value="c"> Um aplicativo instalado no celular</label>
+          <label><input type="radio" name="q1" value="d"> Um computador dedicado a uma função específica em um equipamento</label>
+          <label><input type="radio" name="q1" value="e"> Um cabo que liga sensores ao computador</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Microcontrolador integra CPU, memória e periféricos; microprocessador geralmente depende de componentes externos e é mais voltado a SOs complexos.">
+          <p><strong>2.</strong> Qual alternativa diferencia corretamente MCU e MPU?</p>
+          <label><input type="radio" name="q2" value="a"> MCU é sempre mais potente que MPU</label>
+          <label><input type="radio" name="q2" value="b"> MCU integra periféricos e memórias; MPU depende mais de componentes externos</label>
+          <label><input type="radio" name="q2" value="c"> MPU não executa programas</label>
+          <label><input type="radio" name="q2" value="d"> MCU só funciona com internet</label>
+          <label><input type="radio" name="q2" value="e"> MCU é sinônimo de placa-mãe</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="Flash guarda o programa; SRAM é memória de trabalho; EEPROM guarda poucos dados persistentes.">
+          <p><strong>3.</strong> Associe corretamente os tipos de memória em microcontroladores:</p>
+          <label><input type="radio" name="q3" value="a"> SRAM guarda o programa permanentemente</label>
+          <label><input type="radio" name="q3" value="b"> EEPROM é usada como RAM principal</label>
+          <label><input type="radio" name="q3" value="c"> Flash é apagada sempre que desliga</label>
+          <label><input type="radio" name="q3" value="d"> Flash é apenas para dados temporários</label>
+          <label><input type="radio" name="q3" value="e"> Flash=programa; SRAM=variáveis em execução; EEPROM=dados persistentes pequenos</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="ADC converte tensão analógica em valor numérico; no UNO é comum retornar 0..1023.">
+          <p><strong>4.</strong> O que faz o ADC no Arduino?</p>
+          <label><input type="radio" name="q4" value="a"> Converte uma tensão analógica em um número</label>
+          <label><input type="radio" name="q4" value="b"> Converte 1 em 0 automaticamente</label>
+          <label><input type="radio" name="q4" value="c"> Aumenta a corrente disponível no pino</label>
+          <label><input type="radio" name="q4" value="d"> Troca OR por AND</label>
+          <label><input type="radio" name="q4" value="e"> Mede apenas resistência sem energia</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="PWM é uma modulação por largura de pulso: sinal digital rápido com energia média controlada (duty cycle).">
+          <p><strong>5.</strong> PWM no Arduino é melhor descrito como:</p>
+          <label><input type="radio" name="q5" value="a"> Uma saída analógica verdadeira em tensão contínua</label>
+          <label><input type="radio" name="q5" value="b"> Uma entrada para sensores de corrente</label>
+          <label><input type="radio" name="q5" value="c"> Um sinal digital com largura de pulso ajustável para controlar energia média</label>
+          <label><input type="radio" name="q5" value="d"> Um tipo de memória persistente</label>
+          <label><input type="radio" name="q5" value="e"> Um cabo para comunicação Wi‑Fi</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="I²C usa dois fios (SDA/SCL) e permite vários dispositivos no mesmo barramento.">
+          <p><strong>6.</strong> Qual interface usa 2 fios e suporta vários dispositivos no mesmo barramento?</p>
+          <label><input type="radio" name="q6" value="a"> UART/Serial</label>
+          <label><input type="radio" name="q6" value="b"> PWM</label>
+          <label><input type="radio" name="q6" value="c"> USB-C</label>
+          <label><input type="radio" name="q6" value="d"> I²C</label>
+          <label><input type="radio" name="q6" value="e"> VGA</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="GND comum é essencial como referência para sinais; sem GND comum, leituras e sinais ficam incorretos.">
+          <p><strong>7.</strong> Por que “GND comum” é importante ao ligar módulos diferentes?</p>
+          <label><input type="radio" name="q7" value="a"> Porque aumenta a tensão do circuito</label>
+          <label><input type="radio" name="q7" value="b"> Porque define a mesma referência de 0 V para todos os sinais</label>
+          <label><input type="radio" name="q7" value="c"> Porque substitui resistores em LEDs</label>
+          <label><input type="radio" name="q7" value="d"> Porque impede o uso de PWM</label>
+          <label><input type="radio" name="q7" value="e"> Porque torna qualquer sinal analógico em digital</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="O modelo mental é entradas→processamento→saídas, repetido continuamente no loop.">
+          <p><strong>8.</strong> Qual é o modelo mental básico de um programa embarcado?</p>
+          <label><input type="radio" name="q8" value="a"> Abrir programas → salvar arquivos → desligar</label>
+          <label><input type="radio" name="q8" value="b"> Baixar drivers → instalar jogos → atualizar</label>
+          <label><input type="radio" name="q8" value="c"> Converter AC → DC → medir potência</label>
+          <label><input type="radio" name="q8" value="d"> Escrever tabela verdade → ignorar testes</label>
+          <label><input type="radio" name="q8" value="e"> Ler entradas → processar regras → atualizar saídas (em loop)</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Consigo explicar o que é um sistema embarcado e citar 3 exemplos.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei diferenciar microcontrolador e microprocessador com impacto prático.</label></li>
+          <li><label><input type="checkbox" class="ck"> Entendo Flash, SRAM e EEPROM e sei por que SRAM é crítica.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo identificar pinos digitais, analógicos (ADC) e PWM na placa.</label></li>
+          <li><label><input type="checkbox" class="ck"> Entendo o básico de Serial, I²C e SPI e sei quando cada um é usado.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+
+        <h3>Pesquisas complementares</h3>
+        <ul>
+          <li>Datasheet do ATmega328P: o que é clock, timers e interrupções (visão geral).</li>
+          <li>Por que Strings podem causar problemas de SRAM e alternativas (char arrays).</li>
+          <li>Conversão de nível lógico (5 V ↔ 3,3 V) e quando é necessária.</li>
+          <li>Diferença entre ADC e PWM (entrada analógica x saída “quase analógica”).</li>
+        </ul>
+
+        <div class="note">
+          <strong>Próximo capítulo:</strong> <a href="capitulo10.html"><strong>Capítulo 10 — Entradas e Saídas Digitais no Arduino</strong></a>.
+          Você vai começar a programar I/O digital com botões e LEDs com boas práticas.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 09</div>
+</footer>
+
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+</script>
+</body>
+</html>

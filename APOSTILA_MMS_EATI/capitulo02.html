@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo02.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 02 — Grandezas Elétricas e Lei de Ohm</title>
+  <meta name="description" content="Apostila EATI — Capítulo 02: grandezas elétricas (tensão, corrente, resistência, potência), Lei de Ohm e aplicação em circuitos simples com medições (Tinkercad/multímetro)." />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      min-height:72px;padding:10px 0;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{
+      width:48px;height:48px;border-radius:14px;
+      display:grid;place-items:center;
+      color:#fff;font-weight:900;letter-spacing:.04em;
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      box-shadow:0 14px 24px rgba(0,0,238,.20);
+      flex-shrink:0;
+    }
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 12px;border-radius:999px;
+      font-weight:900;font-size:.92rem;
+      border:1px solid transparent;
+      color:var(--text);
+      background:transparent;
+    }
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      color:#fff;border-color:transparent;
+      box-shadow:0 12px 20px rgba(0,0,238,.18);
+    }
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    /* Cards */
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow-lg);
+      overflow:hidden;
+    }
+    .card-inner{padding:22px}
+
+    .hero{
+      border-radius:var(--radius-lg);
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;right:-80px;top:-80px;
+      width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);
+      pointer-events:none;
+    }
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:7px 12px;
+      border-radius:999px;
+      font-weight:900;
+      color:var(--primary-800);
+      font-size:.85rem;
+    }
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .callout{
+      border-left:4px solid var(--primary);
+      background:var(--surface-soft);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .callout strong{color:var(--primary-800)}
+
+    .note{
+      border:1px dashed var(--line);
+      background:rgba(238,243,255,.7);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);
+      border-radius:18px;
+      padding:16px;
+    }
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0;color:var(--muted)}
+
+    /* Formula block */
+    .formula{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color:#0b1530;
+      overflow:auto;
+      box-shadow:0 6px 14px rgba(23,35,58,.04);
+    }
+
+    /* Table */
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:820px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    /* Steps */
+    .steps{counter-reset: step}
+    .step{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:16px;
+      margin:12px 0;
+    }
+    .step h4{margin:0 0 8px;color:var(--primary-800)}
+    .step h4::before{
+      counter-increment: step;
+      content: "Passo " counter(step) " — ";
+    }
+    .step p{margin:0 0 10px;color:var(--muted)}
+    .step ul{margin:0;padding-left:18px}
+
+    /* Quiz */
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;cursor:pointer;
+      color:var(--primary-800);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:#0a7a3b} .no{color:#9b2c2c}
+    .gabarito{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(0,0,238,.06);
+      border:1px solid rgba(0,0,238,.15);
+      color:var(--muted);
+    }
+
+    /* Checklist */
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    /* Back-to-top */
+    .back-top{
+      position:fixed;right:18px;bottom:18px;z-index:1050;
+      width:50px;height:50px;display:none;place-items:center;
+      border:1px solid var(--line);background:#fff;color:var(--primary-800);
+      border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer;
+    }
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+      table{min-width:740px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 02</strong>
+        <span>Grandezas Elétricas e Lei de Ohm</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">3e0 Index</a>
+      <a href="capitulo01.html" title="Voltar para o Capítulo 01">⬅️ Anterior</a>
+      <a class="primary" href="capitulo03.html" title="Avançar para o Capítulo 03">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">1º Bimestre • Semanas 3–4 • Lei de Ohm</div>
+        <h1>Grandezas Elétricas e Lei de Ohm</h1>
+        <p class="meta">
+          Aqui você aprende as quatro grandezas fundamentais — <strong>tensão (V)</strong>, <strong>corrente (I)</strong>, <strong>resistência (R)</strong> e <strong>potência (P)</strong> —
+          e como usá-las para <strong>prever</strong> e <strong>validar</strong> o comportamento de circuitos simples. Este capítulo prepara você para medir corretamente no Capítulo 04.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Definir tensão, corrente, resistência e potência com exemplos práticos em TI.</li>
+              <li>Aplicar a <strong>Lei de Ohm</strong> para calcular I, V ou R.</li>
+              <li>Estimar consumo e aquecimento por meio de potência (P).</li>
+              <li>Interpretar valores típicos de alimentação em computadores (3,3 V, 5 V, 12 V).</li>
+              <li>Simular e validar um circuito simples (LED + resistor) antes de ir para a bancada.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Conceitos do Capítulo 01 (átomo, cargas, condutores/isolantes/semicondutores).</li>
+              <li>Noções básicas de aritmética (divisão e multiplicação) e leitura de unidades.</li>
+            </ul>
+            <div class="note">
+              <strong>Ferramenta sugerida:</strong> use o <strong>Tinkercad Circuits</strong> para simular o circuito e o multímetro virtual.
+              Se estiver em laboratório físico, use protoboard + multímetro real.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Tensão elétrica (V): a “força” que impulsiona as cargas</h2>
+        <p>
+          <strong>Tensão</strong> (ou diferença de potencial) é o “empurrão” que faz as cargas se moverem. Ela é medida em <strong>volts (V)</strong>.
+          Uma analogia útil é pensar em água: a tensão seria semelhante à <em>pressão</em> que empurra a água através de um cano.
+        </p>
+        <p>
+          Em TI, tensões comuns são <strong>12 V</strong> (ventoinhas, motores, partes da fonte), <strong>5 V</strong> (USB, lógica, alguns periféricos)
+          e <strong>3,3 V</strong> (lógica digital e chips). Muitos circuitos na placa-mãe usam tensões ainda menores (ex.: ~1,0 V) para CPU e RAM,
+          geradas por reguladores (VRM).
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao verificar se uma fonte está entregando 12 V/5 V/3,3 V corretos e ao entender por que tensão fora do padrão gera instabilidade.</div>
+
+        <h2>2) Corrente elétrica (I): quanto “fluxo” passa no circuito</h2>
+        <p>
+          <strong>Corrente</strong> é o fluxo de cargas elétricas. Mede-se em <strong>ampères (A)</strong>.
+          Na analogia da água, a corrente seria semelhante à <em>vazão</em> (quantidade de água passando por segundo).
+        </p>
+        <p>
+          Em TI, a corrente está relacionada ao consumo dos componentes. Um dispositivo pode precisar de pouca corrente (ex.: um sensor)
+          ou de muita corrente (ex.: GPU). Corrente elevada, se não for controlada, pode aquecer trilhas, conectores e componentes.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao interpretar a capacidade de uma fonte (corrente máxima por trilho) e ao identificar curto-circuito (corrente muito alta).</div>
+
+        <h2>3) Resistência (R): a oposição à passagem de corrente</h2>
+        <p>
+          <strong>Resistência</strong> mede a dificuldade que um material ou componente impõe ao fluxo de corrente. A unidade é <strong>ohm (Ω)</strong>.
+          Na analogia da água, resistência lembra o <em>estreitamento</em> do cano: quanto mais estreito, mais difícil é passar água.
+        </p>
+        <p>
+          Em circuitos, resistores são usados para limitar corrente, dividir tensão e proteger componentes.
+          Em TI, resistências aparecem em sensores, circuitos de pull-up/pull-down, divisores de tensão e proteção de LEDs.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao escolher resistor para LED, ao entender quedas de tensão em cabos e ao diagnosticar mau contato (resistência indesejada aumenta).</div>
+
+        <h2>4) Potência (P): energia transformada por segundo (aquecimento, consumo)</h2>
+        <p>
+          <strong>Potência</strong> representa quanta energia elétrica é convertida em outras formas por unidade de tempo. Unidade: <strong>watt (W)</strong>.
+          Potência ajuda a prever <strong>aquecimento</strong> e <strong>consumo</strong>. Componentes de potência (fontes, reguladores, resistores) precisam ser dimensionados
+          para dissipar calor.
+        </p>
+        <p>
+          Em TI, potência aparece em especificações e no dimensionamento de fonte. Se um circuito consome muito, ele pode exigir melhor refrigeração,
+          cabos adequados e conectores compatíveis.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> para entender por que certos componentes aquecem e por que fonte/cabos/conectores têm limites.</div>
+
+        <h2>5) Unidades e prefixos (mA, kΩ, mW): leitura correta evita erros</h2>
+        <p>
+          Em eletrônica, valores frequentemente aparecem com prefixos. Saber ler isso evita erros graves.
+          Por exemplo: <strong>10 mA</strong> (miliampère) é <strong>0,01 A</strong>. <strong>10 kΩ</strong> (quilo-ohm) é <strong>10.000 Ω</strong>.
+        </p>
+        <div class="table-wrap" role="region" aria-label="Prefixos mais comuns">
+          <table>
+            <thead>
+              <tr>
+                <th>Prefixo</th>
+                <th>Símbolo</th>
+                <th>Fator</th>
+                <th>Exemplo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>mili</td><td>m</td><td>10⁻³</td><td>20 mA = 0,020 A</td></tr>
+              <tr><td>micro</td><td>µ</td><td>10⁻⁶</td><td>50 µA = 0,000050 A</td></tr>
+              <tr><td>quilo</td><td>k</td><td>10³</td><td>4,7 kΩ = 4700 Ω</td></tr>
+              <tr><td>mega</td><td>M</td><td>10⁶</td><td>1 MΩ = 1.000.000 Ω</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> na leitura de resistores (4,7 kΩ), sensores e nas medições do multímetro (mA vs A).</div>
+
+        <h2>6) Lei de Ohm: a relação entre V, I e R</h2>
+        <p>
+          A <strong>Lei de Ohm</strong> descreve a relação entre tensão, corrente e resistência em muitos casos práticos:
+          quando a resistência é constante (resistor ideal), a corrente cresce proporcionalmente à tensão.
+        </p>
+        <div class="formula" aria-label="Fórmulas da Lei de Ohm">
+V = R · I
+I = V / R
+R = V / I
+        </div>
+        <p>
+          Com essas três formas, você pode encontrar qualquer variável se conhecer as outras duas.
+          Em eletrônica aplicada, o objetivo é usar a Lei de Ohm para <strong>prever</strong> correntes e evitar danos (por exemplo, colocar um resistor em série com um LED).
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no cálculo do resistor de LED, no diagnóstico de quedas de tensão e na estimativa de corrente em circuitos simples.</div>
+
+        <h3>Lei de Ohm aplicada a potência (P)</h3>
+        <p>
+          Além de <strong>P = V·I</strong>, você pode combinar com a Lei de Ohm e obter duas formas muito úteis:
+        </p>
+        <div class="formula" aria-label="Fórmulas de potência">
+P = V · I
+P = I² · R
+P = V² / R
+        </div>
+        <p>
+          Essas formas ajudam a prever aquecimento em resistores e cabos. Por exemplo, se a corrente dobra, o termo <strong>I²</strong> mostra que a potência no resistor cresce muito.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> para escolher resistores com potência adequada (ex.: 1/4 W) e entender aquecimento em conectores.</div>
+
+        <h2>7) Exemplo guiado (conceitual): calculando resistor para LED</h2>
+        <p>
+          Um LED precisa de corrente limitada. Valores típicos são entre 5 mA e 20 mA, dependendo do LED.
+          Para um exemplo didático, considere:
+        </p>
+        <ul>
+          <li><strong>Fonte:</strong> 5 V</li>
+          <li><strong>Queda no LED (Vf):</strong> ~2 V (pode variar por cor e modelo)</li>
+          <li><strong>Corrente desejada:</strong> 10 mA (0,01 A)</li>
+        </ul>
+        <p>
+          A tensão no resistor será aproximadamente <strong>Vres = 5 V − 2 V = 3 V</strong>.
+          Pela Lei de Ohm: <strong>R = V/I = 3 / 0,01 = 300 Ω</strong>.
+          Como 300 Ω não é um valor “padrão” sempre disponível, usamos um valor próximo (ex.: 330 Ω) para aumentar a segurança.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo do Tinkercad e depois em protoboard, evitando queimar LEDs e portas.</div>
+
+        <div class="note">
+          <strong>Dica técnica:</strong> valores de Vf do LED variam. LED azul/branco costuma ter Vf maior (~3 V). LED vermelho costuma ter Vf menor (~1,8–2,2 V).
+          Por isso, ao trocar a cor do LED, o resistor pode precisar mudar.
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo prático (Tinkercad / Multímetro): LED + Resistor + Medições</h2>
+        <p class="meta">
+          Objetivo: montar e simular um circuito simples, calcular o resistor e validar com medições de tensão e corrente.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Preparar o projeto</h4>
+            <p>Abra o Tinkercad Circuits e crie um circuito novo. Adicione:</p>
+            <ul>
+              <li>1 protoboard</li>
+              <li>1 fonte DC (ou 1 bateria de 9V + regulador, se preferir simplificar use uma fonte ajustável)</li>
+              <li>1 LED</li>
+              <li>1 resistor (comece com 330 Ω)</li>
+              <li>1 multímetro</li>
+            </ul>
+            <div class="note"><strong>Se você estiver na bancada:</strong> use uma fonte USB 5V (ou Arduino 5V), protoboard, LED, resistor 330 Ω e multímetro real.</div>
+          </div>
+
+          <div class="step">
+            <h4>Montar o circuito em série</h4>
+            <p>Ligue os componentes em série para limitar a corrente no LED:</p>
+            <ul>
+              <li>Saída positiva (V+) → resistor → ânodo do LED (perna maior)</li>
+              <li>Cátodo do LED (perna menor) → GND</li>
+            </ul>
+            <div class="callout"><strong>Aplicação do conceito:</strong> o resistor limita a corrente conforme a Lei de Ohm, protegendo o LED.</div>
+          </div>
+
+          <div class="step">
+            <h4>Calcular o resistor (validação)</h4>
+            <p>Use o exemplo do capítulo como referência e ajuste se necessário:</p>
+            <div class="formula">R = (Vfonte − Vf_LED) / I
+Ex.: R = (5 − 2) / 0,01 ≈ 300 Ω  → usar 330 Ω</div>
+            <div class="note"><strong>Para LED azul/branco:</strong> se Vf ≈ 3 V, então R ≈ (5 − 3)/0,01 = 200 Ω → valores típicos 220 Ω.</div>
+          </div>
+
+          <div class="step">
+            <h4>Medir tensão no LED (multímetro em V)</h4>
+            <p>Configure o multímetro para medir tensão (V). Meça em paralelo:</p>
+            <ul>
+              <li>Ponta vermelha no ânodo do LED</li>
+              <li>Ponta preta no cátodo do LED</li>
+            </ul>
+            <p>Observe a queda de tensão (Vf). Compare com o valor esperado (ex.: ~2 V para LED vermelho).</p>
+            <div class="callout"><strong>Aplicação do conceito:</strong> tensão é medida em paralelo; a queda no LED explica por que sobra tensão para o resistor.</div>
+          </div>
+
+          <div class="step">
+            <h4>Medir corrente do circuito (multímetro em A/mA)</h4>
+            <p>Configure o multímetro para corrente (mA). Para medir corrente, ele deve ficar <strong>em série</strong>:</p>
+            <ul>
+              <li>“Abra” o circuito em um ponto (por exemplo, entre resistor e LED)</li>
+              <li>Insira o multímetro no meio, completando o caminho da corrente</li>
+            </ul>
+            <p>Compare o valor medido com a corrente esperada (ex.: ~10 mA).</p>
+            <div class="callout"><strong>Aplicação do conceito:</strong> corrente é medida em série; se medir em paralelo pode gerar curto (assunto reforçado no Capítulo 04).</div>
+          </div>
+
+          <div class="step">
+            <h4>Ajustar e concluir</h4>
+            <p>Troque o resistor (220 Ω, 330 Ω, 470 Ω) e observe:</p>
+            <ul>
+              <li>Como a corrente muda</li>
+              <li>Como o brilho do LED muda</li>
+              <li>Como a potência no resistor muda (mais corrente → mais aquecimento)</li>
+            </ul>
+            <div class="note"><strong>Registro técnico:</strong> anote em uma tabela: resistor usado, tensão no LED, corrente medida e observações (brilho).</div>
+          </div>
+        </div>
+
+        <div class="callout"><strong>Entrega simples (para o caderno/relatório):</strong> uma tabela com 3 resistores testados e suas medições (V do LED e I do circuito) + conclusão de 4 linhas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Atividades práticas derivadas (2–3 sugestões)</h2>
+        <ul>
+          <li><strong>Desafio do resistor correto:</strong> escolha 3 cores de LED (vermelho, verde, azul) e calcule um resistor seguro para cada uma em 5 V; valide no simulador com medições.</li>
+          <li><strong>Queda de tensão em cabos (simulada):</strong> adicione um resistor pequeno em série representando um cabo/conector ruim e observe a queda de tensão e o efeito no brilho/corrente.</li>
+          <li><strong>Comparação de potência:</strong> para cada resistor usado, calcule P = I²·R com a corrente medida e discuta qual resistor “trabalha mais” e por quê.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Tensão (V) é a diferença de potencial que impulsiona as cargas. Corrente é o fluxo e resistência é a oposição.">
+          <p><strong>1.</strong> A grandeza que representa a diferença de potencial é:</p>
+          <label><input type="radio" name="q1" value="a"> Corrente (A)</label>
+          <label><input type="radio" name="q1" value="b"> Resistência (Ω)</label>
+          <label><input type="radio" name="q1" value="c"> Potência (W)</label>
+          <label><input type="radio" name="q1" value="d"> Tensão (V)</label>
+          <label><input type="radio" name="q1" value="e"> Capacitância (F)</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Lei de Ohm: I = V/R.">
+          <p><strong>2.</strong> Pela Lei de Ohm, a corrente é calculada por:</p>
+          <label><input type="radio" name="q2" value="a"> I = R/V</label>
+          <label><input type="radio" name="q2" value="b"> I = V/R</label>
+          <label><input type="radio" name="q2" value="c"> I = V·R</label>
+          <label><input type="radio" name="q2" value="d"> I = P·V</label>
+          <label><input type="radio" name="q2" value="e"> I = P/R</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="10 mA = 10 × 10⁻³ A = 0,01 A.">
+          <p><strong>3.</strong> 10 mA equivalem a:</p>
+          <label><input type="radio" name="q3" value="a"> 1 A</label>
+          <label><input type="radio" name="q3" value="b"> 0,1 A</label>
+          <label><input type="radio" name="q3" value="c"> 0,01 A</label>
+          <label><input type="radio" name="q3" value="d"> 0,001 A</label>
+          <label><input type="radio" name="q3" value="e"> 0,0001 A</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="Corrente é medida em série. Medir corrente em paralelo pode provocar curto.">
+          <p><strong>4.</strong> Para medir corrente com o multímetro, ele deve ser ligado:</p>
+          <label><input type="radio" name="q4" value="a"> Em paralelo com o resistor</label>
+          <label><input type="radio" name="q4" value="b"> Em paralelo com o LED</label>
+          <label><input type="radio" name="q4" value="c"> Em paralelo com a fonte</label>
+          <label><input type="radio" name="q4" value="d"> Em qualquer lugar, tanto faz</label>
+          <label><input type="radio" name="q4" value="e"> Em série com o circuito</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="Potência em watts mede energia por segundo. Uma forma é P = V·I.">
+          <p><strong>5.</strong> A fórmula correta de potência elétrica é:</p>
+          <label><input type="radio" name="q5" value="a"> P = V·I</label>
+          <label><input type="radio" name="q5" value="b"> P = V/R</label>
+          <label><input type="radio" name="q5" value="c"> P = R/I</label>
+          <label><input type="radio" name="q5" value="d"> P = I/V</label>
+          <label><input type="radio" name="q5" value="e"> P = V + I</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Se Vfonte=5V e Vf=2V, sobra 3V no resistor. Com I=0,01A, R=300Ω; valor próximo comum é 330Ω.">
+          <p><strong>6.</strong> Para LED vermelho (Vf≈2 V) em 5 V com corrente de 10 mA, o resistor calculado é próximo de:</p>
+          <label><input type="radio" name="q6" value="a"> 30 Ω</label>
+          <label><input type="radio" name="q6" value="b"> 100 Ω</label>
+          <label><input type="radio" name="q6" value="c"> 150 Ω</label>
+          <label><input type="radio" name="q6" value="d"> 300 Ω (usar 330 Ω)</label>
+          <label><input type="radio" name="q6" value="e"> 3 kΩ</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Se R aumenta e V é fixa, I = V/R diminui, reduzindo o brilho do LED.">
+          <p><strong>7.</strong> Se você aumenta o resistor em série com o LED (mantendo a mesma tensão), a corrente tende a:</p>
+          <label><input type="radio" name="q7" value="a"> Aumentar</label>
+          <label><input type="radio" name="q7" value="b"> Diminuir</label>
+          <label><input type="radio" name="q7" value="c"> Ficar exatamente igual</label>
+          <label><input type="radio" name="q7" value="d"> Virar negativa</label>
+          <label><input type="radio" name="q7" value="e"> Depender apenas do LED, nunca do resistor</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="4,7 kΩ = 4700 Ω (quilo = 10³).">
+          <p><strong>8.</strong> 4,7 kΩ equivalem a:</p>
+          <label><input type="radio" name="q8" value="a"> 47 Ω</label>
+          <label><input type="radio" name="q8" value="b"> 470 Ω</label>
+          <label><input type="radio" name="q8" value="c"> 4700 Ω</label>
+          <label><input type="radio" name="q8" value="d"> 47.000 Ω</label>
+          <label><input type="radio" name="q8" value="e"> 4,7 Ω</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Sei definir tensão, corrente, resistência e potência com exemplos.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo aplicar a Lei de Ohm para calcular V, I ou R.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo converter unidades (mA↔A, kΩ↔Ω) sem erros.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei medir tensão em paralelo e corrente em série (conceitualmente).</label></li>
+          <li><label><input type="checkbox" class="ck"> Consegui simular/planejar o circuito LED + resistor e registrar resultados.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+        <div class="note">
+          <strong>Próximo capítulo:</strong> <a href="capitulo03.html"><strong>Capítulo 03 — Leis de Kirchhoff e Componentes Eletrônicos Básicos</strong></a>.
+          Você vai avançar para circuitos em série/paralelo e conhecer resistores, capacitores, diodos e transistores.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 02</div>
+</footer>
+
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+</script>
+</body>
+</html>

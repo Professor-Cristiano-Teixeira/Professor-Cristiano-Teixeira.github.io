@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo08.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 08 — Simulação/Montagem de Circuitos Digitais e Projeto Integrador 2</title>
+  <meta name="description" content="Apostila EATI — Capítulo 08: simulação e montagem de circuitos digitais, validação por tabela verdade, diagnóstico de falhas lógicas e Projeto Integrador 2 (Sistema Digital de Decisão Simples)." />
+
+  <!-- Prism (tema escuro) para código -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+
+      --ok:#0a7a3b;
+      --bad:#9b2c2c;
+      --warn:#9a6700;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:72px;padding:10px 0}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,var(--primary),var(--primary-800));box-shadow:0 14px 24px rgba(0,0,238,.20);flex-shrink:0}
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;font-weight:900;font-size:.92rem;border:1px solid transparent;color:var(--text);background:transparent}
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{background:linear-gradient(135deg,var(--primary),var(--primary-800));color:#fff;border-color:transparent;box-shadow:0 12px 20px rgba(0,0,238,.18)}
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden}
+    .card-inner{padding:22px}
+
+    .hero{border-radius:var(--radius-lg);background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+    .hero::before{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);pointer-events:none}
+
+    .tag{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:999px;font-weight:900;color:var(--primary-800);font-size:.85rem}
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .callout{border-left:4px solid var(--primary);background:var(--surface-soft);border-radius:12px;padding:12px 14px;margin:14px 0}
+    .callout strong{color:var(--primary-800)}
+
+    .warning{border-left:4px solid #ffb300;background:rgba(255, 200, 0, .12);border-radius:12px;padding:12px 14px;margin:14px 0}
+    .warning strong{color:var(--warn)}
+
+    .danger{border-left:4px solid #e53935;background:rgba(229,57,53,.10);border-radius:12px;padding:12px 14px;margin:14px 0}
+    .danger strong{color:var(--bad)}
+
+    .note{border:1px dashed var(--line);background:rgba(238,243,255,.7);border-radius:12px;padding:12px 14px;margin:14px 0}
+
+    .mini{border:1px solid var(--line);background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);border-radius:18px;padding:16px}
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0;color:var(--muted)}
+
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:980px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    .formula{border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;color:#0b1530;overflow:auto;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+
+    .steps{counter-reset: step}
+    .step{border:1px solid var(--line);background:#fff;border-radius:18px;padding:16px;margin:12px 0}
+    .step h4{margin:0 0 8px;color:var(--primary-800)}
+    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
+    .step p{margin:0 0 10px;color:var(--muted)}
+
+    pre{border-radius:16px;overflow:auto}
+    pre[class*="language-"]{margin:12px 0}
+
+    /* Projeto */
+    .project-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(0,0,238,.08);border:1px solid rgba(0,0,238,.18);color:var(--primary-800);font-weight:900}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:900;color:var(--primary-800);font-size:.86rem}
+    .rubric{display:grid;gap:10px}
+    .rubric .item{border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px}
+    .rubric .item strong{color:var(--primary-800)}
+
+    textarea{width:100%;min-height:220px;border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:#fff;color:var(--text);resize:vertical}
+
+    /* Quiz */
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:900;cursor:pointer;color:var(--primary-800);box-shadow:var(--shadow-sm)}
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0;background:#fff}
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:var(--ok)} .no{color:var(--bad)}
+    .gabarito{display:none;margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(0,0,238,.06);border:1px solid rgba(0,0,238,.15);color:var(--muted)}
+
+    /* Checklist */
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    /* Back-to-top */
+    .back-top{position:fixed;right:18px;bottom:18px;z-index:1050;width:50px;height:50px;display:none;place-items:center;border:1px solid var(--line);background:#fff;color:var(--primary-800);border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer}
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+      table{min-width:760px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 08</strong>
+        <span>Simulação/Montagem de Circuitos Digitais • Projeto Integrador 2</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
+      <a href="capitulo07.html" title="Voltar para o Capítulo 07">⬅️ Anterior</a>
+      <a class="primary" href="capitulo09.html" title="Avançar para o Capítulo 09">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">2º Bimestre • Semanas 15–16 • Montagem + Diagnóstico + Projeto</div>
+        <h1>Simulação/Montagem de Circuitos Digitais e Projeto Integrador 2</h1>
+        <p class="meta">
+          Este capítulo fecha o 2º bimestre com prática intensiva: você vai <strong>projetar</strong> uma lógica a partir de requisitos, <strong>simular</strong>,
+          <strong>montar</strong> e <strong>diagnosticar</strong> falhas típicas (entrada flutuante, inversões, mau contato, regra errada). Ao final, você entrega o
+          <strong>Projeto Integrador 2</strong>: um <em>Sistema Digital de Decisão Simples</em> com documentação técnica.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Transformar requisitos em tabela verdade e expressão lógica (SOP/POS simples).</li>
+              <li>Montar a lógica usando portas (simulador) ou lógica em Arduino (código) e validar.</li>
+              <li>Aplicar De Morgan e simplificação para reduzir complexidade quando fizer sentido.</li>
+              <li>Realizar diagnóstico: detectar inversão, pino flutuante, ligação errada e regra incorreta.</li>
+              <li>Documentar: diagrama, tabela verdade, testes e conclusões.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Cap. 05–07: níveis lógicos/pull-up, portas lógicas, tabelas verdade, álgebra booleana e De Morgan.</li>
+              <li>Noções de segurança/organização (Cap. 04) para evitar curtos e erros de bancada.</li>
+            </ul>
+            <div class="note">
+              <strong>Ferramentas sugeridas:</strong> Tinkercad Circuits (Switches/Logic Gates/Arduino) + multímetro virtual.
+              Em bancada real: protoboard, botões, LEDs, resistores 220Ω/10kΩ e (opcional) CI 74HCxx.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Fluxo de projeto em lógica digital (do requisito ao circuito)</h2>
+        <p>
+          Em projetos digitais, o caminho mais seguro é seguir uma sequência. Isso evita montar “no improviso” e facilita o diagnóstico.
+          Use este fluxo sempre que receber um problema para resolver.
+        </p>
+        <div class="table-wrap" role="region" aria-label="Fluxo de projeto em lógica digital">
+          <table>
+            <thead><tr><th>Etapa</th><th>O que você faz</th><th>Entregável</th><th>Onde vou aplicar isso</th></tr></thead>
+            <tbody>
+              <tr><td>1. Requisitos</td><td>Defina entradas/saídas e a regra (o que deve acontecer).</td><td>Texto curto do problema</td><td>Projeto Integrador 2</td></tr>
+              <tr><td>2. Tabela verdade</td><td>Liste todas as combinações e marque a saída (0/1).</td><td>Tabela (2ⁿ linhas)</td><td>Validação e testes</td></tr>
+              <tr><td>3. Expressão</td><td>Escreva a função (SOP/POS) e simplifique se necessário.</td><td>Expressão original + simplificada</td><td>Reduzir portas/fios</td></tr>
+              <tr><td>4. Implementação</td><td>Monte com portas (simulação) ou implemente em código (Arduino).</td><td>Circuito funcional</td><td>Prototipagem rápida</td></tr>
+              <tr><td>5. Testes</td><td>Teste todas as combinações e registre resultados.</td><td>Matriz de testes + evidências</td><td>Diagnóstico e relatório</td></tr>
+              <tr><td>6. Diagnóstico</td><td>Se falhar, isole o problema (entrada, regra, ligação, alimentação).</td><td>Correção + justificativa</td><td>Manutenção e suporte</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo e no Projeto Integrador 2 — seu relatório deve refletir essas etapas.</div>
+
+        <h2>2) Erros comuns em circuitos digitais (e como identificar)</h2>
+        <p>
+          Na prática, muitos erros são recorrentes. Saber reconhecer os sintomas acelera o diagnóstico.
+        </p>
+        <ul>
+          <li><strong>Entrada flutuante:</strong> leitura muda sozinha → solução: pull-up/pull-down (Cap. 05).</li>
+          <li><strong>Inversão lógica:</strong> botão solto/pressionado invertido (pull-up) → solução: inverter no circuito ou no código.</li>
+          <li><strong>Mau contato:</strong> comportamento intermitente → solução: continuidade, refazer jumpers e conferir GND comum.</li>
+          <li><strong>Regra errada:</strong> montou OR mas precisava AND (ou vice-versa) → solução: comparar com tabela verdade.</li>
+          <li><strong>Alimentação ausente:</strong> CI sem Vcc/GND (em portas 74HCxx) → solução: conferir pinos de alimentação.</li>
+        </ul>
+        <div class="warning"><strong>Regra de ouro:</strong> quando algo “parece aleatório”, suspeite primeiro de <em>entrada flutuante</em> ou <em>mau contato</em>.</div>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo (diagnóstico guiado) e na rubrica do Projeto Integrador 2 (testes e evidências).</div>
+
+        <h2>3) Critérios de qualidade em lógica digital (o que um bom circuito deve ter)</h2>
+        <ul>
+          <li><strong>Comportamento determinístico:</strong> mesma entrada → mesma saída (sempre).</li>
+          <li><strong>Entradas definidas:</strong> nada de flutuação; use pull-up/pull-down.</li>
+          <li><strong>Documentação:</strong> tabela verdade, expressão e diagrama claros.</li>
+          <li><strong>Testes completos:</strong> todas as combinações testadas (2 entradas → 4 testes; 3 entradas → 8 testes).</li>
+        </ul>
+        <div class="note"><strong>Conexão com o próximo bimestre:</strong> no Cap. 09 você inicia sistemas embarcados (Arduino) de forma mais estruturada — o mesmo fluxo (requisito→teste) continua valendo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo prático: Sistema de decisão (A e B) com simulação + validação por tabela verdade</h2>
+        <p class="meta">
+          Vamos implementar um sistema simples e realista: <strong>“Acesso Liberado”</strong>.<br>
+          Entradas: A (credencial válida) e B (biometria ok). Saída: Y (acesso liberado) só quando <strong>A AND B</strong>.
+          Depois, vamos adicionar uma condição alternativa: <strong>Modo emergência</strong> (E) que libera com OR. (Opcional, extensão)
+        </p>
+
+        <h3>Definição do problema</h3>
+        <p>
+          Regra base: <strong>Y = A AND B</strong>. Se A=1 e B=1, libera. Caso contrário, bloqueia.
+          Isso é comum em TI: duas condições precisam ser verdadeiras para liberar (permissão + autenticação).
+        </p>
+
+        <div class="table-wrap" role="region" aria-label="Tabela verdade do acesso liberado">
+          <table>
+            <thead><tr><th>A</th><th>B</th><th>Y = A AND B</th><th>Interpretação</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td>Nenhuma condição</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td>Só biometria</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td>Só credencial</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td><td>Liberado</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Montagem no Tinkercad: entradas com pull-up (recomendado)</h4>
+            <p>Monte dois botões (A e B) com pull-up para evitar flutuação.</p>
+            <ul>
+              <li><strong>Opção 1 (Arduino):</strong> use <code>INPUT_PULLUP</code> e ligue cada botão entre pino e GND (mais simples).</li>
+              <li><strong>Opção 2 (sem Arduino):</strong> use resistores 10kΩ como pull-down e conecte o botão ao 5V.</li>
+            </ul>
+            <div class="note"><strong>Escolha recomendada:</strong> Opção 1 com Arduino porque elimina resistor extra e padroniza o laboratório.</div>
+          </div>
+
+          <div class="step">
+            <h4>Saída: LED “LIBERADO” com resistor</h4>
+            <p>Conecte um LED com resistor 220Ω para indicar a saída Y.</p>
+            <ul>
+              <li>LED Y → pino 9 (Arduino) → resistor 220Ω → LED → GND</li>
+            </ul>
+            <div class="warning"><strong>Não</strong> ligue LED sem resistor (pode danificar o LED ou o pino).</div>
+          </div>
+
+          <div class="step">
+            <h4>Código: implementar Y = A AND B + validação por tabela verdade</h4>
+            <p>O código abaixo lê A e B, calcula AND e imprime a tabela verdade ao iniciar.</p>
+            <pre><code class="language-cpp">// EATI - Capítulo 08
+// Sistema de decisão simples: Acesso Liberado
+// Regra: Y = A AND B
+
+const int BTN_A = 2;
+const int BTN_B = 3;
+const int LED_Y = 9;
+
+bool tabelaImpressa = false;
+
+void printTruthTable(){
+  Serial.println("\nTABELA VERDADE: Y = A AND B");
+  Serial.println("A B | Y");
+  for(int A=0; A&lt;=1; A++){
+    for(int B=0; B&lt;=1; B++){
+      int Y = (A &amp;&amp; B);
+      Serial.print(A); Serial.print(" ");
+      Serial.print(B); Serial.print(" | ");
+      Serial.println(Y);
+    }
+  }
+  Serial.println("-------------------------");
+}
+
+void setup(){
+  pinMode(BTN_A, INPUT_PULLUP);
+  pinMode(BTN_B, INPUT_PULLUP);
+  pinMode(LED_Y, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop(){
+  if(!tabelaImpressa){
+    printTruthTable();
+    tabelaImpressa = true;
+  }
+
+  // Pull-up: solto=1, pressionado=0. Inverter para ficar intuitivo: pressionado=1
+  int A = (digitalRead(BTN_A) == LOW) ? 1 : 0;
+  int B = (digitalRead(BTN_B) == LOW) ? 1 : 0;
+
+  int Y = (A &amp;&amp; B);
+  digitalWrite(LED_Y, Y);
+
+  Serial.print("A=" ); Serial.print(A);
+  Serial.print(" B=" ); Serial.print(B);
+  Serial.print(" | Y=" ); Serial.println(Y);
+
+  delay(200);
+}
+</code></pre>
+            <div class="callout"><strong>Onde vou aplicar isso:</strong> a saída Y segue a tabela verdade e serve como modelo de decisão do Projeto Integrador 2.</div>
+          </div>
+
+          <div class="step">
+            <h4>Teste sistemático (4 casos)</h4>
+            <p>Teste as 4 combinações e registre os resultados:</p>
+            <ul>
+              <li>00: nenhum botão pressionado → Y=0</li>
+              <li>01: apenas B → Y=0</li>
+              <li>10: apenas A → Y=0</li>
+              <li>11: A e B → Y=1</li>
+            </ul>
+            <div class="note"><strong>Evidência:</strong> tire print do circuito + print do Serial Monitor mostrando os 4 casos.</div>
+          </div>
+
+          <div class="step">
+            <h4>Diagnóstico guiado (simule um defeito e corrija)</h4>
+            <p>Escolha 1 defeito proposital e registre o diagnóstico:</p>
+            <ul>
+              <li><strong>Defeito 1:</strong> inverter a lógica (usar OR no lugar de AND) → corrigir pelo requisito/tabela.</li>
+              <li><strong>Defeito 2:</strong> remover pull-up (pino INPUT) → observar flutuação → corrigir com INPUT_PULLUP ou resistor.</li>
+              <li><strong>Defeito 3:</strong> mau contato em GND → comportamento intermitente → corrigir cabos e GND comum.</li>
+            </ul>
+            <div class="warning"><strong>Meta:</strong> mostrar que você sabe “ir do sintoma à causa” usando tabela verdade e inspeção de montagem.</div>
+          </div>
+
+          <div class="step">
+            <h4>Extensão opcional (nível bônus): modo emergência</h4>
+            <p>Adicione uma entrada E (emergência) que libera acesso mesmo sem A e B:</p>
+            <div class="formula">Y = (A AND B) OR E</div>
+            <p>Crie a tabela verdade com 3 entradas (8 linhas) e implemente com um terceiro botão.</p>
+          </div>
+        </div>
+
+        <div class="danger"><strong>Segurança:</strong> na bancada real, evite curto entre 5V e GND. Organize cabos e use resistores nos LEDs. Se medir corrente, lembre: multímetro em série (Cap. 04).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Projeto Integrador 2 (Bimestre 2)</h2>
+        <p class="meta">
+          <span class="project-badge">Entrega do B2</span>
+          <span style="margin-left:10px" class="pill">Tema: Sistema Digital de Decisão Simples</span>
+        </p>
+
+        <h3>1) Proposta</h3>
+        <p>
+          Desenvolver um sistema digital que toma uma decisão a partir de entradas (botões/sensores digitais) e aciona uma saída (LED/buzzer/relé simulado).
+          O sistema deve ser descrito por <strong>tabela verdade</strong> e <strong>expressão lógica</strong> e deve ser <strong>testado</strong> em todas as combinações.
+        </p>
+
+        <h3>2) Requisitos mínimos</h3>
+        <ul>
+          <li>No mínimo <strong>2 entradas</strong> (A e B) e <strong>1 saída</strong> (Y). (Bônus: 3 entradas).</li>
+          <li>Uma <strong>tabela verdade</strong> completa (2 entradas=4 linhas; 3 entradas=8 linhas).</li>
+          <li>Uma <strong>expressão lógica</strong> (original) e uma tentativa de <strong>simplificação</strong> (quando aplicável).</li>
+          <li>Implementação em <strong>simulação</strong> (Tinkercad) e/ou bancada real.</li>
+          <li>Testes completos com registro (prints/fotos + matriz de testes).</li>
+          <li>Diagnóstico: incluir <strong>1 falha proposital</strong> e como você corrigiu.</li>
+        </ul>
+
+        <h3>3) Exemplos de temas (escolha 1)</h3>
+        <ul>
+          <li><strong>Alarme simples:</strong> dispara se (porta aberta OR movimento) AND NOT(modo manutenção).</li>
+          <li><strong>Liberação de acesso:</strong> libera se (credencial AND biometria) OR emergência.</li>
+          <li><strong>Verificador de condição:</strong> LED verde se “OK” e LED vermelho se “falha” com regras lógicas claras.</li>
+          <li><strong>Intertravamento:</strong> só liga um atuador se duas condições de segurança forem verdadeiras.</li>
+        </ul>
+
+        <h3>4) Entregáveis</h3>
+        <ul>
+          <li><strong>Diagrama</strong> (foto/print + legenda dos pinos).</li>
+          <li><strong>Tabela verdade</strong> e <strong>expressão</strong> (original e simplificada).</li>
+          <li><strong>Matriz de testes</strong> (todas as combinações) com evidência.</li>
+          <li><strong>Relatório técnico curto</strong> (1 página ou 20–30 linhas).</li>
+        </ul>
+
+        <h3>5) Matriz de testes (modelo)</h3>
+        <div class="table-wrap" role="region" aria-label="Matriz de testes do Projeto Integrador 2">
+          <table>
+            <thead>
+              <tr>
+                <th>Entrada A</th>
+                <th>Entrada B</th>
+                <th>Saída esperada (Y)</th>
+                <th>Saída observada (Y)</th>
+                <th>OK?</th>
+                <th>Evidência (print/foto)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>0</td><td>1</td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>1</td><td>0</td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>1</td><td>1</td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>6) Modelo de relatório (copiável)</h3>
+        <p class="meta">Use o texto abaixo como modelo. Preencha e cole no seu documento final.</p>
+        <textarea id="reportTemplate">RELATÓRIO TÉCNICO — PROJETO INTEGRADOR 2 (B2)
+
+1) Identificação
+- Estudante(s):
+- Turma:
+- Data:
+- Ferramenta usada: ( ) Tinkercad  ( ) Bancada física
+
+2) Objetivo
+Desenvolver e validar um sistema digital de decisão simples com base em tabela verdade e expressão lógica, incluindo testes completos e diagnóstico de uma falha proposital.
+
+3) Definição do problema
+- Entradas (A, B, ...):
+- Saída(s) (Y, ...):
+- Regra lógica (texto):
+
+4) Modelagem
+- Tabela verdade:
+- Expressão lógica (original):
+- Expressão lógica (simplificada):
+
+5) Implementação
+- Descrição do circuito (pinos e componentes):
+- Prints/fotos anexados: ( ) sim  ( ) não
+
+6) Testes (todas as combinações)
+- Matriz de testes preenchida.
+- Resultado: ( ) comportamento correto  ( ) houve divergência
+
+7) Diagnóstico (falha proposital)
+- Falha inserida:
+- Sintoma observado:
+- Evidência (qual teste revelou):
+- Correção realizada:
+- Resultado após correção:
+
+8) Conclusão
+(8 a 12 linhas: o que aprendeu, como a tabela verdade ajudou, como você diagnosticou e por que a expressão simplificada é útil.)</textarea>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">
+          <button class="btn" type="button" onclick="copyReport()">📋 Copiar modelo</button>
+          <button class="btn" type="button" onclick="fillReportAuto()">✨ Preencher data</button>
+        </div>
+        <p id="copyMsg" class="meta" style="margin-top:10px"></p>
+
+        <h3>7) Critérios de avaliação (rubrica)</h3>
+        <div class="rubric">
+          <div class="item"><strong>Modelagem lógica</strong><br>Tabela verdade completa e coerente; expressão correta; simplificação justificada.</div>
+          <div class="item"><strong>Implementação</strong><br>Circuito bem montado/simulado, entradas estáveis (pull-up/pull-down), saídas corretas.</div>
+          <div class="item"><strong>Testes e diagnóstico</strong><br>Testou todas as combinações; identificou e corrigiu falha com evidências.</div>
+          <div class="item"><strong>Documentação técnica</strong><br>Relatório claro, prints/fotos, matriz de testes e conclusão objetiva.</div>
+        </div>
+
+        <div class="note"><strong>Entrega mínima:</strong> diagrama + tabela verdade + expressão + matriz de testes completa + relatório curto.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="O fluxo correto começa por requisitos, depois tabela verdade, depois expressão e implementação/testes.">
+          <p><strong>1.</strong> Qual sequência é mais correta para projetar um circuito lógico?</p>
+          <label><input type="radio" name="q1" value="a"> Implementar → adivinhar → testar</label>
+          <label><input type="radio" name="q1" value="b"> Comprar componentes → ligar → escrever tabela</label>
+          <label><input type="radio" name="q1" value="c"> Requisitos → tabela verdade → expressão → implementação → testes</label>
+          <label><input type="radio" name="q1" value="d"> Tensão → corrente → potência → tabela verdade</label>
+          <label><input type="radio" name="q1" value="e"> Medir continuidade → desenhar → ignorar tabela</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Entrada flutuante pode ler valores aleatórios por ruído. Pull-up/pull-down define um estado padrão.">
+          <p><strong>2.</strong> O principal sintoma de uma entrada flutuante é:</p>
+          <label><input type="radio" name="q2" value="a"> A saída fica sempre em 1</label>
+          <label><input type="radio" name="q2" value="b"> Leituras instáveis/aleatórias sem mexer no circuito</label>
+          <label><input type="radio" name="q2" value="c"> A tensão da fonte aumenta</label>
+          <label><input type="radio" name="q2" value="d"> O LED queima imediatamente</label>
+          <label><input type="radio" name="q2" value="e"> A resistência do resistor muda</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Para 3 entradas, existem 2^3=8 combinações; para 2 entradas, 4.">
+          <p><strong>3.</strong> Uma tabela verdade com 3 entradas possui quantas combinações?</p>
+          <label><input type="radio" name="q3" value="a"> 2</label>
+          <label><input type="radio" name="q3" value="b"> 4</label>
+          <label><input type="radio" name="q3" value="c"> 6</label>
+          <label><input type="radio" name="q3" value="d"> 8</label>
+          <label><input type="radio" name="q3" value="e"> 16</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="Em pull-up, botão solto lê HIGH (1) e pressionado lê LOW (0). Muitos projetos invertem em código.">
+          <p><strong>4.</strong> Em <code>INPUT_PULLUP</code>, o botão solto normalmente lê:</p>
+          <label><input type="radio" name="q4" value="a"> 1 (HIGH)</label>
+          <label><input type="radio" name="q4" value="b"> 0 (LOW)</label>
+          <label><input type="radio" name="q4" value="c"> -1</label>
+          <label><input type="radio" name="q4" value="d"> 2</label>
+          <label><input type="radio" name="q4" value="e"> 1023</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="Y=A AND B só é 1 quando A=1 e B=1.">
+          <p><strong>5.</strong> Para Y = A AND B, em qual caso Y=1?</p>
+          <label><input type="radio" name="q5" value="a"> A=0, B=0</label>
+          <label><input type="radio" name="q5" value="b"> A=0, B=1</label>
+          <label><input type="radio" name="q5" value="c"> A=1, B=0</label>
+          <label><input type="radio" name="q5" value="d"> A=0, B=0 ou A=1, B=0</label>
+          <label><input type="radio" name="q5" value="e"> A=1, B=1</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Diagnóstico em lógica digital se apoia em comparação com tabela verdade e inspeção de ligações/entradas definidas.">
+          <p><strong>6.</strong> Se o circuito está “aleatório”, qual suspeita é mais provável primeiro?</p>
+          <label><input type="radio" name="q6" value="a"> A tabela verdade está errada por definição</label>
+          <label><input type="radio" name="q6" value="b"> Entrada flutuante ou mau contato</label>
+          <label><input type="radio" name="q6" value="c"> Resistores somaram em paralelo</label>
+          <label><input type="radio" name="q6" value="d"> A potência da fonte é alta demais</label>
+          <label><input type="radio" name="q6" value="e"> A Lei de Ohm não existe em circuitos digitais</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Testes completos significam testar todas as combinações das entradas e comparar com a saída esperada.">
+          <p><strong>7.</strong> Um teste completo para 2 entradas significa:</p>
+          <label><input type="radio" name="q7" value="a"> Testar apenas 00 e 11</label>
+          <label><input type="radio" name="q7" value="b"> Testar só quando der erro</label>
+          <label><input type="radio" name="q7" value="c"> Testar um caso e assumir o resto</label>
+          <label><input type="radio" name="q7" value="d"> Testar 00, 01, 10 e 11 e registrar</label>
+          <label><input type="radio" name="q7" value="e"> Testar apenas com multímetro</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="Simplificar reduz portas e fios mantendo comportamento, ajudando confiabilidade.">
+          <p><strong>8.</strong> Um benefício típico de simplificar uma expressão lógica é:</p>
+          <label><input type="radio" name="q8" value="a"> Aumentar a chance de mau contato</label>
+          <label><input type="radio" name="q8" value="b"> Tornar o circuito maior sem necessidade</label>
+          <label><input type="radio" name="q8" value="c"> Reduzir portas/fios mantendo o mesmo resultado</label>
+          <label><input type="radio" name="q8" value="d"> Eliminar a necessidade de testes</label>
+          <label><input type="radio" name="q8" value="e"> Impedir uso de AND e OR</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Sei seguir o fluxo requisito → tabela verdade → expressão → implementação → testes.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo montar entradas definidas (pull-up/pull-down) sem flutuação.</label></li>
+          <li><label><input type="checkbox" class="ck"> Testei todas as combinações e registrei uma matriz de testes.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo diagnosticar erro de regra (OR vs AND) e erro de montagem (GND/mau contato).</label></li>
+          <li><label><input type="checkbox" class="ck"> Tenho a documentação do Projeto Integrador 2 pronta para entrega.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+
+        <h3>Pesquisas complementares</h3>
+        <ul>
+          <li>ICs 74HCxx mais comuns (74HC08 AND, 74HC32 OR, 74HC04 NOT, 74HC00 NAND).</li>
+          <li>Debounce em botões e histerese (Schmitt trigger).</li>
+          <li>Mapas de Karnaugh (2 e 3 variáveis) para simplificação rápida.</li>
+          <li>Boas práticas de testes: matriz de casos, evidências e relatório.</li>
+        </ul>
+
+        <div class="note">
+          <strong>Próximo capítulo:</strong> <a href="capitulo09.html"><strong>Capítulo 09 — Fundamentos de Sistemas Embarcados e Plataforma Arduino</strong></a>.
+          Agora você vai avançar para microcontroladores e I/O de forma estruturada.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 08</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+
+  // Project helpers
+  function copyReport(){
+    const ta = document.getElementById('reportTemplate');
+    ta.select();
+    ta.setSelectionRange(0, 999999);
+    try {
+      document.execCommand('copy');
+      document.getElementById('copyMsg').textContent = 'Modelo copiado para a área de transferência.';
+    } catch(e){
+      document.getElementById('copyMsg').textContent = 'Não foi possível copiar automaticamente. Selecione e copie manualmente.';
+    }
+  }
+
+  function fillReportAuto(){
+    const ta = document.getElementById('reportTemplate');
+    const today = new Date();
+    const dt = today.toLocaleDateString('pt-BR');
+    ta.value = ta.value.replace('- Data:', '- Data: ' + dt);
+    document.getElementById('copyMsg').textContent = 'Data preenchida. Agora complete o restante.';
+  }
+</script>
+</body>
+</html>

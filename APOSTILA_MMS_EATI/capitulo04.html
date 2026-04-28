@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo04.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 04 — Instrumentos de Medição, Segurança, ESD e Projeto Integrador 1</title>
+  <meta name="description" content="Apostila EATI — Capítulo 04: instrumentos de medição (multímetro), técnicas de medição, segurança elétrica, prevenção ESD, descarte adequado e Projeto Integrador 1 (bancada segura + diagnóstico de circuito)." />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+
+      --ok:#0a7a3b;
+      --bad:#9b2c2c;
+      --warn:#9a6700;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      min-height:72px;padding:10px 0;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{
+      width:48px;height:48px;border-radius:14px;
+      display:grid;place-items:center;
+      color:#fff;font-weight:900;letter-spacing:.04em;
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      box-shadow:0 14px 24px rgba(0,0,238,.20);
+      flex-shrink:0;
+    }
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 12px;border-radius:999px;
+      font-weight:900;font-size:.92rem;
+      border:1px solid transparent;
+      color:var(--text);
+      background:transparent;
+    }
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      color:#fff;border-color:transparent;
+      box-shadow:0 12px 20px rgba(0,0,238,.18);
+    }
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    /* Cards */
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow-lg);
+      overflow:hidden;
+    }
+    .card-inner{padding:22px}
+
+    .hero{
+      border-radius:var(--radius-lg);
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;right:-80px;top:-80px;
+      width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);
+      pointer-events:none;
+    }
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:7px 12px;
+      border-radius:999px;
+      font-weight:900;
+      color:var(--primary-800);
+      font-size:.85rem;
+    }
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .callout{
+      border-left:4px solid var(--primary);
+      background:var(--surface-soft);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .callout strong{color:var(--primary-800)}
+
+    .warning{
+      border-left:4px solid #ffb300;
+      background:rgba(255, 200, 0, .12);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .warning strong{color:var(--warn)}
+
+    .danger{
+      border-left:4px solid #e53935;
+      background:rgba(229,57,53,.10);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .danger strong{color:var(--bad)}
+
+    .note{
+      border:1px dashed var(--line);
+      background:rgba(238,243,255,.7);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);
+      border-radius:18px;
+      padding:16px;
+    }
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0;color:var(--muted)}
+
+    /* Table */
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:920px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    /* Steps */
+    .steps{counter-reset: step}
+    .step{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:16px;
+      margin:12px 0;
+    }
+    .step h4{margin:0 0 8px;color:var(--primary-800)}
+    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
+    .step p{margin:0 0 10px;color:var(--muted)}
+
+    /* Tool cards */
+    .tool{border:1px solid var(--line);border-radius:18px;background:#fff;padding:16px}
+    .tool h4{margin:0 0 8px;color:var(--primary-800)}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;color:var(--primary-800);
+      font-size:.86rem;
+    }
+
+    /* Quiz */
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;cursor:pointer;
+      color:var(--primary-800);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:var(--ok)} .no{color:var(--bad)}
+    .gabarito{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(0,0,238,.06);
+      border:1px solid rgba(0,0,238,.15);
+      color:var(--muted);
+    }
+
+    /* Checklist */
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    /* Project */
+    .project-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      background:rgba(0,0,238,.08);
+      border:1px solid rgba(0,0,238,.18);
+      color:var(--primary-800);
+      font-weight:900;
+    }
+    .rubric{display:grid;gap:10px}
+    .rubric .item{border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px}
+    .rubric .item strong{color:var(--primary-800)}
+
+    textarea{
+      width:100%;
+      min-height:220px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px 14px;
+      background:#fff;
+      color:var(--text);
+      resize:vertical;
+    }
+
+    /* Back-to-top */
+    .back-top{
+      position:fixed;right:18px;bottom:18px;z-index:1050;
+      width:50px;height:50px;display:none;place-items:center;
+      border:1px solid var(--line);background:#fff;color:var(--primary-800);
+      border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer;
+    }
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+      table{min-width:760px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 04</strong>
+        <span>Medição • Segurança • ESD • Projeto Integrador 1</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
+      <a href="capitulo03.html" title="Voltar para o Capítulo 03">⬅️ Anterior</a>
+      <a class="primary" href="capitulo05.html" title="Avançar para o Capítulo 05">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">1º Bimestre • Semanas 7–8 • Medição + Segurança + ESD</div>
+        <h1>Instrumentos de Medição, Segurança, ESD e Projeto Integrador 1</h1>
+        <p class="meta">
+          Este capítulo fecha o 1º bimestre: você aprende a <strong>medir</strong> com segurança (tensão, corrente, resistência/continuidade),
+          organiza a bancada, aplica prevenção contra <strong>ESD</strong> e pratica diagnóstico. Ao final, você entrega o <strong>Projeto Integrador 1</strong>.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Identificar partes do multímetro e selecionar escalas corretamente.</li>
+              <li>Medir tensão em paralelo e corrente em série sem risco de curto.</li>
+              <li>Medir resistência/continuidade com o circuito desenergizado.</li>
+              <li>Aplicar regras de segurança elétrica e organização de bancada.</li>
+              <li>Compreender ESD e aplicar prevenção no manuseio de componentes.</li>
+              <li>Registrar medições e evidências em formato técnico.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Cap. 01–03 (conceitos, grandezas, Lei de Ohm, Kirchhoff, série/paralelo).</li>
+              <li>Noções de polaridade (V+ e GND) e identificação de terminais.</li>
+            </ul>
+            <div class="note">
+              <strong>Ferramentas:</strong> Multímetro (real ou Tinkercad), protoboard, resistores, LED, jumpers.
+              <strong>Importante:</strong> se estiver em laboratório, siga as regras da instituição e do professor.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Instrumentos de medição: o que medimos e por quê</h2>
+        <p>
+          Em manutenção de TI, medir corretamente é o que separa diagnóstico técnico de “chute”. Você usa instrumentos para confirmar hipóteses:
+          <strong>tem tensão?</strong> <strong>há curto?</strong> <strong>a resistência está coerente?</strong> <strong>a fonte está entregando o valor correto?</strong>.
+        </p>
+
+        <div class="grid-3">
+          <div class="tool">
+            <h4>Multímetro digital</h4>
+            <p>Instrumento mais usado: mede <strong>tensão (V)</strong>, <strong>corrente (A/mA)</strong>, <strong>resistência (Ω)</strong>, <strong>continuidade</strong> e, em alguns modelos, <strong>diodo</strong> e <strong>capacitância</strong>.</p>
+          </div>
+          <div class="tool">
+            <h4>Fonte ajustável / USB</h4>
+            <p>Ajuda a alimentar circuitos com segurança. Em TI, entender alimentação (5 V, 12 V) é essencial para testes e prototipagem.</p>
+          </div>
+          <div class="tool">
+            <h4>Simuladores</h4>
+            <p>Tinkercad/Wokwi permitem validar montagem e medições sem risco físico, reforçando o raciocínio antes da bancada.</p>
+          </div>
+        </div>
+
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao testar fontes, medir trilhos (rails), verificar cabos/conectores e diagnosticar falhas em circuitos simples (e depois, em hardware real).</div>
+
+        <h2>2) Multímetro: partes, bornes e escalas (evitando os erros mais caros)</h2>
+        <p>
+          O multímetro tem normalmente três pontos de conexão (bornes): <strong>COM</strong> (preto), <strong>VΩ</strong> (vermelho para tensão/resistência/continuidade) e
+          <strong>A ou mA</strong> (vermelho para corrente). Muitos acidentes acontecem por colocar o cabo vermelho no borne de corrente e tentar medir tensão.
+        </p>
+
+        <div class="danger"><strong>Atenção (erro comum):</strong> medir <strong>tensão</strong> com o cabo no borne de <strong>corrente</strong> pode causar curto e queimar fusível do multímetro (ou o circuito).</div>
+
+        <h3>2.1 Seleção de escala</h3>
+        <p>
+          Em multímetros manuais, você escolhe a escala (ex.: 20 V DC, 200 Ω). Em multímetros auto-range, o aparelho escolhe automaticamente.
+          Regra prática: comece pela escala maior e reduza para aumentar precisão.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao medir 5 V/12 V em circuitos e ao medir resistores (Ω) sem “estourar” a escala.</div>
+
+        <h2>3) Técnicas de medição (as 3 regras de ouro)</h2>
+        <h3>3.1 Medir tensão (V): sempre em paralelo</h3>
+        <p>
+          Tensão é diferença de potencial entre dois pontos. Portanto, você mede tensão <strong>em paralelo</strong> com o elemento ou entre dois pontos do circuito.
+          Ex.: medir 5 V entre V+ e GND.
+        </p>
+        <div class="callout"><strong>Aplicação:</strong> verificar se a fonte fornece 5 V, medir queda no LED e quedas em resistores (KVL).</div>
+
+        <h3>3.2 Medir corrente (A/mA): sempre em série</h3>
+        <p>
+          Corrente é o fluxo que passa pelo caminho do circuito. Para medir, o multímetro deve fazer parte do caminho, ou seja, ser colocado <strong>em série</strong>.
+          Você “abre” o circuito e insere o multímetro no meio.
+        </p>
+        <div class="danger"><strong>Perigo:</strong> ligar o multímetro em modo corrente em paralelo com a fonte equivale a criar um curto.</div>
+        <div class="callout"><strong>Aplicação:</strong> medir consumo do LED e comparar com o cálculo da Lei de Ohm; detectar correntes anormais (possível curto).</div>
+
+        <h3>3.3 Medir resistência/continuidade (Ω): circuito desenergizado</h3>
+        <p>
+          Ao medir resistência, o multímetro injeta uma pequena corrente interna para estimar o valor. Se o circuito estiver energizado, a leitura pode ficar errada e você pode danificar o instrumento.
+          Em continuidade, o multímetro emite um “bip” quando a resistência é baixa (indicando conexão).
+        </p>
+        <div class="callout"><strong>Aplicação:</strong> testar cabos, trilhas, jumpers, verificar mau contato, identificar curto (resistência muito baixa) com segurança.</div>
+
+        <h2>4) Segurança elétrica e organização da bancada</h2>
+        <p>
+          Segurança não é “burocracia”: é parte da competência técnica. Em TI, muitos acidentes são causados por improviso, cabos expostos, metal sobre bancada,
+          fonte sem isolamento, e manuseio sem descarregar energia residual.
+        </p>
+
+        <h3>4.1 Regras práticas de segurança</h3>
+        <ul>
+          <li><strong>Desenergize</strong> antes de medir resistência/continuidade.</li>
+          <li>Evite <strong>curtos</strong>: nunca encoste pontas de prova ao mesmo tempo em pontos indevidos.</li>
+          <li>Use <strong>uma mão</strong> quando possível em medições mais críticas (reduz caminho de corrente pelo corpo).</li>
+          <li>Mantenha a bancada <strong>seca</strong>, sem líquidos e com cabos organizados.</li>
+          <li>Verifique pontas de prova (isolamento, metal exposto, mau contato).</li>
+          <li>Ao final, <strong>desligue</strong> fontes e desconecte alimentação.</li>
+        </ul>
+
+        <h3>4.2 Organização (5S aplicado ao laboratório)</h3>
+        <ul>
+          <li><strong>Separar:</strong> deixar só o necessário na bancada.</li>
+          <li><strong>Organizar:</strong> cabos, jumpers e ferramentas em locais fixos.</li>
+          <li><strong>Limpar:</strong> poeira e sujeira aumentam falhas e risco de curto.</li>
+          <li><strong>Padronizar:</strong> checklist antes/depois da prática.</li>
+          <li><strong>Manter:</strong> registrar e corrigir problemas recorrentes (cabos ruins, pontas de prova).</li>
+        </ul>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no Projeto Integrador 1 e em todas as montagens futuras (Arduino/ESP32 e lógica digital).</div>
+
+        <h2>5) ESD — Descarga eletrostática (o “inimigo invisível”)</h2>
+        <p>
+          ESD é a descarga repentina de eletricidade estática entre corpos com cargas diferentes. O corpo humano pode acumular milhares de volts de carga estática
+          sem que você perceba. Essa descarga pode atravessar componentes sensíveis (chips) e causar danos imediatos ou falhas intermitentes.
+        </p>
+        <div class="warning"><strong>Importante:</strong> ESD pode <em>não</em> queimar o componente na hora; pode reduzir sua vida útil ou causar falhas difíceis de diagnosticar.</div>
+
+        <h3>5.1 Como prevenir ESD na prática</h3>
+        <ul>
+          <li>Use <strong>pulseira antiestática</strong> (quando disponível) conectada ao aterramento.</li>
+          <li>Toque em uma parte metálica aterrada antes de manusear placas.</li>
+          <li>Evite roupas que geram estática (lã/sintéticos) em ambientes secos.</li>
+          <li>Armazene placas em <strong>sacos antiestáticos</strong> (ESD bag), não em plástico comum.</li>
+          <li>Segure placas pelas bordas; evite tocar trilhas e contatos.</li>
+        </ul>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao manusear RAM, CPU, placas e módulos; e no Projeto Integrador 1 ao montar/medir circuitos com cuidado.</div>
+
+        <h2>6) Descarte adequado de materiais eletrônicos</h2>
+        <p>
+          Resíduos eletrônicos (e-lixo) contêm metais e materiais que podem ser nocivos ao meio ambiente. Em uma prática profissional, você deve separar lixo comum
+          de componentes eletrônicos, pilhas e baterias e descartar em pontos de coleta apropriados.
+        </p>
+        <ul>
+          <li><strong>Pilhas/baterias:</strong> descarte em coletores específicos.</li>
+          <li><strong>Placas e componentes:</strong> encaminhar como resíduo eletrônico.</li>
+          <li><strong>Cabos e fontes:</strong> separar para reciclagem quando possível.</li>
+        </ul>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao finalizar atividades práticas e organizar o laboratório de forma profissional (MSI1704).</div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Passo a passo prático: medições essenciais + diagnóstico de circuito básico</h2>
+        <p class="meta">
+          Objetivo: aplicar técnicas de medição com segurança e registrar evidências. Use um circuito LED + resistor (do Capítulo 02) e crie um “defeito” controlado.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Checklist de bancada (antes de energizar)</h4>
+            <p>Antes de ligar qualquer fonte, confirme:</p>
+            <ul>
+              <li>Bancada limpa e seca; sem objetos metálicos soltos.</li>
+              <li>Cabos organizados; pontas de prova íntegras.</li>
+              <li>Multímetro com cabo preto no <strong>COM</strong> e vermelho no borne correto (<strong>VΩ</strong> para tensão).</li>
+              <li>Fonte ajustada para tensão adequada (ex.: 5 V) e corrente limitada (se disponível).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h4>Medir tensão da fonte (V) — em paralelo</h4>
+            <p>Com o multímetro em <strong>DC V</strong>, meça entre V+ e GND da fonte. Registre o valor.</p>
+            <ul>
+              <li>V+ (ponta vermelha) e GND (ponta preta)</li>
+              <li>Se medir negativo, inverta as pontas (isso só indica polaridade invertida)</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h4>Medir queda de tensão no LED e no resistor (KVL)</h4>
+            <p>Com o circuito energizado e funcionando, meça:</p>
+            <ul>
+              <li>V no LED (ponta vermelha no ânodo, preta no cátodo)</li>
+              <li>V no resistor (pontas em cada extremidade do resistor)</li>
+              <li>Compare: Vfonte ≈ VLED + Vres (KVL)</li>
+            </ul>
+            <div class="note"><strong>Dica:</strong> valores variam conforme LED e resistor. O importante é validar a soma aproximada.</div>
+          </div>
+
+          <div class="step">
+            <h4>Medir corrente do circuito (I) — em série</h4>
+            <p>Agora você vai medir corrente com segurança:</p>
+            <ul>
+              <li>Desligue a fonte.</li>
+              <li>Mude o cabo vermelho para o borne <strong>mA</strong> (ou <strong>A</strong> conforme o multímetro).</li>
+              <li>Coloque o multímetro <strong>em série</strong> abrindo o circuito em um ponto (ex.: entre resistor e LED).</li>
+              <li>Ligue a fonte e leia a corrente.</li>
+            </ul>
+            <div class="danger"><strong>Não</strong> tente medir corrente em paralelo com a fonte. Isso pode causar curto.</div>
+          </div>
+
+          <div class="step">
+            <h4>Teste de resistência e continuidade (circuito desenergizado)</h4>
+            <p>Desligue a fonte e descarregue o circuito (aguarde alguns segundos). Depois:</p>
+            <ul>
+              <li>Meça o valor do resistor (Ω) e compare com o nominal (considere tolerância).</li>
+              <li>Teste continuidade em jumpers e trilhas (bip = conexão provável).</li>
+              <li>Se houver resistência muito baixa entre V+ e GND, suspeite de curto.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h4>Diagnóstico de falha proposital (caça ao erro)</h4>
+            <p>Crie <strong>um</strong> erro proposital e diagnostique:</p>
+            <ul>
+              <li>LED invertido (não acende) → medir V no LED e verificar polaridade.</li>
+              <li>Resistor errado (muito baixo) → corrente alta e risco; comparar I e P estimados.</li>
+              <li>Mau contato (jumper solto) → continuidade falha/intermitente.</li>
+            </ul>
+            <div class="callout"><strong>Aplicação:</strong> você usa medições para confirmar hipóteses, registrando evidência (valores e observações).</div>
+          </div>
+
+          <div class="step">
+            <h4>Registro técnico (mínimo)</h4>
+            <p>Registre: circuito, valores medidos, erro aplicado, diagnóstico e correção. Use a tabela sugerida no Projeto Integrador.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Projeto Integrador 1 (Bimestre 1)</h2>
+        <p class="meta">
+          <span class="project-badge">Entrega do B1</span>
+          <span style="margin-left:10px" class="pill">Tema: Bancada Segura + Diagnóstico de Circuito Básico</span>
+        </p>
+
+        <h3>1) Situação-problema</h3>
+        <p>
+          Você recebeu um circuito simples (ex.: LED + resistor + fonte) com um defeito proposital. Sua tarefa é organizar a bancada,
+          aplicar boas práticas de segurança e ESD, medir grandezas com o multímetro e registrar um diagnóstico técnico objetivo.
+        </p>
+
+        <h3>2) Entregáveis obrigatórios</h3>
+        <ul>
+          <li><strong>Checklist de bancada e segurança</strong> (antes/durante/depois).</li>
+          <li><strong>Esquema do circuito</strong> (pode ser desenho simples ou print do Tinkercad).</li>
+          <li><strong>Tabela de medições</strong> (Vfonte, VLED, Vres, I, R medido, continuidade).</li>
+          <li><strong>Diagnóstico</strong>: qual era o defeito, evidências (medições) e como foi corrigido.</li>
+          <li><strong>Relatório técnico curto</strong> (1 página ou 15–25 linhas).</li>
+        </ul>
+
+        <h3>3) Tabela de medições (modelo)</h3>
+        <div class="table-wrap" role="region" aria-label="Tabela de medições do Projeto Integrador 1">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Valor esperado</th>
+                <th>Valor medido</th>
+                <th>Unidade</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Tensão da fonte</td><td>Ex.: 5,0</td><td></td><td>V</td><td></td></tr>
+              <tr><td>Queda no LED (Vf)</td><td>Ex.: 1,8–3,2</td><td></td><td>V</td><td>Cor do LED?</td></tr>
+              <tr><td>Queda no resistor</td><td>Vfonte − Vf</td><td></td><td>V</td><td>KVL confere?</td></tr>
+              <tr><td>Corrente do circuito</td><td>Ex.: 5–20</td><td></td><td>mA</td><td>Em série</td></tr>
+              <tr><td>Resistência do resistor</td><td>Nominal</td><td></td><td>Ω</td><td>Desenergizado</td></tr>
+              <tr><td>Continuidade (cabo/jumper)</td><td>OK</td><td></td><td>—</td><td>Bip/Intermitente?</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>4) Roteiro de relatório (copiável)</h3>
+        <p class="meta">Use o texto abaixo como modelo. Preencha e cole no seu documento final.</p>
+        <textarea id="reportTemplate">RELATÓRIO TÉCNICO — PROJETO INTEGRADOR 1 (B1)
+
+1) Identificação
+- Estudante(s):
+- Turma:
+- Data:
+- Ferramenta usada: ( ) Tinkercad  ( ) Bancada física
+
+2) Objetivo
+Descrever a organização da bancada e o diagnóstico de um circuito básico utilizando medições elétricas com multímetro, aplicando segurança e prevenção ESD.
+
+3) Materiais utilizados
+- Fonte (tensão):
+- Protoboard/jumpers:
+- LED (cor):
+- Resistor (valor nominal):
+- Multímetro:
+
+4) Procedimento resumido
+- Checklist de bancada e segurança realizado.
+- Medição de tensão da fonte.
+- Medição de quedas de tensão (LED e resistor).
+- Medição de corrente em série.
+- Medição de resistência/continuidade com circuito desenergizado.
+
+5) Resultados (resuma sua tabela)
+- Vfonte:
+- VLED:
+- Vres:
+- I:
+- R medido:
+- Continuidade:
+
+6) Diagnóstico e correção
+- Defeito encontrado:
+- Evidências (medições que confirmam):
+- Correção aplicada:
+- Resultado após correção:
+
+7) Conclusão
+(Escreva 6 a 10 linhas: o que aprendeu, quais cuidados foram essenciais, e como a medição ajudou no diagnóstico.)</textarea>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">
+          <button class="btn" type="button" onclick="copyReport()">📋 Copiar modelo</button>
+          <button class="btn" type="button" onclick="fillReportAuto()">✨ Preencher cabeçalho (rápido)</button>
+        </div>
+        <p id="copyMsg" class="meta" style="margin-top:10px"></p>
+
+        <h3>5) Critérios de avaliação (rubrica)</h3>
+        <div class="rubric">
+          <div class="item"><strong>Segurança e organização (MSI1704 / MSI2204)</strong><br>Aplicou checklist, bancada limpa, cabos organizados, evitou riscos e seguiu procedimentos.</div>
+          <div class="item"><strong>Medição correta (MSI0105 / MSI2204)</strong><br>Escolheu bornes/escalas corretos, mediu V em paralelo e I em série, resistência com circuito desenergizado.</div>
+          <div class="item"><strong>Diagnóstico (MSI0106)</strong><br>Identificou defeito com evidências (medições) e justificou a correção.</div>
+          <div class="item"><strong>Documentação técnica (MSI17)</strong><br>Relatório claro, tabela completa e conclusões coerentes.</div>
+        </div>
+
+        <div class="note">
+          <strong>Entrega mínima:</strong> tabela preenchida + relatório curto + evidência (foto/print do circuito). Se for em grupo, descreva a divisão de tarefas.
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Tensão mede-se em paralelo porque é diferença de potencial entre dois pontos.">
+          <p><strong>1.</strong> Para medir tensão (V) em um componente, o multímetro deve ser conectado:</p>
+          <label><input type="radio" name="q1" value="a"> Em série com o circuito</label>
+          <label><input type="radio" name="q1" value="b"> Entre COM e mA</label>
+          <label><input type="radio" name="q1" value="c"> Somente no borne A</label>
+          <label><input type="radio" name="q1" value="d"> Em paralelo com o componente</label>
+          <label><input type="radio" name="q1" value="e"> Em qualquer posição, não importa</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Corrente mede-se em série; medir em paralelo pode provocar curto.">
+          <p><strong>2.</strong> Para medir corrente (A/mA), o multímetro deve ser conectado:</p>
+          <label><input type="radio" name="q2" value="a"> Em paralelo com a fonte</label>
+          <label><input type="radio" name="q2" value="b"> Em série com o circuito</label>
+          <label><input type="radio" name="q2" value="c"> Em paralelo com o resistor</label>
+          <label><input type="radio" name="q2" value="d"> Somente no borne VΩ</label>
+          <label><input type="radio" name="q2" value="e"> Sem desligar a fonte e sem abrir o circuito</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="Resistência/continuidade devem ser medidos com o circuito desenergizado.">
+          <p><strong>3.</strong> Antes de medir resistência (Ω), você deve:</p>
+          <label><input type="radio" name="q3" value="a"> Aumentar a tensão da fonte</label>
+          <label><input type="radio" name="q3" value="b"> Colocar o multímetro em mA</label>
+          <label><input type="radio" name="q3" value="c"> Medir com a fonte ligada para dar leitura real</label>
+          <label><input type="radio" name="q3" value="d"> Encostar as pontas no V+ e no GND ao mesmo tempo</label>
+          <label><input type="radio" name="q3" value="e"> Desligar/desenergizar o circuito</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="a" data-exp="ESD é descarga eletrostática; pode causar falhas imediatas ou intermitentes.">
+          <p><strong>4.</strong> ESD significa:</p>
+          <label><input type="radio" name="q4" value="a"> Descarga eletrostática</label>
+          <label><input type="radio" name="q4" value="b"> Fonte externa de dados</label>
+          <label><input type="radio" name="q4" value="c"> Sistema de energia digital</label>
+          <label><input type="radio" name="q4" value="d"> Cabo de alimentação especial</label>
+          <label><input type="radio" name="q4" value="e"> Software de diagnóstico</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="c" data-exp="Um erro comum é deixar o cabo no borne de corrente e tentar medir tensão, causando curto/fusível queimado.">
+          <p><strong>5.</strong> Um erro perigoso ao usar multímetro é:</p>
+          <label><input type="radio" name="q5" value="a"> Medir tensão com cabo no borne VΩ</label>
+          <label><input type="radio" name="q5" value="b"> Medir tensão entre V+ e GND</label>
+          <label><input type="radio" name="q5" value="c"> Tentar medir tensão com cabo no borne de corrente (A/mA)</label>
+          <label><input type="radio" name="q5" value="d"> Usar COM para o cabo preto</label>
+          <label><input type="radio" name="q5" value="e"> Começar pela escala maior e ajustar</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="d" data-exp="Continuidade indica caminho com baixa resistência (conexão provável) e ajuda a achar mau contato.">
+          <p><strong>6.</strong> O teste de continuidade é útil principalmente para:</p>
+          <label><input type="radio" name="q6" value="a"> Medir potência de uma fonte</label>
+          <label><input type="radio" name="q6" value="b"> Programar microcontroladores</label>
+          <label><input type="radio" name="q6" value="c"> Aumentar tensão de um circuito</label>
+          <label><input type="radio" name="q6" value="d"> Detectar conexão/mau contato em cabos e trilhas</label>
+          <label><input type="radio" name="q6" value="e"> Medir temperatura da placa</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="b" data-exp="Bancada organizada reduz risco de curto, falhas e acidentes, e melhora produtividade.">
+          <p><strong>7.</strong> A principal vantagem de uma bancada organizada é:</p>
+          <label><input type="radio" name="q7" value="a"> Aumentar automaticamente a tensão da fonte</label>
+          <label><input type="radio" name="q7" value="b"> Reduzir riscos e facilitar diagnóstico</label>
+          <label><input type="radio" name="q7" value="c"> Substituir o uso do multímetro</label>
+          <label><input type="radio" name="q7" value="d"> Evitar necessidade de relatório</label>
+          <label><input type="radio" name="q7" value="e"> Tornar o circuito mais potente</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+        <div class="q" data-a="e" data-exp="Pilhas e baterias devem ir para coletores específicos; placas/cabos devem ser encaminhados como e-lixo.">
+          <p><strong>8.</strong> Sobre descarte de materiais eletrônicos, é correto:</p>
+          <label><input type="radio" name="q8" value="a"> Pilhas podem ir no lixo comum</label>
+          <label><input type="radio" name="q8" value="b"> Placas devem ser queimadas para eliminar risco</label>
+          <label><input type="radio" name="q8" value="c"> E-lixo não precisa de separação</label>
+          <label><input type="radio" name="q8" value="d"> Cabos sempre devem ser enterrados</label>
+          <label><input type="radio" name="q8" value="e"> Pilhas/baterias devem ir para coleta específica</label>
+          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Sei identificar COM / VΩ / A(mA) no multímetro e quando usar cada borne.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei medir tensão em paralelo e corrente em série com segurança.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei medir resistência/continuidade com circuito desenergizado.</label></li>
+          <li><label><input type="checkbox" class="ck"> Aplico prevenção ESD (manuseio/armazenamento) corretamente.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consegui registrar medições e justificar um diagnóstico com evidências.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+        <div class="note">
+          <strong>Próximo bimestre:</strong> <a href="capitulo05.html"><strong>Capítulo 05 — Fundamentos de Lógica Digital</strong></a>.
+          Você vai iniciar a base digital (sinais, binário e lógica) que sustenta o funcionamento dos sistemas computacionais.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 04</div>
+</footer>
+
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+
+  // Project helpers
+  function copyReport(){
+    const ta = document.getElementById('reportTemplate');
+    ta.select();
+    ta.setSelectionRange(0, 999999);
+    try {
+      document.execCommand('copy');
+      document.getElementById('copyMsg').textContent = 'Modelo copiado para a área de transferência.';
+    } catch(e){
+      document.getElementById('copyMsg').textContent = 'Não foi possível copiar automaticamente. Selecione e copie manualmente.';
+    }
+  }
+
+  function fillReportAuto(){
+    const ta = document.getElementById('reportTemplate');
+    const today = new Date();
+    const dt = today.toLocaleDateString('pt-BR');
+    const snippet = 'RELATÓRIO TÉCNICO — PROJETO INTEGRADOR 1 (B1)';
+    if(!ta.value.includes(snippet)) return;
+    ta.value = ta.value.replace('- Data:', '- Data: ' + dt);
+    document.getElementById('copyMsg').textContent = 'Cabeçalho preenchido com a data de hoje. Agora complete o restante.';
+  }
+</script>
+</body>
+</html>

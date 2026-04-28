@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<!-- arquivo: capitulo01.html -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EATI • Capítulo 01 — Introdução à Eletrônica Aplicada à TI</title>
+  <meta name="description" content="Apostila EATI — Capítulo 01: Introdução à Eletrônica Aplicada à Tecnologia da Informação (origem da eletricidade, materiais, visão de hardware e preparação conceitual)." />
+
+  <style>
+    :root{
+      --bg:#f5f7ff;
+      --surface:#ffffff;
+      --surface-soft:#eef3ff;
+      --surface-strong:#e2eaff;
+      --text:#17233a;
+      --muted:#54627e;
+      --line:#d7def7;
+
+      /* Tema Azul */
+      --primary:#0000ee;
+      --primary-600:#0000cc;
+      --primary-700:#0000aa;
+      --primary-800:#000088;
+      --focus:0 0 0 4px rgba(0,0,238,.18);
+
+      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
+      --shadow-md:0 16px 38px rgba(23,35,58,.10);
+      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
+
+      --radius-sm:14px;
+      --radius-md:20px;
+      --radius-lg:28px;
+      --container:1100px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
+        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
+    a:hover{color:var(--primary-700)}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:none;box-shadow:var(--focus)}
+
+    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
+
+    /* Topbar */
+    header{
+      position:sticky;top:0;z-index:1000;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      min-height:72px;padding:10px 0;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .badge{
+      width:48px;height:48px;border-radius:14px;
+      display:grid;place-items:center;
+      color:#fff;font-weight:900;letter-spacing:.04em;
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      box-shadow:0 14px 24px rgba(0,0,238,.20);
+      flex-shrink:0;
+    }
+    .brand strong{display:block;line-height:1.1}
+    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
+
+    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav a{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 12px;border-radius:999px;
+      font-weight:900;font-size:.92rem;
+      border:1px solid transparent;
+      color:var(--text);
+      background:transparent;
+    }
+    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
+    .nav a.primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary-800));
+      color:#fff;border-color:transparent;
+      box-shadow:0 12px 20px rgba(0,0,238,.18);
+    }
+    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
+
+    main{padding-bottom:56px}
+
+    /* Layout cards */
+    section{padding:18px 0;scroll-margin-top:90px}
+    .card{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow-lg);
+      overflow:hidden;
+    }
+    .card-inner{padding:22px}
+
+    .hero{
+      border-radius:var(--radius-lg);
+      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;right:-80px;top:-80px;
+      width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);
+      pointer-events:none;
+    }
+
+    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
+    .meta{color:var(--muted);margin:0 0 14px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+
+    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
+    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
+    p{margin:0 0 12px}
+    ul{margin:0 0 12px;padding-left:18px}
+    li{margin:6px 0}
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:7px 12px;
+      border-radius:999px;
+      font-weight:900;
+      color:var(--primary-800);
+      font-size:.85rem;
+    }
+
+    .callout{
+      border-left:4px solid var(--primary);
+      background:var(--surface-soft);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+    .callout strong{color:var(--primary-800)}
+
+    .note{
+      border:1px dashed var(--line);
+      background:rgba(238,243,255,.7);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:14px 0;
+    }
+
+    .mini{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);
+      border-radius:18px;
+      padding:16px;
+    }
+    .mini h4{margin:0 0 8px;color:var(--primary-800)}
+    .mini p{margin:0}
+
+    /* Glossário */
+    dl{margin:0}
+    dt{font-weight:900;color:var(--primary-800);margin-top:10px}
+    dd{margin:4px 0 0 0;color:var(--muted)}
+
+    /* Quiz */
+    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;cursor:pointer;
+      color:var(--primary-800);
+      box-shadow:var(--shadow-sm);
+    }
+    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    .q{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .q p{margin:0 0 10px}
+    .q label{display:block;margin:6px 0;color:var(--muted)}
+    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .res{margin-left:6px;font-weight:900}
+    .ok{color:#0a7a3b} .no{color:#9b2c2c}
+    .gabarito{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(0,0,238,.06);
+      border:1px solid rgba(0,0,238,.15);
+      color:var(--muted);
+    }
+
+    /* Checklist */
+    .checklist li{list-style:none;margin:8px 0}
+    .checklist input{transform:translateY(1px);margin-right:10px}
+
+    /* Table */
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
+    table{width:100%;border-collapse:collapse;min-width:760px;background:#fff}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
+
+    /* Back-to-top */
+    .back-top{
+      position:fixed;right:18px;bottom:18px;z-index:1050;
+      width:50px;height:50px;display:none;place-items:center;
+      border:1px solid var(--line);background:#fff;color:var(--primary-800);
+      border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer;
+    }
+    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
+
+    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
+
+    @media (max-width:900px){
+      .grid-2{grid-template-columns:1fr}
+      .brand span{max-width:40ch}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container topbar">
+    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
+      <div class="badge">EATI</div>
+      <div>
+        <strong>Capítulo 01</strong>
+        <span>Introdução à Eletrônica Aplicada à Tecnologia da Informação</span>
+      </div>
+    </a>
+
+    <nav class="nav" aria-label="Navegação do capítulo">
+      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
+      <a href="index_eati.html" title="Voltar (anterior)">⬅️ Anterior</a>
+      <a class="primary" href="capitulo02.html" title="Avançar para o Capítulo 02">Próximo ➡️</a>
+    </nav>
+  </div>
+</header>
+
+<main id="topo">
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner hero">
+        <div class="tag">1º Bimestre • Semanas 1–2 • Fundamentos</div>
+        <h1>Introdução à Eletrônica Aplicada à TI</h1>
+        <p class="meta">
+          Neste capítulo você constrói a base conceitual: origem da eletricidade, comportamento das cargas e classificação de materiais.
+          Você também entende por que esse conhecimento é essencial para <strong>montagem, diagnóstico e manutenção</strong> de hardware.
+        </p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <h4>Objetivos de aprendizagem</h4>
+            <ul>
+              <li>Explicar, com suas palavras, o que é eletrônica aplicada à TI.</li>
+              <li>Descrever a estrutura do átomo e a origem do fluxo de elétrons.</li>
+              <li>Diferenciar condutores, isolantes e semicondutores e citar exemplos.</li>
+              <li>Relacionar eletricidade e eletrônica ao funcionamento de componentes de hardware.</li>
+              <li>Reconhecer situações comuns em TI em que esses conceitos aparecem.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Pré-requisitos</h4>
+            <ul>
+              <li>Noções básicas de informática e de componentes (placa-mãe, fonte, memória, HD/SSD, periféricos).</li>
+              <li>Curiosidade para observar, comparar e explicar fenômenos (por que aquece, por que falha, por que queima).</li>
+            </ul>
+            <div class="note">
+              <strong>Importante:</strong> por ser um capítulo conceitual, não há passo a passo de montagem nem código.
+              A prática começa de forma estruturada a partir do Capítulo 02 e, principalmente, no Capítulo 04.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner">
+        <h2>1) Eletrônica aplicada à TI: o que é e por que importa</h2>
+        <p>
+          <strong>Eletrônica aplicada à TI</strong> é o estudo dos princípios elétricos e eletrônicos que fazem os equipamentos de informática
+          funcionarem. Em TI, a eletrônica aparece em fontes, placas-mãe, placas de vídeo, módulos de memória, periféricos e em qualquer dispositivo
+          que processa sinais elétricos para representar dados. Quando você entende o básico — como a energia chega, como é controlada e como os materiais
+          conduzem — você passa a diagnosticar com mais segurança e com menos “tentativa e erro”.
+        </p>
+        <p>
+          No curso técnico, esse conhecimento é útil porque muitas falhas típicas de laboratório e manutenção são, na prática, consequências de fenômenos
+          elétricos: mau contato, sobrecorrente, aquecimento, curto-circuito, oxidação, tensão fora de especificação, ESD (descarga eletrostática) e
+          desgaste de componentes. Entender eletrônica não significa “decorar fórmulas” — significa <strong>interpretar sintomas</strong> e tomar decisões técnicas.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao avaliar por que um PC não liga, reinicia sozinho, aquece demais, queima fonte ou perde periféricos.</div>
+
+        <h3>Eletricidade × Eletrônica (diferença prática)</h3>
+        <p>
+          <strong>Eletricidade</strong> trata do fluxo de energia e das grandezas elétricas (como corrente e tensão). Já a <strong>eletrônica</strong> trata do uso de
+          componentes (diodos, transistores, circuitos integrados) para <strong>controlar</strong> esse fluxo, criando comportamentos: retificar, amplificar, filtrar,
+          chavear e processar sinais. Em TI, a eletrônica é o “controle fino” que permite que um circuito represente 0 e 1, gere clock e execute instruções.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> para entender por que fontes convertem AC em DC, por que chips não podem receber tensão errada e como sinais digitais são formados.</div>
+
+        <h2>2) Origem da eletricidade: átomo, cargas e íons</h2>
+        <p>
+          Toda matéria é formada por <strong>átomos</strong>. O núcleo atômico contém <strong>prótons</strong> (carga positiva) e <strong>nêutrons</strong> (carga neutra). Ao redor do núcleo
+          existem <strong>elétrons</strong> (carga negativa). Em muitos materiais, alguns elétrons estão mais “livres” para se mover, e é esse movimento organizado
+          que chamamos de <strong>corrente elétrica</strong>.
+        </p>
+        <p>
+          Quando um átomo perde elétrons, ele se torna um <strong>íon positivo</strong>. Quando ganha elétrons, vira um <strong>íon negativo</strong>. Em eletrônica aplicada, não é
+          necessário aprofundar em química, mas entender íons ajuda a explicar fenômenos como <strong>oxidação</strong> e <strong>corrosão</strong> em contatos e trilhas,
+          comuns em hardware (umidade + poeira + tempo).
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> para entender por que contatos oxidam, por que sujeira aumenta falhas e por que limpeza/armazenamento corretos importam.</div>
+
+        <h3>Carga elétrica e neutralidade</h3>
+        <p>
+          Um corpo é considerado <strong>neutro</strong> quando possui equilíbrio entre cargas positivas e negativas. Ele fica <strong>carregado</strong> quando há excesso de um tipo
+          de carga. Em TI, isso é importante por causa da <strong>ESD</strong> (descarga eletrostática): um corpo carregado pode descarregar repentinamente em um circuito,
+          danificando componentes sensíveis mesmo sem “dar choque” perceptível.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> no manuseio de memórias, processadores e placas (prevenção ESD será detalhada no Capítulo 04).</div>
+
+        <h2>3) Corrente elétrica: fluxo de elétrons e consequências</h2>
+        <p>
+          <strong>Corrente elétrica</strong> é o movimento ordenado de cargas elétricas em um condutor. Em circuitos metálicos, esse movimento ocorre principalmente por
+          elétrons. Na prática, quando um circuito é alimentado, elétrons se deslocam e parte da energia é convertida em outras formas: luz (LED), som (buzzer),
+          movimento (motor) e calor (aquecimento).
+        </p>
+        <p>
+          Para TI, o mais importante é compreender a relação qualitativa: <strong>corrente demais</strong> tende a aquecer componentes e pode levar a danos (trilhas queimadas,
+          MOSFETs em curto, conectores derretidos). <strong>Corrente de menos</strong> pode gerar instabilidade (reinícios, travamentos, falhas intermitentes).
+          Nos próximos capítulos você verá como essas ideias se conectam com medição e com a Lei de Ohm.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao interpretar sintomas de fonte fraca, curto em periféricos, aquecimento anormal e falhas intermitentes de energia.</div>
+
+        <h3>Uma visão útil: energia e potência (introdução)</h3>
+        <p>
+          Mesmo antes de estudar cálculos, é útil entender que <strong>potência</strong> está ligada ao quanto um componente consome/transforma energia por unidade de tempo.
+          Em TI, potência aparece em especificações como “Fonte 500W”, “CPU 65W/95W”, “GPU 200W”. Mais adiante você aprenderá as relações entre potência,
+          tensão e corrente e como isso afeta a escolha de fonte e a segurança do circuito.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> para dimensionar fonte, evitar sobrecarga e entender por que alguns cabos/conectores aquecem.</div>
+
+        <h2>4) Materiais: condutores, isolantes e semicondutores</h2>
+        <p>
+          A forma como um material permite o movimento de elétrons define sua aplicação em circuitos. Em TI, praticamente tudo depende dessa escolha:
+          fios e trilhas precisam conduzir; capas e suportes precisam isolar; chips precisam controlar a condução.
+        </p>
+
+        <h3>4.1 Condutores</h3>
+        <p>
+          Condutores possuem muitos elétrons livres. O cobre, por exemplo, é usado em fios, trilhas de placas e conectores porque conduz bem e tem bom custo.
+          Alumínio também conduz, mas com diferentes características mecânicas e de oxidação.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender trilhas de placas, cabos e conectores e por que “mau contato” gera falhas.</div>
+
+        <h3>4.2 Isolantes</h3>
+        <p>
+          Isolantes dificultam a passagem de corrente. Plástico, borracha e resinas aparecem em cabos, conectores e suportes. Um erro comum em bancada é
+          improvisar com materiais inadequados e criar risco de curto ou aquecimento.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> para evitar curto-circuitos por montagem incorreta, materiais inadequados e má organização de cabos.</div>
+
+        <h3>4.3 Semicondutores (base do hardware)</h3>
+        <p>
+          Semicondutores — principalmente o <strong>silício</strong> — são materiais cujo comportamento elétrico pode ser controlado. Essa característica permite fabricar
+          diodos, transistores e circuitos integrados. Em termos simples: semicondutores permitem criar “portas” controladas para o fluxo de elétrons.
+        </p>
+        <p>
+          Em um processador, por exemplo, bilhões de transistores funcionam como chaves muito rápidas, representando 0 e 1. Em memórias, transistores e capacitores
+          armazenam estados. Em fontes modernas, semicondutores chaveiam energia com alta eficiência. Por isso, compreender semicondutores é compreender
+          a base física do hardware.
+        </p>
+        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender por que chips são sensíveis, por que aquecimento afeta performance e por que ESD pode danificar componentes sem sinal externo.</div>
+
+        <h2>5) Como isso aparece dentro do computador (visão de hardware)</h2>
+        <p>
+          Para conectar teoria à prática, observe três blocos que sempre aparecem em TI:
+        </p>
+        <ul>
+          <li><strong>Alimentação:</strong> a energia entra (rede elétrica), é convertida (fonte) e distribuída (placa-mãe/reguladores).</li>
+          <li><strong>Processamento:</strong> chips controlam sinais e executam operações (CPU, chipset, RAM, GPU).</li>
+          <li><strong>Interconexão:</strong> trilhas, conectores e cabos transportam energia e sinais (PCIe, USB, SATA, headers, etc.).</li>
+        </ul>
+
+        <div class="table-wrap" role="region" aria-label="Mapa rápido de exemplos em TI">
+          <table>
+            <thead>
+              <tr>
+                <th>Conceito</th>
+                <th>Onde aparece em TI</th>
+                <th>Sintoma comum quando dá problema</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Cargas e corrente</td>
+                <td>Fonte, VRM da placa-mãe, trilhas</td>
+                <td>Reinício, aquecimento, cheiro de queimado</td>
+              </tr>
+              <tr>
+                <td>Condutores</td>
+                <td>Cabos, conectores, soldas, trilhas</td>
+                <td>Mau contato, falha intermitente, porta USB instável</td>
+              </tr>
+              <tr>
+                <td>Isolantes</td>
+                <td>Revestimentos, suportes, capas</td>
+                <td>Curto por montagem incorreta, choque, aquecimento</td>
+              </tr>
+              <tr>
+                <td>Semicondutores</td>
+                <td>CPU, RAM, chipset, controladores</td>
+                <td>Não liga, travamentos, artefatos, falhas sem causa aparente</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>6) Mini-glossário (para estudo autônomo)</h2>
+        <dl>
+          <dt>Eletricidade</dt>
+          <dd>Estudo do fluxo de energia elétrica e das grandezas associadas (corrente, tensão etc.).</dd>
+          <dt>Eletrônica</dt>
+          <dd>Uso de componentes para controlar a eletricidade e processar sinais (chavear, filtrar, retificar, amplificar).</dd>
+          <dt>Carga elétrica</dt>
+          <dd>Propriedade física que pode ser positiva ou negativa; relacionada a prótons e elétrons.</dd>
+          <dt>Corrente elétrica</dt>
+          <dd>Fluxo ordenado de cargas em um material (em metais, principalmente elétrons).</dd>
+          <dt>Condutor / Isolante</dt>
+          <dd>Materiais que permitem (condutor) ou dificultam (isolante) a passagem de corrente.</dd>
+          <dt>Semicondutor</dt>
+          <dd>Material controlável que permite fabricar transistores e chips (base da eletrônica digital).</dd>
+          <dt>ESD</dt>
+          <dd>Descarga eletrostática: transferência rápida de carga que pode danificar circuitos sensíveis.</dd>
+        </dl>
+
+        <div class="note">
+          <strong>Conexão com o plano:</strong> neste capítulo você forma a base do 1º bimestre. No Capítulo 02 você entra nas grandezas (corrente, tensão,
+          resistência e potência) e na Lei de Ohm; no Capítulo 04 você consolida com segurança, ESD e medições com multímetro.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Atividades (para praticar sem “passo a passo”)</h2>
+        <ul>
+          <li><strong>Mapa do hardware:</strong> escolha 5 componentes do PC (fonte, placa-mãe, RAM, SSD, USB) e descreva onde aparecem condutores, isolantes e semicondutores.</li>
+          <li><strong>Diagnóstico conceitual:</strong> para cada sintoma (não liga, reinicia, aquece), liste 3 causas possíveis envolvendo eletricidade/eletrônica e como você investigaria.</li>
+          <li><strong>Cartaz de bancada:</strong> crie um mini-cartaz com 6 boas práticas para evitar dano elétrico e ESD (você aprofundará no Capítulo 04).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quiz">
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <div class="quiz-head">
+          <div>
+            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
+            <p class="meta" style="margin:6px 0 0">Cada questão tem 5 alternativas. Responda e, se quiser, confira o gabarito.</p>
+          </div>
+          <div class="quiz-tools">
+            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
+            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
+          </div>
+        </div>
+
+        <!-- Q1 -->
+        <div class="q" data-a="b" data-exp="Elétrons possuem carga negativa e se movimentam nos condutores. Prótons têm carga positiva e nêutrons não têm carga.">
+          <p><strong>1.</strong> Qual partícula possui carga negativa?</p>
+          <label><input type="radio" name="q1" value="a"> Próton</label>
+          <label><input type="radio" name="q1" value="b"> Elétron</label>
+          <label><input type="radio" name="q1" value="c"> Nêutron</label>
+          <label><input type="radio" name="q1" value="d"> Núcleo</label>
+          <label><input type="radio" name="q1" value="e"> Íon positivo</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="q" data-a="c" data-exp="Corrente elétrica é o fluxo ordenado de cargas (em metais, principalmente elétrons).">
+          <p><strong>2.</strong> Corrente elétrica é:</p>
+          <label><input type="radio" name="q2" value="a"> Energia armazenada em um capacitor</label>
+          <label><input type="radio" name="q2" value="b"> Diferença de potencial entre dois pontos</label>
+          <label><input type="radio" name="q2" value="c"> Movimento ordenado de cargas elétricas</label>
+          <label><input type="radio" name="q2" value="d"> Resistência ao fluxo de elétrons</label>
+          <label><input type="radio" name="q2" value="e"> Campo magnético gerado por ímãs</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="q" data-a="a" data-exp="Cobre é um excelente condutor e muito usado em cabos e trilhas de placas.">
+          <p><strong>3.</strong> Qual opção é um exemplo típico de <em>condutor</em> em TI?</p>
+          <label><input type="radio" name="q3" value="a"> Cobre (trilhas/cabos)</label>
+          <label><input type="radio" name="q3" value="b"> Borracha (revestimento de cabos)</label>
+          <label><input type="radio" name="q3" value="c"> Plástico (carcaças e suportes)</label>
+          <label><input type="radio" name="q3" value="d"> Vidro (isolante)</label>
+          <label><input type="radio" name="q3" value="e"> Madeira seca (isolante)</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="q" data-a="d" data-exp="Semicondutores permitem controlar a condução e formar transistores e chips.">
+          <p><strong>4.</strong> Semicondutores são essenciais porque:</p>
+          <label><input type="radio" name="q4" value="a"> Impedem totalmente a passagem de corrente</label>
+          <label><input type="radio" name="q4" value="b"> Não conduzem energia em nenhuma condição</label>
+          <label><input type="radio" name="q4" value="c"> São sempre condutores perfeitos</label>
+          <label><input type="radio" name="q4" value="d"> Permitem controlar o fluxo de elétrons (base dos chips)</label>
+          <label><input type="radio" name="q4" value="e"> Servem apenas para cabos e conectores</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="q" data-a="e" data-exp="Eletrônica em TI é fundamental para diagnóstico e manutenção: fonte, placas, sinais e falhas.">
+          <p><strong>5.</strong> A principal utilidade da eletrônica aplicada à TI no curso técnico é:</p>
+          <label><input type="radio" name="q5" value="a"> Criar artes digitais e layouts</label>
+          <label><input type="radio" name="q5" value="b"> Melhorar digitação e textos</label>
+          <label><input type="radio" name="q5" value="c"> Aprender redes sociais</label>
+          <label><input type="radio" name="q5" value="d"> Apenas programar jogos</label>
+          <label><input type="radio" name="q5" value="e"> Diagnosticar, manter e instalar hardware com segurança</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="q" data-a="b" data-exp="ESD é descarga eletrostática: pode danificar componentes sensíveis sem choque perceptível.">
+          <p><strong>6.</strong> ESD é:</p>
+          <label><input type="radio" name="q6" value="a"> Um tipo de cabo de rede</label>
+          <label><input type="radio" name="q6" value="b"> Descarga eletrostática que pode danificar componentes</label>
+          <label><input type="radio" name="q6" value="c"> Um componente de armazenamento</label>
+          <label><input type="radio" name="q6" value="d"> Um material condutor especial</label>
+          <label><input type="radio" name="q6" value="e"> Um tipo de software de diagnóstico</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+        <!-- Q7 -->
+        <div class="q" data-a="c" data-exp="Eletricidade trata do fluxo/energia; eletrônica usa componentes para controlar esse fluxo e processar sinais.">
+          <p><strong>7.</strong> A melhor diferença prática entre eletricidade e eletrônica é:</p>
+          <label><input type="radio" name="q7" value="a"> Não existe diferença</label>
+          <label><input type="radio" name="q7" value="b"> Eletrônica é só cabos; eletricidade é só chips</label>
+          <label><input type="radio" name="q7" value="c"> Eletricidade = energia/fluxo; eletrônica = controle do fluxo com componentes</label>
+          <label><input type="radio" name="q7" value="d"> Eletricidade é só teoria; eletrônica é só prática</label>
+          <label><input type="radio" name="q7" value="e"> Eletrônica não envolve corrente elétrica</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="q" data-a="d" data-exp="Oxidação/corrosão em contatos tem relação com reações envolvendo íons e afeta condutividade (mau contato).">
+          <p><strong>8.</strong> A oxidação em contatos e conectores pode causar:</p>
+          <label><input type="radio" name="q8" value="a"> Aumento de armazenamento no HD</label>
+          <label><input type="radio" name="q8" value="b"> Melhor condução de corrente sempre</label>
+          <label><input type="radio" name="q8" value="c"> Nenhuma alteração no circuito</label>
+          <label><input type="radio" name="q8" value="d"> Mau contato e falhas intermitentes</label>
+          <label><input type="radio" name="q8" value="e"> Aumento automático da frequência da CPU</label>
+          <div class="q-actions">
+            <button class="btn" type="button" onclick="check(this)">Enviar resposta</button>
+            <button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button>
+            <span class="res"></span>
+          </div>
+          <div class="gabarito"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Checklist do aluno (interativo)</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox" class="ck"> Consigo explicar a diferença entre eletricidade e eletrônica com um exemplo de TI.</label></li>
+          <li><label><input type="checkbox" class="ck"> Sei identificar prótons, elétrons e nêutrons e relacionar com carga elétrica.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo definir corrente elétrica e citar consequências de corrente excessiva.</label></li>
+          <li><label><input type="checkbox" class="ck"> Diferencio condutor/isolante/semicondutor e cito exemplos no computador.</label></li>
+          <li><label><input type="checkbox" class="ck"> Consigo apontar pelo menos 3 situações de manutenção em que esses conceitos ajudam.</label></li>
+        </ul>
+        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card">
+      <div class="card-inner">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Como uma fonte ATX converte AC em DC (visão geral).</li>
+          <li>O que são transistores e por que são a base da computação moderna (introdução).</li>
+          <li>ESD na prática: por que a descarga pode não ser sentida e ainda assim danificar.</li>
+          <li>Oxidação em conectores: causas, prevenção e boas práticas de limpeza.</li>
+        </ul>
+        <div class="note">
+          <strong>Próximo capítulo:</strong> <a href="capitulo02.html"><strong>Capítulo 02 — Grandezas Elétricas e Lei de Ohm</strong></a>.
+          Você vai aprender corrente, tensão, resistência e potência com exemplos aplicados à TI.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+
+<footer>
+  <div class="container">Apostila EATI • Capítulo 01</div>
+</footer>
+
+<script>
+  // Back-to-top
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
+  }, { passive:true });
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // Quiz logic
+  function check(btn){
+    const q = btn.closest('.q');
+    const correct = q.dataset.a;
+    const exp = q.dataset.exp || '';
+    const radios = q.querySelectorAll('input[type=radio]');
+    const selected = Array.from(radios).find(r => r.checked);
+    const res = q.querySelector('.res');
+    const box = q.querySelector('.gabarito');
+
+    if(!selected){
+      res.textContent = ' Selecione uma alternativa.';
+      res.className = 'res no';
+      return;
+    }
+
+    if(selected.value === correct){
+      res.textContent = ' Correto!';
+      res.className = 'res ok';
+    } else {
+      res.textContent = ' Incorreto.';
+      res.className = 'res no';
+    }
+
+    // prepare gabarito content but keep hidden unless requested
+    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+  }
+
+  function toggleAnswer(btn){
+    const q = btn.closest('.q');
+    const box = q.querySelector('.gabarito');
+    if(!box.innerHTML.trim()){
+      // If user clicks gabarito first, compute without checking correctness
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+    }
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function showAllAnswers(){
+    document.querySelectorAll('.q').forEach(q => {
+      const box = q.querySelector('.gabarito');
+      const correct = q.dataset.a;
+      const exp = q.dataset.exp || '';
+      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      box.style.display = 'block';
+    });
+  }
+
+  function resetQuiz(){
+    document.querySelectorAll('.q').forEach(q => {
+      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+      const res = q.querySelector('.res');
+      res.textContent = '';
+      res.className = 'res';
+      const box = q.querySelector('.gabarito');
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Checklist progress
+  const checks = Array.from(document.querySelectorAll('.ck'));
+  const ckStatus = document.getElementById('ckStatus');
+  function updateChecklist(){
+    const done = checks.filter(c => c.checked).length;
+    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
+  }
+  checks.forEach(c => c.addEventListener('change', updateChecklist));
+  updateChecklist();
+</script>
+</body>
+</html>
