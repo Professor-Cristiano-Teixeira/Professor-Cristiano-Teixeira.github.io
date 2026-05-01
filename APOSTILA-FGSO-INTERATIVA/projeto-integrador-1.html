@@ -1,0 +1,771 @@
+<!-- arquivo: projeto-integrador-1.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projeto Integrador 1 (B1) — Plano de Laboratório Padronizado (Windows/VM) | Apostila FGSO</title>
+  <meta name="description" content="Projeto Integrador do 1º bimestre (B1) da Apostila FGSO: criar e entregar um Plano de Laboratório Padronizado para Windows 11 (preferencialmente em VM). Inclui objetivos, conceitos essenciais (baseline, padrão, evidência, snapshot), passo a passo de entrega, modelo pronto, rubrica, atividades, quiz e checklist interativo." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:var(--sans); color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line)}
+    .topbar-inner{max-width:1280px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{width:40px;height:40px;border-radius:12px; background:linear-gradient(135deg,var(--navy),var(--navy-2)); box-shadow:var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14)}
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.75); color:var(--text); box-shadow:0 10px 22px rgba(0,0,0,.25); font-size:13px}
+    .btn:hover{transform:translateY(-1px); background:rgba(18,58,122,.35); text-decoration:none}
+    .btn.primary{background:linear-gradient(135deg,var(--navy),var(--navy-2))}
+
+    .wrap{max-width:1280px; margin:0 auto; padding:18px; display:grid; grid-template-columns:320px 1fr; gap:18px}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr}}
+
+    .side{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; height:fit-content; position:sticky; top:74px}
+    @media (max-width:980px){.side{position:relative; top:auto}}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom:10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); font-size:12px; color:var(--muted); width:fit-content}
+    .meta{display:flex; flex-direction:column; gap:8px; margin:10px 0 12px}
+
+    .toc{list-style:none; padding:0; margin:10px 0 0; display:flex; flex-direction:column; gap:8px}
+    .toc a{display:flex; gap:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:var(--card2); color:var(--text)}
+    .toc a:hover{background:rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width:54px; text-align:center}
+    .toc .t{font-size:13px}
+
+    .main{display:flex; flex-direction:column; gap:18px}
+    .hero{background:linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .hero h1{margin:0 0 6px; font-size:20px}
+    .hero p{margin:6px 0; color:#e7eeff; max-width:92ch}
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .chip{font-size:12px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); padding:6px 10px; border-radius:999px}
+
+    .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .card h2{margin:0 0 10px; font-size:16px}
+    .card h3{margin:16px 0 8px; font-size:14px; color:#dbe7ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+    .grid-3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+    @media (max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+    .box{border:1px dashed rgba(255,255,255,.18); border-radius:14px; padding:12px; background:rgba(10,31,68,.18)}
+    .callout{border-left:4px solid rgba(184,208,255,.9); background:rgba(7,11,20,.35); border-radius:12px; padding:10px 12px; margin:10px 0}
+    .callout.warn{border-left-color:rgba(250,160,90,.95)}
+
+    .kbd{font-family:var(--mono); font-size:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding:1px 7px; border-radius:999px}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background:rgba(7,11,20,.40); border-radius:14px; padding:12px; overflow:auto}
+    .diagram pre{margin:0; font-family:var(--mono); font-size:12px; line-height:1.35; color:#dfe9ff}
+
+    .steps{counter-reset: step; display:grid; gap:12px}
+    .step{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .step h3{margin:0 0 8px; font-size:14px}
+    .step h3:before{counter-increment: step; content:"Passo " counter(step) " — "; color:#dbe7ff}
+    .step ul{margin:8px 0 0 18px}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background:rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px}
+    .q{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .q h4{margin:0 0 10px; font-size:14px}
+    .opts{display:grid; gap:8px; margin:10px 0}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.04); cursor:pointer}
+    .opt:hover{background:rgba(18,58,122,.18)}
+    .opt input{margin-top:3px}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.65); color:var(--text); font-size:12px; cursor:pointer}
+    .mini:hover{background:rgba(18,58,122,.30)}
+    .feedback{margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); display:none}
+    .feedback.ok{background:rgba(50,210,150,.12); border-color:rgba(50,210,150,.35)}
+    .feedback.bad{background:rgba(255,107,107,.10); border-color:rgba(255,107,107,.28)}
+    .feedback .why{color:var(--muted); font-size:13px; margin-top:6px}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32)}
+    .ck input{margin-top:3px}
+    .ck small{display:block; color:var(--muted); margin-top:4px}
+    .progress{height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background:linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85))}
+
+    .footer{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 30px}
+    pre[class*="language-"]{border-radius:14px; border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 22px rgba(0,0,0,.20)}
+    code{font-family:var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Projeto Integrador 1 (B1) • Plano de laboratório padronizado</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo04.html">⟵ Cap. 04</a>
+        <a class="btn primary" href="capitulo05.html">Ir para Cap. 05 ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do projeto">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Projeto Integrador 1</strong></div>
+      <h2>Nesta entrega</h2>
+      <div class="meta">
+        <span class="pill">🧱 Baseline do laboratório</span>
+        <span class="pill">🧾 Evidências & checklist</span>
+        <span class="pill">📦 Pacote padronizado</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos essenciais (onde vou aplicar)</span></a></li>
+        <li><a href="#entrega"><span class="n">03</span><span class="t">Entregável e critérios mínimos</span></a></li>
+        <li><a href="#passo"><span class="n">04</span><span class="t">Passo a passo para montar e entregar</span></a></li>
+        <li><a href="#modelo"><span class="n">05</span><span class="t">Modelo pronto (copiar/colar)</span></a></li>
+        <li><a href="#rubrica"><span class="n">06</span><span class="t">Rubrica de avaliação</span></a></li>
+        <li><a href="#atividades"><span class="n">07</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">08</span><span class="t">Quiz</span></a></li>
+        <li><a href="#checklist"><span class="n">09</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">10</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Importante:</strong> este PI é <em>conceitual + organizacional</em>. Ele prepara seu laboratório para os capítulos práticos (instalação e suporte).
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Projeto Integrador 1 (B1) — Plano de Laboratório Padronizado</h1>
+        <p>
+          No suporte de TI, o maior inimigo é o improviso. Antes de instalar e mexer no Windows,
+          você vai entregar um <strong>plano padronizado do laboratório</strong> (baseline) para que qualquer pessoa consiga reproduzir
+          seu ambiente e para que você tenha um ponto de retorno seguro.
+          Este PI consolida os Capítulos 01–04 e prepara o Capítulo 05 (instalação).
+        </p>
+        <div class="chips">
+          <span class="chip">Host/VM e recursos</span>
+          <span class="chip">Edição do Windows</span>
+          <span class="chip">Rede (NAT) e nome padrão</span>
+          <span class="chip">Disco e partições (planejamento)</span>
+          <span class="chip">Snapshot (ponto limpo)</span>
+          <span class="chip">Checklist de validação</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Objetivos de aprendizagem</h3>
+            <ul>
+              <li>Planejar um laboratório Windows com <strong>padrões</strong> (nomes, pastas e versões).</li>
+              <li>Definir um <strong>baseline</strong> (especificações e decisões) para reproduzir o ambiente.</li>
+              <li>Estabelecer um ponto de retorno seguro (snapshot/backup) antes das práticas.</li>
+              <li>Entregar um pacote com documentação + checklist + evidências mínimas.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Cap. 01–02: conceitos de sistema operacional e componentes.</li>
+              <li>Cap. 03: virtualização (host/guest/snapshot).</li>
+              <li>Cap. 04: versões/edições do Windows e planejamento para instalação.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> esse plano será usado como referência em todos os capítulos práticos seguintes.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos essenciais (e onde vou aplicar isso)</h2>
+
+        <h3>Baseline (linha de base)</h3>
+        <p>
+          Baseline é a descrição do seu ambiente em um “estado conhecido e bom”: versão, recursos, configurações principais.
+          <strong>Onde vou aplicar isso:</strong> você vai escrever a ficha do ambiente (host, VM, Windows, rede e disco) no relatório.
+        </p>
+
+        <h3>Padronização</h3>
+        <p>
+          Padronizar é reduzir variação (nomes, pastas, versões), facilitando suporte e correção.
+          <strong>Onde vou aplicar isso:</strong> você vai definir um padrão de nomes e uma estrutura de pastas para evidências.
+        </p>
+
+        <h3>Evidência</h3>
+        <p>
+          Evidência é qualquer prova do que foi feito (print, log, arquivo). Sem evidência, não há auditoria.
+          <strong>Onde vou aplicar isso:</strong> você vai anexar pelo menos 2 prints e um arquivo de checklist preenchido.
+        </p>
+
+        <h3>Snapshot / Ponto de retorno</h3>
+        <p>
+          Snapshot (na VM) é um ponto de retorno do estado da máquina. Não substitui backup de dados, mas evita retrabalho no laboratório.
+          <strong>Onde vou aplicar isso:</strong> criar snapshot “ponto limpo” antes do Cap. 05.
+        </p>
+
+        <div class="callout">
+          <strong>Resumo do método:</strong> planejar → documentar baseline → padronizar → criar ponto de retorno → validar com checklist.
+        </div>
+      </section>
+
+      <section class="card" id="entrega">
+        <h2>Entregável e critérios mínimos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Você vai entregar</h3>
+            <ul>
+              <li><strong>Relatório</strong> (PDF ou TXT): plano do laboratório + decisões justificadas.</li>
+              <li><strong>Checklist de validação</strong> (8+ itens) preenchido.</li>
+              <li><strong>Evidências</strong>: pelo menos 2 prints (ex.: configurações da VM + tela de winver ou equivalente).</li>
+              <li><strong>Estrutura de pastas</strong> padronizada para o curso.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Critérios mínimos (para não perder ponto)</h3>
+            <ul>
+              <li>Escolha e justificativa da edição (ex.: Pro para laboratório técnico).</li>
+              <li>Estratégia de conta (preferência por conta local no laboratório).</li>
+              <li>Disco planejado (tamanho + ideia de C: sistema / D: dados).</li>
+              <li>Rede definida (NAT no laboratório) e nome padrão do ambiente.</li>
+              <li>Ponto de retorno (snapshot se VM) descrito.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout warn">
+          <strong>Nota prática:</strong> neste PI você não precisa instalar ainda — você está preparando e documentando.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo para montar e entregar</h2>
+        <p class="muted">Siga a ordem para não esquecer nada e para facilitar correção.</p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Criar a pasta do PI e subpastas</h3>
+            <pre class="language-bash"><code>mkdir C:\FGSO\PI_B1
+mkdir C:\FGSO\PI_B1\evidencias
+mkdir C:\FGSO\PI_B1\evidencias\prints
+mkdir C:\FGSO\PI_B1\evidencias\docs</code></pre>
+            <p class="muted">Se você usa D:, pode adaptar para <span class="kbd">D:\DADOS\FGSO\PI_B1</span>.</p>
+          </div>
+
+          <div class="step">
+            <h3>Preencher a ficha do ambiente (baseline)</h3>
+            <ul>
+              <li>Registre dados do host: CPU, RAM, armazenamento.</li>
+              <li>Se usar VM: vCPU, RAM, disco, rede (NAT), nome da VM.</li>
+              <li>Defina a edição do Windows (Home/Pro/etc.) e justifique.</li>
+            </ul>
+            <div class="diagram"><pre>
+Baseline (exemplo)
+- Host: i5 / 16GB / SSD 512GB
+- VM: 2 vCPU / 4GB RAM / 60GB disco / NAT
+- Windows: 11 Pro (laboratório técnico)
+- Nome padrão: FGSO-W11-VM01
+- Rede: NAT (acesso internet sem expor serviços)
+            </pre></div>
+          </div>
+
+          <div class="step">
+            <h3>Planejar conta, disco e segurança</h3>
+            <ul>
+              <li>Conta: local (por que) e senha mínima.</li>
+              <li>Disco: planeje C: (sistema) e D: (dados/backups) — mesmo que seja criado no Cap. 06.</li>
+              <li>Segurança: rotina de snapshots (antes/depois de práticas).</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> evita perda de trabalho quando algo dá errado durante instalação e manutenção.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Definir checklist de validação (8+ itens)</h3>
+            <ul>
+              <li>Crie um arquivo <span class="kbd">checklist.txt</span> e preencha com pelo menos 8 itens.</li>
+            </ul>
+            <pre class="language-bash"><code>echo CHECKLIST PI B1 &gt; C:\FGSO\PI_B1\evidencias\docs\checklist.txt
+echo [ ] VM criada com nome padrao &gt;&gt; C:\FGSO\PI_B1\evidencias\docs\checklist.txt
+echo [ ] NAT configurado &gt;&gt; C:\FGSO\PI_B1\evidencias\docs\checklist.txt
+echo [ ] Disco planejado (C/D) &gt;&gt; C:\FGSO\PI_B1\evidencias\docs\checklist.txt
+echo [ ] Snapshot ponto limpo definido &gt;&gt; C:\FGSO\PI_B1\evidencias\docs\checklist.txt</code></pre>
+            <p class="muted">Complete até 8–10 itens (você pode adaptar o modelo do Cap. 04).</p>
+          </div>
+
+          <div class="step">
+            <h3>Coletar evidências (prints mínimos)</h3>
+            <ul>
+              <li>Print 1: configurações da VM (RAM/vCPU/disco/rede) ou configurações do PC.</li>
+              <li>Print 2: qualquer evidência de versão/planejamento (ex.: ISO selecionada, edição escolhida, etc.).</li>
+              <li>Salve com nomes padronizados: <span class="kbd">01_vm_config.png</span>, <span class="kbd">02_edicao_plano.png</span>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Escrever o relatório final e empacotar</h3>
+            <ul>
+              <li>Crie <span class="kbd">relatorio_PI_B1.txt</span> (ou PDF) em <span class="kbd">docs</span>.</li>
+              <li>Inclua: baseline, decisões (edição/conta/disco/rede), checklist e como você vai usar snapshots.</li>
+              <li>(Opcional) Compacte em ZIP para enviar:</li>
+            </ul>
+            <pre class="language-powershell"><code>Compress-Archive -Path "C:\FGSO\PI_B1\*" -DestinationPath "C:\FGSO\PI_B1.zip" -Force</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="modelo">
+        <h2>Modelo pronto (copiar/colar) — relatório do PI (B1)</h2>
+        <p class="muted">Copie e preencha. O importante é ficar claro e repetível.</p>
+        <div class="diagram"><pre>
+PROJETO INTEGRADOR 1 (B1) — PLANO DE LABORATÓRIO
+Aluno: ____________   Turma: ____   Data: __/__/____
+
+1) Objetivo
+- Padronizar meu laboratório para instalação e suporte ao Windows nos próximos capítulos.
+
+2) Baseline do ambiente
+- Host: (CPU/RAM/SSD)
+- VM (se houver): (vCPU/RAM/Disco/Rede)
+- Windows (edição): (Home/Pro/Enterprise/Education) — justificativa
+
+3) Padrões definidos
+- Nome padrão do ambiente: __________
+- Pastas do curso: C:\FGSO\...
+- Padrão de evidências: 01_, 02_, ...
+
+4) Conta e segurança
+- Tipo de conta: Local (por quê)
+- Senha: (regra mínima)
+- Ponto de retorno: snapshot antes de práticas
+
+5) Disco (planejamento)
+- Tamanho do disco: ____ GB
+- Estratégia: C: sistema, D: dados/backups (quando aplicável)
+
+6) Rede
+- Modo: NAT (ou outro) — justificativa
+
+7) Checklist de validação
+- (colar checklist ou anexar arquivo)
+
+8) Evidências anexas
+- prints/01_vm_config.png
+- prints/02_edicao_plano.png
+- docs/checklist.txt
+          </pre></div>
+      </section>
+
+      <section class="card" id="rubrica">
+        <h2>Rubrica de avaliação</h2>
+        <table aria-label="Rubrica">
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th>Básico</th>
+              <th>Bom</th>
+              <th>Excelente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Baseline</td>
+              <td>Incompleto</td>
+              <td>Completo e claro</td>
+              <td>Detalhado e reproduzível por terceiros</td>
+            </tr>
+            <tr>
+              <td>Padronização</td>
+              <td>Sem padrão</td>
+              <td>Nomes e pastas padronizados</td>
+              <td>Padrão + justificativa + organização exemplar</td>
+            </tr>
+            <tr>
+              <td>Checklist</td>
+              <td>&lt; 8 itens</td>
+              <td>8–10 itens coerentes</td>
+              <td>10+ itens com critérios de validação claros</td>
+            </tr>
+            <tr>
+              <td>Evidências</td>
+              <td>1 print solto</td>
+              <td>2+ prints + checklist</td>
+              <td>Evidências bem nomeadas + relatório bem escrito</td>
+            </tr>
+            <tr>
+              <td>Segurança (ponto de retorno)</td>
+              <td>Não menciona</td>
+              <td>Menciona snapshot</td>
+              <td>Define rotina (antes/depois) e justificativa</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — sem entregar o projeto completo</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Padrão de nomes</h3>
+            <p>Defina um padrão de nomes para VMs e pastas do curso (ex.: FGSO-W11-VM01). Explique no relatório por que isso ajuda no suporte.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Plano de disco</h3>
+            <p>Desenhe (texto) como ficará seu disco: C: sistema, D: dados/backups. Defina tamanho mínimo e por quê.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Checklist melhorado</h3>
+            <p>Transforme seu checklist em 12 itens, adicionando critérios objetivos (ex.: “rede NAT testada com ping”).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Por que a linha NT influenciou tanto a forma como o suporte trabalha (serviços, eventos, permissões)?</li>
+          <li>Quais vantagens e limitações do NAT em um laboratório de VM?</li>
+          <li>Qual a diferença prática entre snapshot (VM) e backup de dados?</li>
+          <li>O que acontece quando não há padronização em uma equipe de suporte?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo passo:</strong> com o laboratório planejado, você está pronto para o <a href="capitulo05.html">Capítulo 05</a> (instalação).
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Projeto Integrador 1 (B1) • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) O que é baseline (linha de base) no contexto do laboratório?',
+        options: [
+          'Um antivírus obrigatório.',
+          'A descrição do ambiente em um estado conhecido e bom (versões e configurações).',
+          'Um arquivo ZIP com backups.',
+          'Uma atualização do Windows.',
+          'Um tipo de licença OEM.'
+        ],
+        correct: 1,
+        why: 'Baseline é a linha de base do ambiente: configurações, versões e recursos para reproduzir e comparar.'
+      },
+      {
+        q: '2) Por que padronização é importante no suporte?',
+        options: [
+          'Porque deixa o PC mais rápido.',
+          'Porque evita ter que aprender.',
+          'Porque reduz variação e facilita reproduzir e corrigir problemas.',
+          'Porque impede atualizações.',
+          'Porque elimina a necessidade de evidências.'
+        ],
+        correct: 2,
+        why: 'Padronização reduz retrabalho e facilita correção e auditoria.'
+      },
+      {
+        q: '3) Em laboratório com VM, qual é a melhor utilidade de um snapshot?',
+        options: [
+          'Substituir backup de dados.',
+          'Aumentar desempenho da internet.',
+          'Criar um ponto de retorno para reverter a VM após testes.',
+          'Remover vírus automaticamente.',
+          'Atualizar o Windows sozinho.'
+        ],
+        correct: 2,
+        why: 'Snapshot é um ponto de retorno do estado da VM, ótimo para laboratório e segurança de testes.'
+      },
+      {
+        q: '4) Qual item é obrigatório no PI B1?',
+        options: [
+          'Instalar todos os drivers do Windows 11.',
+          'Entregar apenas um print do desktop.',
+          'Entregar um plano do laboratório (baseline) + checklist + evidências.',
+          'Criar um domínio Active Directory.',
+          'Formatar o disco físico.'
+        ],
+        correct: 2,
+        why: 'O PI B1 é de planejamento e padronização: baseline, checklist e evidências mínimas.'
+      },
+      {
+        q: '5) Qual é um exemplo de evidência válida neste PI?',
+        options: [
+          'Somente dizer “funcionou”.',
+          'Print das configurações da VM e um checklist preenchido.',
+          'Um vídeo do YouTube.',
+          'Um jogo instalado.',
+          'Uma opinião sem dados.'
+        ],
+        correct: 1,
+        why: 'Evidência é prova: prints, arquivos e checklist documentam o que foi feito.'
+      },
+      {
+        q: '6) Qual modo de rede é comum para laboratório em VM e por quê?',
+        options: [
+          'NAT, porque permite internet sem expor serviços para a rede externa.',
+          'Bridge, porque sempre é mais seguro.',
+          'Desconectar rede, porque é obrigatório.',
+          'Wi‑Fi direto, porque é mais rápido.',
+          'Não importa o modo de rede.'
+        ],
+        correct: 0,
+        why: 'NAT é comum em laboratório porque simplifica acesso à internet e isola melhor serviços da VM.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise baseline, padronização e evidência.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_PI_B1_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei a pasta C:\\FGSO\\PI_B1 com subpastas de evidências.', note:'evidencias/prints e evidencias/docs.' },
+      { id:'c2', title:'Preenchi o baseline do ambiente (host/VM/rede/disco).', note:'Informações reproduzíveis.' },
+      { id:'c3', title:'Justifiquei a edição do Windows para laboratório (ex.: Pro).', note:'Decisão técnica.' },
+      { id:'c4', title:'Defini estratégia de conta local e motivo.', note:'Laboratório.' },
+      { id:'c5', title:'Planejei disco e partições (C sistema / D dados/backups).', note:'Mesmo que a criação seja no Cap. 06.' },
+      { id:'c6', title:'Defini modo de rede (NAT) e justificativa.', note:'Isolamento + internet.' },
+      { id:'c7', title:'Criei checklist com 8+ itens e preenchi.', note:'docs/checklist.txt.' },
+      { id:'c8', title:'Coletei pelo menos 2 prints e salvei com nomes padronizados.', note:'01_ e 02_...' },
+      { id:'c9', title:'Escrevi relatorio_PI_B1 com decisões e plano de snapshot.', note:'Claro e completo.' },
+      { id:'c10', title:'Empacotei (ZIP) ou organizei a pasta para entrega.', note:'PI_B1.zip (opcional).' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', updateChecklistProgress);
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

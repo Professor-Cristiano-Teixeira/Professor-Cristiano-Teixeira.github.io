@@ -1,0 +1,809 @@
+<!-- arquivo: projeto-integrador-2.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projeto Integrador 2 (B2) — Plano de Manutenção e Recuperação do Windows (SOPs + Evidências) | Apostila FGSO</title>
+  <meta name="description" content="Projeto Integrador do 2º bimestre (B2) da Apostila FGSO: criar e entregar um Plano de Manutenção (preventiva/corretiva) e Recuperação do Windows 11, consolidando instalação, administração e manutenção (cap. 05–08). Inclui estrutura de entrega, passo a passo, modelos de SOP, evidências mínimas, rubrica, quiz e checklist interativo." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:var(--sans); color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line)}
+    .topbar-inner{max-width:1280px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{width:40px;height:40px;border-radius:12px; background:linear-gradient(135deg,var(--navy),var(--navy-2)); box-shadow:var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14)}
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.75); color:var(--text); box-shadow:0 10px 22px rgba(0,0,0,.25); font-size:13px}
+    .btn:hover{transform:translateY(-1px); background:rgba(18,58,122,.35); text-decoration:none}
+    .btn.primary{background:linear-gradient(135deg,var(--navy),var(--navy-2))}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding:18px; display:grid; grid-template-columns:320px 1fr; gap:18px}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr}}
+
+    .side{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; height:fit-content; position:sticky; top:74px}
+    @media (max-width:980px){.side{position:relative; top:auto}}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom:10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); font-size:12px; color:var(--muted); width:fit-content}
+    .meta{display:flex; flex-direction:column; gap:8px; margin:10px 0 12px}
+
+    .toc{list-style:none; padding:0; margin:10px 0 0; display:flex; flex-direction:column; gap:8px}
+    .toc a{display:flex; gap:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:var(--card2); color:var(--text)}
+    .toc a:hover{background:rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width:54px; text-align:center}
+    .toc .t{font-size:13px}
+
+    .main{display:flex; flex-direction:column; gap:18px}
+    .hero{background:linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .hero h1{margin:0 0 6px; font-size:20px}
+    .hero p{margin:6px 0; color:#e7eeff; max-width:92ch}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .chip{font-size:12px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); padding:6px 10px; border-radius:999px}
+
+    .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .card h2{margin:0 0 10px; font-size:16px}
+    .card h3{margin:16px 0 8px; font-size:14px; color:#dbe7ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+    .grid-3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+    @media (max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+    .box{border:1px dashed rgba(255,255,255,.18); border-radius:14px; padding:12px; background:rgba(10,31,68,.18)}
+    .callout{border-left:4px solid rgba(184,208,255,.9); background:rgba(7,11,20,.35); border-radius:12px; padding:10px 12px; margin:10px 0}
+    .callout.warn{border-left-color:rgba(250,160,90,.95)}
+
+    .kbd{font-family:var(--mono); font-size:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding:1px 7px; border-radius:999px}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background:rgba(7,11,20,.40); border-radius:14px; padding:12px; overflow:auto}
+    .diagram pre{margin:0; font-family:var(--mono); font-size:12px; line-height:1.35; color:#dfe9ff}
+
+    .steps{counter-reset: step; display:grid; gap:12px}
+    .step{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .step h3{margin:0 0 8px; font-size:14px}
+    .step h3:before{counter-increment: step; content:"Passo " counter(step) " — "; color:#dbe7ff}
+    .step ul{margin:8px 0 0 18px}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background:rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px}
+    .q{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .q h4{margin:0 0 10px; font-size:14px}
+    .opts{display:grid; gap:8px; margin:10px 0}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.04); cursor:pointer}
+    .opt:hover{background:rgba(18,58,122,.18)}
+    .opt input{margin-top:3px}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.65); color:var(--text); font-size:12px; cursor:pointer}
+    .mini:hover{background:rgba(18,58,122,.30)}
+    .feedback{margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); display:none}
+    .feedback.ok{background:rgba(50,210,150,.12); border-color:rgba(50,210,150,.35)}
+    .feedback.bad{background:rgba(255,107,107,.10); border-color:rgba(255,107,107,.28)}
+    .feedback .why{color:var(--muted); font-size:13px; margin-top:6px}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32)}
+    .ck input{margin-top:3px}
+    .ck small{display:block; color:var(--muted); margin-top:4px}
+    .progress{height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background:linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85))}
+
+    .footer{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 30px}
+
+    pre[class*="language-"]{border-radius:14px; border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 22px rgba(0,0,0,.20)}
+    code{font-family:var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Projeto Integrador 2 (B2) • Manutenção e Recuperação do Windows</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo08.html">⟵ Cap. 08</a>
+        <a class="btn primary" href="capitulo09.html">Ir para Cap. 09 ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do projeto">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Projeto Integrador 2</strong></div>
+      <h2>Nesta entrega</h2>
+      <div class="meta">
+        <span class="pill">🛡️ Preventiva (rotina)</span>
+        <span class="pill">🧯 Corretiva (SOPs)</span>
+        <span class="pill">🧾 Evidências e validação</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos essenciais (onde vou aplicar)</span></a></li>
+        <li><a href="#entrega"><span class="n">03</span><span class="t">Entregável e critérios mínimos</span></a></li>
+        <li><a href="#passo"><span class="n">04</span><span class="t">Passo a passo para montar e entregar</span></a></li>
+        <li><a href="#modelo"><span class="n">05</span><span class="t">Modelos de SOP e relatório (copiar/colar)</span></a></li>
+        <li><a href="#rubrica"><span class="n">06</span><span class="t">Rubrica de avaliação</span></a></li>
+        <li><a href="#atividades"><span class="n">07</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">08</span><span class="t">Quiz</span></a></li>
+        <li><a href="#checklist"><span class="n">09</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">10</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Foco do PI (B2):</strong> provar que você sabe manter e recuperar o Windows com método e evidências — não só “clicar”.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Projeto Integrador 2 (B2) — Plano de Manutenção e Recuperação do Windows</h1>
+        <p>
+          Este PI consolida o <strong>2º bimestre</strong> (Capítulos 05–08): instalação, preparação do ambiente e manutenção.
+          Você vai entregar um <strong>pacote de suporte</strong> com rotinas preventivas (semanal/mensal) e procedimentos corretivos (SOPs)
+          usando ferramentas nativas (GUI + comandos SFC/DISM/CHKDSK) e <strong>evidências</strong> organizadas.
+        </p>
+        <div class="chips">
+          <span class="chip">Instalação e baseline (Cap. 05)</span>
+          <span class="chip">Preparação/ambiente (Cap. 06–07)</span>
+          <span class="chip">Preventiva (Cap. 08)</span>
+          <span class="chip">Corretiva (SFC/DISM/CHKDSK)</span>
+          <span class="chip">Evidência antes/depois</span>
+          <span class="chip">Checklist de validação</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Objetivos de aprendizagem</h3>
+            <ul>
+              <li>Definir e executar uma rotina de <strong>manutenção preventiva</strong> (semanal e mensal).</li>
+              <li>Executar e documentar procedimentos <strong>corretivos</strong> com SFC, DISM e CHKDSK.</li>
+              <li>Padronizar pastas e nomes para evidências (prints/logs/relatórios).</li>
+              <li>Escrever SOPs com: sintoma → diagnóstico → ação mínima → validação → rollback.</li>
+              <li>Entregar um pacote reproduzível (README + checklist).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Cap. 05: instalação e configuração inicial (inclui conta local em laboratório).</li>
+              <li>Cap. 06–07: organização do disco e ferramentas administrativas.</li>
+              <li>Cap. 08: manutenção preventiva e corretiva (conceitos e comandos).</li>
+            </ul>
+            <div class="callout">
+              <strong>Ambiente recomendado:</strong> VM (facilita rollback e evita riscos em máquina real).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos essenciais (e onde vou aplicar isso)</h2>
+
+        <h3>Manutenção preventiva</h3>
+        <p>
+          Rotinas para evitar problemas: updates, verificação de segurança, limpeza segura e checagem de saúde.
+          <strong>Onde vou aplicar isso:</strong> você vai escrever uma rotina semanal e mensal com evidências (prints/logs).
+        </p>
+
+        <h3>Manutenção corretiva</h3>
+        <p>
+          Procedimentos para corrigir falhas já existentes: integridade do sistema, disco e recuperação.
+          <strong>Onde vou aplicar isso:</strong> você vai criar pelo menos 2 SOPs corretivos e executar 1 (em laboratório) com logs.
+        </p>
+
+        <h3>Evidência antes/depois</h3>
+        <p>
+          No suporte profissional, você registra estado anterior, faz a ação mínima e valida o resultado.
+          <strong>Onde vou aplicar isso:</strong> seus SOPs vão exigir prints/logs antes e depois (por exemplo, antes e depois do SFC).
+        </p>
+
+        <h3>Integridade do Windows (SFC e DISM)</h3>
+        <p>
+          <strong>SFC</strong> verifica e repara arquivos do sistema. <strong>DISM</strong> repara a imagem do Windows quando o SFC não resolve.
+          <strong>Onde vou aplicar isso:</strong> no SOP “integridade do sistema” e na coleta de logs.
+        </p>
+
+        <h3>Saúde do disco (CHKDSK /scan)</h3>
+        <p>
+          Verifica problemas no sistema de arquivos sem exigir reboot imediato (modo /scan).
+          <strong>Onde vou aplicar isso:</strong> no SOP “disco com erros” e como rotina mensal (opcional).
+        </p>
+
+        <div class="callout warn">
+          <strong>Regra do PI:</strong> procedimento sem evidência = procedimento incompleto.
+        </div>
+      </section>
+
+      <section class="card" id="entrega">
+        <h2>Entregável e critérios mínimos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Você vai entregar (pack)</h3>
+            <ul>
+              <li><strong>Relatório PI_B2</strong> (PDF/TXT): plano + SOPs + conclusões.</li>
+              <li><strong>Rotina preventiva</strong>: semanal e mensal (passos + evidências exigidas).</li>
+              <li><strong>2 SOPs corretivos</strong> completos (mínimo) + 1 executado com logs.</li>
+              <li><strong>Evidências</strong> organizadas: prints + logs + relatórios.</li>
+              <li><strong>Checklist</strong> (10+ itens) preenchido.</li>
+              <li><strong>README</strong>: como navegar no pacote e localizar evidências.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Critérios mínimos (para não perder ponto)</h3>
+            <ul>
+              <li>Estrutura de pastas padronizada e nomes com prefixo (01_, 02_...).</li>
+              <li>1 rotina semanal + 1 mensal com evidências mínimas.</li>
+              <li>2 SOPs corretivos completos (um deles integridade: SFC/DISM).</li>
+              <li>Logs de execução salvos em arquivo (saída do SFC/DISM/CHKDSK).</li>
+              <li>Uma conclusão curta: “o que aprendi” + “como reverter se der errado”.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Recomendação:</strong> execute tudo em VM e tire snapshot antes de cada corretiva para rollback seguro.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo para montar e entregar</h2>
+        <p class="muted">Siga esta ordem e você não esquece evidência nem checklist.</p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Criar estrutura de pastas do PI</h3>
+            <pre class="language-bash"><code>mkdir C:\FGSO\PI_B2
+mkdir C:\FGSO\PI_B2\docs
+mkdir C:\FGSO\PI_B2\evidencias
+mkdir C:\FGSO\PI_B2\evidencias\prints
+mkdir C:\FGSO\PI_B2\evidencias\logs
+mkdir C:\FGSO\PI_B2\evidencias\relatorios</code></pre>
+            <p class="muted">Padronize nomes: <span class="kbd">01_update.png</span>, <span class="kbd">02_security.png</span>, <span class="kbd">03_sfc.txt</span>…</p>
+          </div>
+
+          <div class="step">
+            <h3>Criar README e checklist</h3>
+            <pre class="language-bash"><code>echo PI B2 - Manutencao e Recuperacao &gt; C:\FGSO\PI_B2\README.txt
+echo CHECKLIST PI B2 &gt; C:\FGSO\PI_B2\docs\checklist_PI_B2.txt</code></pre>
+            <ul>
+              <li>Preencha 10+ itens (modelo na seção “Modelos”).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Documentar o baseline pós-instalação</h3>
+            <ul>
+              <li>Registre: edição/build (winver), tipo de conta, disco (C/D planejado), rede e snapshot.</li>
+              <li>Salve 1 print de <span class="kbd">winver</span> e 1 print do gerenciador de disco (ou configuração da VM).</li>
+            </ul>
+            <pre class="language-bash"><code>winver</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Escrever e executar a rotina preventiva (com evidências)</h3>
+            <ul>
+              <li>Semanal: Update + Security + limpeza segura.</li>
+              <li>Mensal: Reliability + Event Viewer (export .evtx) + revisão de inicialização.</li>
+              <li>Salve evidências: 2 prints (Update + Security) e 1 log .evtx.</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Dica:</strong> exporte um log do Event Viewer para <span class="kbd">evidencias\logs</span> (sem dados sensíveis).</n            </div>
+          </div>
+
+          <div class="step">
+            <h3>Criar 2 SOPs corretivos completos (mínimo)</h3>
+            <ul>
+              <li>SOP 1 (obrigatório): Integridade do sistema (SFC → DISM → SFC).</li>
+              <li>SOP 2: Disco/armazenamento (CHKDSK /scan + limpeza + validação de espaço) ou “Windows lento (ações mínimas)”.</li>
+              <li>Para cada SOP: Sintoma → Diagnóstico → Evidência → Ação mínima → Validação → Rollback.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Executar 1 SOP corretivo e salvar logs em arquivo</h3>
+            <p class="muted">Execute como Administrador quando necessário e salve a saída em TXT (evidência).</p>
+            <pre class="language-bash"><code>sfc /scannow &gt; C:\FGSO\PI_B2\evidencias\logs\03_sfc.txt
+DISM /Online /Cleanup-Image /RestoreHealth &gt; C:\FGSO\PI_B2\evidencias\logs\04_dism_restorehealth.txt
+sfc /scannow &gt; C:\FGSO\PI_B2\evidencias\logs\05_sfc_pos_dism.txt
+
+chkdsk C: /scan &gt; C:\FGSO\PI_B2\evidencias\logs\06_chkdsk_scan.txt</code></pre>
+            <div class="callout">
+              <strong>Validação:</strong> confira se os arquivos TXT não estão vazios e escreva uma conclusão curta no relatório.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Escrever relatório final e empacotar</h3>
+            <ul>
+              <li>Crie <span class="kbd">docs\relatorio_PI_B2.txt</span> (modelo abaixo) e inclua links/nome dos arquivos de evidência.</li>
+              <li>(Opcional) compacte em ZIP:</li>
+            </ul>
+            <pre class="language-powershell"><code>Compress-Archive -Path "C:\FGSO\PI_B2\*" -DestinationPath "C:\FGSO\PI_B2.zip" -Force</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="modelo">
+        <h2>Modelos de SOP e relatório (copiar/colar)</h2>
+
+        <details class="block" open>
+          <summary>Modelo de SOP corretivo (padrão) <span class="tag">copiar/colar</span></summary>
+          <div class="diagram"><pre>
+SOP-COR-XX — TÍTULO
+Versão: 1.0  Data: __/__/____
+
+1) Sintoma
+- Descreva o que o usuário percebe.
+
+2) Hipóteses
+- Liste 2–3 causas prováveis.
+
+3) Diagnóstico (GUI)
+- Ferramentas e telas (ex.: Task Manager, Reliability, Event Viewer).
+
+4) Diagnóstico (CLI)
+- Comandos e o que você espera ver.
+
+5) Evidências (obrigatórias)
+- Prints:
+- Logs:
+
+6) Ação mínima (correção)
+- O menor passo que resolve ou melhora.
+
+7) Validação
+- Como provar que melhorou? (antes/depois)
+
+8) Rollback
+- Como desfazer caso piore?
+          </pre></div>
+        </details>
+
+        <details class="block">
+          <summary>Modelo de relatório PI (B2) <span class="tag">copiar/colar</span></summary>
+          <div class="diagram"><pre>
+PROJETO INTEGRADOR 2 (B2) — MANUTENÇÃO E RECUPERAÇÃO DO WINDOWS
+Aluno: ____________  Turma: ____  Data: __/__/____
+
+1) Objetivo
+- Consolidar manutenção preventiva/corretiva e documentar procedimentos com evidências.
+
+2) Baseline do ambiente
+- Windows: edição/build (winver)
+- Ambiente: VM/PC (CPU/RAM/Disco)
+- Padrões: pastas e nomes (01_, 02_...)
+
+3) Rotina preventiva
+3.1 Semanal
+- Update:
+- Security:
+- Limpeza:
+- Evidências:
+
+3.2 Mensal
+- Reliability:
+- Event Viewer (export .evtx):
+- Startup/Tarefas:
+- Evidências:
+
+4) SOPs corretivos
+- SOP-COR-01 (Integridade: SFC/DISM):
+- SOP-COR-02 (Disco/Lento/Outro):
+
+5) Execução e resultados
+- Arquivos gerados em evidencias\logs:
+  - 03_sfc.txt
+  - 04_dism_restorehealth.txt
+  - 05_sfc_pos_dism.txt
+  - 06_chkdsk_scan.txt
+- Conclusão curta (o que foi encontrado/feito):
+
+6) Rollback / segurança
+- Snapshot/Restore point (como voltar):
+
+7) Aprendizados
+- O que ficou mais claro neste bimestre?
+          </pre></div>
+        </details>
+      </section>
+
+      <section class="card" id="rubrica">
+        <h2>Rubrica de avaliação</h2>
+        <table aria-label="Rubrica">
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th>Básico</th>
+              <th>Bom</th>
+              <th>Excelente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Organização do pacote</td>
+              <td>Arquivos soltos</td>
+              <td>Pastas claras + padrão de nomes</td>
+              <td>README + estrutura impecável + ZIP conferido</td>
+            </tr>
+            <tr>
+              <td>Preventiva</td>
+              <td>Sem rotina</td>
+              <td>Semanal + mensal com evidências</td>
+              <td>Rotina com periodicidade e critérios de validação</td>
+            </tr>
+            <tr>
+              <td>SOPs corretivos</td>
+              <td>Incompletos</td>
+              <td>2 SOPs completos</td>
+              <td>3 SOPs completos + validação antes/depois detalhada</td>
+            </tr>
+            <tr>
+              <td>Logs e evidências</td>
+              <td>Poucas evidências</td>
+              <td>Logs TXT + prints essenciais</td>
+              <td>Logs + .evtx + conclusão técnica bem escrita</td>
+            </tr>
+            <tr>
+              <td>Rollback</td>
+              <td>Não menciona</td>
+              <td>Menciona snapshot/restore</td>
+              <td>Rollback descrito e testado em laboratório</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — para fortalecer seu PI</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — SOP “Pouco espaço”</h3>
+            <p>Crie um SOP para pouco espaço: diagnóstico (Storage/WinDirStat opcional), ação mínima (limpeza segura) e validação (antes/depois em GB).</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — SOP “Windows não inicia (conceitual)”</h3>
+            <p>Escreva (sem executar) um SOP para quando o Windows não inicia: WinRE, opções de reparo e quando usar restauração/sfc offline.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Relatório mensal automatizado</h3>
+            <p>Crie um script PowerShell simples que exporta Get-HotFix e Get-WinEvent (últimos 20) para CSV (apenas em laboratório).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz (interativo)</h2>
+        <p class="muted">Revisão do PI B2: preventiva, corretiva e evidências.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre SFC e DISM, e por que a ordem importa?</li>
+          <li>Quais cuidados tomar ao executar comandos como administrador em ambiente real?</li>
+          <li>Qual a diferença entre log em TXT e exportação .evtx?</li>
+          <li>Como definir periodicidade de manutenção em uma organização (semanal/mensal)?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo bimestre:</strong> no Cap. 09 você começa gerenciamento avançado de processos e serviços.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Projeto Integrador 2 (B2) • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Qual é a diferença principal entre manutenção preventiva e corretiva?',
+        options: [
+          'Preventiva corrige erros; corretiva evita problemas.',
+          'Preventiva evita problemas; corretiva corrige problemas já existentes.',
+          'Preventiva só serve em servidor; corretiva só em desktop.',
+          'Não existe diferença.',
+          'Preventiva sempre exige formatação.'
+        ],
+        correct: 1,
+        why: 'Preventiva reduz risco (rotina). Corretiva trata falhas já ocorridas (com diagnóstico e validação).' 
+      },
+      {
+        q: '2) Em um SOP de suporte, qual sequência é mais segura?',
+        options: [
+          'Ação → evidência → rollback.',
+          'Evidência antes → ação mínima → validação → evidência depois → rollback.',
+          'Formatar e pronto.',
+          'Apagar logs para limpar.',
+          'Desativar serviços aleatoriamente.'
+        ],
+        correct: 1,
+        why: 'Evidência antes/depois com ação mínima e validação reduz risco e facilita auditoria e reversão.'
+      },
+      {
+        q: '3) Para verificar e reparar arquivos do sistema, o comando principal é:',
+        options: ['ping', 'tasklist', 'sfc /scannow', 'ipconfig', 'robocopy'],
+        correct: 2,
+        why: 'sfc /scannow verifica e repara arquivos do sistema do Windows.'
+      },
+      {
+        q: '4) Quando o SFC não resolve, qual ferramenta ajuda a reparar a imagem do Windows?',
+        options: ['DISM /Online /Cleanup-Image /RestoreHealth', 'netstat -ano', 'tracert', 'msconfig', 'regedit'],
+        correct: 0,
+        why: 'DISM /RestoreHealth repara a imagem do Windows, permitindo que o SFC funcione corretamente.'
+      },
+      {
+        q: '5) Qual é um exemplo de evidência forte no PI B2?',
+        options: [
+          'Dizer “funcionou”.',
+          'Um print aleatório sem nome.',
+          'Logs TXT do SFC/DISM e prints do Update/Security organizados por pasta.',
+          'Somente um atalho na área de trabalho.',
+          'Somente o nome da VM.'
+        ],
+        correct: 2,
+        why: 'Evidência forte é organizada e auditável: logs e prints nomeados e guardados em pastas padrão.'
+      },
+      {
+        q: '6) Qual comando verifica o sistema de arquivos de forma mais segura (sem forçar reparo offline) no laboratório?',
+        options: ['chkdsk C: /scan', 'format C:', 'del /s C:\\*', 'shutdown /s', 'bcdedit'],
+        correct: 0,
+        why: 'chkdsk /scan verifica a integridade do sistema de arquivos online, adequado para checagens.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise preventiva x corretiva e a ordem SFC → DISM → SFC.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_PI_B2_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei a pasta C:\\FGSO\\PI_B2 com docs/ e evidencias/.', note:'Estrutura completa.' },
+      { id:'c2', title:'Registrei baseline pós-instalação (winver + ambiente).', note:'2 prints mínimos.' },
+      { id:'c3', title:'Defini rotina preventiva semanal e mensal com evidências.', note:'Update/Security + Reliability/Event Viewer.' },
+      { id:'c4', title:'Exportei pelo menos 1 log .evtx do Event Viewer.', note:'Salvei em evidencias/logs.' },
+      { id:'c5', title:'Escrevi 2 SOPs corretivos completos (padrão).', note:'Inclui integridade (SFC/DISM).' },
+      { id:'c6', title:'Executei 1 SOP corretivo e salvei logs TXT (SFC/DISM/CHKDSK).', note:'Arquivos 03_ a 06_.' },
+      { id:'c7', title:'Organizei evidências com nomes padronizados (01_, 02_...).', note:'Facilita correção.' },
+      { id:'c8', title:'Escrevi README explicando onde estão evidências e como avaliar.', note:'Outro usuário entende.' },
+      { id:'c9', title:'Escrevi relatorio_PI_B2 com conclusões e rollback.', note:'Inclui ação mínima e validação.' },
+      { id:'c10', title:'Empacotei em ZIP (opcional) e conferi conteúdo.', note:'PI_B2.zip.' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', updateChecklistProgress);
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

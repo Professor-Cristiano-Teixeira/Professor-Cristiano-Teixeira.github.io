@@ -1,0 +1,921 @@
+<!-- arquivo: capitulo08.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — Manutenção Preventiva, Segurança e Recuperação no Windows (Ferramentas Nativas) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 08 da Apostila FGSO: manutenção preventiva e corretiva no Windows 11 usando ferramentas nativas (Windows Update, Windows Security, Storage Sense, Limpeza de Disco, SFC/DISM, CHKDSK, Restauração do Sistema, Recuperação). Inclui passo a passo prático, boas práticas, solução de problemas, atividades e Projeto Integrador do 2º bimestre." />
+
+  <!-- Prism (tema escuro) para comandos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,27,51,.75);
+      color: var(--text);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      font-size: 13px;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      height: fit-content;
+      position:sticky;
+      top: 74px;
+    }
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{
+      background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 08 • Manutenção preventiva, segurança e recuperação</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo07.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo09.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 08</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🧰 Manutenção & reparo</span>
+        <span class="pill">🛡️ Segurança</span>
+        <span class="pill">♻️ Recuperação</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#teoria"><span class="n">02</span><span class="t">Teoria: preventiva x corretiva</span></a></li>
+        <li><a href="#ferramentas"><span class="n">03</span><span class="t">Ferramentas-chave (o que usar e quando)</span></a></li>
+        <li><a href="#passo"><span class="n">04</span><span class="t">Passo a passo: rotina completa</span></a></li>
+        <li><a href="#recuperacao"><span class="n">05</span><span class="t">Recuperação: pontos, reparos e WinRE</span></a></li>
+        <li><a href="#boas"><span class="n">06</span><span class="t">Boas práticas e erros comuns</span></a></li>
+        <li><a href="#pi"><span class="n">07</span><span class="t">Projeto Integrador (B2) — entrega</span></a></li>
+        <li><a href="#atividades"><span class="n">08</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">09</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">10</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">11</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Recomendação:</strong> se você está em VM, crie snapshot <span class="kbd">08-antes-manutencao</span>. Em máquina real, faça backup de dados importantes.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 08 — Manutenção Preventiva, Segurança e Recuperação no Windows</h1>
+        <p>
+          Se o Capítulo 07 ensinou <strong>diagnosticar</strong>, este capítulo ensina <strong>manter e reparar</strong>.
+          Você vai aprender uma rotina de manutenção preventiva (limpeza, atualizações, segurança) e técnicas corretivas básicas (integridade do sistema, disco, restauração).
+          Ao final, você entregará a etapa do <strong>Projeto Integrador do 2º bimestre</strong>: um <strong>playbook de manutenção</strong> com evidências.
+        </p>
+        <div class="chips">
+          <span class="chip">Windows Update</span>
+          <span class="chip">Windows Security</span>
+          <span class="chip">Storage Sense</span>
+          <span class="chip">SFC / DISM</span>
+          <span class="chip">CHKDSK</span>
+          <span class="chip">Restauração do Sistema</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Explicar diferença entre manutenção <strong>preventiva</strong> e <strong>corretiva</strong>.</li>
+              <li>Executar uma rotina de manutenção usando ferramentas nativas do Windows 11.</li>
+              <li>Aplicar checagens de integridade: <strong>SFC</strong> e <strong>DISM</strong> (quando e por quê).</li>
+              <li>Verificar disco com <strong>CHKDSK</strong> sem colocar dados em risco.</li>
+              <li>Criar <strong>Ponto de Restauração</strong> e entender o <strong>WinRE</strong> (Ambiente de Recuperação).</li>
+              <li>Produzir evidências e um playbook de manutenção (Projeto Integrador B2).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Windows 11 instalado (Cap. 05) e preferencialmente com partição de dados (Cap. 06).</li>
+              <li>Ferramentas administrativas praticadas (Cap. 07).</li>
+              <li>Permissão de administrador na VM/máquina.</li>
+            </ul>
+            <div class="callout warn" style="margin-top:10px">
+              <strong>Dica:</strong> manutenção é mais segura com ponto de retorno (snapshot em VM ou restauração do sistema em máquina real).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="teoria">
+        <h2>Teoria: manutenção preventiva x corretiva (e onde vou aplicar)</h2>
+
+        <h3>Manutenção preventiva</h3>
+        <p>
+          É o conjunto de ações para <strong>evitar</strong> problemas: manter atualizações em dia, limpar arquivos temporários, reduzir software desnecessário,
+          revisar segurança e criar pontos de retorno. Prevenir é mais barato do que consertar.
+          <strong>Onde vou aplicar:</strong> Windows Update, Windows Security, Storage Sense, revisão de inicialização e snapshot.
+        </p>
+
+        <h3>Manutenção corretiva</h3>
+        <p>
+          É o conjunto de ações para <strong>resolver</strong> problemas quando algo já deu errado: reparar arquivos do sistema, corrigir componentes,
+          verificar disco, restaurar configurações e usar o ambiente de recuperação.
+          <strong>Onde vou aplicar:</strong> SFC/DISM, CHKDSK, Restauração do Sistema e WinRE.
+        </p>
+
+        <h3>Regra de ouro (método de suporte)</h3>
+        <p>
+          Sempre pense em 3 etapas: <strong>(1) Evidência</strong> (o que está acontecendo?), <strong>(2) Retorno</strong> (tenho como voltar?),
+          <strong>(3) Ação</strong> (qual a menor intervenção que resolve?).
+          <strong>Onde vou aplicar:</strong> você criará um pacote de evidências e só depois executará reparos.
+        </p>
+
+        <div class="callout">
+          <strong>Conexão com o Cap. 07:</strong> Diagnóstico (Task Manager/Event Viewer/Reliability) vem antes de reparo. Consertar “no escuro” costuma piorar.
+        </div>
+      </section>
+
+      <section class="card" id="ferramentas">
+        <h2>Ferramentas-chave (o que usar e quando)</h2>
+        <p>Este quadro resume as ferramentas do capítulo e em que momento você deve usá-las.</p>
+
+        <table aria-label="Ferramentas e uso">
+          <thead>
+            <tr>
+              <th>Ferramenta</th>
+              <th>Objetivo</th>
+              <th>Quando usar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Windows Update</strong></td>
+              <td>Correções de segurança e estabilidade</td>
+              <td>Sempre (preventivo). Quando há falhas repetidas (corretivo).</td>
+            </tr>
+            <tr>
+              <td><strong>Windows Security</strong></td>
+              <td>Proteção contra vírus, firewall, integridade</td>
+              <td>Sempre (preventivo) e quando há suspeita de malware.</td>
+            </tr>
+            <tr>
+              <td><strong>Storage Sense / Limpeza</strong></td>
+              <td>Limpar temporários, liberar espaço</td>
+              <td>Quando espaço está baixo ou performance degrada por falta de disco.</td>
+            </tr>
+            <tr>
+              <td><strong>SFC</strong></td>
+              <td>Verificar e reparar arquivos do sistema</td>
+              <td>Quando há erros do Windows, travamentos e suspeita de corrupção.</td>
+            </tr>
+            <tr>
+              <td><strong>DISM</strong></td>
+              <td>Reparar a imagem do Windows (component store)</td>
+              <td>Quando SFC não resolve ou relata corrupção não reparável.</td>
+            </tr>
+            <tr>
+              <td><strong>CHKDSK</strong></td>
+              <td>Verificar sistema de arquivos / disco</td>
+              <td>Quando há erros de disco, desligamentos bruscos, falhas de leitura.</td>
+            </tr>
+            <tr>
+              <td><strong>Restauração do Sistema</strong></td>
+              <td>Voltar configurações/estado do sistema</td>
+              <td>Quando update/driver/app quebrou o sistema.</td>
+            </tr>
+            <tr>
+              <td><strong>WinRE</strong></td>
+              <td>Recuperação fora do Windows (reparo/restore)</td>
+              <td>Quando o Windows não inicia ou inicia instável.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout warn">
+          <strong>Importante:</strong> ferramentas como SFC/DISM/CHKDSK exigem privilégios de administrador. Em VM, use snapshot antes.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo: rotina completa de manutenção (laboratório)</h2>
+        <p>
+          Este roteiro é um “procedimento padrão” (SOP). Ao terminar, você terá sistema atualizado, limpo, verificado e com ponto de retorno.
+          Guarde as evidências em <span class="kbd">C:\\FGSO\\cap08</span>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> em VM crie snapshot <span class="kbd">08-antes-manutencao</span>. Em máquina real, backup dos dados mais importantes.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Organizar pasta de evidências</h3>
+            <ul>
+              <li>Crie <span class="kbd">C:\\FGSO\\cap08</span> e <span class="kbd">C:\\FGSO\\cap08\\logs</span>.</li>
+              <li>Crie um arquivo <span class="kbd">checklist.txt</span> e vá marcando as ações executadas.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Checar Windows Update</h3>
+            <ul>
+              <li>Configurações → Windows Update → <strong>Verificar atualizações</strong>.</li>
+              <li>Instale atualizações disponíveis (se solicitar reinício, reinicie).</li>
+              <li>Registre print do status (Atualizado ou Pendências).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Checar Windows Security (proteção básica)</h3>
+            <ul>
+              <li>Abra <strong>Segurança do Windows</strong>.</li>
+              <li>Vá em Proteção contra vírus e ameaças → <strong>Verificação rápida</strong>.</li>
+              <li>Confirme Firewall ativo.</li>
+              <li>Registre print do status.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Limpeza e armazenamento (Storage Sense)</h3>
+            <ul>
+              <li>Configurações → Sistema → Armazenamento.</li>
+              <li>Abra <strong>Arquivos temporários</strong> e selecione itens seguros (ex.: cache/temporários).</li>
+              <li>Ative <strong>Sensor de armazenamento</strong> (Storage Sense) e configure para limpeza periódica.</li>
+              <li>Registre print do espaço antes/depois (aproximado).</li>
+            </ul>
+            <div class="callout">
+              <strong>Dica:</strong> em laboratório, evite apagar “Downloads” automaticamente se você guarda ISOs lá.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Verificar integridade: SFC</h3>
+            <ul>
+              <li>Abra Terminal/Prompt como administrador (Pesquisar → “cmd” → Executar como administrador).</li>
+              <li>Execute:</li>
+            </ul>
+            <pre class="language-bash"><code>sfc /scannow</code></pre>
+            <ul>
+              <li>Ao terminar, anote o resultado (ex.: “nenhuma violação” ou “corrigiu arquivos”).</li>
+              <li>Salve o resultado no seu <span class="kbd">checklist.txt</span>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Se necessário: reparar imagem com DISM</h3>
+            <ul>
+              <li>Se o SFC indicar corrupção não reparável, execute (admin):</li>
+            </ul>
+            <pre class="language-bash"><code>DISM /Online /Cleanup-Image /RestoreHealth</code></pre>
+            <ul>
+              <li>Depois rode novamente: <span class="kbd">sfc /scannow</span>.</li>
+              <li>Anote resultados.</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Observação:</strong> DISM pode demorar. Em VM, desempenho depende do host.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Verificar disco (modo seguro): CHKDSK</h3>
+            <ul>
+              <li>Use o modo não invasivo (admin):</li>
+            </ul>
+            <pre class="language-bash"><code>chkdsk C: /scan</code></pre>
+            <ul>
+              <li>Anote o resultado (se encontrou erros).</li>
+              <li>Evite /f e /r em laboratório sem entender (pode pedir reinício e demorar muito).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Criar Ponto de Restauração (System Restore)</h3>
+            <ul>
+              <li>Abra Executar: <span class="kbd">Win</span>+<span class="kbd">R</span> → <span class="kbd">sysdm.cpl</span>.</li>
+              <li>Aba <strong>Proteção do Sistema</strong> → selecione (C:) → <strong>Configurar</strong> → ativar proteção.</li>
+              <li>Defina uso de espaço (ex.: 5% a 10% do disco da VM) e clique em OK.</li>
+              <li>Clique em <strong>Criar</strong> e nomeie: <span class="kbd">08-pos-manutencao</span>.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde isso ajuda:</strong> se uma atualização/driver quebrar o sistema, você consegue voltar.</n            </div>
+          </div>
+
+          <div class="step">
+            <h3>Conferir confiabilidade (pós-rotina)</h3>
+            <ul>
+              <li>Abra: <span class="kbd">perfmon /rel</span>.</li>
+              <li>Verifique se houve falhas durante a rotina (ex.: update falhou).</li>
+              <li>Anote 1 observação no <span class="kbd">checklist.txt</span>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Snapshot “ponto limpo” (VM)</h3>
+            <ul>
+              <li>Se estiver em VM, crie snapshot: <span class="kbd">08-ponto-limpo</span>.</li>
+              <li>Esse snapshot será base do 3º bimestre (Cap. 09–12).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Resultado esperado:</strong> sistema atualizado, segurança verificada, espaço controlado, integridade checada e ponto de retorno criado.
+        </div>
+      </section>
+
+      <section class="card" id="recuperacao">
+        <h2>Recuperação: pontos de restauração, reparos e WinRE</h2>
+
+        <h3>Ponto de Restauração (o que ele faz e o que ele não faz)</h3>
+        <p>
+          A <strong>Restauração do Sistema</strong> tenta reverter configurações do sistema, drivers e arquivos críticos para um ponto anterior.
+          Ela <strong>não é um backup completo</strong> dos seus arquivos pessoais. Por isso, ela complementa (não substitui) backup.
+          <strong>Onde vou aplicar:</strong> você criou o ponto <span class="kbd">08-pos-manutencao</span> no passo a passo.
+        </p>
+
+        <h3>WinRE (Ambiente de Recuperação)</h3>
+        <p>
+          O <strong>WinRE</strong> é um ambiente de recuperação que pode ser acessado quando o Windows não inicia corretamente. Ele oferece opções como:
+          <strong>Reparo de Inicialização</strong>, <strong>Restauração do Sistema</strong>, <strong>Desinstalar atualizações</strong> e <strong>Prompt de Comando</strong>.
+          <strong>Onde vou aplicar:</strong> em cenários de falha de boot (simulados ou reais) nos próximos capítulos.
+        </p>
+
+        <div class="diagram" aria-label="Fluxo de recuperação">
+<pre>
+Problema ocorre → (1) Diagnóstico (Cap. 07) → (2) Ponto de retorno
+   ├─ Se Windows inicia: Restauração do Sistema / SFC / DISM
+   └─ Se não inicia: WinRE → Reparo de Inicialização / Restauração / Desinstalar updates
+</pre>
+        </div>
+
+        <div class="callout warn">
+          <strong>Importante:</strong> em laboratório, você deve registrar evidências antes de restaurar (logs/prints) para aprender com o erro.
+        </div>
+      </section>
+
+      <section class="card" id="boas">
+        <h2>Boas práticas e erros comuns</h2>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Boas práticas (faça sempre)</h3>
+            <ul>
+              <li>Crie ponto de retorno: snapshot (VM) e/ou restauração do sistema.</li>
+              <li>Atualize com método: update → reinício → validar.</li>
+              <li>Limpeza com critério: não apague arquivos do usuário sem confirmar.</li>
+              <li>Registre evidências: logs, prints, checklist.</li>
+              <li>Menor intervenção possível: comece pelo simples (update/scan/limpeza) antes de reparos invasivos.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Erros comuns (evite)</h3>
+            <ul>
+              <li>Desativar serviços “para ficar mais rápido” sem entender (pode quebrar o sistema).</li>
+              <li>Executar <span class="kbd">chkdsk /f /r</span> sem necessidade (pode demorar e causar riscos).</li>
+              <li>Apagar pastas de sistema manualmente.</li>
+              <li>Ignorar updates por muito tempo (aumenta vulnerabilidades).</li>
+              <li>Editar registro sem backup/snapshot.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout danger">
+          <strong>Regra do curso:</strong> Se você não consegue explicar “o que a ação faz” e “como desfazer”, não execute.
+        </div>
+      </section>
+
+      <section class="card" id="pi">
+        <h2>Projeto Integrador — 2º Bimestre (Entrega incremental)</h2>
+        <p>
+          <strong>Objetivo do PI (B2):</strong> transformar seus passos em um <strong>playbook</strong> (procedimento padrão) que qualquer técnico consiga repetir.
+          Você vai entregar um pacote com: checklist, evidências e um roteiro de recuperação.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Entrega (o que entregar)</h3>
+            <ol>
+              <li><strong>Playbook</strong> (1–2 páginas): rotina semanal + mensal + corretiva básica.</li>
+              <li><strong>Checklist preenchido</strong>: com data e observações.</li>
+              <li><strong>Evidências</strong>: prints (Update, Security, Storage, SFC) + 1 log exportado do Cap. 07 ou deste capítulo.</li>
+              <li><strong>Ponto de retorno</strong>: snapshot <span class="kbd">08-ponto-limpo</span> (VM) OU ponto de restauração criado.</li>
+              <li><strong>Plano de recuperação</strong>: fluxograma simples (Windows inicia vs não inicia).</li>
+            </ol>
+          </div>
+          <div class="box">
+            <h3>Modelo de estrutura do playbook</h3>
+            <ul>
+              <li><strong>1) Objetivo</strong> (por que fazemos manutenção)</li>
+              <li><strong>2) Ferramentas</strong> (Update, Security, Storage, SFC/DISM, Restore)</li>
+              <li><strong>3) Rotina semanal</strong> (passos em 5–10 min)</li>
+              <li><strong>4) Rotina mensal</strong> (passos em 15–30 min)</li>
+              <li><strong>5) Corretiva básica</strong> (SFC → DISM → CHKDSK /scan → Restore)</li>
+              <li><strong>6) Evidências</strong> (o que registrar e onde salvar)</li>
+            </ul>
+            <p class="muted">Dica: salve o playbook em <span class="kbd">D:\\DADOS\\FGSO</span> (se você criou a partição no Cap. 06).</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Conexão com o curso:</strong> no 3º bimestre você vai aprofundar processos, usuários, permissões e rede. Um sistema “saudável” é o ponto de partida.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — para você desenvolver</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Auditoria de espaço</h3>
+            <p>Liste os 5 maiores consumidores de espaço em Armazenamento (apps/temporários). Proponha uma ação de limpeza segura.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Reparação guiada</h3>
+            <p>Execute SFC e registre resultado. Se houver corrupção, execute DISM e rode SFC novamente. Documente antes/depois.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Plano de recuperação</h3>
+            <p>Crie um fluxograma do que fazer quando o Windows não inicia: WinRE → reparo → restore → desinstalar update.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre <strong>backup</strong> e <strong>ponto de restauração</strong>?</li>
+          <li>O que o <strong>DISM</strong> repara que o <strong>SFC</strong> não repara diretamente?</li>
+          <li>O que é <strong>WinRE</strong> e quais opções existem nele?</li>
+          <li>Como Storage Sense decide o que limpar? Quais riscos?</li>
+          <li>Por que updates frequentes são parte da manutenção moderna?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo09.html">Capítulo 09</a> você vai aprofundar processos, serviços e inicialização (administração mais avançada).
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 08 • fim do 2º bimestre • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Manutenção preventiva tem como objetivo principal:',
+        options: [
+          'Consertar o Windows quando ele não inicia.',
+          'Evitar problemas antes que aconteçam.',
+          'Apagar o sistema e reinstalar.',
+          'Desativar atualizações.',
+          'Trocar o hardware automaticamente.'
+        ],
+        correct: 1,
+        why: 'Preventiva busca reduzir riscos e falhas por meio de updates, limpeza, segurança e rotina.'
+      },
+      {
+        q: '2) Qual ferramenta é prioridade para correções de segurança e estabilidade?',
+        options: ['Paint', 'Windows Update', 'Notepad', 'Disk Management', 'Calculator'],
+        correct: 1,
+        why: 'Windows Update entrega correções, patches de segurança e atualizações importantes do sistema.'
+      },
+      {
+        q: '3) Qual comando verifica e tenta reparar arquivos do sistema?',
+        options: ['ipconfig', 'sfc /scannow', 'ping', 'tasklist', 'dir'],
+        correct: 1,
+        why: 'SFC verifica integridade de arquivos do Windows e tenta reparar violações.'
+      },
+      {
+        q: '4) Se o SFC não conseguir reparar, qual ferramenta costuma ser usada para reparar a imagem do Windows?',
+        options: ['DISM /Online /Cleanup-Image /RestoreHealth', 'format C:', 'regedit', 'calc', 'shutdown /s'],
+        correct: 0,
+        why: 'DISM pode reparar a imagem/component store que o SFC usa como referência.'
+      },
+      {
+        q: '5) Qual comando de CHKDSK é mais seguro para uma checagem inicial (não invasiva)?',
+        options: ['chkdsk C: /scan', 'chkdsk C: /r', 'chkdsk C: /f /r', 'chkdsk /x', 'chkdsk /b'],
+        correct: 0,
+        why: 'O modo /scan verifica online e é uma checagem inicial mais segura em laboratório.'
+      },
+      {
+        q: '6) Um Ponto de Restauração é:',
+        options: [
+          'Um backup completo de todos os arquivos pessoais.',
+          'Um ponto para reverter configurações e arquivos críticos do sistema.',
+          'Uma partição obrigatória do disco.',
+          'Um antivírus embutido.',
+          'Uma senha do Windows.'
+        ],
+        correct: 1,
+        why: 'Restauração do sistema reverte componentes do sistema, mas não substitui backup completo.'
+      },
+      {
+        q: '7) WinRE é usado principalmente quando:',
+        options: [
+          'Você quer trocar o papel de parede.',
+          'O Windows não inicia ou precisa de reparo fora do sistema.',
+          'Você quer abrir o Paint.',
+          'Você quer limpar temporários.',
+          'Você quer instalar jogos.'
+        ],
+        correct: 1,
+        why: 'WinRE oferece recuperação quando o Windows não inicia ou precisa de reparo avançado.'
+      },
+      {
+        q: '8) Qual é a melhor ordem (método) ao fazer manutenção corretiva?',
+        options: [
+          'Formatar primeiro, depois investigar.',
+          'Investigar (evidência) → criar retorno → aplicar a menor intervenção.',
+          'Desativar serviços até funcionar.',
+          'Editar registro sem backup.',
+          'Ignorar logs e reiniciar várias vezes.'
+        ],
+        correct: 1,
+        why: 'Método profissional: evidências, ponto de retorno e intervenção mínima reduz risco e retrabalho.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise o quadro “Ferramentas-chave” e o passo a passo.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap08_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei pasta C:\\FGSO\\cap08 e organizei evidências.', note:'Pasta cap08 + logs + checklist.txt.' },
+      { id:'c2', title:'Verifiquei Windows Update e registrei status (print/anotação).', note:'Atualizado ou pendente.' },
+      { id:'c3', title:'Verifiquei Windows Security e executei verificação rápida.', note:'Firewall e proteção ok.' },
+      { id:'c4', title:'Usei Armazenamento/Arquivos temporários e configurei Storage Sense.', note:'Liberei espaço com critério.' },
+      { id:'c5', title:'Executei SFC /scannow e registrei o resultado.', note:'Anotei mensagem final.' },
+      { id:'c6', title:'Se necessário, executei DISM e rodei SFC novamente.', note:'DISM /RestoreHealth.' },
+      { id:'c7', title:'Executei chkdsk C: /scan e registrei o resultado.', note:'Modo seguro (scan).' },
+      { id:'c8', title:'Ativei Proteção do Sistema e criei ponto 08-pos-manutencao.', note:'sysdm.cpl → Proteção do Sistema.' },
+      { id:'c9', title:'Conferi Reliability Monitor após a rotina e anotei observações.', note:'perfmon /rel.' },
+      { id:'c10', title:'Criei ponto de retorno (snapshot 08-ponto-limpo ou equivalente).', note:'Base do 3º bimestre.' },
+      { id:'c11', title:'Preparei a entrega do PI (B2): playbook + evidências + plano de recuperação.', note:'1–2 páginas + prints/logs + fluxograma.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

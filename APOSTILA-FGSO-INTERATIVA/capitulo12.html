@@ -1,0 +1,950 @@
+<!-- arquivo: capitulo12.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 12 — PI (B3): Playbook de Suporte e Manutenção + Introdução a BitLocker | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 12 da Apostila FGSO (3º bimestre): guia de entrega do Playbook de Suporte e Manutenção (preventiva e corretiva) consolidando capítulos anteriores. Inclui uma breve introdução a criptografia e BitLocker (agenda) e um guia detalhado para criar/entregar o playbook com evidências, rubrica, quiz e checklist." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line)}
+    .topbar-inner{max-width:1280px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{width:40px;height:40px;border-radius:12px; background:linear-gradient(135deg,var(--navy),var(--navy-2)); box-shadow:var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14)}
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.75); color:var(--text); box-shadow:0 10px 22px rgba(0,0,0,.25); font-size:13px}
+    .btn:hover{transform:translateY(-1px); background:rgba(18,58,122,.35); text-decoration:none}
+    .btn.primary{background:linear-gradient(135deg,var(--navy),var(--navy-2))}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding:18px; display:grid; grid-template-columns:320px 1fr; gap:18px}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr}}
+
+    .side{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; height:fit-content; position:sticky; top:74px}
+    @media (max-width:980px){.side{position:relative; top:auto}}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom:10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); font-size:12px; color:var(--muted); width:fit-content}
+    .meta{display:flex; flex-direction:column; gap:8px; margin:10px 0 12px}
+
+    .toc{list-style:none; padding:0; margin:10px 0 0; display:flex; flex-direction:column; gap:8px}
+    .toc a{display:flex; gap:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:var(--card2); color:var(--text)}
+    .toc a:hover{background:rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width:54px; text-align:center}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px}
+    .hero{background:linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .hero h1{margin:0 0 6px; font-size:20px}
+    .hero p{margin:6px 0; color:#e7eeff; max-width:92ch}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .chip{font-size:12px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); padding:6px 10px; border-radius:999px}
+
+    .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .card h2{margin:0 0 10px; font-size:16px}
+    .card h3{margin:16px 0 8px; font-size:14px; color:#dbe7ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+    .grid-3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+    @media (max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+    .box{border:1px dashed rgba(255,255,255,.18); border-radius:14px; padding:12px; background:rgba(10,31,68,.18)}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background:rgba(7,11,20,.35); border-radius:12px; padding:10px 12px; margin:10px 0}
+    .callout.warn{border-left-color:rgba(250,160,90,.95)}
+    .callout.danger{border-left-color:rgba(255,107,107,.95)}
+
+    .kbd{font-family:var(--mono); font-size:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding:1px 7px; border-radius:999px}
+
+    details.block{background:rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:10px 12px; margin:10px 0}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size:11px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); padding:2px 8px; border-radius:999px; white-space:nowrap}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background:rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background:rgba(7,11,20,.40); border-radius:14px; padding:12px; overflow:auto}
+    .diagram pre{margin:0; font-family:var(--mono); font-size:12px; line-height:1.35; color:#dfe9ff}
+
+    .steps{counter-reset: step; display:grid; gap:12px}
+    .step{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .step h3{margin:0 0 8px; font-size:14px}
+    .step h3:before{counter-increment: step; content:"Passo " counter(step) " — "; color:#dbe7ff}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px}
+    .q{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .q h4{margin:0 0 10px; font-size:14px}
+    .opts{display:grid; gap:8px; margin:10px 0}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.04); cursor:pointer}
+    .opt:hover{background:rgba(18,58,122,.18)}
+    .opt input{margin-top:3px}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.65); color:var(--text); font-size:12px; cursor:pointer}
+    .mini:hover{background:rgba(18,58,122,.30)}
+    .feedback{margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); display:none}
+    .feedback.ok{background:rgba(50,210,150,.12); border-color:rgba(50,210,150,.35)}
+    .feedback.bad{background:rgba(255,107,107,.10); border-color:rgba(255,107,107,.28)}
+    .feedback .why{color:var(--muted); font-size:13px; margin-top:6px}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32)}
+    .ck input{margin-top:3px}
+    .ck small{display:block; color:var(--muted); margin-top:4px}
+    .progress{height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background:linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85))}
+
+    .footer{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 30px}
+
+    pre[class*="language-"]{border-radius:14px; border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 22px rgba(0,0,0,.20)}
+    code{font-family:var(--mono)}
+
+    .badge{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:rgba(50,210,150,.10); border:1px solid rgba(50,210,150,.28); font-size:12px; color:#d7ffe8}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 12 • PI (B3): Playbook de Suporte e Manutenção</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo11.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo13.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 12</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🔐 Agenda: Criptografia/BitLocker</span>
+        <span class="pill">📘 PI (B3): Playbook (principal)</span>
+        <span class="pill">🧾 Modelo + evidências + rubrica</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#bitlocker"><span class="n">02</span><span class="t">Agenda: Criptografia e BitLocker (intro curta)</span></a></li>
+        <li><a href="#pi"><span class="n">03</span><span class="t">PI (B3): O que entregar (visão geral)</span></a></li>
+        <li><a href="#estrutura"><span class="n">04</span><span class="t">Estrutura do Playbook (modelo pronto)</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo para criar e entregar</span></a></li>
+        <li><a href="#sops"><span class="n">06</span><span class="t">SOPs obrigatórios (preventivo e corretivo)</span></a></li>
+        <li><a href="#evidencias"><span class="n">07</span><span class="t">Evidências (prints, logs, relatórios)</span></a></li>
+        <li><a href="#rubrica"><span class="n">08</span><span class="t">Rubrica de avaliação</span></a></li>
+        <li><a href="#atividades"><span class="n">09</span><span class="t">Atividades práticas</span></a></li>
+        <li><a href="#quiz"><span class="n">10</span><span class="t">Quiz (1 BitLocker + 2 Playbook)</span></a></li>
+        <li><a href="#checklist"><span class="n">11</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">12</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Atenção:</strong> o foco deste capítulo é a <strong>entrega do Playbook</strong>. BitLocker entra apenas como item de agenda (introdução curta).
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 12 — Projeto Integrador (3º Bimestre): Playbook de Suporte e Manutenção (Entrega)</h1>
+        <p>
+          Este capítulo é o fechamento do <strong>3º bimestre</strong> com uma entrega profissional:
+          um <strong>Playbook de Suporte e Manutenção</strong> consolidando tudo que você praticou nos capítulos anteriores.
+          Aqui a teoria é propositalmente curta. O objetivo é te guiar com <strong>muito suporte</strong> na criação e entrega:
+          estrutura, SOPs, evidências, modelo e rubrica.
+        </p>
+        <div class="chips">
+          <span class="chip">Preventiva (Cap. 08)</span>
+          <span class="chip">Admin (Cap. 07)</span>
+          <span class="chip">Proc/Serv (Cap. 09)</span>
+          <span class="chip">Desempenho (Cap. 10)</span>
+          <span class="chip">Backup/Restore (Cap. 11)</span>
+          <span class="chip">Entrega PI (B3)</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Produzir um <strong>Playbook</strong> claro, repetível e auditável (com evidências).</li>
+              <li>Organizar rotinas de <strong>manutenção preventiva</strong> e <strong>corretiva</strong>.</li>
+              <li>Documentar <strong>GUI + CLI</strong> (CMD/PowerShell) nos procedimentos.</li>
+              <li>Empacotar e entregar: PDF + evidências + README + ZIP.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Capítulos 07–11 concluídos (principalmente 08–11).</li>
+              <li>Pasta de trabalho organizada (<span class="kbd">C:\FGSO</span> ou <span class="kbd">D:\DADOS\FGSO</span>).</li>
+              <li>Se possível, snapshot “ponto limpo” (Cap. 08/11) para testar rotinas com segurança.</li>
+            </ul>
+            <div class="callout">
+              <strong>Regra do capítulo:</strong> evidência antes → ação → evidência depois (validação).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PARTE 1 (agenda): curta -->
+      <section class="card" id="bitlocker">
+        <h2>Agenda (curta): Criptografia e BitLocker</h2>
+        <p>
+          <strong>Criptografia</strong> protege dados tornando-os ilegíveis sem a chave. No Windows, o <strong>BitLocker</strong> (ou “Criptografia de dispositivo”)
+          pode criptografar o disco para reduzir risco de vazamento em perda/roubo do equipamento.
+          <strong>Onde vou aplicar isso:</strong> no Playbook, como um item de <strong>segurança</strong> (checagem de status e orientação sobre a chave de recuperação).
+        </p>
+        <div class="grid-2">
+          <div class="box">
+            <h3>O que o aluno precisa saber (mínimo)</h3>
+            <ul>
+              <li>BitLocker protege a unidade (ex.: C:) com criptografia.</li>
+              <li>Sem a <strong>chave de recuperação</strong>, você pode perder acesso aos dados.</li>
+              <li>Em VM, pode não refletir TPM real; use como aprendizado.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Checagem rápida (sem “mexer”)</h3>
+            <p class="muted">Use apenas para consulta e evidência (quando disponível):</p>
+            <pre class="language-bash"><code>manage-bde -status
+manage-bde -status C:</code></pre>
+            <div class="callout warn"><strong>Segurança:</strong> não exponha chaves reais em prints/documentos públicos.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PARTE 2 (principal): Playbook -->
+      <section class="card" id="pi">
+        <h2>PI (B3) — O que entregar (visão geral)</h2>
+        <p>
+          Seu entregável é um <strong>Playbook de Suporte e Manutenção do Windows</strong>. Pense nele como um manual que outra pessoa consegue executar
+          sem precisar falar com você. Ele deve consolidar: <strong>gerenciamento</strong>, <strong>manutenção preventiva</strong>, <strong>manutenção corretiva</strong> e <strong>backup/restore</strong>.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Entrega obrigatória (pack)</h3>
+            <ol>
+              <li><strong>Playbook</strong> em PDF (recomendado) — com índice e versão.</li>
+              <li><strong>Evidências</strong>: prints + logs + relatórios (organizados por pasta).</li>
+              <li><strong>README</strong>: explica o que tem em cada pasta e como avaliar.</li>
+              <li><strong>ZIP</strong> com tudo (opcional, mas recomendado).</li>
+            </ol>
+          </div>
+          <div class="box">
+            <h3>O que o Playbook precisa conter (mínimo)</h3>
+            <ul>
+              <li><strong>Rotina preventiva</strong>: semanal + mensal (Cap. 08 + 07).</li>
+              <li><strong>3 SOPs corretivos</strong> completos (Cap. 09–10–08).</li>
+              <li><strong>Backup/Restore</strong> com teste de restauração (Cap. 11).</li>
+              <li>Um item de <strong>segurança</strong> (BitLocker: checar status + orientação de chave).</li>
+              <li><strong>Fluxos</strong> de decisão (Windows inicia? gargalo?).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Meta de qualidade:</strong> seu playbook deve ser “executável” — não só descritivo. Passos, comandos, evidências e validação.
+        </div>
+      </section>
+
+      <section class="card" id="estrutura">
+        <h2>Estrutura do Playbook (modelo pronto — copie e preencha)</h2>
+        <p class="muted">Copie este modelo e preencha com o seu laboratório. Ele já está alinhado com o que será avaliado.</p>
+
+        <details class="block" open>
+          <summary>Modelo completo (Playbook) <span class="tag">copiar/colar</span></summary>
+          <div class="diagram"><pre>
+TÍTULO: Playbook de Suporte e Manutenção — Windows 11 (FGSO)
+Versão: 1.0   Data: __/__/____   Autor: __________
+
+0) Sumário
+
+1) Objetivo
+- Por que este playbook existe? (padronizar suporte/manutenção)
+
+2) Ambiente (Baseline)
+- Host: CPU/RAM/SSD
+- VM (se houver): RAM/vCPU/Disco/Rede
+- Windows: edição/build (winver)
+- Pastas padrão:
+  - Evidências: C:\FGSO\PI_B3_Playbook\evidencias
+  - Backups: D:\DADOS\Backups (ou C:\FGSO\Backups)
+
+3) Ferramentas
+- GUI: Task Manager, services.msc, eventvwr.msc, resmon, perfmon, taskschd.msc, sysdm.cpl
+- CMD: tasklist/taskkill, sc/net, schtasks, ipconfig/ping/tracert/netstat, sfc/dism/chkdsk, robocopy
+- PowerShell: Get-Process/Stop-Process, Get-Service/Set-Service, Get-Counter, Get-WinEvent, Compress-Archive/Get-FileHash
+
+4) Rotina Preventiva (SOP-PRV)
+4.1 Semanal (5–10 min)
+- Windows Update → reiniciar → validar
+- Windows Security → verificação rápida
+- Storage Sense/temporários → liberar espaço
+- Evidências: print Update + print Security
+
+4.2 Mensal (15–30 min)
+- Reliability (perfmon /rel) → anotar falhas
+- Event Viewer → exportar 1 log (.evtx)
+- Startup apps/tarefas → revisar itens não essenciais
+- Evidências: print Reliability + eventos_sistema.evtx
+
+5) Procedimentos Corretivos (SOP-COR)
+(Use sempre o padrão: Sintoma → Diagnóstico (GUI+CLI) → Evidência → Ação mínima → Validação → Rollback)
+
+SOP-COR-01: “PC lento” (gargalo: CPU/RAM/Disco/Rede)
+SOP-COR-02: “App travado” (processo)
+SOP-COR-03: “Serviço travado” (ex.: spooler)
+SOP-COR-04: “Integridade do sistema” (SFC → DISM → SFC)
+SOP-COR-05: “Pouco espaço em disco” (Storage → limpeza segura)
+
+6) Backup e Restore (SOP-BKP)
+- Estratégia 3-2-1 (adaptada)
+- robocopy com log
+- ZIP + hash
+- TESTE de restauração documentado
+
+7) Segurança (agenda mínima)
+- BitLocker: checar status (manage-bde -status)
+- Chave de recuperação: onde guardaria? quem acessa?
+
+8) Fluxos de decisão
+- Windows inicia? (Sim/Não) → WinRE/Restore/SFC
+- Gargalo? (CPU/RAM/Disco/Rede) → evidências → ação mínima
+
+9) Changelog
+- v1.0 criação
+
+10) Anexos
+- prints/ logs/ relatorios/
+          </pre></div>
+        </details>
+
+        <div class="callout">
+          <strong>Como usar:</strong> copie o modelo e preencha. Depois escreva os SOPs com passos e evidências do seu laboratório.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo para criar e entregar (com muito suporte)</h2>
+        <p class="muted">Se você seguir esta ordem, você não se perde e não esquece evidências.</p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Montar a estrutura da entrega (pastas)</h3>
+            <ul>
+              <li>Crie a pasta do PI e subpastas:</li>
+            </ul>
+            <pre class="language-bash"><code>mkdir C:\FGSO\PI_B3_Playbook
+mkdir C:\FGSO\PI_B3_Playbook\playbook
+mkdir C:\FGSO\PI_B3_Playbook\evidencias
+mkdir C:\FGSO\PI_B3_Playbook\evidencias\prints
+mkdir C:\FGSO\PI_B3_Playbook\evidencias\logs
+mkdir C:\FGSO\PI_B3_Playbook\evidencias\relatorios
+</code></pre>
+            <ul>
+              <li>Crie um <span class="kbd">README.txt</span> explicando a estrutura.</li>
+            </ul>
+            <pre class="language-bash"><code>echo PI B3 - Playbook (estrutura) &gt; C:\FGSO\PI_B3_Playbook\README.txt</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Escrever o Playbook (primeira versão)</h3>
+            <ul>
+              <li>Abra Word/Docs/Writer e cole o modelo (seção anterior).</li>
+              <li>Preencha o Baseline (host/VM/winver/rede/pastas).</li>
+              <li>Crie um índice (Sumário) com âncoras ou numeração.</li>
+              <li>Salve como <span class="kbd">Playbook_FGSO_W11_v1.0.docx</span> (ou similar).</li>
+            </ul>
+            <div class="callout">
+              <strong>Critério:</strong> outra pessoa consegue entender o ambiente (sem te perguntar)? Se sim, ok.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Completar a Rotina Preventiva (semanal + mensal)</h3>
+            <ul>
+              <li>Escreva a rotina semanal (Update/Security/Storage) com: passos GUI + evidências.</li>
+              <li>Escreva a rotina mensal (Reliability/Event Viewer/Startup) com: passos GUI + evidências.</li>
+              <li>Defina: frequência (ex.: semanal toda sexta; mensal 1º dia útil).</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Obrigatório:</strong> ao menos 2 prints (Update + Security) e 1 log .evtx do mensal.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Escrever SOPs corretivos (mínimo 3) com estrutura padrão</h3>
+            <ul>
+              <li>Escolha 3 SOPs: <strong>PC lento</strong>, <strong>App travado</strong>, <strong>Serviço travado</strong> (recomendado).</li>
+              <li>Para cada SOP, preencha:</li>
+              <ul>
+                <li>Sintoma</li>
+                <li>Diagnóstico GUI</li>
+                <li>Diagnóstico CLI (CMD e/ou PowerShell)</li>
+                <li>Evidências (o que salvar)</li>
+                <li>Ação mínima</li>
+                <li>Validação (antes/depois)</li>
+                <li>Rollback (como desfazer)</li>
+              </ul>
+            </ul>
+            <div class="diagram"><pre>
+SOP-COR-XX — TÍTULO
+- Sintoma:
+- Diagnóstico (GUI):
+- Diagnóstico (CLI):
+- Evidências:
+- Ação mínima:
+- Validação:
+- Rollback:
+            </pre></div>
+          </div>
+
+          <div class="step">
+            <h3>Backup/Restore: documentar e provar (teste de restore)</h3>
+            <ul>
+              <li>Inclua 3-2-1 adaptado (pasta de backup + zip + evidência).</li>
+              <li>Inclua comando robocopy e caminho do log.</li>
+              <li>Inclua ZIP + hash (opcional, recomendado).</li>
+              <li><strong>Obrigatório:</strong> descreva o teste de restauração (apagou/alterou e recuperou).</li>
+            </ul>
+            <div class="callout">
+              <strong>Regra do suporte:</strong> backup sem restore testado não vale.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Segurança (agenda): adicionar seção mínima do BitLocker</h3>
+            <ul>
+              <li>Adicione no Playbook um item curto “Segurança: BitLocker/Criptografia”.</li>
+              <li>Inclua: como checar status e orientação de chave de recuperação (sem expor segredo).</li>
+            </ul>
+            <pre class="language-bash"><code>manage-bde -status</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Coletar evidências e organizar (sem bagunça)</h3>
+            <ul>
+              <li>Crie prints e logs mínimos e salve em:</li>
+              <ul>
+                <li><span class="kbd">evidencias\prints</span></li>
+                <li><span class="kbd">evidencias\logs</span></li>
+                <li><span class="kbd">evidencias\relatorios</span></li>
+              </ul>
+              <li>Padronize nomes: <span class="kbd">01_update.png</span>, <span class="kbd">02_security.png</span>, <span class="kbd">03_taskmgr.png</span>...</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Dica:</strong> o avaliador encontra rápido o que precisa? Se sim, você ganhou tempo e pontos.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Exportar PDF e empacotar (entrega final)</h3>
+            <ul>
+              <li>Exporte o playbook em PDF e salve em <span class="kbd">playbook</span>.</li>
+              <li>Compacte a pasta toda em ZIP (recomendado):</li>
+            </ul>
+            <pre class="language-powershell"><code>Compress-Archive -Path "C:\FGSO\PI_B3_Playbook\*" -DestinationPath "C:\FGSO\PI_B3_Playbook.zip" -Force</code></pre>
+            <div class="callout">
+              <strong>Checklist final:</strong> PDF + evidências + README + ZIP.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="sops">
+        <h2>SOPs obrigatórios (preventivo e corretivo) — o mínimo para não perder ponto</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Preventivo (obrigatório)</h3>
+            <ul>
+              <li>Semanal: Update + Security + Storage (Cap. 08).</li>
+              <li>Mensal: Reliability + Event Viewer + Startup (Cap. 07/09).</li>
+              <li>Evidências: 2 prints + 1 .evtx.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Corretivo (mínimo 3 SOPs completos)</h3>
+            <ul>
+              <li>PC lento: gargalo + evidência + ação mínima (Cap. 10).</li>
+              <li>App travado: GUI + CLI (Cap. 09).</li>
+              <li>Serviço travado: services.msc + sc/net (Cap. 09).</li>
+              <li>(Recomendado) Integridade: SFC/DISM/CHKDSK (Cap. 08).</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="block" open>
+          <summary>“Cola” de comandos para SOPs (GUI + CLI) <span class="tag">pronto</span></summary>
+          <div class="grid-2">
+            <div class="box">
+              <h3>Processos/Serviços</h3>
+              <pre class="language-bash"><code>tasklist
+taskkill /IM notepad.exe
+sc query spooler
+net stop spooler
+net start spooler</code></pre>
+            </div>
+            <div class="box">
+              <h3>Integridade/Disco</h3>
+              <pre class="language-bash"><code>sfc /scannow
+DISM /Online /Cleanup-Image /RestoreHealth
+chkdsk C: /scan</code></pre>
+            </div>
+            <div class="box">
+              <h3>Desempenho/Rede</h3>
+              <pre class="language-bash"><code>resmon
+perfmon
+perfmon /rel
+ipconfig /all
+ping 8.8.8.8
+tracert www.microsoft.com
+netstat -ano</code></pre>
+            </div>
+            <div class="box">
+              <h3>Backup/Segurança</h3>
+              <pre class="language-bash"><code>robocopy "C:\Users\%USERNAME%\Documents" "D:\DADOS\Backups\Documents" /E /R:2 /W:2 /LOG+:"D:\DADOS\Backups\logs\robocopy_docs.log"
+manage-bde -status</code></pre>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="evidencias">
+        <h2>Evidências: o que coletar e como organizar</h2>
+        <p class="muted">Evidência é o que prova execução e validação. Sem evidência, vira “só texto”.</p>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Prints (mínimo 6)</h3>
+            <ul>
+              <li>Update (status)</li>
+              <li>Security (status/scan)</li>
+              <li>Task Manager (processos/desempenho)</li>
+              <li>Resource Monitor (disco ou rede)</li>
+              <li>services.msc (serviço + propriedades)</li>
+              <li>Pasta de backup (arquivo presente)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Logs (mínimo 2)</h3>
+            <ul>
+              <li>1 arquivo <span class="kbd">.evtx</span> (Event Viewer)</li>
+              <li>1 log do robocopy (<span class="kbd">robocopy_*.log</span>)</li>
+              <li class="muted">(Opcional) hash do ZIP</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Relatórios (mínimo 2)</h3>
+            <ul>
+              <li>Relatório de desempenho (Cap. 10)</li>
+              <li>Relatório backup/restore (Cap. 11)</li>
+              <li class="muted">(Opcional) checagem BitLocker (status.txt)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Padronização:</strong> use prefixo numérico: <span class="kbd">01_</span>, <span class="kbd">02_</span>… facilita correção.
+        </div>
+      </section>
+
+      <section class="card" id="rubrica">
+        <h2>Rubrica de avaliação (como será corrigido)</h2>
+        <p class="muted">Use como “check de qualidade”. Se atender a coluna Excelente, tende a nota alta.</p>
+
+        <table aria-label="Rubrica">
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th>Básico</th>
+              <th>Bom</th>
+              <th>Excelente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Estrutura e clareza</td>
+              <td>Confuso, sem padrão</td>
+              <td>Organizado, completo</td>
+              <td>Índice + fluxos + rollback em todos SOPs</td>
+            </tr>
+            <tr>
+              <td>Preventiva</td>
+              <td>Lista sem evidência</td>
+              <td>Semanal/mensal + evidências</td>
+              <td>Critérios de validação e periodicidade clara</td>
+            </tr>
+            <tr>
+              <td>Corretiva</td>
+              <td>SOP incompleto</td>
+              <td>≥3 SOPs completos</td>
+              <td>≥4 SOPs + evidência antes/depois</td>
+            </tr>
+            <tr>
+              <td>Backup/Restore</td>
+              <td>Sem restore testado</td>
+              <td>Restore documentado</td>
+              <td>robocopy+log+zip+hash+restore</td>
+            </tr>
+            <tr>
+              <td>Evidências</td>
+              <td>Desorganizado</td>
+              <td>Padrão de pastas e nomes</td>
+              <td>Pack completo + README + ZIP</td>
+            </tr>
+            <tr>
+              <td>Agenda (BitLocker)</td>
+              <td>Menciona</td>
+              <td>Checagem de status</td>
+              <td>Checagem + orientação de chave (sem expor segredo)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <span class="badge">Meta sugerida:</span> entregar no nível <strong>Bom</strong> e buscar <strong>Excelente</strong> em evidências + restore.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3)</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — SOP “PC lento” completo</h3>
+            <p>Escreva o SOP com 4 caminhos (CPU/RAM/Disco/Rede). Para cada caminho, 2 evidências e 1 ação mínima.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Restore comprovado</h3>
+            <p>Escolha um arquivo de teste, altere/apague e restaure via robocopy ou ZIP. Registre prints e descreva no playbook.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Padronização de evidências</h3>
+            <p>Renomeie suas evidências com prefixos (01_, 02_...). Explique no README a lógica e como localizar itens na correção.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo) — 1 BitLocker + 2 Playbook</h2>
+        <p class="muted">Quiz curto e direto para reforçar a entrega. (3 questões)</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Use como checklist final do PI (B3).</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre ponto de restauração e backup completo?</li>
+          <li>Por que “evidência antes/depois” reduz risco em suporte?</li>
+          <li>Onde empresas armazenam chaves de recuperação do BitLocker (conceito)?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo13.html">Capítulo 13</a> iniciamos o 4º bimestre com rede + CMD essencial e revisão de comandos.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 12 • PI do 3º bimestre • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ ===== (3 questões: 1 BitLocker + 2 Playbook)
+    const quizData = [
+      {
+        q: '1) (Playbook) Um SOP corretivo completo deve conter, no mínimo:',
+        options: [
+          'Apenas o comando final.',
+          'Sintoma → Diagnóstico (GUI+CLI) → Evidência → Ação mínima → Validação → Rollback.',
+          'Somente prints sem texto.',
+          'Somente teoria (sem passos).',
+          'Apenas um link externo.'
+        ],
+        correct: 1,
+        why: 'Sem diagnóstico, evidência, validação e rollback, o SOP fica arriscado e não repetível.'
+      },
+      {
+        q: '2) (Playbook) O que torna um backup “válido” para suporte?',
+        options: [
+          'Ter uma pasta chamada Backup.',
+          'Fazer cópia no mesmo disco do sistema.',
+          'Testar restauração (restore) e provar que o arquivo voltou.',
+          'Ter muitos prints do Explorer.',
+          'Rodar sfc /scannow.'
+        ],
+        correct: 2,
+        why: 'Sem teste de restauração você não tem prova de recuperação. Backup que não restaura não ajuda no incidente.'
+      },
+      {
+        q: '3) (BitLocker) Qual é a regra de ouro ao lidar com BitLocker?',
+        options: [
+          'Ativar sem chave para aumentar segurança.',
+          'Guardar a chave de recuperação em local seguro e documentar no procedimento.',
+          'Desativar o Windows Update.',
+          'Apagar logs do Event Viewer.',
+          'Executar bcdedit para acelerar o boot.'
+        ],
+        correct: 1,
+        why: 'Sem a chave de recuperação, você pode perder acesso aos dados. A organização precisa de um plano seguro para armazenar e recuperar.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise a estrutura do SOP e a regra do restore testado.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap12_checklist_v3';
+    const checklistItems = [
+      { id:'c1', title:'Criei a estrutura C:\\FGSO\\PI_B3_Playbook (playbook + evidencias + README).', note:'Pastas e README prontos.' },
+      { id:'c2', title:'Preenchi o Baseline (host/VM/winver/rede/disco/pastas padrão).', note:'Outra pessoa entende o ambiente.' },
+      { id:'c3', title:'Escrevi a rotina preventiva semanal (Update/Security/Storage) com evidências.', note:'2 prints: Update e Security.' },
+      { id:'c4', title:'Escrevi a rotina preventiva mensal (Reliability/Event Viewer/Startup).', note:'Inclui 1 log .evtx.' },
+      { id:'c5', title:'Criei pelo menos 3 SOPs corretivos completos (GUI+CLI+rollback).', note:'Lento + App travado + Serviço travado (recomendado).' },
+      { id:'c6', title:'Incluí Backup/Restore com robocopy + log e teste de restauração documentado.', note:'Restore comprovado.' },
+      { id:'c7', title:'Incluí a agenda de segurança: BitLocker (checagem de status e orientação de chave).', note:'Sem expor dados sensíveis.' },
+      { id:'c8', title:'Coletei evidências mínimas (prints/logs/relatórios) e padronizei nomes.', note:'01_, 02_, 03_...' },
+      { id:'c9', title:'ExporteI o playbook em PDF e salvei em playbook/.', note:'PDF abre corretamente.' },
+      { id:'c10', title:'Compactei a entrega em ZIP (recomendado).', note:'PI_B3_Playbook.zip criado.' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', updateChecklistProgress);
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

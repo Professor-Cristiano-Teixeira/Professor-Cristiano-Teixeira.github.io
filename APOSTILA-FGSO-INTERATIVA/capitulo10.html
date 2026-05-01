@@ -1,0 +1,871 @@
+<!-- arquivo: capitulo10.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 — Diagnóstico de Desempenho (CPU, Memória, Disco e Rede) • GUI + Linha de Comando | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 10 da Apostila FGSO: diagnóstico de desempenho no Windows 11 (CPU, RAM, disco e rede) com ferramentas gráficas e linha de comando (Task Manager, Resource Monitor, PerfMon, Reliability; typeperf, tasklist, PowerShell Get-Process/Get-Counter, netstat, ipconfig, ping, tracert). Passo a passo, atividades, quiz e checklist." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);}    
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.75); color: var(--text); box-shadow: 0 10px 22px rgba(0,0,0,.25); font-size: 13px;}
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; height: fit-content; position:sticky; top: 74px;}
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 10 • Diagnóstico de desempenho (GUI + CLI)</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo09.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo11.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 10</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">📈 CPU • RAM • Disco • Rede</span>
+        <span class="pill">🧪 Evidências e métricas</span>
+        <span class="pill">🖥️ GUI + CLI</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos (gargalo, latência, throughput)</span></a></li>
+        <li><a href="#gui"><span class="n">03</span><span class="t">Ferramentas gráficas (TaskMgr/ResMon/PerfMon)</span></a></li>
+        <li><a href="#cli"><span class="n">04</span><span class="t">Linha de comando (CMD + PowerShell)</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo: diagnóstico completo</span></a></li>
+        <li><a href="#interpretacao"><span class="n">06</span><span class="t">Como interpretar resultados (sem chute)</span></a></li>
+        <li><a href="#atividades"><span class="n">07</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">08</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">09</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">10</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Recomendação:</strong> em VM, crie snapshot <span class="kbd">10-antes-desempenho</span>. Em máquina real, evite “otimizações” sem retorno.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 10 — Diagnóstico de Desempenho (CPU, Memória, Disco e Rede) • GUI + Linha de Comando</h1>
+        <p>
+          “Está lento” é uma das queixas mais comuns do suporte — e também uma das mais vagas. Neste capítulo, você vai aprender a transformar a queixa
+          em <strong>métricas</strong> e <strong>evidências</strong> usando ferramentas nativas do Windows: <strong>Task Manager</strong>, <strong>Resource Monitor</strong>, <strong>PerfMon</strong>
+          e comandos no <strong>CMD/PowerShell</strong>.
+          O objetivo é identificar o <strong>gargalo</strong> (CPU, RAM, Disco ou Rede) com método, registrar evidências e propor a menor intervenção possível.
+        </p>
+        <div class="chips">
+          <span class="chip">Task Manager (Desempenho)</span>
+          <span class="chip">Resource Monitor (ResMon)</span>
+          <span class="chip">PerfMon (contadores)</span>
+          <span class="chip">typeperf / Get-Counter</span>
+          <span class="chip">netstat / ipconfig / ping / tracert</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Definir e identificar <strong>gargalos</strong> (CPU/RAM/Disco/Rede) com evidências.</li>
+              <li>Usar ferramentas GUI para ver consumo, latência e processos relacionados.</li>
+              <li>Coletar métricas via CLI (CMD/PowerShell) e salvar em arquivos.</li>
+              <li>Criar um relatório simples com: sintomas, métricas, conclusão e ação recomendada.</li>
+              <li>Aplicar boas práticas de diagnóstico sem “otimizações mágicas”.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Windows 11 instalado e funcional (Cap. 05).</li>
+              <li>Processos/serviços e inicialização (Cap. 09) compreendidos.</li>
+              <li>Ferramentas administrativas (Cap. 07) revisadas.</li>
+            </ul>
+            <div class="callout">
+              <strong>Importante:</strong> aqui o foco é <em>diagnóstico</em>. Mudanças (desabilitar coisas) só depois de evidências.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos fundamentais (e onde vou aplicar isso)</h2>
+
+        <h3>Gargalo</h3>
+        <p>
+          Gargalo é o recurso que está limitando o desempenho. Mesmo que “tudo esteja lento”, geralmente <strong>um recurso</strong> está no limite.
+          <strong>Onde vou aplicar:</strong> Task Manager/ResMon e contadores (PerfMon) para decidir se o gargalo é CPU, RAM, Disco ou Rede.
+        </p>
+
+        <h3>Throughput (vazão) x Latência</h3>
+        <p>
+          <strong>Throughput</strong> é “quanto passa por segundo” (MB/s, Mbps). <strong>Latência</strong> é “quanto tempo demora” (ms).
+          Disco pode ter throughput razoável e ainda assim estar ruim por latência alta; rede pode ter Mbps alto mas latência ruim.
+          <strong>Onde vou aplicar:</strong> Resource Monitor mostra tempo de resposta do disco e atividade; ping/tracert ajudam a entender latência de rede.
+        </p>
+
+        <h3>CPU: % de uso e tempo de CPU</h3>
+        <p>
+          CPU alta constante pode indicar processo pesado, atualização, antivírus ou VM com poucos recursos.
+          <strong>Onde vou aplicar:</strong> Task Manager (Desempenho/Processos) e PowerShell <span class="kbd">Get-Process</span> ordenando por CPU.
+        </p>
+
+        <h3>Memória: pressão, paginação e “swap”</h3>
+        <p>
+          Pouca RAM leva a paginação: o Windows usa disco como memória, o que é muito mais lento.
+          Sintoma comum: disco em 100% e sistema travando.
+          <strong>Onde vou aplicar:</strong> Task Manager (Memória) e contadores como “Available MBytes”.
+        </p>
+
+        <h3>Disco: atividade, fila e tempo de resposta</h3>
+        <p>
+          Disco 100% pode ser atualização, indexação, antivírus ou falta de RAM (swap). O que importa é relacionar com <strong>processos</strong>.
+          <strong>Onde vou aplicar:</strong> Resource Monitor (Disco) para ver quais processos estão lendo/escrevendo.
+        </p>
+
+        <h3>Rede: tráfego, conexões e DNS</h3>
+        <p>
+          Rede envolve throughput, latência e resolução de nomes (DNS). Às vezes “internet lenta” é DNS ruim, não banda.
+          <strong>Onde vou aplicar:</strong> Task Manager (Rede), <span class="kbd">ipconfig</span>, <span class="kbd">ping</span>, <span class="kbd">tracert</span>, <span class="kbd">netstat</span>.
+        </p>
+
+        <div class="callout">
+          <strong>Regra do capítulo:</strong> não confunda sintoma com causa. Use evidências para ligar “o que está alto” ao processo/serviço responsável.
+        </div>
+      </section>
+
+      <section class="card" id="gui">
+        <h2>Ferramentas gráficas (GUI): onde olhar e o que coletar</h2>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Task Manager</h3>
+            <ul>
+              <li>Aba <strong>Processos</strong>: top consumo CPU/RAM/Disco/Rede</li>
+              <li>Aba <strong>Desempenho</strong>: visão geral por recurso</li>
+              <li>Aba <strong>Inicializar</strong>: impacto no boot</li>
+            </ul>
+            <p class="muted">Atalho: Ctrl+Shift+Esc</p>
+          </div>
+          <div class="box">
+            <h3>Resource Monitor (resmon)</h3>
+            <ul>
+              <li>CPU: processos e handles</li>
+              <li>Memória: hard faults, uso real</li>
+              <li>Disco: processos, arquivos e tempo de resposta</li>
+              <li>Rede: conexões e atividade</li>
+            </ul>
+            <p class="muted">Atalho: resmon</p>
+          </div>
+          <div class="box">
+            <h3>PerfMon</h3>
+            <ul>
+              <li>Contadores: CPU, memória, disco, rede</li>
+              <li>Relatórios e coleta</li>
+            </ul>
+            <p class="muted">Atalho: perfmon</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no passo a passo você vai tirar 4 prints (CPU/RAM/Disco/Rede) e registrar top processos.
+        </div>
+      </section>
+
+      <section class="card" id="cli">
+        <h2>Linha de comando (CMD + PowerShell): coleta rápida de métricas</h2>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>CPU/RAM/Processos (PowerShell)</h3>
+            <pre class="language-powershell"><code># Top 10 por CPU
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Name,Id,CPU,WS
+
+# Top 10 por memória (Working Set)
+Get-Process | Sort-Object WS -Descending | Select-Object -First 10 Name,Id,WS
+</code></pre>
+          </div>
+          <div class="box">
+            <h3>Contadores (PowerShell Get-Counter)</h3>
+            <pre class="language-powershell"><code># 5 amostras (1 por segundo) de CPU e memória
+Get-Counter "\Processor(_Total)\% Processor Time","\Memory\Available MBytes" -SampleInterval 1 -MaxSamples 5
+
+# Disco e rede (pode variar conforme interface)
+Get-Counter "\PhysicalDisk(_Total)\% Disk Time" -SampleInterval 1 -MaxSamples 5
+Get-Counter "\Network Interface(*)\Bytes Total/sec" -SampleInterval 1 -MaxSamples 3
+</code></pre>
+            <p class="muted">Os nomes de contadores são sensíveis. Se algum falhar, use perfmon para descobrir o nome exato.</p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box">
+            <h3>Contadores (CMD typeperf)</h3>
+            <pre class="language-bash"><code>typeperf "\Processor(_Total)\% Processor Time" "\Memory\Available MBytes" -si 1 -sc 5
+</code></pre>
+            <p class="muted">typeperf imprime amostras. Você pode redirecionar para arquivo.</p>
+          </div>
+          <div class="box">
+            <h3>Rede (CMD)</h3>
+            <pre class="language-bash"><code>ipconfig /all
+ping 8.8.8.8
+ping www.microsoft.com
+tracert www.microsoft.com
+netstat -ano</code></pre>
+            <p class="muted">Ping mede latência. Tracert mostra rota. Netstat mostra conexões e PIDs.</p>
+          </div>
+        </div>
+
+        <details class="block" open>
+          <summary>Salvar evidências em arquivo <span class="tag">prático</span></summary>
+          <p>Salvar saídas em arquivos é uma habilidade de suporte: facilita relatório e auditoria.</p>
+          <pre class="language-bash"><code>mkdir C:\FGSO\cap10\logs
+
+typeperf "\Processor(_Total)\% Processor Time" "\Memory\Available MBytes" -si 1 -sc 10 &gt; C:\FGSO\cap10\logs\contadores.txt
+
+ipconfig /all &gt; C:\FGSO\cap10\logs\ipconfig.txt
+netstat -ano &gt; C:\FGSO\cap10\logs\netstat.txt</code></pre>
+        </details>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo: diagnóstico completo (GUI + CLI + relatório)</h2>
+        <p>
+          Você vai executar o mesmo objetivo por dois caminhos. No final, você terá um relatório curto e evidências organizadas.
+          Pasta padrão: <span class="kbd">C:\\FGSO\\cap10</span>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> em VM crie snapshot <span class="kbd">10-antes-desempenho</span>. Se possível, feche apps desnecessários no host.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Preparar pasta de evidências</h3>
+            <ul>
+              <li>Crie <span class="kbd">C:\\FGSO\\cap10</span> e <span class="kbd">C:\\FGSO\\cap10\\logs</span>.</li>
+              <li>Crie <span class="kbd">relatorio.txt</span> (você vai preencher no final).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Criar um “cenário controlado” (leve) para observar</h3>
+            <ul>
+              <li>Abra 2–3 aplicativos: navegador (poucas abas), Explorador de Arquivos e Bloco de Notas.</li>
+              <li>Copie um arquivo médio (ex.: 200–500 MB) dentro do disco virtual, se você tiver (opcional).</li>
+              <li>Objetivo: gerar um pouco de CPU/RAM/Disco para observar (sem estressar demais).</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Sem exagero:</strong> não rode ferramentas “pesadas” ou suspeitas para gerar carga.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>GUI: Task Manager — prints e top processos</h3>
+            <ul>
+              <li>Abra <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">Esc</span>.</li>
+              <li>Aba <strong>Desempenho</strong>: clique em CPU, Memória, Disco e Ethernet/Wi‑Fi.</li>
+              <li>Tire 4 prints (um por recurso) e salve em <span class="kbd">C:\\FGSO\\cap10</span>.</li>
+              <li>Aba <strong>Processos</strong>: anote top 3 por CPU e top 3 por Memória.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>GUI: Resource Monitor — identificar “quem” causa o consumo</h3>
+            <ul>
+              <li>Abra <span class="kbd">resmon</span>.</li>
+              <li>Na aba <strong>Disco</strong>, observe “Processos com atividade de disco” e “Arquivos”.</li>
+              <li>Na aba <strong>Rede</strong>, observe “Processos com atividade de rede”.</li>
+              <li>Anote 1 processo que aparece em disco e 1 em rede.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> descobrir o processo responsável evita “otimizações” inúteis.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>CLI: coletar top processos (PowerShell)</h3>
+            <ul>
+              <li>Abra PowerShell e execute:</li>
+            </ul>
+            <pre class="language-powershell"><code>Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Name,Id,CPU,WS | Out-File C:\FGSO\cap10\logs\top_cpu.txt
+Get-Process | Sort-Object WS -Descending | Select-Object -First 10 Name,Id,WS | Out-File C:\FGSO\cap10\logs\top_mem.txt</code></pre>
+            <ul>
+              <li>Abra os arquivos e compare com o que você viu na GUI.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>CLI: coletar contadores (Get-Counter ou typeperf)</h3>
+            <ul>
+              <li>PowerShell (recomendado):</li>
+            </ul>
+            <pre class="language-powershell"><code>Get-Counter "\Processor(_Total)\% Processor Time","\Memory\Available MBytes" -SampleInterval 1 -MaxSamples 10 |
+  Out-File C:\FGSO\cap10\logs\contadores_ps.txt</code></pre>
+            <ul>
+              <li>Alternativa CMD (typeperf):</li>
+            </ul>
+            <pre class="language-bash"><code>typeperf "\Processor(_Total)\% Processor Time" "\Memory\Available MBytes" -si 1 -sc 10 &gt; C:\FGSO\cap10\logs\contadores_cmd.txt</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>CLI: rede — IP, latência e conexões</h3>
+            <ul>
+              <li>Salvar IP e DNS:</li>
+            </ul>
+            <pre class="language-bash"><code>ipconfig /all &gt; C:\FGSO\cap10\logs\ipconfig.txt</code></pre>
+            <ul>
+              <li>Testar latência (IP e nome):</li>
+            </ul>
+            <pre class="language-bash"><code>ping 8.8.8.8 &gt; C:\FGSO\cap10\logs\ping_ip.txt
+ping www.microsoft.com &gt; C:\FGSO\cap10\logs\ping_dns.txt</code></pre>
+            <ul>
+              <li>Rota (tracert):</li>
+            </ul>
+            <pre class="language-bash"><code>tracert www.microsoft.com &gt; C:\FGSO\cap10\logs\tracert.txt</code></pre>
+            <ul>
+              <li>Conexões (netstat):</li>
+            </ul>
+            <pre class="language-bash"><code>netstat -ano &gt; C:\FGSO\cap10\logs\netstat.txt</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Montar o relatório (relatorio.txt)</h3>
+            <ul>
+              <li>Preencha 6 linhas:</li>
+              <li><strong>1)</strong> Sintoma: “lento ao abrir apps / disco alto / internet lenta”</li>
+              <li><strong>2)</strong> Evidência GUI: CPU/RAM/Disco/Rede (resumo)</li>
+              <li><strong>3)</strong> Evidência CLI: top_cpu, top_mem, contadores</li>
+              <li><strong>4)</strong> Gargalo provável (1 recurso principal)</li>
+              <li><strong>5)</strong> Processo/serviço suspeito (1–2 nomes)</li>
+              <li><strong>6)</strong> Ação recomendada (menor intervenção) + como desfazer</li>
+            </ul>
+            <div class="callout">
+              <strong>Exemplo de ação mínima:</strong> “esperar update terminar”, “reduzir apps em startup (Cap. 09)”, “aumentar RAM da VM”, “liberar espaço (Cap. 08)”.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="interpretacao">
+        <h2>Como interpretar resultados (sem chute)</h2>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Padrões típicos</h3>
+            <ul>
+              <li><strong>CPU 90–100%</strong> constante → processo pesado, update, antivírus, VM subdimensionada.</li>
+              <li><strong>Memória alta</strong> + pouca disponível → paginação, disco alto, travamentos.</li>
+              <li><strong>Disco 100%</strong> + muitos reads/writes → update, indexação, antivírus, swap por falta de RAM.</li>
+              <li><strong>Rede lenta</strong> com ping alto → latência/rota; ping ok mas site lento → DNS/servidor.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Decisões seguras (ações mínimas)</h3>
+            <ul>
+              <li>Confirmar com evidência (ResMon) qual processo está causando.</li>
+              <li>Se for update/antivírus: aguardar finalizar e validar depois.</li>
+              <li>Se RAM insuficiente: aumentar RAM da VM ou reduzir apps.</li>
+              <li>Se disco cheio: usar Storage Sense/limpeza (Cap. 08).</li>
+              <li>Se startup pesado: desabilitar itens não essenciais (Cap. 09) — com retorno.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="diagram" aria-label="Fluxo de decisão">
+<pre>
+Queixa: "Está lento"
+  1) Task Manager (Desempenho) → qual recurso está alto?
+  2) Resource Monitor → qual processo está causando?
+  3) CLI (Get-Process / Get-Counter / typeperf) → coletar evidência
+  4) Ação mínima + retorno (snapshot/ponto)
+  5) Validar novamente (comparar antes/depois)
+</pre>
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — para você desenvolver</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Baseline do laboratório</h3>
+            <p>Com a VM “em repouso”, colete 10 amostras de CPU e memória com Get-Counter. Guarde como baseline e compare com cenário de uso.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Disco: quem está escrevendo?</h3>
+            <p>Simule cópia de arquivo e use ResMon (Disco) para identificar quais processos mais escrevem. Registre prints e conclusão.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Rede: DNS x IP</h3>
+            <p>Compare ping por IP e por nome (DNS). Explique quando a lentidão pode ser DNS e proponha uma verificação em ipconfig /all.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre throughput e latência em disco e rede?</li>
+          <li>O que são “hard faults” na aba Memória do Resource Monitor?</li>
+          <li>Quais contadores de PerfMon são mais usados para diagnosticar gargalos?</li>
+          <li>Por que disco 100% pode ser consequência de pouca RAM?</li>
+          <li>Explique por que “otimizadores” genéricos podem piorar o sistema.</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo11.html">Capítulo 11</a> vamos aplicar diagnóstico + recuperação: backup, restauração e estratégias de continuidade (GUI + CLI).
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 10 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) O que é um gargalo de desempenho?',
+        options: [
+          'Um erro de antivírus.',
+          'O recurso que limita o desempenho (CPU/RAM/Disco/Rede).',
+          'Uma partição do disco.',
+          'Um tipo de usuário.',
+          'Um programa de edição de texto.'
+        ],
+        correct: 1,
+        why: 'Gargalo é o recurso que está no limite e impede o sistema de responder bem.'
+      },
+      {
+        q: '2) Qual ferramenta GUI é a primeira escolha para ver rapidamente CPU/RAM/Disco/Rede?',
+        options: ['Regedit', 'Task Manager', 'Paint', 'Disk Management', 'Notepad'],
+        correct: 1,
+        why: 'O Task Manager (Desempenho/Processos) é a visão rápida do uso de recursos.'
+      },
+      {
+        q: '3) Qual ferramenta ajuda a descobrir qual processo está usando mais DISCO e quais arquivos estão sendo acessados?',
+        options: ['Resource Monitor (resmon)', 'Calculator', 'Control Panel', 'msconfig', 'WordPad'],
+        correct: 0,
+        why: 'O Resource Monitor mostra processos com atividade de disco e arquivos em uso.'
+      },
+      {
+        q: '4) Qual comando mede latência de rede de forma simples?',
+        options: ['ping', 'tasklist', 'dir', 'sc query', 'typeperf'],
+        correct: 0,
+        why: 'Ping mede tempo de resposta (latência) entre seu PC e um destino.'
+      },
+      {
+        q: '5) Qual comando mostra configurações de IP/DNS e é útil para investigar “internet lenta por DNS”?',
+        options: ['ipconfig /all', 'taskkill', 'format', 'sfc', 'net start'],
+        correct: 0,
+        why: 'ipconfig /all mostra IP, gateway, DNS e detalhes da interface.'
+      },
+      {
+        q: '6) Se o sistema está com pouca RAM, um sintoma comum é:',
+        options: [
+          'CPU sempre em 0%.',
+          'Disco alto por paginação (swap), travamentos ao alternar apps.',
+          'Rede desconectada sempre.',
+          'Impressora não funciona.',
+          'Tela muda de cor.'
+        ],
+        correct: 1,
+        why: 'Com pouca RAM, o sistema pagina para disco, aumentando uso de disco e lentidão.'
+      },
+      {
+        q: '7) Qual comando PowerShell é adequado para listar top processos por uso de CPU?',
+        options: [
+          'Get-Process | Sort-Object CPU -Descending | Select-Object -First 10',
+          'ipconfig /all',
+          'netstat -ano',
+          'chkdsk /scan',
+          'bcdedit'
+        ],
+        correct: 0,
+        why: 'Get-Process permite ordenar por CPU e selecionar os principais processos.'
+      },
+      {
+        q: '8) Qual é a melhor postura ao diagnosticar desempenho?',
+        options: [
+          'Aplicar “otimizador” e torcer.',
+          'Coletar evidência (GUI/CLI), identificar gargalo e aplicar a menor intervenção.',
+          'Desativar serviços aleatoriamente.',
+          'Editar o Registro sem backup.',
+          'Formatar sempre que ficar lento.'
+        ],
+        correct: 1,
+        why: 'Método profissional: evidência → gargalo → ação mínima → validação.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise conceitos de gargalo e as ferramentas GUI/CLI.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap10_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei a pasta C:\\FGSO\\cap10 e subpastas de logs.', note:'cap10 + logs + relatorio.txt.' },
+      { id:'c2', title:'Coleti 4 prints do Task Manager (CPU/RAM/Disco/Rede).', note:'Salvos na pasta do capítulo.' },
+      { id:'c3', title:'Anotei top 3 processos por CPU e por Memória.', note:'Baseado em Task Manager.' },
+      { id:'c4', title:'Usei Resource Monitor para identificar processo de disco e de rede.', note:'Registrei nomes.' },
+      { id:'c5', title:'Gerei top_cpu.txt e top_mem.txt via PowerShell.', note:'Comparei GUI x CLI.' },
+      { id:'c6', title:'Coletei contadores com Get-Counter ou typeperf e salvei em arquivo.', note:'contadores_ps.txt ou contadores_cmd.txt.' },
+      { id:'c7', title:'Salvei ipconfig, ping e tracert em arquivos.', note:'ipconfig.txt / ping_*.txt / tracert.txt.' },
+      { id:'c8', title:'Salvei netstat -ano e entendi que ele mostra conexões e PIDs.', note:'netstat.txt.' },
+      { id:'c9', title:'Preenchi relatorio.txt com sintoma, evidências, gargalo e ação mínima.', note:'6 itens do modelo do capítulo.' },
+      { id:'c10', title:'Consigo explicar throughput x latência e por que isso importa.', note:'Rede e disco podem ser “lentos” por latência.' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

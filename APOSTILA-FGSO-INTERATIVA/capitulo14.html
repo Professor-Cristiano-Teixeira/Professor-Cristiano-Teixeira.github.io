@@ -1,0 +1,951 @@
+<!-- arquivo: capitulo14.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 14 — PowerShell Essencial para Suporte (GUI + PowerShell) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 14 da Apostila FGSO: PowerShell essencial para suporte e administração no Windows 11. Passo a passo com comandos fundamentais (help, pipeline, objetos, filtros, arquivos, exportação) e tabela com cmdlets mais frequentes para gerenciamento e manutenção (processos, serviços, rede, disco, logs, tarefas, segurança). Inclui prática guiada, atividades, quiz e checklist." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);}    
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.75); color: var(--text); box-shadow: 0 10px 22px rgba(0,0,0,.25); font-size: 13px;}
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; height: fit-content; position:sticky; top: 74px;}
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 14 • PowerShell essencial + tabela de cmdlets</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo13.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo15.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 14</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">⚡ PowerShell (fundamentos)</span>
+        <span class="pill">🧰 Operação para suporte</span>
+        <span class="pill">📋 Tabela de cmdlets frequentes</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos (cmdlets, pipeline, objetos)</span></a></li>
+        <li><a href="#ps-essencial"><span class="n">03</span><span class="t">PowerShell essencial: passo a passo</span></a></li>
+        <li><a href="#tabela"><span class="n">04</span><span class="t">Tabela: cmdlets frequentes (gestão/manutenção)</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo prático (evidências em arquivos)</span></a></li>
+        <li><a href="#atividades"><span class="n">06</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">07</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">08</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">09</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Dica:</strong> PowerShell trabalha com <strong>objetos</strong> (não apenas texto). Entender isso é o “pulo do gato” para administrar Windows.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 14 — PowerShell Essencial para Suporte (GUI + PowerShell)</h1>
+        <p>
+          Se o CMD te dá o básico, o <strong>PowerShell</strong> te dá poder: filtragem, automação, relatórios e controle fino do Windows.
+          Neste capítulo você aprende o que ainda faltava para “operar” instruções em PowerShell: ajuda, descoberta de comandos,
+          pipeline com objetos, filtros, exportação de evidências e cmdlets frequentes de administração e manutenção.
+        </p>
+        <div class="chips">
+          <span class="chip">Get-Help / Get-Command</span>
+          <span class="chip">Pipeline de objetos</span>
+          <span class="chip">Where-Object / Select-Object</span>
+          <span class="chip">Export-Csv / Out-File</span>
+          <span class="chip">Rede (Get-Net*)</span>
+          <span class="chip">Logs (Get-WinEvent)</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Abrir PowerShell/Terminal e usar ajuda e descoberta de cmdlets.</li>
+              <li>Explicar cmdlets, pipeline e objetos (e aplicar em suporte real).</li>
+              <li>Filtrar e selecionar informações com <strong>Where-Object</strong>, <strong>Select-Object</strong> e <strong>Sort-Object</strong>.</li>
+              <li>Gerar evidências em arquivo (Out-File, Export-Csv) e organizar logs.</li>
+              <li>Usar cmdlets frequentes para processos, serviços, rede, disco, logs e tarefas.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>CMD essencial e coleta de evidências (Cap. 13).</li>
+              <li>Conceitos de processos/serviços e desempenho (Cap. 09–10).</li>
+              <li>Permissão de administrador para alguns cmdlets (dependendo do ambiente).</li>
+            </ul>
+            <div class="callout">
+              <strong>Importante:</strong> assim como no CMD, sempre registre evidências <em>antes</em> de mudar configurações.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos (curtos) — e onde vou aplicar isso</h2>
+
+        <h3>Cmdlet (verbo-substantivo)</h3>
+        <p>
+          No PowerShell, comandos são <strong>cmdlets</strong>, geralmente com padrão <em>Verbo-Substantivo</em> (ex.: <span class="kbd">Get-Process</span>, <span class="kbd">Set-Service</span>).
+          Isso facilita “adivinhar” comandos. <strong>Onde vou aplicar:</strong> você vai usar <span class="kbd">Get-Command</span> para descobrir cmdlets por verbo ou por tema.
+        </p>
+
+        <h3>Pipeline de objetos (|)</h3>
+        <p>
+          Diferente do CMD (texto), o PowerShell passa <strong>objetos</strong> pelo pipeline. Um objeto tem propriedades (Name, Id, Status).
+          <strong>Onde vou aplicar:</strong> você vai usar <span class="kbd">Get-Process | Where-Object ... | Select-Object ...</span> para montar relatórios.
+        </p>
+
+        <h3>Objetos e propriedades (Get-Member)</h3>
+        <p>
+          Para saber o que um cmdlet retorna, use <span class="kbd">Get-Member</span>: ele mostra propriedades e métodos.
+          <strong>Onde vou aplicar:</strong> você vai descobrir quais propriedades existem para filtrar e selecionar corretamente.
+        </p>
+
+        <h3>Exportação e evidências</h3>
+        <p>
+          Suporte profissional exige evidências. No PowerShell, você exporta resultados para TXT/CSV com facilidade.
+          <strong>Onde vou aplicar:</strong> você vai criar a pasta <span class="kbd">C:\FGSO\cap14</span> e salvar relatórios com Out-File/Export-Csv.
+        </p>
+
+        <div class="callout">
+          <strong>Regra do capítulo:</strong> sempre pergunte: “Que objeto eu tenho?” (Get-Member) e “Que evidência preciso salvar?” (Out-File/Export-Csv).
+        </div>
+      </section>
+
+      <section class="card" id="ps-essencial">
+        <h2>PowerShell essencial: passo a passo (para operar instruções)</h2>
+        <p class="muted">Este guia é o “kit de sobrevivência” do PowerShell para suporte. Faça na ordem.</p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Abrir PowerShell e entender o prompt</h3>
+            <ul>
+              <li>Abra: Menu Iniciar → <strong>Terminal</strong> (Windows Terminal) → escolha <strong>PowerShell</strong>.</li>
+              <li>O prompt mostra o caminho atual (ex.: <span class="kbd">PS C:\Users\Usuario&gt;</span>).</li>
+              <li>Use <span class="kbd">pwd</span> (alias de Get-Location) para confirmar onde você está.</li>
+            </ul>
+            <pre class="language-powershell"><code>pwd
+Get-Location</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Ajuda (Get-Help) e exemplos</h3>
+            <ul>
+              <li><span class="kbd">Get-Help</span> mostra como usar um cmdlet.</li>
+              <li>Use <span class="kbd">-Examples</span> para ver exemplos prontos.</li>
+            </ul>
+            <pre class="language-powershell"><code>Get-Help Get-Process
+Get-Help Get-Process -Examples
+Get-Help Get-Service -Full</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Descobrir comandos (Get-Command)</h3>
+            <ul>
+              <li>Procure por cmdlets por verbo (Get/Set/New/Remove/Restart) e por tema (Net, Service, Event).</li>
+            </ul>
+            <pre class="language-powershell"><code>Get-Command -Verb Get
+Get-Command *service*
+Get-Command Get-Net*
+Get-Command *event*</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Navegação e arquivos (Get-ChildItem, Set-Location, New-Item)</h3>
+            <ul>
+              <li>PowerShell tem aliases (dir/ls/cd), mas prefira aprender os cmdlets reais.</li>
+              <li>Crie a pasta do capítulo.</li>
+            </ul>
+            <pre class="language-powershell"><code>Set-Location C:\
+New-Item -ItemType Directory -Force -Path C:\FGSO\cap14\logs | Out-Null
+Get-ChildItem C:\FGSO\cap14</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Entender o que um comando retorna (Get-Member)</h3>
+            <ul>
+              <li>Descubra propriedades para filtrar e selecionar com segurança.</li>
+            </ul>
+            <pre class="language-powershell"><code>Get-Process | Get-Member
+Get-Service | Get-Member</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Filtrar e selecionar (Where-Object, Select-Object, Sort-Object)</h3>
+            <ul>
+              <li>Filtrar: escolha apenas o que interessa.</li>
+              <li>Selecionar: escolha colunas/propriedades.</li>
+              <li>Ordenar: priorize pelo que importa.</li>
+            </ul>
+            <pre class="language-powershell"><code># Top 10 processos por memória
+Get-Process | Sort-Object WS -Descending | Select-Object -First 10 Name,Id,WS
+
+# Serviços parados
+Get-Service | Where-Object {$_.Status -eq 'Stopped'} | Select-Object -First 15 Name,Status,StartType
+</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Formatar e exportar evidências (Format-Table, Out-File, Export-Csv)</h3>
+            <ul>
+              <li><span class="kbd">Out-File</span> salva texto.</li>
+              <li><span class="kbd">Export-Csv</span> salva dados estruturados (ótimo para planilhas).</li>
+              <li>Crie evidências: processos e serviços.</li>
+            </ul>
+            <pre class="language-powershell"><code># TXT
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 15 Name,Id,CPU,WS |
+  Format-Table -AutoSize | Out-String | Out-File C:\FGSO\cap14\logs\top_processos.txt
+
+# CSV
+Get-Service | Select-Object Name,DisplayName,Status,StartType |
+  Export-Csv -NoTypeInformation -Encoding UTF8 C:\FGSO\cap14\logs\servicos.csv</code></pre>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> no seu Playbook (Cap. 12), evidências em TXT/CSV valorizam a entrega e facilitam auditoria.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Rede via PowerShell (Get-Net*) — checagem e evidência</h3>
+            <ul>
+              <li>Checar adaptadores, IP, gateway e DNS com cmdlets modernos.</li>
+              <li>Salvar em arquivo para evidência (como você fez no CMD no Cap. 13).</li>
+            </ul>
+            <pre class="language-powershell"><code>Get-NetAdapter | Select-Object Name,Status,LinkSpeed | Format-Table -AutoSize
+Get-NetIPConfiguration | Format-List | Out-File C:\FGSO\cap14\logs\net_ipconfig.txt
+Get-DnsClientServerAddress | Out-File C:\FGSO\cap14\logs\dns_servers.txt</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Testes (Test-Connection e Resolve-DnsName)</h3>
+            <ul>
+              <li><span class="kbd">Test-Connection</span> é o “ping” do PowerShell.</li>
+              <li><span class="kbd">Resolve-DnsName</span> ajuda a confirmar DNS.</li>
+            </ul>
+            <pre class="language-powershell"><code>Test-Connection 8.8.8.8 -Count 4 | Out-File C:\FGSO\cap14\logs\test_connection_ip.txt
+Resolve-DnsName www.microsoft.com | Out-File C:\FGSO\cap14\logs\resolve_dns.txt</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Boas práticas: executar como admin e registrar antes/depois</h3>
+            <ul>
+              <li>Algumas ações exigem admin (ex.: mudar DNS, reiniciar adaptador).</li>
+              <li>Método: evidência <strong>antes</strong> → mudança → evidência <strong>depois</strong>.</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Em laboratório:</strong> só altere DNS/IP se você souber reverter. Sempre registre o estado anterior (Out-File).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="tabela">
+        <h2>Tabela — cmdlets usados com grande frequência (gestão e manutenção)</h2>
+        <p class="muted">Tabela pensada para suporte: “qual cmdlet uso para isso?”. Inclui os mais comuns do dia a dia.</p>
+
+        <table aria-label="Cmdlets frequentes">
+          <thead>
+            <tr>
+              <th>Área</th>
+              <th>Cmdlet</th>
+              <th>Para que serve</th>
+              <th>Exemplo rápido</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ajuda/Descoberta</td>
+              <td><strong>Get-Help</strong></td>
+              <td>Ajuda do cmdlet (parâmetros e exemplos)</td>
+              <td><span class="kbd">Get-Help Get-Process -Examples</span></td>
+            </tr>
+            <tr>
+              <td>Ajuda/Descoberta</td>
+              <td><strong>Get-Command</strong></td>
+              <td>Encontrar comandos por nome/verbo</td>
+              <td><span class="kbd">Get-Command Get-Net*</span></td>
+            </tr>
+            <tr>
+              <td>Objetos</td>
+              <td><strong>Get-Member</strong></td>
+              <td>Ver propriedades e métodos de objetos</td>
+              <td><span class="kbd">Get-Service | Get-Member</span></td>
+            </tr>
+            <tr>
+              <td>Processos</td>
+              <td><strong>Get-Process</strong></td>
+              <td>Listar processos e consumo</td>
+              <td><span class="kbd">Get-Process | sort CPU -desc</span></td>
+            </tr>
+            <tr>
+              <td>Processos</td>
+              <td><strong>Stop-Process</strong></td>
+              <td>Encerrar processo (com cuidado)</td>
+              <td><span class="kbd">Stop-Process -Name notepad -Force</span></td>
+            </tr>
+            <tr>
+              <td>Serviços</td>
+              <td><strong>Get-Service</strong></td>
+              <td>Listar serviços e status</td>
+              <td><span class="kbd">Get-Service | ? Status -eq Stopped</span></td>
+            </tr>
+            <tr>
+              <td>Serviços</td>
+              <td><strong>Start/Stop-Service</strong></td>
+              <td>Iniciar/parar serviço</td>
+              <td><span class="kbd">Restart-Service spooler</span></td>
+            </tr>
+            <tr>
+              <td>Serviços</td>
+              <td><strong>Set-Service</strong></td>
+              <td>Alterar tipo de inicialização</td>
+              <td><span class="kbd">Set-Service spooler -StartupType Manual</span></td>
+            </tr>
+            <tr>
+              <td>Arquivos</td>
+              <td><strong>Get-ChildItem</strong></td>
+              <td>Listar arquivos/pastas (dir)</td>
+              <td><span class="kbd">Get-ChildItem C:\FGSO</span></td>
+            </tr>
+            <tr>
+              <td>Arquivos</td>
+              <td><strong>Copy-Item / Move-Item</strong></td>
+              <td>Copiar/mover arquivos</td>
+              <td><span class="kbd">Copy-Item a b -Recurse</span></td>
+            </tr>
+            <tr>
+              <td>Arquivos</td>
+              <td><strong>Remove-Item</strong></td>
+              <td>Excluir (cuidado)</td>
+              <td><span class="kbd">Remove-Item arquivo.txt</span></td>
+            </tr>
+            <tr>
+              <td>Exportação</td>
+              <td><strong>Out-File</strong></td>
+              <td>Salvar saída em texto</td>
+              <td><span class="kbd">... | Out-File logs.txt</span></td>
+            </tr>
+            <tr>
+              <td>Exportação</td>
+              <td><strong>Export-Csv</strong></td>
+              <td>Salvar dados em CSV (planilha)</td>
+              <td><span class="kbd">... | Export-Csv a.csv</span></td>
+            </tr>
+            <tr>
+              <td>Rede</td>
+              <td><strong>Get-NetAdapter</strong></td>
+              <td>Status do adaptador e link</td>
+              <td><span class="kbd">Get-NetAdapter</span></td>
+            </tr>
+            <tr>
+              <td>Rede</td>
+              <td><strong>Get-NetIPConfiguration</strong></td>
+              <td>IP, gateway e DNS por adaptador</td>
+              <td><span class="kbd">Get-NetIPConfiguration</span></td>
+            </tr>
+            <tr>
+              <td>Rede</td>
+              <td><strong>Get-DnsClientServerAddress</strong></td>
+              <td>DNS configurado</td>
+              <td><span class="kbd">Get-DnsClientServerAddress</span></td>
+            </tr>
+            <tr>
+              <td>Rede</td>
+              <td><strong>Resolve-DnsName</strong></td>
+              <td>Testar resolução DNS</td>
+              <td><span class="kbd">Resolve-DnsName www.microsoft.com</span></td>
+            </tr>
+            <tr>
+              <td>Rede</td>
+              <td><strong>Test-Connection</strong></td>
+              <td>Teste de conectividade (ping)</td>
+              <td><span class="kbd">Test-Connection 8.8.8.8 -Count 4</span></td>
+            </tr>
+            <tr>
+              <td>Logs</td>
+              <td><strong>Get-WinEvent</strong></td>
+              <td>Ler logs modernos (Event Log)</td>
+              <td><span class="kbd">Get-WinEvent -LogName System -Max 20</span></td>
+            </tr>
+            <tr>
+              <td>Sistema</td>
+              <td><strong>Get-ComputerInfo</strong></td>
+              <td>Informações do sistema</td>
+              <td><span class="kbd">Get-ComputerInfo | select OsName,OsVersion</span></td>
+            </tr>
+            <tr>
+              <td>Atualizações</td>
+              <td><strong>Get-HotFix</strong></td>
+              <td>Listar hotfix/updates instalados</td>
+              <td><span class="kbd">Get-HotFix | select -First 10</span></td>
+            </tr>
+            <tr>
+              <td>Tarefas</td>
+              <td><strong>Get-ScheduledTask</strong></td>
+              <td>Listar tarefas agendadas</td>
+              <td><span class="kbd">Get-ScheduledTask | select -First 10</span></td>
+            </tr>
+            <tr>
+              <td>Backup</td>
+              <td><strong>Compress-Archive</strong></td>
+              <td>Criar ZIP (backup portátil)</td>
+              <td><span class="kbd">Compress-Archive -Path ... -DestinationPath ...</span></td>
+            </tr>
+            <tr>
+              <td>Integridade</td>
+              <td><strong>Get-FileHash</strong></td>
+              <td>Hash para integridade</td>
+              <td><span class="kbd">Get-FileHash arquivo.zip</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>Dica:</strong> se você quiser “memorizar” algo, memorize os verbos: Get/Set/New/Remove/Start/Stop/Restart + o tema (Process/Service/Net/Event).
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo prático: pacote de evidências com PowerShell</h2>
+        <p>
+          Você vai montar um pacote de evidências parecido com o do CMD (Cap. 13), só que usando PowerShell.
+          Pasta padrão: <span class="kbd">C:\FGSO\cap14</span>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> se estiver em VM, confirme que a rede está ativa. Use Terminal/PowerShell.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Criar pastas e arquivo de relatório</h3>
+            <pre class="language-powershell"><code>New-Item -ItemType Directory -Force -Path C:\FGSO\cap14\logs | Out-Null
+"Relatório PowerShell - Cap14" | Out-File C:\FGSO\cap14\relatorio.txt
+("Data: {0}" -f (Get-Date)) | Out-File C:\FGSO\cap14\relatorio.txt -Append</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Coletar processos e serviços (TXT + CSV)</h3>
+            <pre class="language-powershell"><code>Get-Process | Sort-Object CPU -Descending | Select-Object -First 15 Name,Id,CPU,WS |
+  Format-Table -AutoSize | Out-String | Out-File C:\FGSO\cap14\logs\top_processos.txt
+
+Get-Service | Select-Object Name,DisplayName,Status,StartType |
+  Export-Csv -NoTypeInformation -Encoding UTF8 C:\FGSO\cap14\logs\servicos.csv</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Coletar evidências de rede (IP/DNS/adaptador)</h3>
+            <pre class="language-powershell"><code>Get-NetAdapter | Select-Object Name,Status,LinkSpeed |
+  Format-Table -AutoSize | Out-String | Out-File C:\FGSO\cap14\logs\net_adapter.txt
+
+Get-NetIPConfiguration | Format-List | Out-File C:\FGSO\cap14\logs\net_ipconfig.txt
+Get-DnsClientServerAddress | Out-File C:\FGSO\cap14\logs\dns_servers.txt</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Testes: conectividade e DNS</h3>
+            <pre class="language-powershell"><code>Test-Connection 8.8.8.8 -Count 4 | Out-File C:\FGSO\cap14\logs\test_connection_ip.txt
+Resolve-DnsName www.microsoft.com | Out-File C:\FGSO\cap14\logs\resolve_dns.txt</code></pre>
+            <div class="callout">
+              <strong>No relatório:</strong> escreva “IP ok/DNS ok” ou “IP ok/DNS falha” com base nos arquivos.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Logs do Windows (Get-WinEvent)</h3>
+            <pre class="language-powershell"><code>Get-WinEvent -LogName System -MaxEvents 50 |
+  Select-Object TimeCreated,Id,LevelDisplayName,ProviderName,Message |
+  Export-Csv -NoTypeInformation -Encoding UTF8 C:\FGSO\cap14\logs\eventos_sistema.csv</code></pre>
+            <div class="callout warn">
+              <strong>Dica:</strong> logs podem ter mensagens longas. CSV facilita pesquisar e filtrar depois.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Conferir se o pacote está completo</h3>
+            <pre class="language-powershell"><code>Get-ChildItem C:\FGSO\cap14
+Get-ChildItem C:\FGSO\cap14\logs</code></pre>
+            <ul>
+              <li>Garanta que existam: relatorio.txt, top_processos.txt, servicos.csv, net_ipconfig.txt, dns_servers.txt, resolve_dns.txt e eventos_sistema.csv.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Resultado esperado:</strong> você consegue gerar evidências em PowerShell para suporte e manutenção — base para automatizar rotinas nos próximos capítulos.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3)</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Relatório “Top 5”</h3>
+            <p>Crie um relatório em CSV com top 5 processos por CPU e top 5 por memória. Inclua data/hora e salve em logs/.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Filtro de eventos</h3>
+            <p>Use Get-WinEvent para filtrar somente erros (LevelDisplayName = Error) nas últimas 24h e exporte para CSV.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Diagnóstico de rede completo</h3>
+            <p>Crie um “pacote de rede” com Get-NetIPConfiguration, DNS, Test-Connection e Resolve-DnsName. Escreva conclusão em relatorio.txt.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Por que o PowerShell é baseado em objetos e não apenas texto?</li>
+          <li>Qual a diferença entre Out-File e Export-Csv na prática?</li>
+          <li>Quais verbos (Get/Set/New/Remove) você mais usa e por quê?</li>
+          <li>O que é um módulo no PowerShell (Get-Module/Import-Module)?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo15.html">Capítulo 15</a> você vai aplicar PowerShell em tarefas de suporte (automação básica e scripts curtos) com segurança e logs.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 14 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) O que diferencia o PowerShell do CMD no pipeline?',
+        options: [
+          'No PowerShell o pipeline passa objetos; no CMD passa texto.',
+          'No PowerShell não existe pipe.',
+          'No CMD o pipeline passa objetos; no PowerShell passa texto.',
+          'No PowerShell só funciona com internet.',
+          'Não existe diferença.'
+        ],
+        correct: 0,
+        why: 'PowerShell passa objetos no pipeline, com propriedades; CMD trabalha majoritariamente com texto.'
+      },
+      {
+        q: '2) Qual cmdlet mostra ajuda e exemplos de uso?',
+        options: ['Get-Help', 'Get-Process', 'Out-File', 'Get-WinEvent', 'Get-NetAdapter'],
+        correct: 0,
+        why: 'Get-Help mostra documentação e exemplos (use -Examples para ver exemplos rápidos).' 
+      },
+      {
+        q: '3) Para descobrir quais propriedades um cmdlet retorna, você usa:',
+        options: ['Get-Member', 'Get-ChildItem', 'Test-Connection', 'Resolve-DnsName', 'Export-Csv'],
+        correct: 0,
+        why: 'Get-Member lista propriedades e métodos do objeto retornado, ajudando a filtrar e selecionar.'
+      },
+      {
+        q: '4) Qual comando é o “ping” do PowerShell?',
+        options: ['Test-Connection', 'Get-NetIPConfiguration', 'Get-Command', 'Get-Counter', 'Format-Table'],
+        correct: 0,
+        why: 'Test-Connection é o equivalente moderno do ping no PowerShell (com saída estruturada).' 
+      },
+      {
+        q: '5) Para salvar dados estruturados em planilha, o melhor é:',
+        options: ['Export-Csv', 'cls', 'cd', 'Get-Member', 'Stop-Process'],
+        correct: 0,
+        why: 'Export-Csv salva resultados em formato tabular (CSV), ideal para Excel/Sheets.'
+      },
+      {
+        q: '6) Qual cmdlet mostra IP, gateway e DNS por adaptador?',
+        options: ['Get-NetIPConfiguration', 'Get-Process', 'Get-Help', 'Get-FileHash', 'Get-Service'],
+        correct: 0,
+        why: 'Get-NetIPConfiguration mostra configuração IP completa (IP, gateway e DNS) por interface.'
+      },
+      {
+        q: '7) Para filtrar somente serviços parados, você usa principalmente:',
+        options: ['Where-Object', 'Get-Command', 'New-Item', 'Get-Location', 'Format-List'],
+        correct: 0,
+        why: 'Where-Object filtra objetos pelo valor de propriedades (ex.: Status -eq Stopped).' 
+      },
+      {
+        q: '8) Qual é a ordem mais segura ao realizar mudanças administrativas?',
+        options: [
+          'Mudar primeiro e registrar depois.',
+          'Registrar evidência antes → mudança → evidência depois.',
+          'Apagar logs para limpar o sistema.',
+          'Desativar serviços aleatórios para acelerar.',
+          'Formatar o computador.'
+        ],
+        correct: 1,
+        why: 'Método profissional: evidência antes/depois reduz risco e facilita rollback.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise cmdlets essenciais e pipeline de objetos.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap14_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Sei abrir PowerShell/Terminal e identificar o caminho atual (pwd/Get-Location).', note:'Consigo navegar com Set-Location.' },
+      { id:'c2', title:'Sei usar ajuda e exemplos (Get-Help -Examples).', note:'Consigo ler parâmetros e exemplos.' },
+      { id:'c3', title:'Sei descobrir comandos com Get-Command (por verbo e por tema).', note:'Ex.: Get-Net* / *service*.' },
+      { id:'c4', title:'Consigo usar pipeline com objetos e descobrir propriedades (Get-Member).', note:'Entendo que não é só texto.' },
+      { id:'c5', title:'Consigo filtrar e selecionar (Where-Object/Select-Object/Sort-Object).', note:'Criei pelo menos um filtro correto.' },
+      { id:'c6', title:'Consigo exportar evidências (Out-File/Export-Csv) e organizar logs.', note:'Gerei TXT e CSV.' },
+      { id:'c7', title:'Coletei evidências de rede com Get-NetIPConfiguration e DNS com Get-DnsClientServerAddress.', note:'Arquivos salvos em logs/.' },
+      { id:'c8', title:'Executei Test-Connection e Resolve-DnsName e interpretei resultados.', note:'Consegui concluir IP ok/DNS ok.' },
+      { id:'c9', title:'Usei Get-WinEvent para exportar eventos do sistema e salvar em CSV.', note:'eventos_sistema.csv gerado.' },
+      { id:'c10', title:'Montei o pacote completo C:\\FGSO\\cap14 com relatorio e logs.', note:'Pasta completa e conferida.' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', updateChecklistProgress);
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,891 @@
+<!-- arquivo: capitulo09.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 09 — Processos, Serviços e Inicialização (GUI + Linha de Comando) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 09 da Apostila FGSO: administração de processos, serviços e inicialização do Windows 11 com ferramentas gráficas e linha de comando (Task Manager, Services, msconfig, Task Scheduler, Event Viewer; tasklist/taskkill, sc, net, PowerShell Get-Process/Get-Service/Stop-Process/Set-Service, schtasks, bcdedit com cautela). Passo a passo, atividades, quiz e checklist." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);}    
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.75); color: var(--text); box-shadow: 0 10px 22px rgba(0,0,0,.25); font-size: 13px;}
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; height: fit-content; position:sticky; top: 74px;}
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 09 • Processos, serviços e inicialização (GUI + CLI)</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo08.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo10.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 09</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🧩 Processos • PID • Threads</span>
+        <span class="pill">⚙️ Serviços • Inicialização</span>
+        <span class="pill">🖥️ GUI + CLI (CMD/PowerShell)</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos essenciais (com aplicação)</span></a></li>
+        <li><a href="#gui"><span class="n">03</span><span class="t">Ferramentas gráficas (GUI)</span></a></li>
+        <li><a href="#cli"><span class="n">04</span><span class="t">Linha de comando (CMD + PowerShell)</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo prático (roteiro completo)</span></a></li>
+        <li><a href="#seguranca"><span class="n">06</span><span class="t">Cuidados e segurança (não quebrar o boot)</span></a></li>
+        <li><a href="#atividades"><span class="n">07</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">08</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">09</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">10</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Recomendação:</strong> em VM, crie snapshot <span class="kbd">09-antes-processos-servicos</span> antes de mexer em serviços e inicialização.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 09 — Processos, Serviços e Inicialização (GUI + Linha de Comando)</h1>
+        <p>
+          Agora você vai dominar o “coração” da administração do Windows: <strong>processos</strong> (programas em execução), <strong>serviços</strong> (componentes em segundo plano)
+          e <strong>inicialização</strong> (o que roda quando o Windows liga). Você fará tudo de duas formas:
+          <strong>GUI</strong> (ferramentas gráficas) e <strong>CLI</strong> (CMD/PowerShell). Isso te torna mais rápido, mais preciso e mais preparado para suporte real.
+        </p>
+        <div class="chips">
+          <span class="chip">Task Manager</span>
+          <span class="chip">services.msc</span>
+          <span class="chip">msconfig</span>
+          <span class="chip">tasklist/taskkill</span>
+          <span class="chip">sc / net</span>
+          <span class="chip">Get-Process/Get-Service</span>
+          <span class="chip">schtasks</span>
+          <span class="chip">bcdedit (cautela)</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Explicar e identificar <strong>processo</strong>, <strong>PID</strong> e <strong>thread</strong> (Cap. 02).</li>
+              <li>Usar GUI e CLI para listar e encerrar processos de forma segura.</li>
+              <li>Gerenciar serviços: consultar status, iniciar/parar e entender dependências.</li>
+              <li>Analisar inicialização: startup apps e tarefas agendadas.</li>
+              <li>Executar diagnóstico de boot (msconfig) e, com cautela, conhecer comandos de boot.</li>
+              <li>Produzir um mini-relatório com evidências do ambiente.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Windows 11 instalado (Cap. 05) e manutenção básica feita (Cap. 08 recomendado).</li>
+              <li>Ferramentas do Cap. 07 (Task Manager, Event Viewer, Services) revisadas.</li>
+              <li>Permissão de administrador (para alguns comandos).</li>
+            </ul>
+            <div class="callout danger" style="margin-top:10px">
+              <strong>Alerta:</strong> mudar inicialização/serviços sem método pode quebrar apps e até impedir o boot. Use snapshot/retorno.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos essenciais (com “onde vou aplicar isso”)</h2>
+
+        <h3>Processo, PID e Threads</h3>
+        <p>
+          <strong>Processo</strong> é um programa em execução. Cada processo tem um identificador chamado <strong>PID</strong>. Dentro dele existem <strong>threads</strong>, que são caminhos de execução.
+          <strong>Onde vou aplicar:</strong> no Task Manager (GUI) e em <span class="kbd">tasklist</span> / <span class="kbd">Get-Process</span> (CLI) você verá nomes e PIDs.
+        </p>
+
+        <h3>Serviços (services)</h3>
+        <p>
+          Um <strong>serviço</strong> é um componente que roda em segundo plano, geralmente sem janela. Ele pode iniciar automaticamente no boot.
+          <strong>Onde vou aplicar:</strong> em <span class="kbd">services.msc</span> (GUI) e em <span class="kbd">sc</span> / <span class="kbd">Get-Service</span> (CLI).
+        </p>
+
+        <h3>Inicialização (Startup)</h3>
+        <p>
+          Inicialização é tudo que entra em ação quando o Windows inicia: aplicativos de startup e tarefas agendadas.
+          <strong>Onde vou aplicar:</strong> Task Manager → Inicializar (GUI) e <span class="kbd">schtasks</span> / <span class="kbd">Get-ScheduledTask</span> (CLI).
+        </p>
+
+        <h3>Privilégios (admin) e UAC</h3>
+        <p>
+          Algumas ações exigem permissões elevadas (administrador). O UAC existe para reduzir risco de alterações acidentais.
+          <strong>Onde vou aplicar:</strong> ao iniciar Terminal/PowerShell como admin para gerenciar serviços e rodar comandos avançados.
+        </p>
+
+        <div class="callout">
+          <strong>Regra do capítulo:</strong> primeiro <strong>listar</strong> e <strong>entender</strong>, depois <strong>mudar</strong> (e sempre com retorno).
+        </div>
+      </section>
+
+      <section class="card" id="gui">
+        <h2>Ferramentas gráficas (GUI) — o que fazer com cada uma</h2>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Task Manager</h3>
+            <p><strong>Uso:</strong> ver processos, consumo e startup apps. Encerrar tarefa travada.</p>
+            <p class="muted">Atalho: Ctrl+Shift+Esc</p>
+          </div>
+          <div class="box">
+            <h3>Services</h3>
+            <p><strong>Uso:</strong> ver e controlar serviços (iniciar/parar), tipo de inicialização e dependências.</p>
+            <p class="muted">Atalho: services.msc</p>
+          </div>
+          <div class="box">
+            <h3>msconfig</h3>
+            <p><strong>Uso:</strong> diagnóstico de boot (modo seguro), “clean boot” (com cuidado).</p>
+            <p class="muted">Atalho: msconfig</p>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:12px">
+          <div class="box">
+            <h3>Task Scheduler</h3>
+            <p><strong>Uso:</strong> ver tarefas que rodam no logon/horário e impactam desempenho.</p>
+            <p class="muted">Atalho: taskschd.msc</p>
+          </div>
+          <div class="box">
+            <h3>Event Viewer</h3>
+            <p><strong>Uso:</strong> checar erros relacionados a serviços/processos e boot.</p>
+            <p class="muted">Atalho: eventvwr.msc</p>
+          </div>
+          <div class="box">
+            <h3>Reliability Monitor</h3>
+            <p><strong>Uso:</strong> correlacionar falhas por data (linha do tempo).</p>
+            <p class="muted">Atalho: perfmon /rel</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no passo a passo você vai executar o mesmo objetivo em GUI e depois repetir em CLI.
+        </div>
+      </section>
+
+      <section class="card" id="cli">
+        <h2>Linha de comando (CMD + PowerShell) — comandos essenciais</h2>
+        <p>
+          Linha de comando é mais rápida, automatizável e registra evidências com facilidade. Aqui você terá um kit mínimo de comandos.
+          Execute sempre em <strong>Terminal/PowerShell</strong> (recomendado) e, quando necessário, como administrador.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Processos (CMD)</h3>
+            <pre class="language-bash"><code>tasklist
+tasklist | findstr /i chrome
+taskkill /PID 1234
+taskkill /IM notepad.exe /F</code></pre>
+            <p class="muted">Use /F (forçar) apenas quando o app não responde. Evite encerrar processos do sistema.</p>
+          </div>
+          <div class="box">
+            <h3>Processos (PowerShell)</h3>
+            <pre class="language-powershell"><code>Get-Process | Sort-Object CPU -Descending | Select-Object -First 10
+Get-Process notepad
+Stop-Process -Name notepad -Force
+Get-Process | Where-Object {$_.WorkingSet -gt 300MB}</code></pre>
+            <p class="muted">PowerShell permite filtrar e selecionar colunas com facilidade.</p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box">
+            <h3>Serviços (CMD)</h3>
+            <pre class="language-bash"><code>sc query
+sc query spooler
+net start
+net stop spooler
+sc start spooler
+sc stop spooler</code></pre>
+            <p class="muted">Dica: serviços têm nome “curto” (ex.: spooler). Veja o nome em services.msc.</p>
+          </div>
+          <div class="box">
+            <h3>Serviços (PowerShell)</h3>
+            <pre class="language-powershell"><code>Get-Service | Sort-Object Status,DisplayName
+Get-Service -Name spooler
+Start-Service spooler
+Stop-Service spooler
+Set-Service spooler -StartupType Manual</code></pre>
+            <p class="muted">Set-Service altera tipo de inicialização. Faça isso só em laboratório e anote para reverter.</p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box">
+            <h3>Inicialização e tarefas (CMD)</h3>
+            <pre class="language-bash"><code>schtasks /Query /FO LIST /V
+schtasks /Query /TN "\Microsoft\Windows\UpdateOrchestrator\Schedule Scan" /V</code></pre>
+            <p class="muted">Use schtasks para consultar tarefas. Alterar tarefas exige cuidado.</p>
+          </div>
+          <div class="box">
+            <h3>Inicialização e tarefas (PowerShell)</h3>
+            <pre class="language-powershell"><code>Get-ScheduledTask | Select-Object -First 20
+Get-ScheduledTask | Where-Object {$_.State -eq 'Ready'} | Select-Object -First 20</code></pre>
+            <p class="muted">Em algumas versões, Get-ScheduledTask pode exigir módulo disponível (no Windows 11 normalmente existe).</p>
+          </div>
+        </div>
+
+        <details class="block">
+          <summary>Boot (bcdedit) — apenas leitura e cautela <span class="tag">alto risco</span></summary>
+          <p>
+            <strong>bcdedit</strong> manipula a configuração de boot. Uma alteração errada pode impedir o Windows de iniciar.
+            Neste capítulo, use apenas para <strong>consultar</strong>. Para mudar boot, prefira msconfig.
+          </p>
+          <pre class="language-bash"><code>bcdedit</code></pre>
+          <div class="callout danger"><strong>Regra:</strong> não execute comandos bcdedit de escrita sem snapshot e sem entender exatamente o efeito.</div>
+        </details>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo prático (roteiro completo): GUI → CLI → evidência</h2>
+        <p>
+          Você fará um roteiro em 3 blocos: (A) processos, (B) serviços, (C) inicialização.
+          Em cada bloco: primeiro GUI, depois CLI, e por fim salvar evidências em <span class="kbd">C:\\FGSO\\cap09</span>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> em VM crie snapshot <span class="kbd">09-antes-processos-servicos</span>.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Preparar a pasta de evidências</h3>
+            <ul>
+              <li>Crie <span class="kbd">C:\\FGSO\\cap09</span> e <span class="kbd">C:\\FGSO\\cap09\\logs</span>.</li>
+              <li>Crie um arquivo <span class="kbd">resumo.txt</span> com: data, nome da VM/PC e objetivo do capítulo.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Bloco A (GUI): processos no Task Manager</h3>
+            <ul>
+              <li>Abra <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">Esc</span>.</li>
+              <li>Abra alguns aplicativos leves (Bloco de Notas, Calculadora, navegador) para criar processos.</li>
+              <li>Na aba Processos, ordene por CPU e Memória e anote o top 3.</li>
+              <li>Localize o processo do Bloco de Notas e anote o nome.</li>
+              <li>Faça um print e salve em <span class="kbd">C:\\FGSO\\cap09</span>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Bloco A (CLI): listar e encerrar um processo de teste</h3>
+            <ul>
+              <li>Abra Terminal (ou CMD) e execute:</li>
+            </ul>
+            <pre class="language-bash"><code>tasklist | findstr /i notepad</code></pre>
+            <ul>
+              <li>Se aparecer, encerre o Bloco de Notas (apenas o app de teste):</li>
+            </ul>
+            <pre class="language-bash"><code>taskkill /IM notepad.exe</code></pre>
+            <ul>
+              <li>Confirme na GUI que o processo sumiu.</li>
+              <li>Registre no <span class="kbd">resumo.txt</span>: qual comando usou e o resultado.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> suporte real usa taskkill/Stop-Process para encerrar apps travados remotamente ou com automação.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Bloco B (GUI): serviços no services.msc</h3>
+            <ul>
+              <li>Abra <span class="kbd">services.msc</span>.</li>
+              <li>Localize <strong>Spooler de Impressão</strong> (Print Spooler). Se não existir na sua edição/VM, escolha outro serviço não crítico.</li>
+              <li>Abra Propriedades e observe: descrição, status e dependências.</li>
+              <li>Sem parar o serviço ainda, faça print e salve.</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Escolha segura:</strong> Spooler é um exemplo clássico de suporte (impressão travada). Em VM pode estar parado — isso também é aprendizado.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Bloco B (CLI): consultar e iniciar/parar o serviço (controlado)</h3>
+            <ul>
+              <li>Consultar status:</li>
+            </ul>
+            <pre class="language-bash"><code>sc query spooler</code></pre>
+            <ul>
+              <li>Se estiver RUNNING, pare e depois inicie (apenas para treino):</li>
+            </ul>
+            <pre class="language-bash"><code>net stop spooler
+net start spooler</code></pre>
+            <ul>
+              <li>Registre no <span class="kbd">resumo.txt</span> o status antes e depois.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> serviços travados são causa comum de falhas (update, impressão, rede). Saber reiniciar o serviço resolve muitos casos.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Bloco C (GUI): inicialização (Startup apps + tarefas)</h3>
+            <ul>
+              <li>Abra Task Manager → aba <strong>Inicializar</strong>.</li>
+              <li>Escolha um item não essencial (se existir) e apenas anote: habilitado ou desabilitado. (Evite desabilitar itens do sistema.)</li>
+              <li>Abra <span class="kbd">taskschd.msc</span> e encontre 1 tarefa com gatilho “No logon”.</li>
+              <li>Anote: nome da tarefa, gatilho e ação.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Bloco C (CLI): listar tarefas e salvar evidência</h3>
+            <ul>
+              <li>Exportar uma lista simplificada de tarefas (vai ser grande):</li>
+            </ul>
+            <pre class="language-bash"><code>schtasks /Query /FO LIST /V &gt; C:\FGSO\cap09\logs\tarefas.txt</code></pre>
+            <ul>
+              <li>Abra o arquivo tarefas.txt e encontre a tarefa que você anotou na GUI.</li>
+              <li>Registre no <span class="kbd">resumo.txt</span> a confirmação (GUI = CLI).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Diagnóstico de boot (msconfig) — apenas leitura e método</h3>
+            <ul>
+              <li>Abra <span class="kbd">msconfig</span>.</li>
+              <li>Observe abas e opções (Inicialização, Serviços).</li>
+              <li>Se quiser testar modo seguro, faça isso apenas em VM e com snapshot. (Veja seção “Cuidados”.)</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Final: pacote de evidências</h3>
+            <ul>
+              <li>Garanta que você tem: 2 prints (processos + services), 1 tarefas.txt e um resumo.txt.</li>
+              <li>Seu resumo deve conter: top 3 processos, status do spooler (antes/depois) e 1 tarefa no logon.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="seguranca">
+        <h2>Cuidados e segurança (para não quebrar o sistema)</h2>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>O que é seguro fazer</h3>
+            <ul>
+              <li>Listar processos/serviços/tarefas (leitura).</li>
+              <li>Encerrar aplicativos de teste (Bloco de Notas, Calculadora).</li>
+              <li>Reiniciar serviços não críticos em laboratório (ex.: spooler).</li>
+              <li>Desabilitar 1 item de startup não essencial (apenas em VM).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>O que NÃO fazer (neste capítulo)</h3>
+            <ul>
+              <li>Encerrar processos do sistema sem entender (ex.: wininit, csrss, lsass).</li>
+              <li>Alterar serviços críticos (Windows Update, RPC, rede) aleatoriamente.</li>
+              <li>Editar registro para “otimizar” sem método.</li>
+              <li>Usar bcdedit para alterar boot sem snapshot.</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="block">
+          <summary>Modo Seguro (Safe Mode) — somente em VM, com retorno <span class="tag">opcional</span></summary>
+          <p>
+            O modo seguro inicia o Windows com o mínimo de drivers/serviços, útil para remover problemas.
+            Em laboratório, você pode testar para aprender.
+          </p>
+          <p><strong>Método GUI (recomendado):</strong> msconfig → Inicialização → Inicialização segura (Mínima) → OK → Reiniciar. Depois, desmarque para voltar ao normal.</p>
+          <p><strong>Método CLI (cautela):</strong> só para conhecimento. Em caso de erro, você pode “prender” o boot em modo seguro.</p>
+          <pre class="language-bash"><code>REM ATIVAR (cautela)
+bcdedit /set {current} safeboot minimal
+REM DESATIVAR (voltar ao normal)
+bcdedit /deletevalue {current} safeboot</code></pre>
+          <div class="callout danger"><strong>Regra:</strong> não execute bcdedit de escrita sem snapshot. Prefira msconfig.</div>
+        </details>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — para você desenvolver</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — “Caça ao PID”</h3>
+            <p>Abra 5 aplicativos, liste com tasklist e encontre o PID de cada um. Depois encerre 2 com taskkill e confirme na GUI.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Serviços e dependências</h3>
+            <p>Escolha 3 serviços (1 de update, 1 de rede, 1 opcional). Liste dependências no services.msc e explique o risco de parar cada um.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Boot mais rápido (método)</h3>
+            <p>Liste itens de inicialização e tarefas no logon. Proponha 2 mudanças seguras (em VM) e registre tempo de boot percebido antes/depois.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre encerrar um processo e parar um serviço?</li>
+          <li>O que é um PID e por que ele é importante em automação e suporte?</li>
+          <li>Por que tarefas agendadas podem causar lentidão no boot?</li>
+          <li>O que é UAC e por que executar como administrador muda o resultado?</li>
+          <li>Explique o risco de alterar o BCD (bcdedit) sem ponto de retorno.</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo10.html">Capítulo 10</a> você vai aprofundar diagnóstico de desempenho (CPU, memória, disco e rede) com métricas e evidências.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 09 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Um processo é:',
+        options: [
+          'Um arquivo .txt no disco.',
+          'Um programa em execução, identificado por PID.',
+          'Uma partição do disco.',
+          'Um firewall.',
+          'Um driver de rede.'
+        ],
+        correct: 1,
+        why: 'Processo é a execução de um programa. O PID identifica o processo.'
+      },
+      {
+        q: '2) Qual ferramenta GUI é a primeira escolha para ver consumo de recursos por processo?',
+        options: ['services.msc', 'Task Manager', 'regedit', 'diskmgmt.msc', 'control'],
+        correct: 1,
+        why: 'Task Manager mostra processos e consumo de CPU/RAM/Disco/Rede e permite encerrar apps travados.'
+      },
+      {
+        q: '3) Qual comando CMD lista processos?',
+        options: ['tasklist', 'ping', 'ipconfig', 'netsh', 'format'],
+        correct: 0,
+        why: 'tasklist lista processos em execução (nome, PID, consumo etc.).'
+      },
+      {
+        q: '4) Qual comando encerra um aplicativo de teste pelo nome (imagem)?',
+        options: ['taskkill /IM notepad.exe', 'net start notepad', 'sc stop notepad', 'bcdedit notepad', 'schtasks /run notepad'],
+        correct: 0,
+        why: 'taskkill /IM encerra processo pelo nome da imagem. Use com cuidado e evite processos do sistema.'
+      },
+      {
+        q: '5) Um serviço é melhor descrito como:',
+        options: [
+          'Um aplicativo com janela sempre aberta.',
+          'Um componente que roda em segundo plano e pode iniciar automaticamente.',
+          'Um arquivo do Word.',
+          'Um tipo de pasta.',
+          'Uma placa de hardware.'
+        ],
+        correct: 1,
+        why: 'Serviços são componentes em background (update, rede, impressão). São gerenciados por services.msc, sc e PowerShell.'
+      },
+      {
+        q: '6) Para consultar o status do serviço spooler via CMD, usamos:',
+        options: ['sc query spooler', 'tasklist spooler', 'net user spooler', 'format spooler', 'ping spooler'],
+        correct: 0,
+        why: 'sc query spooler consulta o estado do serviço (RUNNING/STOPPED) e outras informações.'
+      },
+      {
+        q: '7) Qual ferramenta ajuda a entender itens que iniciam no logon além dos apps de startup?',
+        options: ['Task Scheduler', 'Paint', 'Calculator', 'Disk Cleanup', 'WordPad'],
+        correct: 0,
+        why: 'O Task Scheduler (taskschd.msc) mostra tarefas que podem rodar no logon e afetar boot/desempenho.'
+      },
+      {
+        q: '8) Qual afirmação sobre bcdedit é mais segura para este capítulo?',
+        options: [
+          'É seguro usar bcdedit para mudar o boot sem backup.',
+          'bcdedit deve ser usado apenas para leitura neste capítulo; alterações só com snapshot e método.',
+          'bcdedit é um editor de texto.',
+          'bcdedit serve para limpar arquivos temporários.',
+          'bcdedit desinstala programas.'
+        ],
+        correct: 1,
+        why: 'bcdedit altera configurações de boot e pode impedir a inicialização. Aqui, use apenas para consultar.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise as seções GUI e CLI.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap09_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei a pasta C:\\FGSO\\cap09 e organizei evidências.', note:'cap09 + logs + resumo.txt.' },
+      { id:'c2', title:'Usei Task Manager para identificar top 3 processos por CPU/Memória.', note:'Salvei print/anotei.' },
+      { id:'c3', title:'Listei um processo via tasklist e confirmei o PID.', note:'Usei findstr para filtrar.' },
+      { id:'c4', title:'Encerrei um app de teste via taskkill e confirmei na GUI.', note:'Ex.: notepad.exe.' },
+      { id:'c5', title:'Verifiquei um serviço no services.msc e entendi dependências.', note:'Spooler ou outro.' },
+      { id:'c6', title:'Consultei o serviço via sc query e reiniciei (net stop/start) em laboratório.', note:'Registrei antes/depois.' },
+      { id:'c7', title:'Analisei inicialização (Startup apps) e encontrei 1 tarefa no logon.', note:'Task Scheduler.' },
+      { id:'c8', title:'Gerei tarefas.txt via schtasks e conferi a mesma tarefa da GUI.', note:'GUI = CLI.' },
+      { id:'c9', title:'Abri msconfig e compreendi uso para diagnóstico de boot.', note:'Sem mudanças perigosas.' },
+      { id:'c10', title:'Consigo explicar por que bcdedit é arriscado e quando usar.', note:'Usei apenas leitura.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+
+    // Last update
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+  </script>
+</body>
+</html>

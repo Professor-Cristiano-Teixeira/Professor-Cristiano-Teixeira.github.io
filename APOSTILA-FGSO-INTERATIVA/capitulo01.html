@@ -1,0 +1,977 @@
+<!-- arquivo: capitulo01.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 01 — Evolução dos Computadores e dos Sistemas Operacionais | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 01 da Apostila FGSO: Evolução dos computadores e dos sistemas operacionais, com foco nas gerações e na automação histórica." />
+
+  <!-- Prism (tema escuro) — usado aqui para trechos de pseudo-código e exemplos conceituais (sem prática) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-9o1n8y9Sx9f0xkH5o0m0c2gk7k9jOQf3mW8dV1uB3bq8m7Jm8gq9QdCzWQbQ9pQ9c0q8mW4h1Gm2Q0x9g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width:1280px; margin:0 auto; padding: 12px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,27,51,.75);
+      color: var(--text);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      font-size: 13px;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      height: fit-content;
+      position:sticky;
+      top: 74px;
+    }
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{
+      background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 90ch;}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; margin-top: 10px;}
+    @media (max-width: 980px){.grid-2{grid-template-columns:1fr;}}
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .callout{
+      border-left: 4px solid rgba(184,208,255,.9);
+      background: rgba(7,11,20,.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin: 10px 0;
+    }
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    /* Cards de geração */
+    details.gen{
+      background: rgba(7,11,20,.32);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin: 10px 0;
+    }
+    details.gen summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.gen summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;}
+    @media (max-width: 980px){.grid-3{grid-template-columns:1fr;}}
+
+    .box{
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(10,31,68,.18);
+    }
+
+    .timeline{position:relative; padding-left: 18px; margin: 10px 0;}
+    .timeline:before{content:""; position:absolute; left:7px; top:4px; bottom:4px; width:2px; background: rgba(255,255,255,.12); border-radius: 2px;}
+    .titem{position:relative; margin: 10px 0 10px 0; padding-left: 10px;}
+    .titem:before{content:""; position:absolute; left:-14px; top:4px; width:10px; height:10px; border-radius: 999px; background: rgba(184,208,255,.85); border:1px solid rgba(255,255,255,.25)}
+    .titem strong{display:block}
+
+    /* Quiz */
+    .quiz{
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .q{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(7,11,20,.32);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,27,51,.65);
+      color: var(--text);
+      font-size: 12px;
+      cursor:pointer;
+    }
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    /* Prism tweaks */
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 01 • Evolução dos Computadores e dos Sistemas Operacionais</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="plano.html">📝 Plano da Disciplina</a>
+        <a class="btn primary" href="capitulo02.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 01</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🎯 Foco: teoria (sem prática até o Cap. 4)</span>
+        <span class="pill">⏱️ Estudo sugerido: 35–60 min</span>
+        <span class="pill">🧠 Palavras‑chave: gerações, automação, SO, lote, time‑sharing</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#por-que"><span class="n">02</span><span class="t">Por que estudar a evolução?</span></a></li>
+        <li><a href="#automacao"><span class="n">03</span><span class="t">Automação antes do computador</span></a></li>
+        <li><a href="#geracoes"><span class="n">04</span><span class="t">Gerações dos computadores (cards)</span></a></li>
+        <li><a href="#internet"><span class="n">05</span><span class="t">5ª geração e Internet (expansão)</span></a></li>
+        <li><a href="#6e7"><span class="n">06</span><span class="t">6ª e 7ª geração? (questionamentos)</span></a></li>
+        <li><a href="#aplicacao"><span class="n">07</span><span class="t">Onde isso será aplicado (Cap. 5+)</span></a></li>
+        <li><a href="#quiz"><span class="n">08</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">09</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">10</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Importante:</strong> até o <strong>Capítulo 04</strong> o estudo é <strong>100% teórico</strong>. As práticas começam no <strong>Capítulo 05</strong>.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero">
+        <h1>Capítulo 01 — Evolução dos Computadores e dos Sistemas Operacionais</h1>
+        <p>
+          Antes de instalar, configurar e automatizar o Windows (práticas a partir do Cap. 05), precisamos entender <strong>como chegamos até aqui</strong>.
+          Este capítulo conta a história da computação com foco em <strong>Sistemas Operacionais (SO)</strong>: por que eles surgiram, como mudaram com cada geração
+          de hardware e como as necessidades humanas (automação, tempo, cálculo, controle) empurraram essa evolução.
+        </p>
+        <div class="chips" aria-label="Conexões com o curso">
+          <span class="chip">Base tecnológica: fundamentação de SO</span>
+          <span class="chip">Competências: MSI18 (conceitos), MSI02 (instalar/configurar — futuro)</span>
+          <span class="chip">Habilidade: MSI1809 (arquiteturas e modos de uso/licenciamento — futuro)</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos de aprendizagem e pré-requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Explicar o que são <strong>gerações de computadores</strong> e por que essa classificação existe.</li>
+              <li>Relacionar cada geração com mudanças na forma de <strong>executar programas</strong> (sem SO, lote, tempo compartilhado, PCs, Internet).</li>
+              <li>Descrever como surgiram as principais ideias por trás de um SO: <strong>controle, automação, compartilhamento e segurança</strong>.</li>
+              <li>Argumentar (com base técnica) se smartphones podem ser uma <strong>6ª geração</strong> e se IA moderna aponta para uma <strong>7ª geração</strong>.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré-requisitos recomendados</h3>
+            <ul>
+              <li>Uso básico de computador (interface gráfica, arquivos e pastas).</li>
+              <li>Noções simples de hardware: CPU, RAM e armazenamento (o básico).</li>
+              <li>Curiosidade e leitura atenta: este capítulo é voltado para estudo autônomo.</li>
+            </ul>
+            <p class="muted">Se algum termo for novo, anote e volte nele: a repetição ao longo do curso consolida.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="por-que">
+        <h2>Por que estudar a evolução dos computadores (com foco em SO)?</h2>
+        <p>
+          Parece tentador pular a história e ir direto para “clicar nas ferramentas do Windows”. Mas, no suporte técnico, você quase sempre enfrenta
+          situações em que <strong>o problema não está no botão</strong>, e sim na lógica por trás do sistema: como ele organiza processos, memória,
+          arquivos, dispositivos e permissões. Entender a evolução ajuda a perceber <strong>por que certas decisões de projeto existem</strong>.
+        </p>
+        <p>
+          As gerações de computadores são uma forma didática de organizar mudanças grandes de tecnologia (válvulas, transistores, circuitos integrados,
+          microprocessadores e, depois, redes/Internet). Cada salto de hardware abriu espaço para novas formas de uso — e isso obrigou os sistemas
+          operacionais a evoluírem: de “quase inexistentes” para plataformas complexas com multitarefa, segurança, redes e automação.
+        </p>
+        <div class="callout">
+          <strong>Ideia-chave:</strong> o hardware muda, o jeito de usar muda, e o SO muda para <em>organizar</em> e <em>proteger</em> esse novo jeito de usar.
+        </div>
+      </section>
+
+      <section class="card" id="automacao">
+        <h2>Antes do computador: a vontade humana de automatizar</h2>
+        <p>
+          A história da computação não começa com eletricidade. Ela começa com uma pergunta antiga: <strong>“Como fazer uma máquina repetir um trabalho?”</strong>
+          Quando um dispositivo consegue repetir uma regra (mesmo simples), ele está fazendo o embrião do que hoje chamamos de <strong>algoritmo</strong>.
+          Essa busca aparece na medição do tempo, na navegação, no comércio e na ciência.
+        </p>
+
+        <h3>Dispositivos primitivos de marcação do tempo</h3>
+        <p>
+          Relógios de sol, clepsidras (relógios de água) e mecanismos baseados em peso não são “computadores” no sentido moderno, mas introduzem algo
+          essencial: <strong>controle de processo</strong> (fluxo, engrenagens, ciclos). Sistemas operacionais, séculos depois, também são controladores de processos,
+          só que digitais.
+        </p>
+
+        <h3>Mecanismo de Anticítera (Antikythera)</h3>
+        <p>
+          O Mecanismo de Anticítera é frequentemente descrito como um <strong>computador mecânico antigo</strong> usado para modelar ciclos astronômicos.
+          O que importa para nós é a ideia: engrenagens representando relações matemáticas. Esse tipo de mecanismo mostra que a humanidade buscava
+          <strong>automatizar cálculo e previsão</strong> muito antes do computador eletrônico.
+        </p>
+
+        <h3>Renascimento e era moderna: automação e cálculo</h3>
+        <p>
+          Com o avanço das engrenagens e da metalurgia, surgiram máquinas de calcular (como calculadoras mecânicas) e ideias de automação industrial.
+          Um marco importante na lógica da automação foi o uso de <strong>instruções externas</strong> para controlar uma máquina (por exemplo, padrões repetidos),
+          conceito que mais tarde inspira “programas” e “dados”.
+        </p>
+
+        <div class="callout">
+          <strong>Conexão com SO:</strong> quando uma máquina executa regras, alguém precisa gerenciar “o que roda, quando roda e com quais recursos”.
+          No passado, isso era manual; com computadores, isso vira a missão do <strong>Sistema Operacional</strong>.
+        </div>
+
+        <h3>Linha do tempo conceitual (marcos de ideia)</h3>
+        <div class="timeline" aria-label="Linha do tempo conceitual">
+          <div class="titem"><strong>Medição do tempo</strong><span class="muted">Controle cíclico e repetição (o embrião de processos).</span></div>
+          <div class="titem"><strong>Mecanismos de engrenagens</strong><span class="muted">Modelar relações matemáticas com peças físicas.</span></div>
+          <div class="titem"><strong>Automação industrial</strong><span class="muted">Repetir padrões e reduzir trabalho humano direto.</span></div>
+          <div class="titem"><strong>Computação eletrônica</strong><span class="muted">Velocidade, armazenamento e necessidade de organizar recursos → SO.</span></div>
+        </div>
+      </section>
+
+      <section class="card" id="geracoes">
+        <h2>Gerações dos computadores (com foco em Sistemas Operacionais)</h2>
+        <p>
+          A divisão em gerações é uma forma de agrupar períodos em que a tecnologia-base do hardware mudou bastante e, com isso, o modo de programar e usar
+          computadores também mudou. A seguir, cada geração é apresentada em um <strong>card detalhado</strong> para facilitar o estudo autônomo.
+        </p>
+
+        <details class="gen" open>
+          <summary>1ª Geração — Válvulas (computação eletrônica inicial) <span class="tag">Conceito: operação manual</span></summary>
+          <div class="grid-3">
+            <div class="box">
+              <h3>Como eram</h3>
+              <p>Grandes, quentes, consumo elétrico alto e confiabilidade limitada. Programação muito próxima do hardware.</p>
+              <p class="muted">Pense em “máquinas raras” usadas por poucos especialistas.</p>
+            </div>
+            <div class="box">
+              <h3>Como se usava</h3>
+              <p>Execução de um programa por vez. Muito ajuste manual. Frequentemente o programador também era o operador.</p>
+              <p class="muted">Entrada/saída lenta e limitada (cartões perfurados e fitas).</p>
+            </div>
+            <div class="box">
+              <h3>Impacto em SO</h3>
+              <p>Praticamente não havia SO como conhecemos. A “gestão” era humana: carregar programa, iniciar, esperar terminar, coletar resultados.</p>
+              <p class="muted">Aqui nasce o problema: a máquina ficava ociosa por falta de organização de tarefas.</p>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>Ideia para guardar:</strong> quando a máquina é cara e rara, <em>tempo ocioso</em> vira desperdício — isso pressiona o surgimento de métodos de gerenciamento.
+          </div>
+        </details>
+
+        <details class="gen">
+          <summary>2ª Geração — Transistores (mais confiáveis) <span class="tag">Conceito: processamento em lote</span></summary>
+          <div class="grid-3">
+            <div class="box">
+              <h3>O salto do transistor</h3>
+              <p>Menos calor, mais confiabilidade e possibilidade de manter a máquina trabalhando por mais tempo.</p>
+              <p class="muted">Aumenta a demanda por organizar vários trabalhos (jobs).</p>
+            </div>
+            <div class="box">
+              <h3>Modo de operação: Lote</h3>
+              <p>Em vez de “um operador por programa”, reúne-se um conjunto de tarefas e executa-se em sequência.</p>
+              <p class="muted">Objetivo: reduzir troca manual e manter a máquina ocupada.</p>
+            </div>
+            <div class="box">
+              <h3>Impacto em SO</h3>
+              <p>Surgem monitores e rotinas de controle (antepassados do SO): carregar jobs, registrar execução, lidar com E/S básica.</p>
+              <p class="muted">A ideia de “fila de tarefas” aparece com força.</p>
+            </div>
+          </div>
+
+          <h3>Pseudo-código conceitual: processamento em lote</h3>
+          <pre class="language-text"><code>fila_de_jobs = [job1, job2, job3]
+para cada job em fila_de_jobs:
+    carregar(job)
+    executar(job)
+    salvar_resultado(job)
+    registrar_log(job)
+</code></pre>
+
+          <div class="callout">
+            <strong>Onde isso será aplicado depois:</strong> quando você rodar rotinas de manutenção e scripts (Cap. 13–15), estará automatizando “lotes” de tarefas.
+          </div>
+        </details>
+
+        <details class="gen">
+          <summary>3ª Geração — Circuitos Integrados (multiprogramação) <span class="tag">Conceito: tempo compartilhado (base)</span></summary>
+          <p>
+            Com circuitos integrados, os computadores ganham desempenho e estabilidade suficiente para uma ideia revolucionária:
+            <strong>vários programas na memória</strong> e a CPU alternando entre eles. Isso melhora o uso do processador e abre caminho para interação.
+          </p>
+          <div class="grid-3">
+            <div class="box">
+              <h3>Multiprogramação</h3>
+              <p>Enquanto um programa espera E/S (disco, fita, impressão), outro pode usar a CPU.</p>
+              <p class="muted">O SO começa a decidir “quem usa a CPU agora”.</p>
+            </div>
+            <div class="box">
+              <h3>Tempo compartilhado (time-sharing)</h3>
+              <p>Vários usuários interagem quase ao mesmo tempo (terminais). A CPU dá pequenas fatias de tempo para cada sessão.</p>
+              <p class="muted">Para o usuário, parece simultâneo. Na prática, é alternância rápida.</p>
+            </div>
+            <div class="box">
+              <h3>Impacto em SO</h3>
+              <p>Surge o SO como “maestro”: escalonamento, proteção de memória, contas de usuário e controle de acesso básicos.</p>
+              <p class="muted">A necessidade de segurança cresce: vários usuários no mesmo sistema.</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Conexão direta com o curso:</strong> o conceito de tempo compartilhado prepara você para entender multitarefa, processos e usuários (Cap. 02, 09 e 10).
+          </div>
+        </details>
+
+        <details class="gen">
+          <summary>4ª Geração — Microprocessadores (PCs e GUIs) <span class="tag">Conceito: computador pessoal</span></summary>
+          <p>
+            O microprocessador coloca a “CPU inteira” em um chip, permitindo computadores menores, mais baratos e muito mais acessíveis.
+            Isso muda o público: sai do laboratório/empresa e vai para escritórios, escolas e casas.
+          </p>
+          <div class="grid-3">
+            <div class="box">
+              <h3>PCs e padronização</h3>
+              <p>Arquiteturas se popularizam, periféricos se multiplicam, e compatibilidade vira prioridade.</p>
+              <p class="muted">Drivers e sistemas de arquivos ganham papel central.</p>
+            </div>
+            <div class="box">
+              <h3>Interfaces gráficas (GUI)</h3>
+              <p>A GUI reduz barreiras: mouse, janelas, menus. O SO se torna também um ambiente de interação.</p>
+              <p class="muted">A experiência do usuário vira requisito técnico.</p>
+            </div>
+            <div class="box">
+              <h3>Impacto em SO</h3>
+              <p>O SO passa a gerenciar muitos dispositivos, programas de terceiros, instalação, atualizações e segurança em larga escala.</p>
+              <p class="muted">A administração do sistema vira um trabalho (suporte e manutenção).</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Onde isso será aplicado depois:</strong> instalação, drivers, atualizações e manutenção (Cap. 05–08) são heranças diretas do mundo PC.
+          </div>
+        </details>
+
+        <details class="gen">
+          <summary>5ª Geração — Integração avançada, redes e serviços <span class="tag">Conceito: conectividade e serviços</span></summary>
+          <p>
+            A chamada “5ª geração” varia conforme o autor, mas no uso moderno ela costuma representar a era de integração, miniaturização,
+            redes e serviços — com o computador inserido em ambientes conectados. Aqui, a Internet deixa de ser “um extra” e vira infraestrutura.
+          </p>
+          <div class="grid-3">
+            <div class="box">
+              <h3>Computação conectada</h3>
+              <p>O SO precisa falar com rede o tempo todo: atualização, autenticação, sincronização, serviços.</p>
+              <p class="muted">Conectividade vira padrão, não exceção.</p>
+            </div>
+            <div class="box">
+              <h3>Segurança como pilar</h3>
+              <p>Quanto mais conectado, maior a superfície de ataque. O SO evolui com firewall, criptografia, isolamento e correções contínuas.</p>
+              <p class="muted">Manutenção e segurança caminham juntas.</p>
+            </div>
+            <div class="box">
+              <h3>Impacto em SO</h3>
+              <p>Atualizações frequentes, telemetria, políticas, contas online, e maior automação de manutenção.</p>
+              <p class="muted">O suporte técnico passa a lidar com ecossistemas.</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Onde isso será aplicado depois:</strong> quando você aprender backup/recuperação, atualização e scripts (Cap. 05, 11, 15), estará lidando com um SO “vivo” e conectado.
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="internet">
+        <h2>Avançando a 5ª geração: o que a Internet mudou (de verdade)</h2>
+        <p>
+          A Internet acelerou mudanças que antes eram lentas. Em vez de comprar software em mídia física e atualizar raramente, passamos a um mundo de
+          <strong>atualização contínua</strong>. Isso cria uma nova realidade de suporte: problemas podem surgir após atualizações; vulnerabilidades aparecem
+          publicamente; correções precisam ser rápidas; e a configuração do sistema deve considerar rede o tempo todo.
+        </p>
+        <p>
+          Para o sistema operacional, isso significa: mais camadas de segurança, serviços rodando em segundo plano, integração com contas, sincronização,
+          drivers assinados, proteção contra malware e mecanismos de recuperação. Tudo isso existe para manter a experiência estável mesmo em um ambiente
+          conectado e hostil.
+        </p>
+        <div class="callout warn">
+          <strong>Reflexão técnica:</strong> a Internet não trouxe apenas “sites”. Ela trouxe um novo tipo de risco e uma nova velocidade de mudança.
+          Por isso, administrar Windows hoje envolve <em>política, atualização, backup, segurança e automação</em>.
+        </div>
+      </section>
+
+      <section class="card" id="6e7">
+        <h2>6ª geração (smartphones) e 7ª geração (IA moderna)? — Questionamentos guiados</h2>
+        <p>
+          A classificação em gerações não é lei; é uma <strong>ferramenta de compreensão</strong>. Por isso, faz sentido questionar: os smartphones são apenas
+          “4ª/5ª geração em formato menor” ou inauguram um novo paradigma? E a IA moderna, presente em sistemas e serviços, é só “mais um software” ou uma
+          mudança estrutural?
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Hipótese: Smartphones como 6ª geração</h3>
+            <p><strong>Argumentos a favor:</strong></p>
+            <ul>
+              <li>Computação pessoal <strong>ubíqua</strong> (sempre com você).</li>
+              <li>Interfaces naturais: toque, voz, biometria.</li>
+              <li>Sensores como padrão (GPS, acelerômetro, câmera) → novos tipos de aplicações.</li>
+              <li>Ecossistema de apps e permissões centrado em privacidade e mobilidade.</li>
+            </ul>
+            <p class="muted">Se isso é “uma geração”, é porque muda o modo de uso, não apenas o chip.</p>
+          </div>
+          <div class="box">
+            <h3>Hipótese: IA moderna como 7ª geração</h3>
+            <p><strong>Argumentos a favor:</strong></p>
+            <ul>
+              <li>Computação passa a incluir <strong>modelos</strong> que sugerem, interpretam e automatizam decisões.</li>
+              <li>Novos fluxos: copilotos, agentes, recomendações e automações inteligentes.</li>
+              <li>Impacto direto em produtividade e segurança (detecção de ameaças, análise de logs).</li>
+              <li>Pressão por novos hardwares (NPUs) e novos requisitos de privacidade/controle.</li>
+            </ul>
+            <p class="muted">Se é “uma geração”, ela muda a forma como interagimos e administramos sistemas.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Pergunta aberta (5 a 10 anos):</strong> quais avanços você enxerga como mais prováveis?
+          <span class="muted">Ex.: computação na borda (edge), IA local, realidade aumentada, novas formas de autenticação, automação de suporte, computação quântica aplicada, chips neuromórficos.</span>
+        </div>
+      </section>
+
+      <section class="card" id="aplicacao">
+        <h2>Onde vou aplicar isso? (sem prática neste capítulo — referência para Cap. 05+)</h2>
+        <p>
+          Mesmo sendo teórico, este capítulo prepara decisões práticas que você verá a partir do Cap. 05. Abaixo está um mapa de “como a teoria vira ação”.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Do conceito para a ferramenta</h3>
+            <ul>
+              <li><strong>Processamento em lote</strong> → rotinas repetitivas e scripts (<em>Cap. 13–15</em>).</li>
+              <li><strong>Tempo compartilhado</strong> → processos, serviços, usuários, multitarefa (<em>Cap. 02, 09, 10</em>).</li>
+              <li><strong>Era PC</strong> → instalação, drivers, atualizações, manutenção (<em>Cap. 05–08</em>).</li>
+              <li><strong>Internet</strong> → segurança, atualização contínua, backup e recuperação (<em>Cap. 05, 11, 12</em>).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Como estudar sozinho (estratégia)</h3>
+            <ol>
+              <li>Leia um card de geração por vez e escreva 2 frases: “o que mudou no hardware” e “o que isso exigiu do SO”.</li>
+              <li>Grife 5 palavras-chave e tente explicar para alguém (ou para você mesmo) sem ler o texto.</li>
+              <li>Faça o quiz e, ao errar, releia apenas o trecho relacionado (não o capítulo inteiro).</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Sem prática até o Cap. 4:</strong> aqui você está montando a base mental. No Cap. 05, a base vira instalação e configuração reais.
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque o que você realmente consegue explicar com suas palavras. Isso vale mais do que “apenas ler”.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div class="row" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares (para aprofundar)</h2>
+        <ul>
+          <li><strong>Tempo compartilhado (time-sharing):</strong> procure exemplos históricos e compare com multitarefa atual.</li>
+          <li><strong>História das interfaces:</strong> CLI → GUI → touch → voz. Quais são os ganhos e perdas de cada uma?</li>
+          <li><strong>Segurança e Internet:</strong> por que atualizações constantes se tornaram inevitáveis?</li>
+          <li><strong>Smartphones e geração 6:</strong> faça um argumento técnico (com critérios) defendendo sim ou não.</li>
+          <li><strong>IA e geração 7:</strong> identifique 3 impactos reais em administração de sistemas (logs, automação, segurança).</li>
+        </ul>
+
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> em <a href="capitulo02.html">Capítulo 02</a> você verá tipos de SO, Kernel/Shell e funções do SO (processos, memória, arquivos, E/S) — a base técnica do resto do curso.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 01 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-kG0J3ZfXxG8XbJbK9y8ZqWk0cHkQpS9q7a4mOe0m7q+z0l3lYv1y2a4qQmQ2lHh3r0Hqv2YtV1Zp3dN0WQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // ===== Utilidades =====
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Qual afirmação melhor descreve o motivo de existirem “gerações de computadores”?',
+        options: [
+          'É uma lei universal que define obrigatoriamente 5 períodos fixos.',
+          'É uma forma didática de agrupar grandes mudanças tecnológicas e seus impactos no uso.',
+          'É uma lista de marcas de computadores que dominaram o mercado em cada época.',
+          'É a classificação oficial do Windows por versão (XP, 7, 10, 11).',
+          'É um termo usado apenas para falar de celulares e tablets.'
+        ],
+        correct: 1,
+        why: 'Gerações são uma organização didática: quando muda a tecnologia-base do hardware, muda também como programamos, usamos e administramos — e o SO acompanha.'
+      },
+      {
+        q: '2) Na 1ª geração (válvulas), qual era a situação típica em relação a sistemas operacionais?',
+        options: [
+          'SO completo com interface gráfica e multitarefa.',
+          'SO já oferecia segurança avançada e contas de usuário.',
+          'Quase não havia SO; o controle era majoritariamente manual pelo operador.',
+          'O SO era sempre distribuído via Internet e atualizado automaticamente.',
+          'O SO existia apenas para smartphones.'
+        ],
+        correct: 2,
+        why: 'Na 1ª geração, a execução era mais “manual”: carregar, iniciar, aguardar e retirar resultados. A necessidade de organizar isso impulsionou evoluções posteriores.'
+      },
+      {
+        q: '3) O que caracteriza o “processamento em lote” (batch) associado à 2ª geração?',
+        options: [
+          'Vários usuários interagem ao mesmo tempo em terminais.',
+          'Um conjunto de tarefas é reunido e executado em sequência para reduzir intervenções manuais.',
+          'O computador executa somente aplicativos com interface touch.',
+          'O sistema garante prazos rígidos de resposta (tempo real).',
+          'A CPU nunca fica ociosa porque há infinitos processadores.'
+        ],
+        correct: 1,
+        why: 'Lote organiza jobs em filas, executando um após o outro para manter a máquina ocupada e reduzir trocas manuais.'
+      },
+      {
+        q: '4) Por que o “tempo compartilhado” (time-sharing) foi um marco importante para os sistemas operacionais?',
+        options: [
+          'Porque eliminou a necessidade de memória e de armazenamento.',
+          'Porque permitiu que vários usuários tivessem a sensação de uso simultâneo por fatias de tempo.',
+          'Porque acabou com a necessidade de segurança.',
+          'Porque dispensou totalmente drivers e periféricos.',
+          'Porque tornou impossível usar rede e Internet.'
+        ],
+        correct: 1,
+        why: 'Time-sharing exige escalonamento e proteção: o SO alterna rapidamente entre sessões/processos e precisa isolar usuários e recursos.'
+      },
+      {
+        q: '5) Na 4ª geração (microprocessadores), qual desafio se torna especialmente relevante para SOs em PCs?',
+        options: [
+          'Gerenciar muitos periféricos diferentes e compatibilidade, incluindo drivers.',
+          'Eliminar completamente qualquer tipo de interface com o usuário.',
+          'Rodar apenas um programa por vez e nunca multitarefa.',
+          'Proibir instalação de software de terceiros.',
+          'Retornar ao uso de cartões perfurados como principal entrada.'
+        ],
+        correct: 0,
+        why: 'PCs popularizam periféricos e softwares variados. Drivers, sistemas de arquivos, instalação e manutenção passam a ser parte do cotidiano do SO.'
+      },
+      {
+        q: '6) Qual é um efeito direto da Internet na administração moderna de sistemas operacionais?',
+        options: [
+          'Atualizações ficam raras e praticamente desnecessárias.',
+          'A superfície de ataque aumenta, exigindo segurança e correções contínuas.',
+          'O sistema deixa de precisar de rede.',
+          'A criptografia se torna impossível de usar.',
+          'O suporte técnico deixa de existir.'
+        ],
+        correct: 1,
+        why: 'Conectividade aumenta riscos e acelera mudanças; por isso, atualizações, segurança, backup e recuperação ganham prioridade.'
+      },
+      {
+        q: '7) Ao discutir “smartphones como 6ª geração”, qual critério faz mais sentido tecnicamente?',
+        options: [
+          'O tamanho do aparelho (quanto menor, maior a geração).',
+          'A cor e o design do dispositivo.',
+          'Mudança de paradigma de uso (ubiquidade, sensores, interfaces naturais, ecossistema).',
+          'A existência de teclado físico.',
+          'O nome do sistema operacional móvel.'
+        ],
+        correct: 2,
+        why: 'Geração faz sentido quando muda o modo de uso e requisitos do sistema. Mobilidade, sensores e interfaces naturais podem indicar um novo paradigma.'
+      },
+      {
+        q: '8) Qual afirmação é mais adequada sobre a ideia de “7ª geração com IA moderna”?',
+        options: [
+          'IA moderna não impacta administração de sistemas.',
+          'IA só serve para entretenimento e não tem relação com suporte.',
+          'IA pode alterar fluxos de interação e automação, exigindo novos requisitos (ex.: hardware, privacidade, controle).',
+          'IA elimina a necessidade de sistema operacional.',
+          'IA torna redes e atualizações obsoletas.'
+        ],
+        correct: 2,
+        why: 'A IA pode mudar como trabalhamos e administramos sistemas (automação, análise de logs, copilotos), além de puxar novos requisitos de hardware e governança.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: elimine as opções claramente incorretas antes de decidir.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      // conta apenas questões respondidas corretamente (quando a pessoa clica em enviar)
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const fb = $(`#fb${qi}`);
+        if(fb && fb.style.display === 'block'){
+          // Se já exibiu feedback, consideramos como "respondida"; pode ser gabarito também.
+          // Para não inflar, só conta como respondida se existe seleção.
+          const chosen = $(`input[name="q${qi}"]:checked`);
+          if(chosen){
+            answered++;
+            if(Number(chosen.value) === quizData[qi].correct) correct++;
+          }
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Você pode refazer quantas vezes quiser.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap01_checklist_v1';
+    const checklistItems = [
+      {
+        id: 'c1',
+        title: 'Consigo explicar o que são “gerações de computadores” e por que essa classificação é útil.',
+        note: 'Dica: use a frase “mudança de tecnologia-base → muda o uso → muda o SO”.'
+      },
+      {
+        id: 'c2',
+        title: 'Consigo descrever a diferença entre operação manual (1ª geração) e lote (2ª geração).',
+        note: 'Cite “fila de jobs” e redução de intervenção manual.'
+      },
+      {
+        id: 'c3',
+        title: 'Consigo explicar, em termos simples, o que é tempo compartilhado (time-sharing).',
+        note: 'Mencione fatias de tempo, alternância rápida e sensação de simultaneidade.'
+      },
+      {
+        id: 'c4',
+        title: 'Consigo relacionar PCs/GUI (4ª geração) com a necessidade de drivers, instalação e manutenção.',
+        note: 'Explique por que a diversidade de periféricos exige gerenciamento.'
+      },
+      {
+        id: 'c5',
+        title: 'Consigo explicar como a Internet alterou a administração moderna de sistemas (segurança e atualização contínua).',
+        note: 'Cite superfície de ataque e necessidade de correções.'
+      },
+      {
+        id: 'c6',
+        title: 'Consigo argumentar se smartphones podem ser uma 6ª geração (com critérios técnicos).',
+        note: 'Use: ubiquidade, sensores, interfaces naturais, ecossistemas.'
+      },
+      {
+        id: 'c7',
+        title: 'Consigo discutir a hipótese de IA moderna apontar para uma 7ª geração.',
+        note: 'Cite: automação, análise, novos requisitos (hardware, privacidade, governança).' 
+      }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      box.addEventListener('change', () => {
+        updateChecklistProgress();
+      });
+
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{
+        return JSON.parse(localStorage.getItem(ckKey) || '{}');
+      }catch(e){
+        return {};
+      }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+
+    renderChecklist();
+
+    // ===== Toast simples =====
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+<!-- arquivo: projeto-integrador-4.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projeto Integrador 4 (B4) — Kit de Implantação e Provisionamento (Sysprep + DISM) | Apostila FGSO</title>
+  <meta name="description" content="Projeto Integrador do 4º bimestre (B4) da Apostila FGSO: criar e entregar um Kit de Implantação e Provisionamento do Windows usando Sysprep e DISM (padronização por imagem WIM), com runbook, scripts, evidências, checklist e pacote final. Inclui passo a passo, modelos, rubrica, quiz e checklist interativo." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line)}
+    .topbar-inner{max-width:1280px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{width:40px;height:40px;border-radius:12px; background:linear-gradient(135deg,var(--navy),var(--navy-2)); box-shadow:var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14)}
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.75); color:var(--text); box-shadow:0 10px 22px rgba(0,0,0,.25); font-size:13px}
+    .btn:hover{transform:translateY(-1px); background:rgba(18,58,122,.35); text-decoration:none}
+    .btn.primary{background:linear-gradient(135deg,var(--navy),var(--navy-2))}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding:18px; display:grid; grid-template-columns:320px 1fr; gap:18px}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr}}
+
+    .side{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; height:fit-content; position:sticky; top:74px}
+    @media (max-width:980px){.side{position:relative; top:auto}}
+
+    .crumb{font-size:12px; color:var(--muted); margin-bottom:10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); font-size:12px; color:var(--muted); width:fit-content}
+    .meta{display:flex; flex-direction:column; gap:8px; margin:10px 0 12px}
+
+    .toc{list-style:none; padding:0; margin:10px 0 0; display:flex; flex-direction:column; gap:8px}
+    .toc a{display:flex; gap:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:var(--card2); color:var(--text)}
+    .toc a:hover{background:rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width:54px; text-align:center}
+    .toc .t{font-size:13px}
+
+    .main{display:flex; flex-direction:column; gap:18px}
+    .hero{background:linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .hero h1{margin:0 0 6px; font-size:20px}
+    .hero p{margin:6px 0; color:#e7eeff; max-width:92ch}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .chip{font-size:12px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); padding:6px 10px; border-radius:999px}
+
+    .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .card h2{margin:0 0 10px; font-size:16px}
+    .card h3{margin:16px 0 8px; font-size:14px; color:#dbe7ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+    .grid-3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+    @media (max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+    .box{border:1px dashed rgba(255,255,255,.18); border-radius:14px; padding:12px; background:rgba(10,31,68,.18)}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background:rgba(7,11,20,.35); border-radius:12px; padding:10px 12px; margin:10px 0}
+    .callout.warn{border-left-color:rgba(250,160,90,.95)}
+    .callout.danger{border-left-color:rgba(255,107,107,.95)}
+
+    .kbd{font-family:var(--mono); font-size:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding:1px 7px; border-radius:999px}
+
+    details.block{background:rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:10px 12px; margin:10px 0}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size:11px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); padding:2px 8px; border-radius:999px; white-space:nowrap}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background:rgba(7,11,20,.40); border-radius:14px; padding:12px; overflow:auto}
+    .diagram pre{margin:0; font-family:var(--mono); font-size:12px; line-height:1.35; color:#dfe9ff}
+
+    .steps{counter-reset: step; display:grid; gap:12px}
+    .step{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .step h3{margin:0 0 8px; font-size:14px}
+    .step h3:before{counter-increment: step; content:"Passo " counter(step) " — "; color:#dbe7ff}
+    .step ul{margin:8px 0 0 18px}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background:rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px}
+    .q{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .q h4{margin:0 0 10px; font-size:14px}
+    .opts{display:grid; gap:8px; margin:10px 0}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.04); cursor:pointer}
+    .opt:hover{background:rgba(18,58,122,.18)}
+    .opt input{margin-top:3px}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.65); color:var(--text); font-size:12px; cursor:pointer}
+    .mini:hover{background:rgba(18,58,122,.30)}
+    .feedback{margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); display:none}
+    .feedback.ok{background:rgba(50,210,150,.12); border-color:rgba(50,210,150,.35)}
+    .feedback.bad{background:rgba(255,107,107,.10); border-color:rgba(255,107,107,.28)}
+    .feedback .why{color:var(--muted); font-size:13px; margin-top:6px}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32)}
+    .ck input{margin-top:3px}
+    .ck small{display:block; color:var(--muted); margin-top:4px}
+    .progress{height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background:linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85))}
+
+    .footer{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 30px}
+
+    pre[class*="language-"]{border-radius:14px; border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 22px rgba(0,0,0,.20)}
+    code{font-family:var(--mono)}
+
+    .badge{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:rgba(50,210,150,.10); border:1px solid rgba(50,210,150,.28); font-size:12px; color:#d7ffe8}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Projeto Integrador 4 (B4) • Kit de Implantação (Sysprep + DISM)</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo16.html">⟵ Cap. 16</a>
+        <a class="btn primary" href="index.html">Encerramento ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do projeto">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Projeto Integrador 4</strong></div>
+      <h2>Nesta entrega</h2>
+      <div class="meta">
+        <span class="pill">🧩 Imagem WIM (padronização)</span>
+        <span class="pill">🧼 Sysprep + DISM</span>
+        <span class="pill">📦 Runbook + scripts + evidências</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos essenciais (onde vou aplicar)</span></a></li>
+        <li><a href="#entrega"><span class="n">03</span><span class="t">Entregável e critérios mínimos</span></a></li>
+        <li><a href="#estrutura"><span class="n">04</span><span class="t">Estrutura do Kit (padrão de pastas)</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo de montagem e validação</span></a></li>
+        <li><a href="#modelo"><span class="n">06</span><span class="t">Modelos (README, checklist e runbook)</span></a></li>
+        <li><a href="#rubrica"><span class="n">07</span><span class="t">Rubrica de avaliação</span></a></li>
+        <li><a href="#atividades"><span class="n">08</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">09</span><span class="t">Quiz</span></a></li>
+        <li><a href="#checklist"><span class="n">10</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">11</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Foco do PI (B4):</strong> provar padronização e repetibilidade: outra pessoa deve conseguir implantar seguindo seu runbook.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Projeto Integrador 4 (B4) — Kit de Implantação e Provisionamento (Sysprep + DISM)</h1>
+        <p>
+          Este PI finaliza o curso com uma entrega de padrão corporativo: um <strong>Kit de Implantação</strong>.
+          Você vai produzir uma <strong>imagem WIM</strong> a partir de uma máquina de referência (Sysprep) e documentar
+          como capturar/aplicar (DISM) e tornar bootável (bcdboot). A correção considera organização, evidências e clareza do runbook.
+        </p>
+        <div class="chips">
+          <span class="chip">VM Referência (REF)</span>
+          <span class="chip">Sysprep /generalize</span>
+          <span class="chip">DISM Capture/Apply</span>
+          <span class="chip">diskpart (UEFI)</span>
+          <span class="chip">bcdboot</span>
+          <span class="chip">README + checklist</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Objetivos</h3>
+            <ul>
+              <li>Entregar um <strong>kit repetível</strong> de implantação por imagem.</li>
+              <li>Produzir e/ou documentar uma <strong>imagem WIM</strong> (captura) e uma implantação (aplicação).</li>
+              <li>Escrever um <strong>runbook</strong> claro com riscos, validação e rollback.</li>
+              <li>Organizar evidências e facilitar auditoria (prints/logs).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Cap. 16 (Sysprep + DISM) concluído ou em execução.</li>
+              <li>VM recomendada (VirtualBox/Hyper‑V) e ISO do Windows.</li>
+              <li>Conhecimentos de CMD/PowerShell para registrar evidências (Cap. 13–15).</li>
+            </ul>
+            <div class="callout">
+              <strong>Segurança:</strong> não execute em disco físico sem saber reverter. Use VM.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos essenciais (e onde vou aplicar isso)</h2>
+
+        <h3>Máquina de referência (REF)</h3>
+        <p>
+          É a instalação “modelo” (limpa, atualizada e com apps essenciais) que servirá de base para a imagem.
+          <strong>Onde vou aplicar isso:</strong> você vai documentar o baseline da REF e criar snapshot antes do Sysprep.
+        </p>
+
+        <h3>Sysprep (/generalize + /oobe)</h3>
+        <p>
+          Generaliza a instalação removendo identificadores específicos e prepara para o OOBE.
+          <strong>Onde vou aplicar isso:</strong> no runbook e nas evidências de execução do Sysprep (REF desligada).
+        </p>
+
+        <h3>DISM (Capture/Apply)</h3>
+        <p>
+          Captura a partição do Windows para WIM e aplica o WIM em um disco alvo.
+          <strong>Onde vou aplicar isso:</strong> logs/prints do Capture-Image e Apply-Image.
+        </p>
+
+        <h3>UEFI e boot (diskpart + bcdboot)</h3>
+        <p>
+          Após aplicar a imagem, é necessário criar partição EFI e configurar o boot.
+          <strong>Onde vou aplicar isso:</strong> evidência do diskpart (EFI=S:) e do bcdboot.
+        </p>
+
+        <h3>Evidência e auditoria</h3>
+        <p>
+          O objetivo é provar o processo, não apenas o resultado.
+          <strong>Onde vou aplicar isso:</strong> prints do CMD/WinPE, lista de volumes, dir do WIM e OOBE iniciando no alvo.
+        </p>
+
+        <div class="callout warn">
+          <strong>Regra do PI:</strong> seu kit deve funcionar como manual de implantação — alguém executa seguindo seu texto.
+        </div>
+      </section>
+
+      <section class="card" id="entrega">
+        <h2>Entregável e critérios mínimos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Você vai entregar</h3>
+            <ul>
+              <li><strong>Runbook</strong> (PDF/TXT) explicando captura e aplicação (com riscos).</li>
+              <li><strong>Scripts</strong> (BAT) comentados para captura e aplicação (recomendado).</li>
+              <li><strong>Evidências</strong> (prints + logs): Sysprep, DISM capture, diskpart, DISM apply, bcdboot, OOBE.</li>
+              <li><strong>Checklist</strong> (10+ itens) preenchido.</li>
+              <li><strong>README</strong> (mapa do pacote).</li>
+              <li><strong>ZIP</strong> com tudo (recomendado).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Critérios mínimos</h3>
+            <ul>
+              <li>Runbook com etapas claras e comandos essenciais (Sysprep, DISM, diskpart, bcdboot).</li>
+              <li>Ao menos 8 evidências (prints) organizadas e nomeadas (01_, 02_, ...).</li>
+              <li>Um registro de validação: OOBE iniciando no alvo + winver.</li>
+              <li>Checklist completo e um parágrafo de “lições aprendidas”.</li>
+              <li>Se o WIM for grande demais para a plataforma, entregue <strong>runbook + evidências + scripts</strong> (obrigatório) e documente tamanho/local.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="badge">Dica:</span> evidência mais forte = print do OOBE no alvo + print do <span class="kbd">dir</span> do arquivo WIM.
+        </div>
+      </section>
+
+      <section class="card" id="estrutura">
+        <h2>Estrutura do Kit (padrão de pastas)</h2>
+        <p class="muted">Use esta estrutura para facilitar correção e auditoria.</p>
+        <div class="diagram"><pre>
+C:\FGSO\PI_B4_Implantacao\
+  imagem\
+    W11_FGSO.wim (se viável)
+  runbook\
+    Runbook_Sysprep_DISM.pdf (ou .txt)
+    checklist_validacao.txt
+  scripts\
+    capturar_wim.bat
+    aplicar_wim.bat
+  evidencias\
+    prints\
+    logs\
+  README.txt
+  PI_B4_Implantacao.zip (recomendado)
+</pre></div>
+        <div class="callout warn">
+          <strong>Padronização:</strong> nomes com prefixo numérico em evidências (01_, 02_...) facilitam muito a correção.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo de montagem e validação</h2>
+        <p class="muted">Este roteiro é direto e evita esquecer itens da entrega.</p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Criar pasta do PI (B4)</h3>
+            <pre class="language-bash"><code>mkdir C:\FGSO\PI_B4_Implantacao
+mkdir C:\FGSO\PI_B4_Implantacao\imagem
+mkdir C:\FGSO\PI_B4_Implantacao\runbook
+mkdir C:\FGSO\PI_B4_Implantacao\scripts
+mkdir C:\FGSO\PI_B4_Implantacao\evidencias
+mkdir C:\FGSO\PI_B4_Implantacao\evidencias\prints
+mkdir C:\FGSO\PI_B4_Implantacao\evidencias\logs</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Preparar REF, executar Sysprep e registrar evidência</h3>
+            <ul>
+              <li>REF atualizada + snapshot antes.</li>
+              <li>Sysprep:</li>
+            </ul>
+            <pre class="language-bash"><code>C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown</code></pre>
+            <ul>
+              <li>Salve print: <span class="kbd">01_sysprep_cmd.png</span> e print da VM desligada (opcional).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Capturar WIM no WinPE/Setup e registrar (DISM)</h3>
+            <ul>
+              <li>Boot pela ISO → Shift+F10 → diskpart/list volume.</li>
+              <li>Capture o WIM (ajuste letras):</li>
+            </ul>
+            <pre class="language-bash"><code>diskpart
+list volume
+exit
+mkdir D:\Images
+
+dism /Capture-Image /ImageFile:D:\Images\W11_FGSO.wim /CaptureDir:C:\ /Name:"W11_FGSO" /Compress:max /CheckIntegrity
+
+dir D:\Images</code></pre>
+            <ul>
+              <li>Salve prints: <span class="kbd">02_list_volume.png</span>, <span class="kbd">03_capture_ok.png</span>, <span class="kbd">04_dir_wim.png</span>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Preparar TARGET (diskpart UEFI), aplicar WIM e bcdboot</h3>
+            <pre class="language-bash"><code>diskpart
+select disk 0
+clean
+convert gpt
+create partition efi size=100
+format quick fs=fat32 label="SYSTEM"
+assign letter=S
+create partition msr size=16
+create partition primary
+format quick fs=ntfs label="Windows"
+assign letter=C
+exit
+
+dism /Apply-Image /ImageFile:D:\Images\W11_FGSO.wim /Index:1 /ApplyDir:C:\
+bcdboot C:\Windows /s S: /f UEFI</code></pre>
+            <ul>
+              <li>Salve prints: <span class="kbd">05_diskpart_uefi.png</span>, <span class="kbd">06_apply_ok.png</span>, <span class="kbd">07_bcdboot_ok.png</span>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Validar implantação (OOBE + winver) e concluir</h3>
+            <ul>
+              <li>Reinicie a VM alvo sem ISO → OOBE deve aparecer.</li>
+              <li>Após configurar, rode <span class="kbd">winver</span> e salve print.</li>
+              <li>Salve prints: <span class="kbd">08_oobe.png</span>, <span class="kbd">09_winver.png</span>.</li>
+            </ul>
+            <pre class="language-bash"><code>winver</code></pre>
+            <div class="callout">
+              <strong>Validação mínima:</strong> OOBE aparece + Windows inicia + versão conferida.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Escrever Runbook + README + Checklist e empacotar</h3>
+            <ul>
+              <li>Crie o runbook em <span class="kbd">runbook/</span> (modelo abaixo).</li>
+              <li>Preencha checklist (10+ itens) e inclua riscos/rollback.</li>
+              <li>Compacte:</li>
+            </ul>
+            <pre class="language-powershell"><code>Compress-Archive -Path "C:\FGSO\PI_B4_Implantacao\*" -DestinationPath "C:\FGSO\PI_B4_Implantacao.zip" -Force</code></pre>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Dica final:</strong> se o WIM não for entregue, registre no README o tamanho e onde está armazenado no laboratório.
+        </div>
+      </section>
+
+      <section class="card" id="modelo">
+        <h2>Modelos (README, checklist e runbook)</h2>
+
+        <details class="block" open>
+          <summary>Modelo de README.txt (copiar/colar) <span class="tag">pronto</span></summary>
+          <div class="diagram"><pre>
+PI B4 — KIT DE IMPLANTAÇÃO (SYSPREP + DISM)
+Aluno: ________  Turma: ____  Data: __/__/____
+
+1) Estrutura
+- runbook/: instruções completas
+- scripts/: bat de captura e aplicação
+- evidencias/: prints e logs
+- imagem/: WIM (se possível)
+
+2) Como validar rapidamente
+- evidencias/prints/08_oobe.png (OOBE no alvo)
+- evidencias/prints/04_dir_wim.png (WIM capturado)
+- evidencias/prints/07_bcdboot_ok.png (boot UEFI)
+
+3) Observações
+- WIM pode ser grande; se não anexado, informar tamanho e local:
+  - Tamanho: ____ GB
+  - Local no laboratório: __________
+
+4) Segurança
+- Procedimento recomendado em VM. Diskpart clean apaga disco.
+          </pre></div>
+        </details>
+
+        <details class="block">
+          <summary>Modelo de checklist_validacao.txt (10+ itens) <span class="tag">pronto</span></summary>
+          <div class="diagram"><pre>
+CHECKLIST — PI B4 (Implantação)
+[ ] REF atualizada (winver e update)
+[ ] Snapshot criado antes do Sysprep
+[ ] Sysprep /generalize executado (REF desligou)
+[ ] Boot pela ISO e CMD (Shift+F10)
+[ ] diskpart list volume registrado
+[ ] WIM capturado (dism /Capture-Image)
+[ ] WIM verificado (dir mostra arquivo)
+[ ] TARGET particionada em UEFI (EFI=S:)
+[ ] WIM aplicada (dism /Apply-Image)
+[ ] bcdboot executado (UEFI)
+[ ] OOBE inicia no alvo
+[ ] winver conferido no alvo
+[ ] Evidências organizadas e nomeadas (01_...)
+[ ] Runbook final revisado e claro
+          </pre></div>
+        </details>
+
+        <details class="block">
+          <summary>Modelo de Runbook (estrutura mínima) <span class="tag">pronto</span></summary>
+          <div class="diagram"><pre>
+RUNBOOK — SYSPREP + DISM (PI B4)
+Versão: 1.0  Data: __/__/____
+
+1) Objetivo
+- Implantar Windows por imagem (WIM) com padronização.
+
+2) Pré-requisitos
+- ISO Windows, VM REF e VM TARGET, disco para armazenar WIM.
+
+3) Etapa A — Preparar REF
+- Atualizar Windows
+- Instalar apenas essencial
+- Snapshot antes
+
+4) Etapa B — Sysprep
+- sysprep /generalize /oobe /shutdown
+- Não bootar no Windows após desligar (até capturar)
+
+5) Etapa C — Capturar WIM (WinPE/Setup)
+- Shift+F10
+- diskpart list volume
+- dism /Capture-Image ...
+
+6) Etapa D — Preparar TARGET (UEFI)
+- diskpart: clean, convert gpt, EFI=S:, C: NTFS
+
+7) Etapa E — Aplicar WIM + Boot
+- dism /Apply-Image ...
+- bcdboot C:\Windows /s S: /f UEFI
+
+8) Validação
+- OOBE inicia
+- winver e apps essenciais presentes
+
+9) Riscos e rollback
+- diskpart clean apaga disco
+- rollback: snapshot anterior / refazer partições
+          </pre></div>
+        </details>
+      </section>
+
+      <section class="card" id="rubrica">
+        <h2>Rubrica de avaliação</h2>
+        <p class="muted">Quanto mais “executável” e auditável, maior a nota.</p>
+        <table aria-label="Rubrica PI B4">
+          <thead>
+            <tr><th>Critério</th><th>Básico</th><th>Bom</th><th>Excelente</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Runbook</td>
+              <td>Confuso</td>
+              <td>Completo e claro</td>
+              <td>Inclui riscos, rollback, validação e dicas de letras de unidade</td>
+            </tr>
+            <tr>
+              <td>Evidências</td>
+              <td>Poucas</td>
+              <td>8+ prints organizados</td>
+              <td>Prints + logs + mapa no README</td>
+            </tr>
+            <tr>
+              <td>Scripts</td>
+              <td>Não entrega</td>
+              <td>BATs comentados</td>
+              <td>BATs + validação automática + variáveis de caminho</td>
+            </tr>
+            <tr>
+              <td>Implantação (resultado)</td>
+              <td>Sem prova</td>
+              <td>OOBE e winver no alvo</td>
+              <td>OOBE + validação completa + checklist 100%</td>
+            </tr>
+            <tr>
+              <td>Organização</td>
+              <td>Arquivos soltos</td>
+              <td>Estrutura padrão + ZIP</td>
+              <td>Estrutura + README excelente + nomes padronizados</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout"><span class="badge">Meta:</span> atingir <strong>Bom</strong> em tudo e buscar <strong>Excelente</strong> em runbook + evidências.</div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3)</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Script com variáveis</h3>
+            <p>Melhore os BATs usando variáveis (IMAGEFILE, CAPTUREDIR, APPLYDIR) e adicionando mensagens e log (append).</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Falhas comuns (runbook)</h3>
+            <p>Adicione uma seção “erros comuns” (letra de unidade errada, bcdboot, partição EFI) e como identificar e corrigir.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Checklist automático (PowerShell)</h3>
+            <p>Crie um PS que verifica se prints/logs esperados existem e gera relatório “OK/FALTA” em TXT.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz (interativo)</h2>
+        <p class="muted">Revisão do PI B4: imagem, Sysprep, DISM e validação.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>O que é unattend.xml e quais fases do Windows Setup ele automatiza?</li>
+          <li>Qual a diferença entre WIM e ESD e por que compressão importa?</li>
+          <li>Quais limitações do Sysprep em versões modernas do Windows?</li>
+          <li>Como MDT/WDS/Intune/Autopilot se comparam ao processo manual (conceito)?</li>
+        </ul>
+        <div class="callout">
+          <strong>Parabéns:</strong> com esse kit você tem um entregável de portfólio de nível corporativo.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Projeto Integrador 4 (B4) • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Qual é o objetivo do Sysprep /generalize?',
+        options: [
+          'Instalar drivers automaticamente.',
+          'Remover identificadores específicos e preparar a imagem para reutilização.',
+          'Acelerar o boot do Windows.',
+          'Criar a partição EFI.',
+          'Apagar o disco do sistema.'
+        ],
+        correct: 1,
+        why: 'O /generalize remove informações específicas da máquina para que a imagem possa ser implantada em outros equipamentos.'
+      },
+      {
+        q: '2) Qual comando DISM cria um arquivo .wim a partir de uma partição/diretório?',
+        options: ['dism /Apply-Image', 'dism /Capture-Image', 'dism /Get-Drivers', 'dism /Cleanup-Image', 'bcdboot'],
+        correct: 1,
+        why: '/Capture-Image captura o conteúdo do diretório/partição para um arquivo WIM.'
+      },
+      {
+        q: '3) Por que usar Shift+F10 (CMD) na tela de instalação?',
+        options: [
+          'Para abrir o navegador.',
+          'Para executar DISM e diskpart fora do Windows instalado (WinPE).',
+          'Para ativar o Windows automaticamente.',
+          'Para atualizar o driver de vídeo.',
+          'Para desativar o UEFI.'
+        ],
+        correct: 1,
+        why: 'No WinPE/Setup você consegue capturar/aplicar imagem sem o Windows estar em uso.'
+      },
+      {
+        q: '4) Depois de aplicar o WIM em C:, qual comando cria o boot UEFI na partição EFI (S:)?',
+        options: [
+          'sfc /scannow',
+          'chkdsk /scan',
+          'bcdboot C:\\Windows /s S: /f UEFI',
+          'ipconfig /all',
+          'manage-bde -status'
+        ],
+        correct: 2,
+        why: 'bcdboot copia arquivos de boot e configura inicialização UEFI na partição EFI.'
+      },
+      {
+        q: '5) Qual evidência é mais forte de que a implantação funcionou?',
+        options: [
+          'Um texto dizendo “ok”.',
+          'Print do OOBE iniciando na VM alvo.',
+          'Um print do wallpaper.',
+          'Somente o arquivo ZIP.',
+          'Somente o nome da VM.'
+        ],
+        correct: 1,
+        why: 'OOBE no alvo prova que o Windows aplicado está bootando e que a imagem foi generalizada.'
+      },
+      {
+        q: '6) Por que é obrigatório conferir o disco correto antes do diskpart clean?',
+        options: [
+          'Porque o clean deixa o PC mais rápido.',
+          'Porque o clean apaga o disco selecionado e pode destruir dados.',
+          'Porque o clean aumenta a RAM.',
+          'Porque o clean não funciona em VM.',
+          'Porque o clean só apaga a partição EFI.'
+        ],
+        correct: 1,
+        why: 'diskpart clean apaga tabelas de partição do disco selecionado. Confirme o disco para evitar perda.'
+      },
+      {
+        q: '7) Se o WIM for grande demais para anexar na plataforma, o que você deve entregar?',
+        options: [
+          'Nada, porque sem WIM não tem nota.',
+          'Somente o README.',
+          'Runbook + evidências + scripts (e documentar tamanho/local do WIM).',
+          'Somente prints sem texto.',
+          'Apenas a ISO do Windows.'
+        ],
+        correct: 2,
+        why: 'O que é avaliado é repetibilidade e prova do processo. Documente o WIM e entregue o restante completo.'
+      },
+      {
+        q: '8) Qual é o objetivo principal do README no kit?',
+        options: [
+          'Deixar o pacote bonito.',
+          'Indicar onde está cada item e como validar rapidamente.',
+          'Substituir o runbook.',
+          'Apagar logs antigos.',
+          'Guardar senhas.'
+        ],
+        correct: 1,
+        why: 'README guia o avaliador e o usuário do kit: estrutura, execução e validação rápida.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise Sysprep, DISM e a validação com OOBE.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST (interativo) =====
+    const ckKey = 'FGSO_PI_B4_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei a estrutura C:\\FGSO\\PI_B4_Implantacao (imagem/runbook/scripts/evidencias).', note:'Pastas padrão prontas.' },
+      { id:'c2', title:'Preparei REF (atualizada, limpa) e criei snapshot antes do Sysprep.', note:'REF-pronta-antes-sysprep.' },
+      { id:'c3', title:'Executei Sysprep /generalize /oobe /shutdown e registrei evidência.', note:'REF desligada/selada.' },
+      { id:'c4', title:'Capturei o WIM com DISM e registrei dir confirmando o arquivo.', note:'Capture-Image OK.' },
+      { id:'c5', title:'Preparei TARGET com diskpart (UEFI: EFI=S: + C: NTFS).', note:'diskpart clean/convert gpt.' },
+      { id:'c6', title:'Apliquei o WIM e executei bcdboot para boot UEFI.', note:'Apply-Image + bcdboot OK.' },
+      { id:'c7', title:'Validei OOBE e winver no alvo (prints).', note:'Prova de implantação.' },
+      { id:'c8', title:'Escrevi Runbook completo com riscos, validação e rollback.', note:'runbook/.' },
+      { id:'c9', title:'Criei scripts BAT comentados (captura/aplicação).', note:'scripts/.' },
+      { id:'c10', title:'Criei README + checklist preenchido e empacotei em ZIP.', note:'PI_B4_Implantacao.zip.' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', updateChecklistProgress);
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+
+    // Progress bar init
+    (function(){
+      const d = loadChecklist();
+      const done = checklistItems.filter(i => d[i.id]).length;
+      const pct = Math.round((done / checklistItems.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    })();
+  </script>
+</body>
+</html>

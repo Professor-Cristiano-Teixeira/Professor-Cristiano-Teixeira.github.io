@@ -1,0 +1,966 @@
+<!-- arquivo: capitulo03.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 03 — Fundamentos de Virtualização de Sistemas | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 03 da Apostila FGSO: fundamentos de virtualização, hypervisors, host/guest, snapshots, imagens, redes (NAT/bridge/host-only) e boas práticas de segurança. Conteúdo teórico (práticas apenas a partir do Cap. 5)." />
+
+  <!-- Prism (tema escuro) — usado para exemplos conceituais (sem prática até o Cap. 4) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.75); color: var(--text); box-shadow: 0 10px 22px rgba(0,0,0,.25); font-size: 13px;}
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; height: fit-content; position:sticky; top: 74px;}
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; margin-top: 10px;}
+    @media (max-width: 980px){.grid-2{grid-template-columns:1fr;}}
+
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;}
+    @media (max-width: 980px){.grid-3{grid-template-columns:1fr;}}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .callout{border-left: 4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .box{border:1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .kbd{font-family:var(--mono); font-size: 12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 03 • Fundamentos de Virtualização</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="plano.html">📝 Plano da Disciplina</a>
+        <a class="btn" href="capitulo02.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo04.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 03</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🎯 Foco: teoria (sem prática até o Cap. 4)</span>
+        <span class="pill">⏱️ Estudo sugerido: 45–75 min</span>
+        <span class="pill">🧠 Palavras‑chave: hypervisor, host/guest, snapshot, imagem, NAT, bridge, isolamento</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceito"><span class="n">02</span><span class="t">O que é virtualização?</span></a></li>
+        <li><a href="#hypervisors"><span class="n">03</span><span class="t">Hypervisor tipo 1 e tipo 2</span></a></li>
+        <li><a href="#componentes"><span class="n">04</span><span class="t">Host, Guest, VM, imagem e snapshot</span></a></li>
+        <li><a href="#recursos"><span class="n">05</span><span class="t">Recursos: CPU, RAM, disco e “overcommit”</span></a></li>
+        <li><a href="#rede"><span class="n">06</span><span class="t">Rede em VM: NAT, Bridge e Host‑Only</span></a></li>
+        <li><a href="#storage"><span class="n">07</span><span class="t">Armazenamento: VDI/VHD/VMDK e snapshots</span></a></li>
+        <li><a href="#seguranca"><span class="n">08</span><span class="t">Segurança e boas práticas</span></a></li>
+        <li><a href="#quando"><span class="n">09</span><span class="t">Quando usar virtualização no suporte</span></a></li>
+        <li><a href="#mapa"><span class="n">10</span><span class="t">Mapa: teoria → prática (Cap. 5+)</span></a></li>
+        <li><a href="#passo"><span class="n">11</span><span class="t">Passo a passo conceitual (sem laboratório)</span></a></li>
+        <li><a href="#atividades"><span class="n">12</span><span class="t">Atividades (para Cap. 5+)</span></a></li>
+        <li><a href="#quiz"><span class="n">13</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">14</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">15</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Importante:</strong> até o <strong>Capítulo 04</strong> o estudo é <strong>100% teórico</strong>. A primeira prática guiada começa no <strong>Capítulo 05</strong>.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero">
+        <h1>Capítulo 03 — Fundamentos de Virtualização de Sistemas</h1>
+        <p>
+          Virtualização é uma das ferramentas mais importantes para suporte e manutenção porque permite <strong>testar, instalar e consertar</strong> sistemas
+          em um ambiente controlado. Antes de colocar a mão no Windows real (Cap. 05+), precisamos entender os conceitos: o que é hypervisor,
+          o que é uma VM, como funcionam snapshots, redes virtuais e quais cuidados de segurança evitam dores de cabeça.
+        </p>
+        <div class="chips">
+          <span class="chip">Base tecnológica: virtualização (fundamentos)</span>
+          <span class="chip">Preparação para laboratório seguro</span>
+          <span class="chip">Conexão: instalação, backup e recuperação (Cap. 05 e 11)</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos de aprendizagem e pré-requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Definir <strong>virtualização</strong> e diferenciar virtualização de sistema, de hardware e de aplicação (no nível necessário).</li>
+              <li>Diferenciar <strong>hypervisor tipo 1</strong> e <strong>tipo 2</strong>.</li>
+              <li>Explicar <strong>host</strong>, <strong>guest</strong>, <strong>VM</strong>, <strong>imagem</strong> e <strong>snapshot</strong> e por que isso é útil em laboratório.</li>
+              <li>Entender o impacto de configurar <strong>CPU/RAM/disco</strong> e o que é <strong>overcommit</strong> (superalocação).</li>
+              <li>Explicar modos de rede: <strong>NAT</strong>, <strong>Bridge</strong> e <strong>Host‑Only</strong> (quando usar cada um).</li>
+              <li>Listar boas práticas de segurança e organização (snapshots, isolamentos e nomes padronizados).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré-requisitos recomendados</h3>
+            <ul>
+              <li>Noções básicas de CPU, RAM e armazenamento.</li>
+              <li>Noção básica de rede: IP e “estar conectado” (será aprofundado em outro componente, se existir).</li>
+              <li>Leitura atenta: aqui você constrói vocabulário técnico usado nas práticas futuras.</li>
+            </ul>
+            <div class="callout warn" style="margin-top:10px">
+              <strong>Sem prática agora:</strong> você só vai criar VMs no laboratório a partir do Cap. 05.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceito">
+        <h2>O que é virtualização?</h2>
+        <p>
+          <strong>Virtualização</strong> é a técnica de criar uma versão “virtual” (simulada e controlada) de um recurso computacional: uma máquina inteira,
+          um sistema operacional, um disco, uma rede ou até um aplicativo. Na prática mais comum para suporte, virtualização significa:
+          <strong>rodar um sistema operacional dentro de outro</strong>, como se fosse um computador separado.
+        </p>
+        <p>
+          O objetivo principal é <strong>isolamento</strong> e <strong>repetibilidade</strong>. Isolamento significa que você pode testar alterações sem quebrar seu sistema principal.
+          Repetibilidade significa que você consegue voltar para um estado anterior (snapshot) e repetir testes sempre no mesmo ponto.
+        </p>
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> quando você for instalar e reparar Windows (Cap. 05+), você fará isso em VMs com snapshots para praticar sem risco.
+        </div>
+      </section>
+
+      <section class="card" id="hypervisors">
+        <h2>Hypervisor: quem “manda” na virtualização?</h2>
+        <p>
+          O <strong>hypervisor</strong> (ou monitor de máquina virtual) é o software responsável por criar e gerenciar máquinas virtuais. Ele faz o “meio de campo” entre
+          as VMs e o hardware real. Existem dois modelos clássicos.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Tipo 1 (bare‑metal)</h3>
+            <p>Roda <strong>direto no hardware</strong> (sem um sistema operacional tradicional por baixo).</p>
+            <ul>
+              <li>Geralmente mais eficiente e usado em datacenters.</li>
+              <li>Foco em servidores e infraestrutura.</li>
+            </ul>
+            <p class="muted">Exemplo mental: o hypervisor vira o “SO do servidor”.</p>
+          </div>
+          <div class="box">
+            <h3>Tipo 2 (hosted)</h3>
+            <p>Roda <strong>sobre um sistema operacional anfitrião</strong> (host).</p>
+            <ul>
+              <li>Ideal para laboratório, ensino e testes no desktop.</li>
+              <li>Mais simples de instalar e usar no dia a dia.</li>
+            </ul>
+            <p class="muted">É o caso típico do VirtualBox em um Windows.</p>
+          </div>
+        </div>
+
+        <div class="diagram" aria-label="Diagrama tipo 1 vs tipo 2">
+<pre>
+Tipo 1 (bare-metal):
+Hardware
+  └─ Hypervisor
+       ├─ VM1 (Guest OS)
+       ├─ VM2 (Guest OS)
+       └─ VM3 (Guest OS)
+
+Tipo 2 (hosted):
+Hardware
+  └─ Host OS (Windows)
+       └─ Hypervisor (VirtualBox)
+            ├─ VM1 (Guest OS)
+            └─ VM2 (Guest OS)
+</pre>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> entender tipo 2 ajuda a compreender limitações de performance no laboratório e por que a VM depende do host.
+        </div>
+      </section>
+
+      <section class="card" id="componentes">
+        <h2>Host, Guest, VM, imagem e snapshot (vocabulário essencial)</h2>
+        <p>
+          Se você dominar estes termos, metade da virtualização já fica clara.
+        </p>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Host (anfitrião)</h3>
+            <p>É o computador real (hardware + SO) onde o hypervisor está instalado.</p>
+            <p class="muted">Ex.: seu Windows do laboratório.</p>
+          </div>
+          <div class="box">
+            <h3>Guest (convidado)</h3>
+            <p>É o sistema operacional que roda dentro da VM.</p>
+            <p class="muted">Ex.: Windows 11 instalado na VM.</p>
+          </div>
+          <div class="box">
+            <h3>VM (máquina virtual)</h3>
+            <p>“Computador lógico” com CPU/RAM/disco/placa de rede virtuais.</p>
+            <p class="muted">Funciona como um PC separado, mas depende do host.</p>
+          </div>
+        </div>
+
+        <details class="block" open>
+          <summary>Imagem (disco virtual) <span class="tag">estado persistente</span></summary>
+          <p>
+            A <strong>imagem</strong> (ou disco virtual) é um arquivo (ou conjunto de arquivos) que armazena o conteúdo do disco da VM.
+            Quando o guest “instala” algo, na prática ele grava nessa imagem.
+          </p>
+          <p>
+            A imagem permite copiar, mover e fazer backup da VM. Por isso, em suporte, ela é valiosa: você pode manter “ambientes limpos” e “ambientes com problema”
+            para comparar.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> em instalação e backup/restore (Cap. 05 e 11), você vai aprender a planejar estados e guardar imagens.
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>Snapshot <span class="tag">ponto de retorno</span></summary>
+          <p>
+            Um <strong>snapshot</strong> é como uma “foto” do estado da VM em um momento específico. Ele permite voltar no tempo caso uma instalação, atualização ou configuração dê errado.
+          </p>
+          <p>
+            Importante: snapshot não é a mesma coisa que backup. Snapshot depende do estado atual e pode crescer de tamanho, pois costuma guardar diferenças (deltas).
+            Backup é uma cópia independente (mais segura para arquivamento).
+          </p>
+          <div class="callout warn">
+            <strong>Erro comum:</strong> usar snapshot como backup “para sempre”. Em geral, snapshot é para <em>curto prazo</em> e testes; backup é para <em>segurança e arquivo</em>.
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="recursos">
+        <h2>Recursos em VM: CPU, RAM, disco e o conceito de overcommit</h2>
+        <p>
+          Uma VM parece um computador separado, mas ela está compartilhando recursos reais do host. Por isso, o hypervisor precisa “fatiar” CPU e RAM,
+          e emular dispositivos. Configurar recursos é sempre um equilíbrio: dar o suficiente para a VM funcionar sem travar o host.
+        </p>
+
+        <details class="block" open>
+          <summary>CPU virtual (vCPU) <span class="tag">núcleos e tempo</span></summary>
+          <p>
+            A VM recebe uma quantidade de <strong>vCPUs</strong> (núcleos virtuais). Isso não cria núcleos reais; apenas define quanto tempo e paralelismo a VM poderá usar.
+            Se você alocar núcleos demais, o host pode ficar lento e a VM pode até piorar (mais contexto, mais competição).
+          </p>
+          <div class="callout">
+            <strong>Conexão com Cap. 02:</strong> time-sharing e escalonamento explicam por que “muitas vCPUs” não significa automaticamente “mais rápido”.
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>Memória (RAM) <span class="tag">limite crítico</span></summary>
+          <p>
+            A RAM é geralmente o recurso que mais limita laboratório. Se a VM recebe muita RAM, o host pode entrar em pressão de memória e ficar lento.
+            Se a VM recebe pouca, o guest vai paginar para disco e ficar lento.
+          </p>
+          <p class="muted">Dica mental: a soma das RAMs alocadas + consumo do host deve caber na RAM física, com margem.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Disco e I/O <span class="tag">gargalo comum</span></summary>
+          <p>
+            A performance do disco virtual depende do armazenamento real do host. Em geral, SSD oferece melhor experiência do que HD.
+            Além disso, operações de disco podem “congelar” VMs quando o host está sobrecarregado.
+          </p>
+          <div class="callout">
+            <strong>Aplicação futura:</strong> no Cap. 06 e 10 você vai entender por que disco é gargalo e como diagnosticar I/O.
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>Overcommit (superalocação) <span class="tag">cuidado</span></summary>
+          <p>
+            <strong>Overcommit</strong> é alocar para VMs mais recursos do que o host possui fisicamente (ex.: somar 32 GB de RAM em VMs em um host com 16 GB).
+            Isso pode funcionar em situações específicas (nem todas as VMs usam tudo ao mesmo tempo), mas pode causar lentidão e instabilidade.
+          </p>
+          <div class="callout warn">
+            <strong>Regra prática (mental):</strong> overcommit pode existir, mas deve ser planejado. Para ensino, prefira configurações conservadoras.
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="rede">
+        <h2>Rede em máquinas virtuais: NAT, Bridge e Host‑Only</h2>
+        <p>
+          Redes virtuais existem para que a VM se comunique com o host, com a Internet e/ou com outras VMs. O modo escolhido impacta isolamento e facilidade.
+          Para suporte, entender o modo de rede evita problemas de “não tenho Internet na VM” ou “minha VM apareceu na rede da empresa sem querer”.
+        </p>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>NAT</h3>
+            <p>A VM “sai” para a rede/Internet usando o host como roteador. A rede externa não enxerga a VM diretamente.</p>
+            <p class="muted">Boa opção para laboratório seguro e Internet na VM.</p>
+          </div>
+          <div class="box">
+            <h3>Bridge</h3>
+            <p>A VM entra na mesma rede física do host, como se fosse um computador a mais no roteador/switch.</p>
+            <p class="muted">Útil quando você precisa que a rede enxergue a VM diretamente.</p>
+          </div>
+          <div class="box">
+            <h3>Host‑Only</h3>
+            <p>Rede privada entre host e VMs. Em geral, sem acesso direto à Internet (a menos que combinado com NAT/rotas).</p>
+            <p class="muted">Ótimo para isolamento total e testes controlados.</p>
+          </div>
+        </div>
+
+        <div class="diagram" aria-label="Diagrama de modos de rede">
+<pre>
+NAT:
+VM ──(rede interna)── Hypervisor ── Host ── Internet
+   (rede externa NÃO vê a VM diretamente)
+
+Bridge:
+VM ── Switch/Roteador ── Internet
+Host ──┘
+   (VM aparece como mais um dispositivo na rede)
+
+Host-Only:
+VM ── Rede privada ── Host
+   (isolado do mundo externo por padrão)
+</pre>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> quando criarmos o laboratório (Cap. 05), você escolherá NAT/Host‑Only para praticar com segurança.
+        </div>
+      </section>
+
+      <section class="card" id="storage">
+        <h2>Armazenamento na virtualização: formatos e snapshots</h2>
+        <p>
+          Discos virtuais são arquivos. Dependendo do hypervisor, existem formatos comuns como <strong>VDI</strong>, <strong>VHD/VHDX</strong> e <strong>VMDK</strong>.
+          Para o aluno, o mais importante é entender que: (1) há um arquivo que representa o disco da VM e (2) snapshots podem criar arquivos de diferença.
+        </p>
+
+        <details class="block" open>
+          <summary>Disco dinâmico vs fixo <span class="tag">tamanho e desempenho</span></summary>
+          <p>
+            Em muitos hypervisors, o disco virtual pode ser:
+            <strong>dinâmico</strong> (cresce conforme você usa espaço) ou <strong>fixo</strong> (aloca tudo de uma vez).
+            O dinâmico economiza espaço no host no começo, mas pode fragmentar e crescer de forma inesperada.
+            O fixo ocupa mais espaço imediatamente, mas tende a ser mais previsível.
+          </p>
+          <div class="callout">
+            <strong>Aplicação futura:</strong> ao planejar laboratório (Cap. 05), você vai decidir quanto espaço reservar e como evitar falta de armazenamento.
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>Snapshots e cadeias (deltas) <span class="tag">crescimento</span></summary>
+          <p>
+            Muitos snapshots funcionam criando um “arquivo delta” (diferenças) enquanto o disco base fica parado.
+            Quanto mais você usa a VM após o snapshot, mais o delta cresce.
+          </p>
+          <p class="muted">Por isso: muitos snapshots antigos podem ocupar muito espaço e dificultar manutenção.</p>
+          <div class="callout warn">
+            <strong>Boa prática:</strong> usar snapshots com objetivo claro (antes de uma mudança) e remover/mesclar depois do teste.
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="seguranca">
+        <h2>Segurança e boas práticas em ambientes virtuais</h2>
+        <p>
+          Virtualização dá sensação de segurança, mas ela não é “mágica”. Se a VM estiver conectada em bridge na rede real, ela pode causar impacto como qualquer PC.
+          Se você baixar arquivos perigosos na VM, ainda assim pode haver risco (principalmente por compartilhamento de pastas e clipboard).
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Boas práticas de isolamento</h3>
+            <ul>
+              <li>Prefira <strong>NAT</strong> ou <strong>Host‑Only</strong> quando não precisar que a rede externa veja a VM.</li>
+              <li>Evite compartilhar pastas do host com VMs usadas para testes arriscados.</li>
+              <li>Se usar “arrastar e soltar”/clipboard, entenda que isso pode transferir conteúdo entre host e VM.</li>
+              <li>Mantenha snapshots “ponto limpo” para voltar rápido.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Boas práticas de organização</h3>
+            <ul>
+              <li>Nomeie VMs com padrão: <span class="kbd">FGSO-W11-Base</span>, <span class="kbd">FGSO-W11-TesteDrivers</span>.</li>
+              <li>Registre configurações (RAM, vCPU, rede) em um checklist.</li>
+              <li>Guarde ISOs e imagens em local padronizado.</li>
+              <li>Limite o número de snapshots por VM e use com objetivo.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no laboratório (Cap. 05) você vai criar um ambiente seguro e repetível para instalação e manutenção.
+        </div>
+      </section>
+
+      <section class="card" id="quando">
+        <h2>Quando usar virtualização no suporte técnico?</h2>
+        <p>
+          Virtualização é útil sempre que você precisa <strong>testar</strong> algo sem risco ou <strong>reproduzir</strong> um problema de forma controlada.
+          No suporte, isso evita fazer “tentativa e erro” no computador do usuário.
+        </p>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Testes de instalação</h3>
+            <p>Validar um procedimento de instalação/atualização antes de aplicar em máquinas reais.</p>
+          </div>
+          <div class="box">
+            <h3>Treinamento e simulação</h3>
+            <p>Simular cenários: falha de boot, driver com problema, restauração, permissões.</p>
+          </div>
+          <div class="box">
+            <h3>Ambiente padronizado</h3>
+            <p>Criar uma VM “base” e replicar para turmas ou testes com o mesmo ponto de partida.</p>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Limitação importante:</strong> nem todo problema é reproduzível em VM. Alguns dependem de hardware específico (placa Wi‑Fi, GPU, BIOS/UEFI, TPM etc.).
+        </div>
+      </section>
+
+      <section class="card" id="mapa">
+        <h2>Mapa: teoria → prática (a partir do Cap. 05)</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Conceito → onde aparece</h3>
+            <ul>
+              <li><strong>Host/Guest</strong> → organização do laboratório (Cap. 05)</li>
+              <li><strong>Snapshot</strong> → antes de mudanças e testes (Cap. 05–08)</li>
+              <li><strong>NAT/Host‑Only</strong> → laboratório seguro (Cap. 05)</li>
+              <li><strong>Disco dinâmico/fixo</strong> → planejamento de armazenamento (Cap. 06)</li>
+              <li><strong>Isolamento</strong> → segurança e boas práticas (Cap. 08 e 12)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>O que você ganha com isso</h3>
+            <ul>
+              <li>Treinar instalação sem medo de perder dados.</li>
+              <li>Repetir exercícios com o mesmo ponto inicial.</li>
+              <li>Comparar configurações e aprender diagnóstico com método.</li>
+              <li>Registrar evidências e criar “playbooks” de suporte.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo conceitual (sem laboratório)</h2>
+        <p>
+          Para respeitar o plano do curso, este capítulo não terá práticas executáveis. Porém, o roteiro abaixo é um <strong>passo a passo mental</strong>
+          do que você fará quando o laboratório começar.
+        </p>
+
+        <details class="block" open>
+          <summary>Roteiro mental: criar um laboratório seguro com VM <span class="tag">não executar agora</span></summary>
+          <ol>
+            <li><strong>Planejar o objetivo</strong>: “vou instalar Windows para testar atualização?” ou “vou treinar recuperação?”.</li>
+            <li><strong>Escolher rede</strong>: NAT (Internet sem expor) ou Host‑Only (isolado).</li>
+            <li><strong>Definir recursos</strong>: RAM/vCPU com margem para o host.</li>
+            <li><strong>Criar disco virtual</strong>: dinâmico (economiza) ou fixo (previsível).</li>
+            <li><strong>Fazer snapshot ‘ponto limpo’</strong>: antes de qualquer alteração.</li>
+            <li><strong>Testar e registrar</strong>: o que mudou, o que deu certo/errado.</li>
+            <li><strong>Reverter snapshot</strong> ou consolidar e remover snapshots desnecessários.</li>
+          </ol>
+        </details>
+
+        <p class="muted">A partir do Cap. 05, este roteiro vira um procedimento real no VirtualBox.</p>
+
+        <pre class="language-text"><code>// exemplo conceitual de naming (não é comando)
+FGSO-W11-Base
+FGSO-W11-TesteUpdates
+FGSO-W11-Recuperacao
+Rede: NAT (padrão)
+Snapshot: 00-Ponto-Limpo
+</code></pre>
+
+        <div class="callout warn">
+          <strong>Reforço:</strong> este capítulo é 100% teórico. Guarde o roteiro para aplicar quando chegar no Cap. 05.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades sugeridas (para Cap. 05+)</h2>
+        <p class="muted">Ideias para quando o laboratório começar. Não executar agora.</p>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1</h3>
+            <p><strong>Comparar modos de rede:</strong> criar duas VMs, uma com NAT e outra com Host‑Only, e identificar diferenças de conectividade.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2</h3>
+            <p><strong>Snapshots com método:</strong> fazer snapshot antes de instalar um software e voltar ao ponto limpo depois, anotando o que mudou.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3</h3>
+            <p><strong>Teste de recursos:</strong> variar RAM/vCPU e observar impacto em responsividade (com checklist e registro).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque o que você realmente consegue explicar com suas palavras. Isso vale mais do que “apenas ler”.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li><strong>VT‑x/AMD‑V:</strong> pesquise por que virtualização por hardware existe e como ela melhora desempenho e isolamento.</li>
+          <li><strong>Snapshot vs Backup:</strong> encontre diferenças e riscos de depender apenas de snapshots.</li>
+          <li><strong>Overcommit:</strong> pesquise impactos em RAM e por que pode causar “thrashing” (troca excessiva para disco).</li>
+          <li><strong>Rede em VMs:</strong> pesquise o que é NAT e por que Bridge expõe a VM na rede.</li>
+          <li><strong>Segurança:</strong> pesquise ataques possíveis via compartilhamento de pastas e clipboard entre host e guest.</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> em <a href="capitulo04.html">Capítulo 04</a> você verá uma visão histórica/crítica do Windows e preparação de instalação (ainda teórica). Depois disso começam as práticas.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 03 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Virtualização, no contexto mais comum de laboratório, significa:',
+        options: [
+          'Aumentar a velocidade da Internet do computador.',
+          'Rodar um sistema operacional dentro de outro, em ambiente controlado.',
+          'Trocar o HD por um SSD automaticamente.',
+          'Desinstalar o sistema operacional e usar apenas BIOS.',
+          'Criptografar o disco com BitLocker.'
+        ],
+        correct: 1,
+        why: 'Virtualização permite executar um sistema convidado (guest) dentro do host, criando uma máquina virtual (VM) com isolamento e repetibilidade.'
+      },
+      {
+        q: '2) O hypervisor é:',
+        options: [
+          'O antivírus instalado no Windows.',
+          'O software que cria e gerencia máquinas virtuais, mediando acesso ao hardware.',
+          'Um tipo de cabo de rede especial para VMs.',
+          'Um sistema de arquivos do Linux.',
+          'Um driver de impressora.'
+        ],
+        correct: 1,
+        why: 'Hypervisor é o componente responsável por virtualizar hardware e coordenar VMs.'
+      },
+      {
+        q: '3) Qual diferença melhor descreve hypervisor Tipo 1 e Tipo 2?',
+        options: [
+          'Tipo 1 roda sobre um SO host; Tipo 2 roda direto no hardware.',
+          'Tipo 1 roda direto no hardware; Tipo 2 roda sobre um SO host.',
+          'Tipo 1 só existe em celulares; Tipo 2 só existe em servidores.',
+          'Tipo 1 é sempre inseguro; Tipo 2 é sempre seguro.',
+          'Não existe diferença; são sinônimos.'
+        ],
+        correct: 1,
+        why: 'Tipo 1 (bare-metal) executa direto no hardware; Tipo 2 (hosted) executa sobre um sistema operacional anfitrião.'
+      },
+      {
+        q: '4) Snapshot é melhor definido como:',
+        options: [
+          'Uma cópia independente e completa (backup) para guardar por anos.',
+          'Uma foto do estado da VM que permite voltar a um ponto anterior.',
+          'Um tipo de rede que conecta VMs à Internet.',
+          'Um formato de disco virtual (VDI).',
+          'Um modo de acelerar a CPU da VM.'
+        ],
+        correct: 1,
+        why: 'Snapshot registra o estado e permite retorno rápido. Não substitui backup de longo prazo.'
+      },
+      {
+        q: '5) Qual afirmação sobre NAT é mais correta?',
+        options: [
+          'A VM aparece na rede como um computador igual ao host (exposto).',
+          'A VM usa o host como roteador para acessar a Internet, sem ser vista diretamente pela rede externa.',
+          'NAT impede qualquer acesso à rede, inclusive do host.',
+          'NAT exige sempre dois cabos de rede.',
+          'NAT é o mesmo que Host‑Only.'
+        ],
+        correct: 1,
+        why: 'No NAT, a VM sai para a rede usando o host/hypervisor como intermediário. Isso aumenta isolamento e simplicidade.'
+      },
+      {
+        q: '6) Bridge (adaptador em ponte) significa que:',
+        options: [
+          'A VM só conversa com o host e mais ninguém.',
+          'A VM não tem placa de rede virtual.',
+          'A VM entra na mesma rede física do host e é vista como outro dispositivo.',
+          'A VM não pode ter Internet nunca.',
+          'A VM vira um firewall automaticamente.'
+        ],
+        correct: 2,
+        why: 'Bridge conecta a VM diretamente à rede física, o que pode ser útil, mas aumenta exposição e exige mais cuidado.'
+      },
+      {
+        q: '7) Overcommit é:',
+        options: [
+          'Alocar menos recursos do que a VM precisa para forçar economia.',
+          'Alocar mais recursos às VMs do que o host tem fisicamente, esperando que não usem tudo ao mesmo tempo.',
+          'Um tipo de snapshot.',
+          'Um modo de criptografia.',
+          'Um tipo de driver.'
+        ],
+        correct: 1,
+        why: 'Overcommit (superalocação) pode funcionar, mas aumenta risco de lentidão e instabilidade, especialmente em RAM.'
+      },
+      {
+        q: '8) Qual é uma boa prática de segurança em laboratório com VMs?',
+        options: [
+          'Usar Bridge sempre, para facilitar tudo.',
+          'Compartilhar todas as pastas do host com a VM por padrão.',
+          'Preferir NAT/Host‑Only quando possível e limitar compartilhamentos/clipboard em testes arriscados.',
+          'Manter dezenas de snapshots por meses como “backup definitivo”.',
+          'Desativar atualizações do host e do guest para evitar mudanças.'
+        ],
+        correct: 2,
+        why: 'Isolamento reduz risco. Compartilhamentos e bridge ampliam exposição. Snapshot não substitui backup.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise NAT/Bridge/Host‑Only e os conceitos de snapshot e hypervisor.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const fb = $(`#fb${qi}`);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(fb && fb.style.display === 'block' && chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap03_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Consigo definir virtualização e explicar por que ela é útil no suporte.', note:'Use os termos isolamento e repetibilidade.' },
+      { id:'c2', title:'Consigo diferenciar hypervisor tipo 1 e tipo 2.', note:'Tipo 1: direto no hardware; Tipo 2: sobre o host.' },
+      { id:'c3', title:'Consigo explicar host, guest e VM com um exemplo.', note:'Host = máquina real; guest = SO dentro da VM.' },
+      { id:'c4', title:'Consigo explicar o que é uma imagem (disco virtual) e por que ela é importante.', note:'É o “disco” da VM em arquivo(s).' },
+      { id:'c5', title:'Consigo explicar snapshot e por que snapshot não é o mesmo que backup.', note:'Snapshot é ponto de retorno; backup é cópia independente.' },
+      { id:'c6', title:'Consigo explicar NAT, Bridge e Host‑Only e quando usar cada um.', note:'NAT: simples e mais isolado; Bridge: expõe na rede; Host-only: isolado.' },
+      { id:'c7', title:'Consigo explicar overcommit e os riscos para desempenho (especialmente RAM).', note:'Superalocar pode causar lentidão e instabilidade.' },
+      { id:'c8', title:'Consigo listar pelo menos 4 boas práticas de segurança/organização em VMs.', note:'Ex.: usar NAT, limitar compartilhamentos, snapshots com objetivo, nomes padronizados.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

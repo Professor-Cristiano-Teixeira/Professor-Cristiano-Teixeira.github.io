@@ -1,0 +1,924 @@
+<!-- arquivo: capitulo04.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 — Windows: História, Versões (Desktop e Server), Edições e Preparação para Instalação | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 04 da Apostila FGSO: história e evolução do Windows (MS-DOS → Windows 11), linha 9x e linha NT, versões Desktop e Server com principais inovações, pontos críticos e falhas, edições/licenciamento, e preparação teórica para instalação. Inclui Projeto Integrador do 1º bimestre (conceitual)." />
+
+  <!-- Prism (tema escuro) — exemplos conceituais e comandos ilustrativos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,27,51,.75);
+      color: var(--text);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      font-size: 13px;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      height: fit-content;
+      position:sticky;
+      top: 74px;
+    }
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left: 4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 04 • Windows: história, versões, edições e preparação</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo03.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo05.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 04</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🎯 Teoria (Cap. 01–04)</span>
+        <span class="pill">🪟 Windows Desktop + Server</span>
+        <span class="pill">🧭 Preparação para instalar (Cap. 05)</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#panorama"><span class="n">02</span><span class="t">Panorama: de MS‑DOS ao Windows 11</span></a></li>
+        <li><a href="#linhas"><span class="n">03</span><span class="t">Linha 9x x Linha NT (mudança estrutural)</span></a></li>
+        <li><a href="#desktop"><span class="n">04</span><span class="t">Versões Desktop: inovações e críticas</span></a></li>
+        <li><a href="#nt"><span class="n">05</span><span class="t">Windows NT: por que foi revolucionário</span></a></li>
+        <li><a href="#server"><span class="n">06</span><span class="t">Windows Server: linha do tempo e marcos</span></a></li>
+        <li><a href="#edicoes"><span class="n">07</span><span class="t">Edições e licenciamento (visão técnica)</span></a></li>
+        <li><a href="#preparacao"><span class="n">08</span><span class="t">Preparação teórica para instalação</span></a></li>
+        <li><a href="#pi"><span class="n">09</span><span class="t">Projeto Integrador (B1) — entrega</span></a></li>
+        <li><a href="#quiz"><span class="n">10</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">11</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">12</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Observação:</strong> não foi possível consultar fontes externas neste ambiente (busca web indisponível). O capítulo traz uma visão consolidada e didática.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 04 — Windows: História, Versões (Desktop e Server), Edições e Preparação para Instalação</h1>
+        <p>
+          Para instalar, configurar e dar suporte ao Windows com segurança, você precisa entender <strong>como ele evoluiu</strong> e <strong>por que certas decisões técnicas existem</strong>.
+          Este capítulo apresenta uma visão histórica e crítica do Windows desde a época do <strong>MS‑DOS</strong> até o <strong>Windows 11</strong>, incluindo a linha <strong>Windows NT</strong>
+          e a evolução do <strong>Windows Server</strong>. Ao final, você produzirá uma entrega do <strong>Projeto Integrador do 1º bimestre</strong> (conceitual).
+        </p>
+        <div class="chips" aria-label="Conexões com o curso">
+          <span class="chip">Cap. 05: instalação em VM</span>
+          <span class="chip">Cap. 07–10: ferramentas administrativas e diagnóstico</span>
+          <span class="chip">Cap. 15–16: automação e implantação</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final do capítulo você será capaz de:</h3>
+            <ul>
+              <li>Explicar as grandes fases do Windows: <strong>DOS/Windows clássico</strong>, <strong>Windows 9x</strong> e <strong>Windows NT</strong>.</li>
+              <li>Comparar versões desktop e identificar <strong>inovações</strong>, <strong>pontos críticos</strong> e <strong>falhas</strong> relevantes para suporte.</li>
+              <li>Entender a evolução do Windows Server e marcos como <strong>Active Directory</strong>, <strong>Hyper‑V</strong> e segurança moderna.</li>
+              <li>Distinguir edições (Home/Pro/Enterprise/Education) e tipos de licenças (visão técnica).</li>
+              <li>Planejar a instalação (requisitos, firmware, partições, mídia, contas) — preparando o Cap. 05.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Cap. 01 e 02 (fundamentos de SO, multitarefa, kernel/shell).</li>
+              <li>Cap. 03 (virtualização: host/guest/snapshot).</li>
+            </ul>
+            <div class="callout">
+              <strong>Importante:</strong> este capítulo é teórico. A prática de instalação começa no <strong>Capítulo 05</strong>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="panorama">
+        <h2>Panorama: de MS‑DOS ao Windows 11 (o “porquê” da evolução)</h2>
+        <p>
+          O Windows não nasceu como um sistema operacional completo. Ele começou como um <strong>ambiente gráfico</strong> que rodava sobre o <strong>MS‑DOS</strong>.
+          Com o tempo, a Microsoft precisou responder a mudanças do mercado: computadores pessoais mais poderosos, redes corporativas, Internet, segurança,
+          dispositivos móveis, virtualização e atualizações constantes.
+        </p>
+        <p>
+          Essa evolução gerou uma transição decisiva: sair de um mundo em que o sistema era menos protegido e mais “caseiro” para uma arquitetura moderna
+          com <strong>isolamento de processos</strong>, <strong>segurança</strong>, <strong>drivers mais controlados</strong> e <strong>administração profissional</strong>.
+        </p>
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no Cap. 05 você verá requisitos e decisões (UEFI/TPM) que são consequência direta dessa evolução.
+        </div>
+      </section>
+
+      <section class="card" id="linhas">
+        <h2>Linha 9x x Linha NT: a mudança estrutural que define o Windows moderno</h2>
+        <p>
+          Uma forma prática de entender a história do Windows é reconhecer que existiram, por um período, <strong>duas famílias</strong> principais:
+          a família voltada ao consumidor (Windows 9x) e a família profissional (Windows NT).
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Família DOS/9x (consumidor)</h3>
+            <ul>
+              <li>Origem: Windows rodando sobre MS‑DOS (compatibilidade e legado).</li>
+              <li>Foco: facilidade e compatibilidade para o usuário final e jogos.</li>
+              <li>Limitações: menor isolamento, maior sensibilidade a travamentos, segurança mais fraca.</li>
+            </ul>
+            <p class="muted">Exemplos clássicos: Windows 95, 98, ME.</p>
+          </div>
+          <div class="box">
+            <h3>Família NT (profissional/corporativa)</h3>
+            <ul>
+              <li>Origem: arquitetura própria, pensada para robustez e multiusuário.</li>
+              <li>Foco: estabilidade, segurança, rede, domínios, serviços.</li>
+              <li>Base do Windows moderno: versões atuais derivam da linha NT.</li>
+            </ul>
+            <p class="muted">Exemplos: Windows NT, 2000, XP, 7, 10, 11 e Windows Server.</p>
+          </div>
+        </div>
+
+        <div class="diagram" aria-label="Mapa visual">
+<pre>
+MS-DOS + Windows (ambiente) ──► Windows 9x (consumidor)
+                      └──────► Windows NT (profissional) ──► Windows moderno (XP→11) + Windows Server
+</pre>
+        </div>
+
+        <div class="callout warn">
+          <strong>Por que isso importa no suporte?</strong> porque muitos conceitos de administração (usuários, permissões, serviços) são herança direta do NT.
+        </div>
+      </section>
+
+      <section class="card" id="desktop">
+        <h2>Versões Desktop: grandes mudanças, inovações, pontos críticos e falhas</h2>
+        <p>
+          A seguir, uma linha do tempo didática das versões desktop, destacando marcos técnicos e também problemas históricos que marcaram suporte e compatibilidade.
+          Use como referência para entender por que o Windows 11 é do jeito que é.
+        </p>
+
+        <details class="block" open>
+          <summary>Era MS‑DOS + Windows clássico (1.x / 2.x / 3.x) <span class="tag">GUI sobre DOS</span></summary>
+          <p><strong>Inovações:</strong> introdução e popularização de interface gráfica (janelas, mouse) em PCs, execução de aplicativos em ambiente visual.</p>
+          <p><strong>Pontos críticos:</strong> forte dependência do DOS, limitações de memória e multitarefa; foco maior em compatibilidade do que em isolamento e segurança.</p>
+          <p class="muted"><strong>Por que importa:</strong> explica a herança de compatibilidade e por que o Windows manteve suporte a softwares antigos por décadas.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows 95 <span class="tag">Start Menu • Plug and Play</span></summary>
+          <p><strong>Inovações:</strong> menu Iniciar, barra de tarefas, Explorer, arquitetura mais amigável, melhor suporte a dispositivos (Plug and Play) e redes domésticas.</p>
+          <p><strong>Pontos críticos:</strong> ainda carregava legado do DOS; estabilidade e segurança limitadas quando comparadas a sistemas modernos.</p>
+          <p class="muted"><strong>Marca histórica:</strong> consolidou o “jeito Windows” de usar o desktop.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows 98 / 98 SE <span class="tag">Internet e drivers</span></summary>
+          <p><strong>Inovações:</strong> melhor suporte a hardware e drivers, maior integração com recursos de Internet para a época, melhorias de usabilidade.</p>
+          <p><strong>Pontos críticos:</strong> problemas de estabilidade e vulnerabilidades típicas da era pré‑segurança moderna.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows ME <span class="tag">fim da linha 9x</span></summary>
+          <p><strong>Inovações:</strong> tentou simplificar a experiência doméstica e introduzir recursos de restauração do sistema.</p>
+          <p><strong>Pontos críticos/falhas:</strong> ficou marcado por instabilidade e compatibilidade problemática — um exemplo clássico de por que “lançar rápido” pode gerar alto custo de suporte.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows 2000 (desktop profissional) <span class="tag">NT no desktop</span></summary>
+          <p><strong>Inovações:</strong> trouxe robustez da linha NT para estações de trabalho; melhor estabilidade e suporte corporativo.</p>
+          <p><strong>Pontos críticos:</strong> transição de drivers e compatibilidade com softwares domésticos ainda era um desafio.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows XP <span class="tag">popularização do NT</span></summary>
+          <p><strong>Inovações:</strong> unificou a experiência do consumidor com a base NT, melhorando estabilidade; grande adoção, grande ecossistema de drivers e aplicativos.</p>
+          <p><strong>Pontos críticos:</strong> por ser muito usado e por muito tempo, virou alvo de malware; necessidade de atualizações e antivírus ficou evidente.</p>
+          <p class="muted"><strong>Impacto:</strong> XP consolidou a base NT no desktop e mudou o padrão de suporte.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows Vista <span class="tag">UAC • novo modelo de drivers</span></summary>
+          <p><strong>Inovações:</strong> UAC (Controle de Conta de Usuário), melhorias de segurança, mudanças em drivers e gráficos (buscando mais estabilidade e proteção).</p>
+          <p><strong>Pontos críticos/falhas:</strong> consumo alto de recursos para a época, compatibilidade de drivers no lançamento e percepção de lentidão.</p>
+          <p class="muted"><strong>Lição:</strong> segurança costuma exigir mudanças que, no começo, geram atrito e reclamações.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows 7 <span class="tag">refino e desempenho</span></summary>
+          <p><strong>Inovações:</strong> refinou a base do Vista com melhor desempenho e estabilidade; grande aceitação; melhorias na interface e no gerenciamento.</p>
+          <p><strong>Pontos críticos:</strong> legado de compatibilidade ainda presente; ciclo longo de uso aumenta riscos quando suporte termina.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows 8 / 8.1 <span class="tag">UI touch e mudança de paradigma</span></summary>
+          <p><strong>Inovações:</strong> interface voltada ao toque, loja de apps, tentativa de unificar desktop/tablet; melhorias de boot e alguns mecanismos modernos.</p>
+          <p><strong>Pontos críticos/falhas:</strong> ruptura de experiência no desktop (ausência/alteração do menu Iniciar no 8 inicial) e resistência de usuários corporativos.</p>
+          <p class="muted"><strong>Lição:</strong> mudanças de interface precisam considerar o público-alvo e o contexto de uso.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows 10 <span class="tag">Windows as a Service</span></summary>
+          <p><strong>Inovações:</strong> retorno do menu Iniciar (híbrido), plataforma contínua de atualizações (modelo “serviço”), reforço de segurança, integração com nuvem e recursos modernos.</p>
+          <p><strong>Pontos críticos:</strong> atualizações frequentes podem causar conflitos; debates sobre telemetria e controle do usuário; necessidade de gestão mais profissional (políticas/WSUS/Intune em ambientes corporativos).</p>
+          <p class="muted"><strong>Impacto:</strong> o suporte passa a lidar com “ciclos de atualização” como parte do trabalho.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows 11 <span class="tag">segurança + requisitos + UX</span></summary>
+          <p><strong>Inovações:</strong> modernização visual, foco maior em segurança por padrão (requisitos como TPM/Secure Boot em muitos cenários), aprimoramentos de produtividade (janelas, layout), evolução de subsistemas e integração com ferramentas modernas.</p>
+          <p><strong>Pontos críticos:</strong> requisitos mais rígidos limitam hardware antigo; mudanças de interface podem exigir adaptação; compatibilidade de alguns periféricos antigos pode ser desafio.</p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> no Cap. 05 você verá por que requisitos e decisões (UEFI/TPM) aparecem na prática, especialmente em VMs e máquinas antigas.
+          </div>
+        </details>
+
+        <div class="callout warn">
+          <strong>Como estudar essa linha do tempo:</strong> para cada versão, responda: <em>1) o que ela trouxe de novo?</em> <em>2) quais dores de suporte ela criou?</em>
+        </div>
+      </section>
+
+      <section class="card" id="nt">
+        <h2>Windows NT: por que foi revolucionário (conceitos que aparecem até hoje)</h2>
+        <p>
+          A linha <strong>Windows NT</strong> foi criada com metas de engenharia diferentes da linha 9x: foco em <strong>robustez</strong>, <strong>multiusuário</strong>, <strong>segurança</strong> e <strong>rede</strong>.
+          Muitos conceitos que você verá em ferramentas do Windows (serviços, permissões, eventos) fazem mais sentido quando você entende o que o NT trouxe.
+        </p>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Isolamento e estabilidade</h3>
+            <p>Processos mais isolados, proteção de memória e um kernel projetado para reduzir o impacto de um app travar o sistema inteiro.</p>
+          </div>
+          <div class="box">
+            <h3>Segurança e permissões</h3>
+            <p>Modelo de usuários, grupos e permissões mais consistente, essencial para ambientes corporativos.</p>
+          </div>
+          <div class="box">
+            <h3>Serviços e rede</h3>
+            <p>Serviços rodando em segundo plano e foco em rede, preparando o caminho para domínios e servidores.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no Cap. 07 e 10 você vai usar ferramentas como Serviços, Event Viewer e Task Manager — todas têm raízes fortes no modelo NT.
+        </div>
+      </section>
+
+      <section class="card" id="server">
+        <h2>Windows Server: linha do tempo e marcos técnicos</h2>
+        <p>
+          O Windows Server acompanha a linha NT e evolui para atender necessidades corporativas: autenticação, rede, arquivos, aplicações, virtualização, alta disponibilidade e integração com nuvem.
+          Abaixo, um resumo dos marcos mais importantes (o suficiente para base de suporte).
+        </p>
+
+        <table aria-label="Linha do tempo do Windows Server">
+          <thead>
+            <tr>
+              <th>Geração/Versão</th>
+              <th>Principais inovações</th>
+              <th>Pontos críticos (visão de suporte)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Windows NT Server (família NT)</strong></td>
+              <td>Base robusta, serviços de rede, domínio (modelos antigos), foco corporativo.</td>
+              <td>Gestão mais complexa que sistemas domésticos; dependência de compatibilidade de drivers/serviços.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows 2000 Server</strong></td>
+              <td><strong>Active Directory</strong> (marco), DNS integrado, políticas e gestão centralizada.</td>
+              <td>AD exige planejamento: DNS, replicação e boas práticas; erros impactam toda a rede.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows Server 2003</strong></td>
+              <td>Consolidação do AD, melhorias de segurança e administração, amadurecimento corporativo.</td>
+              <td>Ambientes legados ainda são comuns; fim de suporte gera risco.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows Server 2008 / 2008 R2</strong></td>
+              <td><strong>Hyper‑V</strong> (virtualização), <strong>Server Core</strong> (redução de superfície), melhorias de segurança.</td>
+              <td>Virtualização muda o suporte (host/guest); exige entender recursos e isolamento.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows Server 2012 / 2012 R2</strong></td>
+              <td>Melhorias em virtualização e armazenamento (ex.: conceitos como Storage Spaces), administração mais orientada a automação.</td>
+              <td>Mudanças de gestão e interface em servidores; precisa de padronização e documentação.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows Server 2016</strong></td>
+              <td>Ênfase em containers, melhorias em segurança e virtualização, opções mais “modulares”.</td>
+              <td>Containers/virtualização exigem conceitos novos; governança e atualização são essenciais.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows Server 2019</strong></td>
+              <td>Integração híbrida (com nuvem), reforço de segurança e gestão.</td>
+              <td>Ambientes híbridos aumentam dependência de identidade e rede; exige boas práticas de backup e atualização.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows Server 2022 (linha moderna)</strong></td>
+              <td>Foco em segurança moderna, reforço de criptografia e opções de “secure by default”.</td>
+              <td>Exige hardware e configuração adequados; atualização e compliance ganham peso.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> mesmo focando Windows 11 no laboratório, esses marcos explicam por que ferramentas de rede, usuários, políticas e segurança são tão importantes no suporte.
+        </div>
+      </section>
+
+      <section class="card" id="edicoes">
+        <h2>Edições e licenciamento (visão técnica para suporte)</h2>
+        <p>
+          No suporte, você não precisa virar especialista jurídico, mas precisa entender <strong>o que muda tecnicamente</strong> entre edições e por que a escolha errada gera retrabalho.
+        </p>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Home</h3>
+            <p>Foco doméstico. Recursos corporativos podem ser limitados.</p>
+            <p class="muted">Impacto: algumas funções de gestão e rede podem não existir.</p>
+          </div>
+          <div class="box">
+            <h3>Pro</h3>
+            <p>Recursos profissionais (ex.: mais opções de administração, rede e políticas em cenários comuns).</p>
+            <p class="muted">Impacto: mais adequado para laboratório e perfil técnico.</p>
+          </div>
+          <div class="box">
+            <h3>Enterprise/Education</h3>
+            <p>Recursos corporativos e educacionais, gestão centralizada, políticas avançadas.</p>
+            <p class="muted">Impacto: comum em organizações e escolas.</p>
+          </div>
+        </div>
+
+        <h3>Licenças (resumo útil)</h3>
+        <ul>
+          <li><strong>OEM</strong>: geralmente vinculada ao equipamento (pré‑instalada).</li>
+          <li><strong>Retail</strong>: licença de varejo, mais flexível em trocas (depende do contrato).</li>
+          <li><strong>Volume</strong>: licenciamento para organizações (ativação e gestão centralizadas).</li>
+        </ul>
+        <div class="callout warn">
+          <strong>Onde vou aplicar isso:</strong> no Cap. 05 você verá a tela de edição e ativação. Saber escolher evita instalar a edição errada e ter que refazer tudo.
+        </div>
+      </section>
+
+      <section class="card" id="preparacao">
+        <h2>Preparação teórica para instalação (ponte direta para o Cap. 05)</h2>
+        <p>
+          Uma instalação bem-sucedida não começa quando você clica em “Instalar”. Ela começa com planejamento. Abaixo está um roteiro conceitual (sem executar ainda):
+        </p>
+
+        <details class="block" open>
+          <summary>Checklist conceitual de instalação <span class="tag">use no Cap. 05</span></summary>
+          <ol>
+            <li><strong>Objetivo</strong>: instalação limpa? atualização? laboratório?</li>
+            <li><strong>Compatibilidade</strong>: CPU/RAM/armazenamento; requisitos de segurança (ex.: UEFI/Secure Boot/TPM em muitos cenários).</li>
+            <li><strong>Edição</strong>: Home vs Pro vs Enterprise/Education (escolha conforme o objetivo).</li>
+            <li><strong>Mídia</strong>: ISO oficial e íntegra; local de armazenamento.</li>
+            <li><strong>Firmware</strong>: UEFI vs BIOS; estratégia de boot (em VM, configurações equivalentes).</li>
+            <li><strong>Disco</strong>: GPT/MBR; planejamento de partições (sistema x dados).</li>
+            <li><strong>Conta</strong>: em laboratório, frequentemente usar conta local (veremos bypass no Cap. 05).</li>
+            <li><strong>Ponto de retorno</strong>: snapshot (VM) ou backup (máquina real).</li>
+          </ol>
+        </details>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> todo esse checklist vira passos reais no <a href="capitulo05.html">Capítulo 05</a>.
+        </div>
+      </section>
+
+      <section class="card" id="pi">
+        <h2>Projeto Integrador — 1º Bimestre (Entrega incremental • conceitual)</h2>
+        <p>
+          <strong>Objetivo do PI (B1):</strong> produzir um plano de laboratório padronizado que você usará nos próximos capítulos.
+          Aqui a entrega ainda é <strong>conceitual</strong> (sem prática obrigatória), mas deve ser detalhada o suficiente para alguém repetir.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Entrega (o que você deve entregar)</h3>
+            <ol>
+              <li><strong>Ficha do ambiente</strong>: host (PC/VM), RAM/CPU, VirtualBox (sim/não).</li>
+              <li><strong>Escolha da edição</strong>: justifique (ex.: Pro para laboratório técnico).</li>
+              <li><strong>Estratégia de conta</strong>: conta local (explicar por quê em laboratório).</li>
+              <li><strong>Estratégia de disco</strong>: tamanho do disco, partições planejadas (C: sistema, D: dados).</li>
+              <li><strong>Estratégia de segurança</strong>: atualizações, senha local, snapshot antes de práticas.</li>
+              <li><strong>Checklist de validação</strong>: 8 itens para confirmar que “está pronto”.</li>
+            </ol>
+          </div>
+          <div class="box">
+            <h3>Modelo de checklist de validação (exemplo)</h3>
+            <ul>
+              <li>✅ Windows inicializa sem erro</li>
+              <li>✅ Usuário local criado</li>
+              <li>✅ Espaço livre suficiente no disco</li>
+              <li>✅ Atualizações configuradas (planejamento)</li>
+              <li>✅ Snapshot “ponto limpo” criado (se em VM)</li>
+              <li>✅ Edição correta (Home/Pro/Enterprise)</li>
+              <li>✅ Rede configurada (NAT no laboratório)</li>
+              <li>✅ Nome padrão da VM/máquina registrado</li>
+            </ul>
+            <p class="muted">Você poderá adaptar conforme seu laboratório.</p>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Como será usado depois:</strong> no Cap. 05 você vai executar a instalação e no Cap. 06 você vai criar partições conforme o plano.
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque o que você realmente consegue explicar com suas palavras (isso vale mais do que “só ler”).</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares (para aprofundar)</h2>
+        <ul>
+          <li>Por que a unificação do Windows na base NT (XP em diante) foi importante para segurança e estabilidade?</li>
+          <li>Que mudanças de interface (Vista, 8, 11) geraram mais impacto no suporte e por quê?</li>
+          <li>O que é Active Directory e por que ele é um marco no Windows Server?</li>
+          <li>Quais são os riscos de manter sistemas sem suporte (fim de vida) em uma organização?</li>
+          <li>Explique com suas palavras o que significa “Windows como serviço” (atualizações contínuas).</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo05.html">Capítulo 05</a> começam as práticas: instalação do Windows 11 em VM (VirtualBox) e configuração inicial.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 04 (revisado e ampliado) • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Qual afirmação melhor descreve a origem do Windows?',
+        options: [
+          'O Windows nasceu como um sistema operacional de servidores e depois virou desktop.',
+          'O Windows começou como um ambiente gráfico rodando sobre o MS-DOS.',
+          'O Windows sempre foi baseado em Linux.',
+          'O Windows sempre exigiu TPM desde a primeira versão.',
+          'O Windows é apenas um navegador.'
+        ],
+        correct: 1,
+        why: 'Historicamente, as primeiras versões do Windows eram um ambiente GUI que rodava sobre o MS-DOS.'
+      },
+      {
+        q: '2) Qual é a diferença principal entre a família 9x e a família NT?',
+        options: [
+          '9x era voltada a consumidores e carregava legado do DOS; NT foi projetada para robustez, multiusuário e segurança.',
+          'NT é mais antiga que o DOS e não usa kernel.',
+          '9x é o nome do Windows Server.',
+          'NT significa “Network Tablet” e só existe em celulares.',
+          'Não existe diferença; são a mesma família.'
+        ],
+        correct: 0,
+        why: 'A família NT introduz arquitetura moderna com foco corporativo, enquanto 9x carregava legado do DOS e tinha menos isolamento.'
+      },
+      {
+        q: '3) Qual versão é lembrada por popularizar menu Iniciar e barra de tarefas (marco de UX)?',
+        options: [
+          'Windows 3.1',
+          'Windows 95',
+          'Windows NT 3.1',
+          'Windows Server 2008',
+          'Windows ME'
+        ],
+        correct: 1,
+        why: 'O Windows 95 consolidou o menu Iniciar e a barra de tarefas como padrão do desktop.'
+      },
+      {
+        q: '4) Qual conjunto de ideias está mais ligado à base NT e aparece no suporte moderno?',
+        options: [
+          'Cartões perfurados e fitas magnéticas.',
+          'Serviços em segundo plano, permissões/usuários e logs de eventos.',
+          'Apenas jogos e multimídia.',
+          'Somente ferramentas de desenho.',
+          'Desligar o computador para executar tarefas.'
+        ],
+        correct: 1,
+        why: 'Serviços, modelo de permissões e eventos são pilares do Windows NT e da administração moderna.'
+      },
+      {
+        q: '5) Qual marco do Windows Server é associado a gestão centralizada de identidade e políticas?',
+        options: [
+          'Active Directory',
+          'Paint',
+          'MS-DOS',
+          'Notepad',
+          'Calculadora'
+        ],
+        correct: 0,
+        why: 'Active Directory é um marco por centralizar identidades, autenticação e políticas em ambientes corporativos.'
+      },
+      {
+        q: '6) Por que a escolha de edição (Home/Pro/Enterprise/Education) importa?',
+        options: [
+          'Porque muda a cor do papel de parede apenas.',
+          'Porque pode habilitar ou bloquear recursos relevantes para administração e rede.',
+          'Porque altera a voltagem do computador.',
+          'Porque elimina a necessidade de instalar drivers.',
+          'Porque torna o computador invisível.'
+        ],
+        correct: 1,
+        why: 'Edições diferem em recursos. Escolher errado pode impedir funções necessárias e exigir reinstalação.'
+      },
+      {
+        q: '7) Qual é a melhor descrição de “Windows como serviço” (modelo moderno)?',
+        options: [
+          'Uma versão que nunca recebe atualizações.',
+          'Um modelo de atualizações contínuas e ciclos de releases, exigindo gestão e planejamento.',
+          'Um sistema que só roda na nuvem e não pode ser instalado.',
+          'Um hardware especial para servidores.',
+          'Um antivírus embutido apenas.'
+        ],
+        correct: 1,
+        why: 'O modelo moderno inclui atualizações frequentes e exige gestão de versões, testes e políticas em ambientes reais.'
+      },
+      {
+        q: '8) Qual item faz parte do planejamento correto antes de instalar o Windows (Cap. 05)?',
+        options: [
+          'Ignorar requisitos e instalar de qualquer jeito.',
+          'Escolher edição, verificar compatibilidade e definir estratégia de conta/partições.',
+          'Apagar todas as partições sem saber o que são.',
+          'Desativar permanentemente qualquer segurança.',
+          'Instalar sem mídia/ISO.'
+        ],
+        correct: 1,
+        why: 'Planejamento inclui requisitos, edição, mídia, firmware/partições e estratégia de conta. Isso evita retrabalho e falhas.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise as seções “Linha 9x x NT” e “Planejamento de instalação”.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Você pode refazer quantas vezes quiser.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap04_checklist_v2';
+    const checklistItems = [
+      { id:'c1', title:'Consigo explicar por que o Windows começou sobre o MS-DOS e o que isso impactou.', note:'Compatibilidade/legado e transição para arquitetura moderna.' },
+      { id:'c2', title:'Consigo diferenciar família 9x e família NT com 2 características de cada.', note:'9x: legado DOS; NT: robustez, segurança, multiusuário.' },
+      { id:'c3', title:'Consigo citar 3 marcos do Windows desktop (ex.: 95, XP, 10/11) e suas consequências no suporte.', note:'Inclua inovação + ponto crítico.' },
+      { id:'c4', title:'Consigo explicar por que o Windows NT foi um marco para estabilidade e segurança.', note:'Isolamento, permissões, serviços, logs.' },
+      { id:'c5', title:'Consigo citar 2 marcos do Windows Server (ex.: Active Directory, Hyper-V) e por que importam.', note:'Identidade, virtualização, gestão centralizada.' },
+      { id:'c6', title:'Consigo explicar por que edições (Home/Pro/Enterprise/Education) importam tecnicamente.', note:'Recursos de administração e rede podem variar.' },
+      { id:'c7', title:'Consigo montar um checklist conceitual de instalação (requisitos, mídia, firmware, disco, conta).', note:'Isso vira o Cap. 05.' },
+      { id:'c8', title:'Entreguei o PI (B1) com ficha do ambiente e checklist de validação.', note:'Entrega conceitual que será usada nos próximos capítulos.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

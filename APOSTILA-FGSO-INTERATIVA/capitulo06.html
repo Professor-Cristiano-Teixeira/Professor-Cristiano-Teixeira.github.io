@@ -1,0 +1,870 @@
+<!-- arquivo: capitulo06.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 06 — Discos, Partições e Gerenciamento de Disco (Windows) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 06 da Apostila FGSO: teoria de discos e particionamento, recap do que o instalador do Windows fez, e prática guiada usando o Gerenciamento de Disco para redimensionar volumes e criar novas partições (volumes)." />
+
+  <!-- Prism (tema escuro) para comandos e anotações técnicas -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width:1280px; margin:0 auto; padding: 12px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,27,51,.75);
+      color: var(--text);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      font-size: 13px;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      height: fit-content;
+      position:sticky;
+      top: 74px;
+    }
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{
+      background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .card h2{margin:0 0 10px 0; font-size: 16px;}
+    .card h3{margin: 16px 0 8px 0; font-size: 14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    .kbd{font-family:var(--mono); font-size: 12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35);}
+    td{font-size:13px; color:#eaf0ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 06 • Discos, Particionamento e Gerenciamento de Disco</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo05.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo07.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 06</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🛠️ Teoria + prática guiada</span>
+        <span class="pill">🎯 Estudo autônomo</span>
+        <span class="pill">💽 DiskMgmt + Partições</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#teoria"><span class="n">02</span><span class="t">Teoria essencial (discos e partições)</span></a></li>
+        <li><a href="#recap"><span class="n">03</span><span class="t">O que o instalador do Windows fez</span></a></li>
+        <li><a href="#ferramenta"><span class="n">04</span><span class="t">Ferramenta: Gerenciamento de Disco</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo: redimensionar e criar partições</span></a></li>
+        <li><a href="#problemas"><span class="n">06</span><span class="t">Problemas comuns e soluções</span></a></li>
+        <li><a href="#atividades"><span class="n">07</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">08</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">09</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">10</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Dica de laboratório:</strong> se você estiver em VM (VirtualBox), faça um <strong>snapshot</strong> antes de mexer em partições.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 06 — Discos, Partições e Gerenciamento de Disco (Windows)</h1>
+        <p>
+          Neste capítulo você aprende <strong>a teoria essencial</strong> de discos e particionamento e, em seguida, aplica com uma prática guiada usando
+          a ferramenta nativa do Windows: <strong>Gerenciamento de Disco</strong>.
+          Você vai <strong>resgatar o que já aconteceu na instalação</strong> (Cap. 05) e depois vai <strong>redimensionar o volume C:</strong> para criar
+          uma <strong>nova partição</strong> (volume) para dados.
+        </p>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos de aprendizagem e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Explicar o que são <strong>disco</strong>, <strong>partição</strong> e <strong>volume</strong> (e por que isso importa).</li>
+              <li>Identificar as partições criadas automaticamente pelo Windows durante a instalação.</li>
+              <li>Usar o <strong>Gerenciamento de Disco</strong> para <strong>reduzir</strong> um volume e criar <strong>novo volume</strong>.</li>
+              <li>Formatar um volume em <strong>NTFS</strong> e atribuir letra/etiqueta.</li>
+              <li>Aplicar boas práticas para evitar perda de dados e falhas de boot.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Windows 11 instalado (Cap. 05) em VM ou máquina real.</li>
+              <li>Entender BIOS/UEFI e MBR/GPT do Cap. 04 (revisaremos o essencial).</li>
+              <li>Recomendado: snapshot/backup do estado atual (especialmente em VM).</li>
+            </ul>
+            <div class="callout danger" style="margin-top:10px">
+              <strong>Atenção:</strong> particionamento envolve risco. Siga o passo a passo com calma e <strong>não apague</strong> partições do sistema.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="teoria">
+        <h2>Teoria essencial (discos e particionamento)</h2>
+
+        <h3>Disco, partição e volume — não são a mesma coisa</h3>
+        <p>
+          <strong>Disco</strong> é o dispositivo de armazenamento (físico ou virtual): HDD, SSD ou o <em>disco virtual</em> da sua VM.
+          Uma <strong>partição</strong> é uma divisão lógica do disco. Um <strong>volume</strong> é a partição “montada” e pronta para uso pelo sistema (normalmente com uma letra,
+          como <span class="kbd">C:</span> ou <span class="kbd">D:</span>).
+        </p>
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no Gerenciamento de Disco você verá “Disco 0” (disco), vários blocos (partições) e alguns com letras (volumes).
+        </div>
+
+        <h3>Por que particionar?</h3>
+        <p>
+          Particionar permite separar funções e reduzir riscos. Ex.: manter o sistema em <span class="kbd">C:</span> e seus arquivos pessoais em <span class="kbd">D:</span>.
+          Isso facilita backup, organização e até reinstalações futuras.
+        </p>
+
+        <h3>Sistema de arquivos (NTFS) — por que ele é o padrão no Windows</h3>
+        <p>
+          O <strong>NTFS</strong> é o sistema de arquivos mais usado no Windows porque suporta permissões, segurança, arquivos grandes e recursos avançados.
+          Ao criar um volume novo, você precisará escolher o sistema de arquivos, e o NTFS é a escolha padrão para discos internos.
+        </p>
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> ao criar o novo volume no Gerenciamento de Disco, você vai formatar como <strong>NTFS</strong> e dar um rótulo (ex.: <span class="kbd">DADOS</span>).
+        </div>
+
+        <h3>MBR vs GPT (revisão rápida do Cap. 04)</h3>
+        <p>
+          Em instalações modernas, especialmente com UEFI, o Windows usa <strong>GPT</strong>. O GPT suporta discos maiores e múltiplas partições de forma mais moderna.
+          Em VMs e máquinas atuais, o normal é: <strong>UEFI + GPT</strong>.
+        </p>
+
+        <div class="diagram" aria-label="Mapa mental">
+<pre>
+Disco (físico/virtual)
+  ├─ Partições do sistema (EFI/MSR/Recuperação)
+  ├─ Partição principal (C:) → Windows + Programas
+  └─ Partição de dados (D:) → Arquivos do usuário (opcional)
+</pre>
+        </div>
+      </section>
+
+      <section class="card" id="recap">
+        <h2>Resgate: o que já foi feito durante a instalação (Cap. 05)</h2>
+        <p>
+          Quando você escolheu o disco virtual e clicou em <strong>Avançar</strong> no instalador do Windows, ele criou automaticamente as partições necessárias.
+          Em sistemas modernos, é comum existir mais de uma partição além do <span class="kbd">C:</span>.
+        </p>
+        <p class="muted">A quantidade e o tamanho podem variar, mas os papéis geralmente são os mesmos.</p>
+
+        <table aria-label="Partições comuns criadas pelo Windows">
+          <thead>
+            <tr>
+              <th>Partição / Volume</th>
+              <th>Finalidade</th>
+              <th>Como aparece</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>EFI System</strong></td>
+              <td>Arquivos de inicialização do UEFI (boot). Essencial para iniciar o Windows.</td>
+              <td>Pequena (geralmente 100–300 MB). Sem letra.</td>
+            </tr>
+            <tr>
+              <td><strong>MSR</strong> (Microsoft Reserved)</td>
+              <td>Reserva para o Windows gerenciar o disco GPT.</td>
+              <td>Pequena (geralmente 16 MB). Sem letra.</td>
+            </tr>
+            <tr>
+              <td><strong>Windows (C:)</strong></td>
+              <td>Partição principal: sistema, programas, perfis e dados.</td>
+              <td>Grande. Letra <span class="kbd">C:</span>.</td>
+            </tr>
+            <tr>
+              <td><strong>Recuperação</strong></td>
+              <td>Ambiente de recuperação (WinRE), reparo e restauração.</td>
+              <td>Pequena (centenas de MB). Sem letra.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout warn">
+          <strong>Regra de segurança:</strong> no Gerenciamento de Disco, <strong>não apague</strong> partições EFI/MSR/Recuperação. Elas são necessárias para boot e reparo.
+        </div>
+      </section>
+
+      <section class="card" id="ferramenta">
+        <h2>Ferramenta: Gerenciamento de Disco (diskmgmt.msc)</h2>
+        <p>
+          O <strong>Gerenciamento de Disco</strong> é a ferramenta nativa do Windows para visualizar discos, partições e volumes.
+          Ela permite tarefas como: criar volumes, formatar, atribuir letras, reduzir e expandir volumes.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Como abrir (3 formas)</h3>
+            <ol>
+              <li>Botão direito no menu Iniciar → <strong>Gerenciamento de Disco</strong></li>
+              <li>Tecla <span class="kbd">Win</span> + <span class="kbd">R</span> → digite <span class="kbd">diskmgmt.msc</span></li>
+              <li>Pesquisar por “Criar e formatar partições do disco rígido”</li>
+            </ol>
+          </div>
+          <div class="box">
+            <h3>O que você vai enxergar</h3>
+            <ul>
+              <li>Lista de discos (ex.: <strong>Disco 0</strong>)</li>
+              <li>Blocos coloridos representando partições/volumes</li>
+              <li>O volume <span class="kbd">C:</span> e áreas sem letra</li>
+              <li>Espaço <strong>Não alocado</strong> (quando você reduzir um volume)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> você vai reduzir o volume <span class="kbd">C:</span> para criar espaço não alocado e, então, criar um novo volume (ex.: <span class="kbd">D:</span>).
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo (prática guiada): redimensionar e criar novas partições</h2>
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> se você está em VM, faça um snapshot chamado <span class="kbd">06-antes-particoes</span>.
+          Se está em máquina real, garanta que não há dados importantes sem backup.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Abrir o Gerenciamento de Disco</h3>
+            <ul>
+              <li>Pressione <span class="kbd">Win</span> + <span class="kbd">R</span>, digite <span class="kbd">diskmgmt.msc</span> e pressione <strong>Enter</strong>.</li>
+              <li>Se aparecer Controle de Conta de Usuário (UAC), clique em <strong>Sim</strong>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Identificar o Disco e as partições do sistema</h3>
+            <ul>
+              <li>Localize <strong>Disco 0</strong> (em VM normalmente é o disco do Windows).</li>
+              <li>Observe as partições pequenas (EFI/MSR/Recuperação) e o volume principal <span class="kbd">C:</span>.</li>
+              <li>Confirme que <span class="kbd">C:</span> está com status “Íntegro”.</li>
+            </ul>
+            <div class="callout">
+              <strong>Dica:</strong> o objetivo é mexer somente no <span class="kbd">C:</span> (reduzir) e no espaço <strong>Não alocado</strong> (criar o novo volume).
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Reduzir o volume C: (Shrink)</h3>
+            <ul>
+              <li>Clique com o botão direito no volume <strong>(C:)</strong>.</li>
+              <li>Escolha <strong>Diminuir Volume...</strong></li>
+              <li>O Windows calculará quanto pode reduzir. Aguarde.</li>
+              <li>Em “Digite o espaço a ser diminuído (MB)”, coloque um valor (ex.: <strong>20480</strong> para 20 GB).</li>
+              <li>Clique em <strong>Diminuir</strong>.</li>
+            </ul>
+            <div class="diagram" aria-label="Exemplo de cálculo">
+<pre>
+1 GB ≈ 1024 MB
+20 GB → 20 x 1024 = 20480 MB
+30 GB → 30 x 1024 = 30720 MB
+</pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Verificar o espaço Não alocado</h3>
+            <ul>
+              <li>Após reduzir, deve aparecer um bloco preto (ou indicado) como <strong>Não alocado</strong>.</li>
+              <li>Esse espaço é o “vazio” que usaremos para criar a nova partição/volume.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Criar um Novo Volume Simples (nova partição)</h3>
+            <ul>
+              <li>Clique com o botão direito no espaço <strong>Não alocado</strong>.</li>
+              <li>Escolha <strong>Novo Volume Simples...</strong></li>
+              <li>No assistente, clique em <strong>Avançar</strong>.</li>
+              <li>Defina o tamanho (por padrão ele usa todo o espaço) e clique em <strong>Avançar</strong>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Atribuir letra e formatar em NTFS</h3>
+            <ul>
+              <li>Escolha uma letra (recomendado: <strong>D:</strong>) e clique em <strong>Avançar</strong>.</li>
+              <li>Selecione <strong>NTFS</strong>.</li>
+              <li>Marque <strong>Formatação rápida</strong>.</li>
+              <li>Rótulo do volume: digite <span class="kbd">DADOS</span> (ou outro nome claro).</li>
+              <li>Clique em <strong>Avançar</strong> e depois em <strong>Concluir</strong>.</li>
+            </ul>
+            <div class="callout">
+              <strong>Resultado esperado:</strong> você verá um novo volume “DADOS (D:)” com status “Íntegro”.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Validar no Explorador de Arquivos</h3>
+            <ul>
+              <li>Abra o Explorador de Arquivos.</li>
+              <li>Em “Este Computador”, confirme que existem <span class="kbd">C:</span> e <span class="kbd">D:</span>.</li>
+              <li>Crie uma pasta em <span class="kbd">D:</span> chamada <span class="kbd">FGSO</span>.</li>
+              <li>Crie um arquivo de texto simples para confirmar escrita/leitura.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Boas práticas:</strong> em um ambiente real, crie uma partição de dados para facilitar backup e reinstalação sem perder arquivos.
+        </div>
+      </section>
+
+      <section class="card" id="problemas">
+        <h2>Problemas comuns e soluções (sem pânico)</h2>
+
+        <details class="box" open>
+          <summary style="cursor:pointer; font-weight:800">Problema 1: “Diminuir volume” mostra um valor muito pequeno</summary>
+          <p>
+            Isso acontece quando existem arquivos “difíceis de mover” no fim do disco (ex.: paginação, hibernação, pontos de restauração).
+            Em VM geralmente é menos comum, mas pode ocorrer.
+          </p>
+          <p><strong>Soluções seguras (ordem sugerida):</strong></p>
+          <ol>
+            <li>Reinicie a VM e tente novamente.</li>
+            <li>Libere espaço: limpe temporários (Configurações → Sistema → Armazenamento).</li>
+            <li>Se necessário (usuário avançado): desativar hibernação e tentar de novo.</li>
+          </ol>
+          <pre class="language-bash"><code>powercfg /h off</code></pre>
+          <p class="muted">Obs.: este comando desativa hibernação. Em notebooks reais isso altera comportamento do sistema.</p>
+        </details>
+
+        <details class="box">
+          <summary style="cursor:pointer; font-weight:800">Problema 2: “Novo volume simples” não aparece</summary>
+          <p>
+            Verifique se você clicou no <strong>espaço Não alocado</strong> (não no volume C:). O menu muda dependendo do bloco selecionado.
+          </p>
+        </details>
+
+        <details class="box">
+          <summary style="cursor:pointer; font-weight:800">Problema 3: Volume criado, mas sem letra (D: não aparece)</summary>
+          <p>
+            Você pode atribuir uma letra depois:
+            botão direito no volume → <strong>Alterar letra e caminhos da unidade...</strong> → <strong>Adicionar</strong>.
+          </p>
+        </details>
+
+        <div class="callout danger">
+          <strong>Nunca faça neste capítulo:</strong> converter para disco dinâmico, apagar partições EFI/MSR/Recuperação, ou alterar partições sem entender.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (faça sozinho — sem resposta pronta)</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Organização</h3>
+            <p>Crie uma estrutura de pastas em <span class="kbd">D:</span> (Documentos, Drivers, Backups) e mova alguns arquivos de teste do <span class="kbd">C:</span>.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Padrão de laboratório</h3>
+            <p>Crie um volume <span class="kbd">E:</span> pequeno (ex.: 5 GB) chamado <span class="kbd">TESTES</span> para arquivos temporários de aula.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Snapshot e reversão</h3>
+            <p>Faça um snapshot antes de alterar partições, altere, registre prints e depois reverta ao snapshot e explique o que mudou.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Use <strong>Ver Gabarito</strong> para revisar.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente consegue fazer/explicar sem olhar o texto.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Por que o Windows cria partições EFI/MSR/Recuperação automaticamente?</li>
+          <li>Qual a diferença entre <strong>partição</strong> e <strong>volume</strong> em diferentes ferramentas?</li>
+          <li>O que é <em>fragmentação</em> e por que ela afeta mais HD do que SSD?</li>
+          <li>O que é <em>paginação</em> (pagefile) e como isso impacta reduzir volume?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo07.html">Capítulo 07</a> vamos explorar Painel de Controle/Configurações e ferramentas administrativas.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 06 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Qual alternativa descreve melhor a diferença entre disco, partição e volume?',
+        options: [
+          'Disco, partição e volume são sinônimos.',
+          'Disco é o dispositivo; partição é a divisão lógica; volume é a partição pronta para uso (geralmente com letra).',
+          'Partição é sempre maior que o disco.',
+          'Volume é sempre invisível no Windows.',
+          'Disco só existe em máquinas físicas, nunca em VMs.'
+        ],
+        correct: 1,
+        why: 'Disco é o armazenamento (físico/virtual). Partição é a divisão. Volume é a partição montada e utilizável (com letra, sistema de arquivos etc.).'
+      },
+      {
+        q: '2) O Windows normalmente cria automaticamente quais partições em uma instalação moderna (UEFI + GPT)?',
+        options: [
+          'Apenas C: e nada mais.',
+          'EFI/MSR/Recuperação, além do C:.',
+          'Somente partições FAT32.',
+          'Somente partições para jogos.',
+          'Uma partição chamada Linux.'
+        ],
+        correct: 1,
+        why: 'Em UEFI+GPT é comum haver EFI (boot), MSR (reserva), C: (sistema) e Recuperação (WinRE).'
+      },
+      {
+        q: '3) Qual ferramenta nativa do Windows usamos para redimensionar volumes graficamente?',
+        options: [
+          'Paint',
+          'Gerenciador de Dispositivos',
+          'Gerenciamento de Disco (diskmgmt.msc)',
+          'Bloco de Notas',
+          'Microsoft Store'
+        ],
+        correct: 2,
+        why: 'O Gerenciamento de Disco (diskmgmt.msc) é a ferramenta nativa para criar volumes, formatar e redimensionar discos/partições.'
+      },
+      {
+        q: '4) Quando você reduz o volume C:, o que aparece em seguida?',
+        options: [
+          'Um novo volume já formatado automaticamente.',
+          'Espaço “Não alocado”, pronto para virar uma nova partição/volume.',
+          'O Windows desinstala programas.',
+          'A partição EFI é apagada.',
+          'O disco vira dinâmico automaticamente.'
+        ],
+        correct: 1,
+        why: 'Reduzir (shrink) cria espaço Não alocado. Depois você cria um “Novo volume simples” nesse espaço.'
+      },
+      {
+        q: '5) Qual sistema de arquivos é a escolha padrão recomendada para um volume interno no Windows?',
+        options: [
+          'NTFS',
+          'FAT12',
+          'ext4',
+          'APFS',
+          'HFS+'
+        ],
+        correct: 0,
+        why: 'NTFS é o padrão no Windows por suportar permissões, arquivos grandes e recursos de segurança.'
+      },
+      {
+        q: '6) Qual ação é perigosa e NÃO deve ser feita neste capítulo?',
+        options: [
+          'Criar um volume D: no espaço Não alocado.',
+          'Formatar o novo volume em NTFS.',
+          'Apagar a partição EFI/MSR/Recuperação.',
+          'Atribuir uma letra ao volume.',
+          'Abrir o diskmgmt.msc.'
+        ],
+        correct: 2,
+        why: 'Apagar partições EFI/MSR/Recuperação pode impedir boot e remover ferramentas de recuperação.'
+      },
+      {
+        q: '7) Se a opção “Novo Volume Simples” não aparece, qual é a causa mais provável?',
+        options: [
+          'Você clicou no volume C: em vez do espaço Não alocado.',
+          'O Windows não suporta discos.',
+          'A VM não tem mouse.',
+          'O NTFS foi removido do sistema.',
+          'O computador não tem RAM.'
+        ],
+        correct: 0,
+        why: 'O menu depende do bloco selecionado. “Novo Volume Simples” aparece no espaço Não alocado.'
+      },
+      {
+        q: '8) Converter para disco dinâmico é recomendado para iniciantes?',
+        options: [
+          'Sim, sempre. É obrigatório.',
+          'Sim, porque facilita tudo.',
+          'Não. É avançado e pode complicar compatibilidade e recuperação.',
+          'Não existe disco dinâmico no Windows.',
+          'Apenas em celulares.'
+        ],
+        correct: 2,
+        why: 'Disco dinâmico é tema avançado. Para técnico iniciante, use discos básicos e volumes simples.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: volte na teoria e no passo a passo do diskmgmt.msc.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap06_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Consigo explicar a diferença entre disco, partição e volume.', note:'Disco = armazenamento; partição = divisão; volume = partição montada (letra/sistema de arquivos).' },
+      { id:'c2', title:'Consigo identificar partições EFI/MSR/Recuperação no Gerenciamento de Disco.', note:'E sei por que não devo apagá-las.' },
+      { id:'c3', title:'Abri o Gerenciamento de Disco usando diskmgmt.msc.', note:'Win+R → diskmgmt.msc.' },
+      { id:'c4', title:'Reduzi o volume C: com “Diminuir Volume”.', note:'Escolhi um tamanho coerente (ex.: 20 GB).' },
+      { id:'c5', title:'Criei um Novo Volume Simples no espaço Não alocado.', note:'Usei o assistente corretamente.' },
+      { id:'c6', title:'Formatei o volume como NTFS e atribuí letra (ex.: D:).', note:'Defini também um rótulo (ex.: DADOS).' },
+      { id:'c7', title:'Validei no Explorador que o novo volume aparece e aceita arquivos.', note:'Criei pasta e arquivo de teste.' },
+      { id:'c8', title:'Consigo listar 2 problemas comuns (shrink limitado, letra ausente) e como resolver.', note:'Reiniciar, liberar espaço, atribuir letra, etc.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

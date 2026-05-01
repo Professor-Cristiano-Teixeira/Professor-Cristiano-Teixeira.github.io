@@ -1,0 +1,930 @@
+<!-- arquivo: capitulo07.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 — Ferramentas de Administração e Manutenção do Windows (GUI + Nativas) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 07 da Apostila FGSO: ferramentas nativas de administração e manutenção do Windows 11 (Configurações/Painel, Task Manager, Services, Event Viewer, PerfMon, Resource Monitor, Reliability Monitor, Device Manager, msconfig, regedit, Task Scheduler, Windows Security, Update). Inclui teoria, passo a passo prático, atividades, quiz e checklist." />
+
+  <!-- Prism (tema escuro) para comandos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,27,51,.75);
+      color: var(--text);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      font-size: 13px;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      height: fit-content;
+      position:sticky;
+      top: 74px;
+    }
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{
+      background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 07 • Ferramentas de Administração e Manutenção do Windows</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo06.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo08.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 07</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🛠️ Ferramentas nativas</span>
+        <span class="pill">🧠 Diagnóstico & manutenção</span>
+        <span class="pill">🧪 Prática guiada</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#mapa"><span class="n">02</span><span class="t">Mapa mental: qual ferramenta usar?</span></a></li>
+        <li><a href="#teoria"><span class="n">03</span><span class="t">Teoria: as ferramentas e para que servem</span></a></li>
+        <li><a href="#atalhos"><span class="n">04</span><span class="t">Atalhos e comandos (.msc / .cpl)</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo prático (roteiro completo)</span></a></li>
+        <li><a href="#rotina"><span class="n">06</span><span class="t">Rotina de manutenção (check rápido)</span></a></li>
+        <li><a href="#atividades"><span class="n">07</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">08</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">09</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">10</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Dica:</strong> se você estiver em VM, faça um snapshot <span class="kbd">07-antes-ferramentas</span> antes de alterações (serviços, msconfig, registro).
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 07 — Ferramentas de Administração e Manutenção do Windows</h1>
+        <p>
+          Neste capítulo você aprende a usar as principais ferramentas nativas do Windows para <strong>administrar</strong>, <strong>diagnosticar</strong> e <strong>manter</strong> o sistema.
+          A proposta é simples: em vez de “clicar sem entender”, você vai aprender <strong>qual ferramenta usar em cada tipo de problema</strong> e
+          vai praticar um roteiro completo de checagem (processos, serviços, logs, desempenho, confiabilidade, drivers e segurança).
+        </p>
+        <div class="chips">
+          <span class="chip">Task Manager</span>
+          <span class="chip">Services</span>
+          <span class="chip">Event Viewer</span>
+          <span class="chip">PerfMon/ResMon</span>
+          <span class="chip">Device Manager</span>
+          <span class="chip">msconfig</span>
+          <span class="chip">Windows Security</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Escolher a ferramenta certa para cada cenário: lentidão, travamento, erro, driver, boot, segurança.</li>
+              <li>Usar: <strong>Configurações</strong>, <strong>Painel de Controle</strong>, <strong>Task Manager</strong>, <strong>Services</strong>, <strong>Event Viewer</strong>, <strong>Reliability Monitor</strong>, <strong>PerfMon</strong>, <strong>Resource Monitor</strong>, <strong>Device Manager</strong>, <strong>Task Scheduler</strong>, <strong>msconfig</strong> e <strong>Regedit</strong> (com cuidado).</li>
+              <li>Coletar evidências: prints, export de logs e informações do sistema.</li>
+              <li>Executar uma rotina básica de manutenção sem depender do professor.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Windows 11 instalado e funcionando (Cap. 05).</li>
+              <li>Disco e partições organizadas (Cap. 06) — recomendado.</li>
+              <li>Conta local com permissões administrativas (laboratório).</li>
+            </ul>
+            <div class="callout">
+              <strong>Importante:</strong> neste capítulo você vai <em>observar e diagnosticar</em>. Evite mudanças agressivas em serviços e registro.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="mapa">
+        <h2>Mapa mental: qual ferramenta usar?</h2>
+        <p>Use este mapa como “GPS” de suporte. Quando surgir um problema, você começa por aqui.</p>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Lentidão / travamento</h3>
+            <ul>
+              <li><strong>Task Manager</strong> (CPU/RAM/Disco)</li>
+              <li><strong>Resource Monitor</strong> (detalhe)</li>
+              <li><strong>PerfMon</strong> (contadores)</li>
+              <li><strong>Reliability Monitor</strong> (histórico)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Erros e falhas</h3>
+            <ul>
+              <li><strong>Event Viewer</strong> (logs)</li>
+              <li><strong>Reliability Monitor</strong> (linha do tempo)</li>
+              <li><strong>Windows Update</strong> (falhas de atualização)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Hardware / drivers</h3>
+            <ul>
+              <li><strong>Device Manager</strong></li>
+              <li><strong>System Information</strong> (msinfo32)</li>
+              <li><strong>Windows Security</strong> (isolamento/driver bloqueado)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:12px">
+          <div class="box">
+            <h3>Boot e inicialização</h3>
+            <ul>
+              <li><strong>Task Manager → Startup</strong></li>
+              <li><strong>msconfig</strong> (modo seguro / boot)</li>
+              <li><strong>Task Scheduler</strong> (tarefas iniciando)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Rede e internet (básico)</h3>
+            <ul>
+              <li><strong>Configurações</strong> (Wi‑Fi/Ethernet)</li>
+              <li><strong>Event Viewer</strong> (eventos de rede)</li>
+              <li><strong>Windows Security</strong> (firewall)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Segurança</h3>
+            <ul>
+              <li><strong>Windows Security</strong></li>
+              <li><strong>Firewall</strong> / proteção contra vírus</li>
+              <li><strong>Windows Update</strong> (correções)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Como usar:</strong> comece com a ferramenta mais simples (Task Manager / Reliability Monitor) e aprofunde (Event Viewer / PerfMon) se necessário.
+        </div>
+      </section>
+
+      <section class="card" id="teoria">
+        <h2>Teoria: ferramentas de administração e manutenção (com “onde vou aplicar isso”)</h2>
+
+        <details class="block" open>
+          <summary>Configurações x Painel de Controle <span class="tag">settings vs cpl</span></summary>
+          <p><strong>Conceito:</strong> O Windows tem duas “portas” principais de configuração. <strong>Configurações</strong> é a interface moderna; o <strong>Painel de Controle</strong> é a interface clássica (ainda muito usada).</p>
+          <p><strong>Onde vou aplicar:</strong> você vai abrir os dois e localizar ajustes de sistema, rede, atualização e programas.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Gerenciador de Tarefas (Task Manager) <span class="tag">processos • desempenho</span></summary>
+          <p><strong>Conceito:</strong> mostra processos, consumo de CPU/RAM/Disco/Rede e permite encerrar tarefas travadas. Também controla apps de inicialização.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai identificar o que está consumindo recursos e registrar uma evidência (print/relatório simples).</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Serviços (services.msc) <span class="tag">serviços em 2º plano</span></summary>
+          <p><strong>Conceito:</strong> serviços são programas que rodam em segundo plano (ex.: update, impressão, rede). Eles podem iniciar automaticamente ou manualmente.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai localizar serviços críticos e entender status (Executando/Parado) sem desativar aleatoriamente.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Visualizador de Eventos (eventvwr.msc) <span class="tag">logs</span></summary>
+          <p><strong>Conceito:</strong> o Windows registra eventos (informações, avisos e erros). Log é “o histórico do que aconteceu”.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai filtrar erros recentes e exportar um log para evidência.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Monitor de Confiabilidade (Reliability Monitor) <span class="tag">linha do tempo</span></summary>
+          <p><strong>Conceito:</strong> apresenta uma linha do tempo com falhas de aplicativos, falhas do Windows e instalações/atualizações.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai localizar “picos de instabilidade” e associar com eventos/atualizações.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>PerfMon e Resource Monitor <span class="tag">contadores e detalhe</span></summary>
+          <p><strong>Conceito:</strong> <strong>PerfMon</strong> mede contadores de desempenho (CPU, memória, disco). <strong>Resource Monitor</strong> mostra detalhes de processos e uso por recurso.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai abrir os dois e identificar gargalo (CPU 100%, disco 100%, RAM pressionada).</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Gerenciador de Dispositivos (devmgmt.msc) <span class="tag">drivers</span></summary>
+          <p><strong>Conceito:</strong> lista hardware e drivers. Ícones de alerta indicam driver ausente ou com problema.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai verificar se há dispositivo com aviso e registrar propriedades do driver.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>msconfig e Regedit (com cuidado) <span class="tag">config avançada</span></summary>
+          <p><strong>Conceito:</strong> <strong>msconfig</strong> ajuda em diagnóstico de boot/inicialização. <strong>Regedit</strong> altera o Registro do Windows (configurações internas). O Registro pode quebrar o sistema se alterado sem método.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai abrir e reconhecer a ferramenta, mas evitar alterações profundas. Em laboratório, alterações só com backup/snapshot.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Agendador de Tarefas (taskschd.msc) <span class="tag">automação nativa</span></summary>
+          <p><strong>Conceito:</strong> o Windows agenda tarefas automáticas (limpeza, update, manutenção) e também permite agendar scripts e ações.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai localizar tarefas que rodam no logon e entender por que algumas coisas iniciam sozinhas.</p>
+        </details>
+
+        <details class="block" open>
+          <summary>Windows Security e Windows Update <span class="tag">segurança e correções</span></summary>
+          <p><strong>Conceito:</strong> segurança moderna depende de correções (updates), proteção contra malware, firewall e configurações de proteção.</p>
+          <p><strong>Onde vou aplicar:</strong> você vai checar status do Defender, firewall e atualizações pendentes.</p>
+        </details>
+      </section>
+
+      <section class="card" id="atalhos">
+        <h2>Atalhos e comandos úteis (.msc / .cpl)</h2>
+        <p class="muted">Você pode abrir várias ferramentas com <span class="kbd">Win</span> + <span class="kbd">R</span> (Executar). Isso acelera suporte.</p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ferramentas administrativas (.msc)</h3>
+            <pre class="language-bash"><code>taskmgr
+services.msc
+eventvwr.msc
+perfmon
+resmon
+msinfo32
+devmgmt.msc
+taskschd.msc
+msconfig
+regedit</code></pre>
+          </div>
+          <div class="box">
+            <h3>Atalhos clássicos (.cpl)</h3>
+            <pre class="language-bash"><code>control
+appwiz.cpl
+sysdm.cpl
+firewall.cpl
+powercfg.cpl</code></pre>
+            <p class="muted">Nem todo .cpl existe igual em todas as versões, mas muitos continuam úteis.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no passo a passo você vai usar vários desses atalhos para abrir ferramentas sem ficar “procurando no menu”.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo prático (roteiro completo de administração e manutenção)</h2>
+        <p>
+          Este roteiro é pensado para você executar sozinho, gerando evidências. Ao final, você terá um “pacote” de diagnóstico:
+          prints, anotações e um log exportado.
+        </p>
+
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> crie um snapshot <span class="kbd">07-antes-ferramentas</span> (se estiver em VM). Em máquina real, evite mudanças em serviços/registro.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Identificar versão do Windows e nome do PC</h3>
+            <ul>
+              <li>Abra Executar: <span class="kbd">Win</span> + <span class="kbd">R</span> → digite <span class="kbd">winver</span>.</li>
+              <li>Anote a versão/compilação.</li>
+              <li>Vá em Configurações → Sistema → Sobre e registre o nome do dispositivo.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Task Manager: identificar consumo (CPU/RAM/Disco)</h3>
+            <ul>
+              <li>Abra: <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">Esc</span> (ou <span class="kbd">taskmgr</span>).</li>
+              <li>Na aba <strong>Processos</strong>, ordene por CPU e depois por Memória.</li>
+              <li>Tire um print (ou anote) dos 3 processos que mais consomem.</li>
+              <li>Na aba <strong>Inicializar</strong> (Startup), identifique apps habilitados.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde aplicar:</strong> lentidão e travamentos quase sempre começam aqui.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Services: entender serviços essenciais (sem desativar aleatoriamente)</h3>
+            <ul>
+              <li>Abra: <span class="kbd">services.msc</span>.</li>
+              <li>Localize e observe (status e tipo de inicialização):
+                <ul>
+                  <li>Windows Update</li>
+                  <li>Serviços de Rede (variam)</li>
+                  <li>Spooler de Impressão (se existir)</li>
+                </ul>
+              </li>
+              <li>Escolha 1 serviço e apenas <strong>abra Propriedades</strong> para ver descrição e dependências.</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Regra do laboratório:</strong> só pare/inicie serviços quando você souber o impacto e tiver snapshot.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Event Viewer: localizar erros recentes e exportar log</h3>
+            <ul>
+              <li>Abra: <span class="kbd">eventvwr.msc</span>.</li>
+              <li>Vá em <strong>Logs do Windows</strong> → <strong>Sistema</strong>.</li>
+              <li>À direita, clique em <strong>Filtrar Log Atual...</strong> e marque <strong>Crítico</strong> e <strong>Erro</strong>.</li>
+              <li>Anote 1 erro (ID do evento, fonte e descrição curta).</li>
+              <li>Exportar: <strong>Salvar todos os eventos como...</strong> (formato .evtx) e salve em <span class="kbd">C:\FGSO\logs</span> (crie a pasta se necessário).</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde aplicar:</strong> logs ajudam a provar o que aconteceu, quando e qual componente falhou.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Reliability Monitor: associar falhas na linha do tempo</h3>
+            <ul>
+              <li>Abra Executar: <span class="kbd">Win</span>+<span class="kbd">R</span> → digite <span class="kbd">perfmon /rel</span>.</li>
+              <li>Observe a linha do tempo e procure falhas (X vermelhos).</li>
+              <li>Clique em um dia com falha e leia o que ocorreu.</li>
+              <li>Anote: nome do aplicativo/erro e data.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>PerfMon e Resource Monitor: encontrar gargalo</h3>
+            <ul>
+              <li>Abra <span class="kbd">perfmon</span> e veja o gráfico básico (Monitor de Desempenho).</li>
+              <li>Abra <span class="kbd">resmon</span> e analise CPU, Memória e Disco.</li>
+              <li>Responda: o gargalo está mais em CPU, RAM ou Disco?</li>
+            </ul>
+            <div class="diagram" aria-label="Interpretação rápida">
+<pre>
+CPU alta constante → processo pesado, antivírus, atualização, VM sem recursos
+Memória alta + paginação → pouca RAM / muitos apps
+Disco 100% → update, indexação, antivírus, pouca RAM (swap)
+</pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Device Manager: verificar drivers</h3>
+            <ul>
+              <li>Abra: <span class="kbd">devmgmt.msc</span>.</li>
+              <li>Procure ícones de alerta (triângulo amarelo).</li>
+              <li>Abra Propriedades de um dispositivo e veja a aba <strong>Driver</strong> (versão e fornecedor).</li>
+              <li>Anote 1 informação do driver (data/versão) como evidência.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Task Scheduler: identificar tarefas automáticas</h3>
+            <ul>
+              <li>Abra: <span class="kbd">taskschd.msc</span>.</li>
+              <li>Navegue em Biblioteca do Agendador e procure tarefas com gatilho “No logon”.</li>
+              <li>Abra Propriedades de uma tarefa e veja gatilhos/ações.</li>
+              <li>Anote: nome da tarefa e o que ela executa.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>msconfig (diagnóstico de inicialização) — apenas reconhecimento</h3>
+            <ul>
+              <li>Abra: <span class="kbd">msconfig</span>.</li>
+              <li>Veja as abas: Geral, Inicialização, Serviços, Inicialização de Programas (pode redirecionar ao Task Manager).</li>
+              <li><strong>Não altere</strong> configurações sem orientação/snapshot.</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Regra:</strong> msconfig é poderoso. Mudanças erradas podem impedir o boot.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Windows Security e Windows Update: checagem de base</h3>
+            <ul>
+              <li>Abra <strong>Segurança do Windows</strong> e verifique status de proteção.</li>
+              <li>Abra <strong>Windows Update</strong> e procure atualizações pendentes.</li>
+              <li>Anote: status “Atualizado” ou “Pendente”.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Organizar evidências (pasta FGSO)</h3>
+            <ul>
+              <li>Crie <span class="kbd">C:\FGSO\cap07</span>.</li>
+              <li>Salve: prints, o log .evtx exportado e um texto <span class="kbd">resumo.txt</span> com suas anotações.</li>
+              <li>Seu resumo deve conter: 1 erro do Event Viewer, 1 falha do Reliability Monitor e 1 gargalo (CPU/RAM/Disco).</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="rotina">
+        <h2>Rotina de manutenção (check rápido para usar sempre)</h2>
+        <p class="muted">Use como rotina semanal/bimestral. Isso cria hábito de suporte profissional.</p>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Rotina semanal (5–10 min)</h3>
+            <ul>
+              <li>Windows Update: pendências?</li>
+              <li>Task Manager: CPU/RAM anormais?</li>
+              <li>Reliability Monitor: falhas recentes?</li>
+              <li>Armazenamento: espaço livre suficiente?</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Rotina mensal (15–30 min)</h3>
+            <ul>
+              <li>Event Viewer: erros críticos repetidos?</li>
+              <li>Device Manager: drivers com alerta?</li>
+              <li>Startup apps: algo desnecessário iniciando?</li>
+              <li>Backup/snapshot: ponto de retorno atualizado?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no Cap. 08 (manutenção preventiva) você vai consolidar essa rotina com checklists e boas práticas.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — para você desenvolver</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Relatório de saúde do sistema</h3>
+            <p>Crie um relatório (1 página) com: top 5 processos, 3 erros do Event Viewer, 2 falhas do Reliability Monitor e uma conclusão.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Cenário simulado</h3>
+            <p>Simule “lentidão”: abra vários apps e observe CPU/RAM/disco. Depois explique qual recurso virou gargalo e por quê.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Tarefas e inicialização</h3>
+            <p>Liste 5 itens de inicialização e 3 tarefas do Agendador que rodam no logon. Explique qual pode impactar o boot.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre <strong>Evento</strong> (Event Viewer) e <strong>Falha</strong> (Reliability Monitor)?</li>
+          <li>O que é um <strong>serviço</strong> e por que ele é diferente de um aplicativo comum?</li>
+          <li>Por que drivers podem causar instabilidade? O que significa “driver assinado”?</li>
+          <li>Qual a diferença entre <strong>PerfMon</strong> e <strong>Resource Monitor</strong>?</li>
+          <li>Quais riscos existem ao editar o Registro sem backup?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo08.html">Capítulo 08</a> você vai consolidar manutenção preventiva, limpeza lógica e boas práticas.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 07 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Qual ferramenta é a primeira escolha para identificar consumo de CPU/RAM/Disco por processos?',
+        options: ['Regedit', 'Task Manager', 'Paint', 'Notepad', 'Control Panel'],
+        correct: 1,
+        why: 'O Task Manager mostra processos e consumo de recursos. É o ponto de partida para lentidão e travamentos.'
+      },
+      {
+        q: '2) Qual ferramenta mostra logs detalhados de erros, avisos e informações do sistema?',
+        options: ['Event Viewer', 'Calculator', 'Disk Cleanup', 'Snipping Tool', 'Photos'],
+        correct: 0,
+        why: 'O Event Viewer (eventvwr.msc) registra e permite filtrar eventos do sistema e aplicativos.'
+      },
+      {
+        q: '3) Qual comando abre o Monitor de Confiabilidade (linha do tempo de falhas)?',
+        options: ['perfmon /rel', 'ipconfig', 'taskkill', 'format', 'ping'],
+        correct: 0,
+        why: 'perfmon /rel abre o Reliability Monitor, útil para correlacionar falhas por data.'
+      },
+      {
+        q: '4) Onde você controla programas que iniciam junto com o Windows (startup apps)?',
+        options: ['Task Manager → Inicializar', 'Event Viewer → Sistema', 'Services.msc', 'Regedit apenas', 'Paint'],
+        correct: 0,
+        why: 'O Task Manager possui a aba Inicializar para habilitar/desabilitar apps de startup com segurança.'
+      },
+      {
+        q: '5) Qual ferramenta lista hardware e drivers e mostra alertas de dispositivo?',
+        options: ['Device Manager', 'Windows Update', 'Power Options', 'WordPad', 'Diskmgmt'],
+        correct: 0,
+        why: 'O Device Manager (devmgmt.msc) é o local padrão para checar drivers e problemas de hardware.'
+      },
+      {
+        q: '6) Qual afirmação é mais correta sobre services.msc?',
+        options: [
+          'É para editar fotos.',
+          'É para gerenciar serviços em segundo plano e seu tipo de inicialização.',
+          'Serve apenas para instalar jogos.',
+          'É um antivírus.',
+          'É um editor de texto.'
+        ],
+        correct: 1,
+        why: 'Services.msc gerencia serviços (background). Mudanças erradas podem afetar o sistema, por isso exige cuidado.'
+      },
+      {
+        q: '7) Qual é a postura mais segura ao usar msconfig e regedit em laboratório?',
+        options: [
+          'Alterar tudo até funcionar.',
+          'Evitar mudanças sem entender e usar snapshot/backup antes.',
+          'Desativar segurança sempre.',
+          'Usar apenas para jogos.',
+          'Ignorar o risco porque é VM.'
+        ],
+        correct: 1,
+        why: 'Msconfig e regedit são ferramentas poderosas. O método seguro inclui entender impacto e ter ponto de retorno.'
+      },
+      {
+        q: '8) Qual combinação de ferramentas melhor explica um diagnóstico completo?',
+        options: [
+          'Task Manager + Event Viewer + Reliability Monitor',
+          'Paint + Photos + Notepad',
+          'Calculator + Clock + Maps',
+          'WordPad + Snipping Tool',
+          'Only Control Panel'
+        ],
+        correct: 0,
+        why: 'Task Manager mostra sintomas (recursos), Event Viewer mostra evidências (logs) e Reliability Monitor mostra histórico (linha do tempo).' 
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: volte ao “Mapa mental” e ao passo a passo.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap07_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Sei escolher a ferramenta certa para lentidão (TaskMgr/ResMon/PerfMon).', note:'Consigo explicar quando usar cada uma.' },
+      { id:'c2', title:'Usei o Task Manager e identifiquei top 3 processos por CPU e Memória.', note:'Registrei evidência (print/anotações).' },
+      { id:'c3', title:'Abri services.msc e verifiquei status/descrição de pelo menos 1 serviço.', note:'Sem desativar aleatoriamente.' },
+      { id:'c4', title:'Filtrei erros no Event Viewer e exportei um log .evtx.', note:'Salvei em C:\\FGSO\\cap07 ou C:\\FGSO\\logs.' },
+      { id:'c5', title:'Abri o Reliability Monitor e anotei ao menos 1 falha com data.', note:'Usei perfmon /rel.' },
+      { id:'c6', title:'Usei ResMon/PerfMon para identificar o gargalo (CPU/RAM/Disco).', note:'Expliquei minha conclusão.' },
+      { id:'c7', title:'Verifiquei drivers no Device Manager e anotei versão/data de 1 driver.', note:'Procurei alertas.' },
+      { id:'c8', title:'Identifiquei 1 tarefa no Task Scheduler que executa no logon.', note:'Anotei gatilhos/ações.' },
+      { id:'c9', title:'Chequei Windows Security e Windows Update (status).', note:'Registrei pendências.' },
+      { id:'c10', title:'Organizei evidências em C:\\FGSO\\cap07 (prints + resumo + log).', note:'Meu resumo contém: 1 erro, 1 falha e 1 gargalo.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

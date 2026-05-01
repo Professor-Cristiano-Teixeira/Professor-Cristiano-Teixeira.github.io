@@ -1,0 +1,988 @@
+<!-- arquivo: capitulo05.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 05 — Instalação do Windows 11 no VirtualBox (Guia Completo) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 05 da Apostila FGSO: guia completo e autônomo para instalar Windows 11 no VirtualBox, do planejamento à validação pós-instalação, incluindo instalação sem conta Microsoft via comando no OOBE (OOBE\BYPASSNRO), boas práticas, solução de problemas e checklist." />
+
+  <!-- Prism (tema escuro) para comandos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,27,51,.75);
+      color: var(--text);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      font-size: 13px;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      height: fit-content;
+      position:sticky;
+      top: 74px;
+    }
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{
+      background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left: 4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 05 • Instalação do Windows 11 no VirtualBox (sem conta Microsoft)</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo04.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo06.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 05</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🛠️ Prática guiada</span>
+        <span class="pill">🎯 Estudo autônomo</span>
+        <span class="pill">🧑‍💻 Sem conta Microsoft (OOBE)</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Teoria essencial (o que você está fazendo)</span></a></li>
+        <li><a href="#planejamento"><span class="n">03</span><span class="t">Planejamento rápido (antes de clicar)</span></a></li>
+        <li><a href="#virtualbox"><span class="n">04</span><span class="t">Configuração do VirtualBox (VM)</span></a></li>
+        <li><a href="#instalacao"><span class="n">05</span><span class="t">Instalação do Windows 11 (passo a passo)</span></a></li>
+        <li><a href="#oobe"><span class="n">06</span><span class="t">Finalização (OOBE) sem conta Microsoft</span></a></li>
+        <li><a href="#pos"><span class="n">07</span><span class="t">Pós‑instalação: configurações recomendadas</span></a></li>
+        <li><a href="#troubleshoot"><span class="n">08</span><span class="t">Problemas comuns e soluções</span></a></li>
+        <li><a href="#atividades"><span class="n">09</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">10</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">11</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">12</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Dica:</strong> se você errar alguma etapa, em VM é possível voltar usando <strong>snapshot</strong> (Cap. 03).
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 05 — Instalação do Windows 11 no VirtualBox (Guia Completo)</h1>
+        <p>
+          Este capítulo marca o início das práticas. Você vai instalar o <strong>Windows 11</strong> em uma máquina virtual usando <strong>VirtualBox</strong>,
+          e vai finalizar a instalação com <strong>conta local</strong> (sem conta Microsoft), usando um recurso de terminal durante o <strong>OOBE</strong>.
+          O objetivo é que você consiga repetir o processo sozinho, com segurança, registrando evidências e entendendo as decisões que tomou.
+        </p>
+        <div class="chips">
+          <span class="chip">VirtualBox (VM)</span>
+          <span class="chip">ISO do Windows 11</span>
+          <span class="chip">OOBE\BYPASSNRO</span>
+          <span class="chip">Validação pós‑instalação</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos de aprendizagem e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Criar e configurar uma <strong>VM</strong> adequada para Windows 11 no VirtualBox (RAM, CPU, disco, rede).</li>
+              <li>Instalar o Windows 11 com <strong>instalação personalizada</strong> (disco vazio).</li>
+              <li>Finalizar a instalação com <strong>usuário local</strong>, sem conta Microsoft, usando o comando do OOBE.</li>
+              <li>Executar um checklist de pós‑instalação: versão, drivers básicos, updates e organização inicial.</li>
+              <li>Registrar evidências (prints + checklist) para comprovar a instalação.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>VirtualBox instalado no host.</li>
+              <li>Virtualização por hardware habilitada (VT‑x/AMD‑V) — Cap. 03.</li>
+              <li>Arquivo ISO do Windows 11 disponível localmente.</li>
+              <li>Conceitos de UEFI/GPT e edições — Cap. 04.</li>
+            </ul>
+            <div class="callout warn" style="margin-top:10px">
+              <strong>Recomendação:</strong> tenha pelo menos <strong>8 GB</strong> de RAM no host para rodar uma VM com 4 GB sem travar.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Teoria essencial (o que você está fazendo — e por quê)</h2>
+
+        <h3>1) ISO e boot</h3>
+        <p>
+          Uma <strong>ISO</strong> é uma imagem de instalação — pense como um “DVD digital” do Windows. A VM precisa dar boot por essa ISO para iniciar o instalador.
+          <strong>Onde vou aplicar:</strong> ao iniciar a VM, você seleciona a ISO como unidade óptica virtual.
+        </p>
+
+        <h3>2) VM, recursos e desempenho</h3>
+        <p>
+          A VM compartilha CPU e RAM com o host. Se você der recursos demais para a VM, o host pode travar; se der recursos de menos, a VM fica lenta.
+          <strong>Onde vou aplicar:</strong> ao definir RAM (ex.: 4 GB) e CPU (ex.: 2 núcleos).
+        </p>
+
+        <h3>3) Particionamento automático</h3>
+        <p>
+          Em uma instalação limpa, o instalador cria automaticamente partições necessárias (EFI/MSR/Recuperação e a principal).
+          <strong>Onde vou aplicar:</strong> ao escolher “Instalação personalizada” e apontar o disco vazio.
+        </p>
+
+        <h3>4) OOBE (Out‑Of‑Box Experience)</h3>
+        <p>
+          O <strong>OOBE</strong> é a etapa final onde você define país, teclado, rede e conta do usuário. Em versões recentes, o Windows costuma incentivar
+          fortemente o uso de <strong>conta Microsoft</strong>. Em laboratório, porém, é comum usar <strong>conta local</strong>.
+          <strong>Onde vou aplicar:</strong> você abrirá o terminal com <span class="kbd">Shift</span> + <span class="kbd">F10</span> e executará <span class="kbd">OOBE\BYPASSNRO</span>.
+        </p>
+
+        <h3>5) Conta local vs Conta Microsoft (visão prática de suporte)</h3>
+        <p>
+          Conta local é simples e ideal para laboratório: independe de internet, reduz distrações e facilita padronização. Conta Microsoft facilita sincronização
+          e integração com serviços online, mas pode ser desnecessária no laboratório.
+          <strong>Onde vou aplicar:</strong> ao finalizar o OOBE, você criará um usuário local.
+        </p>
+
+        <div class="callout">
+          <strong>Meta do capítulo:</strong> terminar com um Windows 11 funcional, com usuário local, pronto para os capítulos de configuração, discos e ferramentas administrativas.
+        </div>
+      </section>
+
+      <section class="card" id="planejamento">
+        <h2>Planejamento rápido (antes de clicar em “Novo”)</h2>
+        <p>Use este mini‑planejamento para evitar retrabalho.</p>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Checklist de entrada</h3>
+            <ul>
+              <li>✅ ISO do Windows 11 baixada e localizada</li>
+              <li>✅ VirtualBox instalado</li>
+              <li>✅ Virtualização habilitada no BIOS/UEFI do host</li>
+              <li>✅ Espaço em disco no host (pelo menos 70 GB livres)</li>
+              <li>✅ Tempo estimado: primeira instalação pode levar mais por updates</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Decisões que você precisa tomar</h3>
+            <ul>
+              <li><strong>Edição</strong>: Pro é recomendada para laboratório técnico.</li>
+              <li><strong>Nome da VM</strong>: padronizado (ex.: FGSO‑W11‑Base).</li>
+              <li><strong>Partições</strong>: deixe o instalador criar automaticamente (mais seguro).</li>
+              <li><strong>Conta</strong>: usar conta local (aplicaremos o bypass no OOBE).</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="virtualbox">
+        <h2>Configuração do VirtualBox (criação e ajustes da VM)</h2>
+        <p>
+          Nesta seção você cria a VM e confere ajustes que evitam erros comuns. Mesmo que sua tela seja levemente diferente,
+          os <strong>conceitos e objetivos</strong> são os mesmos.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Criar a VM</h3>
+            <ul>
+              <li>Abra o VirtualBox e clique em <strong>Novo</strong>.</li>
+              <li>Nome: <span class="kbd">FGSO-W11-Base</span> (sugestão).</li>
+              <li>Tipo: <strong>Microsoft Windows</strong> • Versão: <strong>Windows 11 (64-bit)</strong> (ou equivalente).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Definir recursos (RAM e CPU)</h3>
+            <ul>
+              <li>RAM: <strong>4096 MB</strong> (4 GB) como base (se o host permitir, 6–8 GB melhora).</li>
+              <li>CPU: <strong>2 núcleos</strong> (se host tiver folga, 4 núcleos pode melhorar).</li>
+              <li>Mantenha margem para o host não travar.</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Regra prática:</strong> não aloque mais de ~50% da RAM do host para a VM.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Criar disco virtual</h3>
+            <ul>
+              <li>Escolha <strong>Criar um disco rígido virtual agora</strong>.</li>
+              <li>Tipo: <strong>VDI</strong> (padrão do VirtualBox).</li>
+              <li>Armazenamento: <strong>Dinâmico</strong> (cresce conforme uso).</li>
+              <li>Tamanho: <strong>64 GB</strong> (mínimo confortável para updates e ferramentas).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Conferir configurações importantes</h3>
+            <ul>
+              <li>Selecione a VM → <strong>Configurações</strong>.</li>
+              <li><strong>Sistema</strong>: confirme a ordem de boot (Óptico antes do Disco, se necessário).</li>
+              <li><strong>Armazenamento</strong>: anexe a ISO do Windows 11 no drive óptico.</li>
+              <li><strong>Rede</strong>: use <strong>NAT</strong> (seguro e simples para laboratório).</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> a ISO no armazenamento garante que a VM inicialize o instalador.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Snapshot (recomendado)</h3>
+            <ul>
+              <li>Antes de iniciar a instalação, crie um snapshot chamado <span class="kbd">05-antes-instalacao</span>.</li>
+              <li>Assim você pode “voltar no tempo” se errar um passo.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="instalacao">
+        <h2>Instalação do Windows 11 (passo a passo — instalador)</h2>
+        <p>
+          A instalação a seguir é para disco vazio (VM nova). Se sua VM já tiver algo instalado, você deverá apagar partições —
+          <strong>neste curso, não faça isso em máquinas reais sem backup</strong>.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Iniciar a VM e dar boot pela ISO</h3>
+            <ul>
+              <li>Clique em <strong>Iniciar</strong> na VM.</li>
+              <li>Se o VirtualBox perguntar a ISO, selecione a ISO do Windows 11.</li>
+              <li>Aguarde a tela de idioma/teclado do instalador.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Idioma, teclado e início</h3>
+            <ul>
+              <li>Escolha idioma e teclado conforme seu laboratório.</li>
+              <li>Clique em <strong>Instalar agora</strong>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Chave de produto e edição</h3>
+            <ul>
+              <li>Se pedir chave, selecione <strong>Não tenho uma chave de produto</strong> (laboratório).</li>
+              <li>Escolha uma edição (recomendado: <strong>Windows 11 Pro</strong> para laboratório técnico).</li>
+            </ul>
+            <div class="callout warn">
+              <strong>Atenção:</strong> instalar a edição errada pode exigir reinstalação para ter recursos de administração.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Termos e tipo de instalação</h3>
+            <ul>
+              <li>Aceite os termos.</li>
+              <li>Selecione <strong>Instalação personalizada (avançada)</strong>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Escolha do disco (VM nova)</h3>
+            <ul>
+              <li>Selecione o disco vazio (geralmente “Unidade 0 Espaço não alocado”).</li>
+              <li>Clique em <strong>Avançar</strong>.</li>
+              <li>O instalador criará as partições necessárias automaticamente.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Cópia de arquivos e reinicializações</h3>
+            <ul>
+              <li>Aguarde copiar e instalar.</li>
+              <li>A VM reiniciará automaticamente.</li>
+              <li>Se aparecer “Pressione qualquer tecla para inicializar do CD/DVD”, <strong>não pressione</strong> (deixe bootar do disco).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Você terminou o instalador.</strong> Agora começa o OOBE (configuração inicial) — onde faremos a instalação sem conta Microsoft.
+        </div>
+      </section>
+
+      <section class="card" id="oobe">
+        <h2>Finalização (OOBE) sem conta Microsoft — método recomendado do curso</h2>
+        <p>
+          Em muitas instalações recentes, o Windows tenta forçar a conexão e login com conta Microsoft.
+          No laboratório, vamos usar um procedimento conhecido para liberar a opção de <strong>conta local</strong>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Quando aplicar:</strong> use este procedimento quando o Windows pedir Internet/conta e você quiser seguir com conta local.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Abrir o terminal no OOBE</h3>
+            <ul>
+              <li>Na tela do OOBE, pressione <span class="kbd">Shift</span> + <span class="kbd">F10</span>.</li>
+              <li>Um Prompt de Comando será aberto.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Executar o comando de bypass</h3>
+            <ul>
+              <li>Digite o comando abaixo e pressione <strong>Enter</strong>:</li>
+            </ul>
+            <pre class="language-bash"><code>OOBE\BYPASSNRO</code></pre>
+            <ul>
+              <li>A máquina reiniciará automaticamente.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Escolher configuração limitada (sem Internet)</h3>
+            <ul>
+              <li>Após reiniciar, avance até aparecer a etapa de rede.</li>
+              <li>Selecione <strong>Não tenho Internet</strong>.</li>
+              <li>Em seguida, clique em <strong>Continuar com configuração limitada</strong>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Criar usuário local</h3>
+            <ul>
+              <li>Crie um nome de usuário local (ex.: <span class="kbd">aluno</span> ou <span class="kbd">fgso</span>).</li>
+              <li>Defina senha (recomendado) e perguntas de segurança, se solicitado.</li>
+              <li>Finalize as telas de privacidade (veja recomendações no próximo tópico).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Resultado esperado:</strong> você entra na área de trabalho com um usuário local, sem precisar de conta Microsoft.
+        </div>
+      </section>
+
+      <section class="card" id="pos">
+        <h2>Pós‑instalação: configurações recomendadas (para laboratório)</h2>
+        <p>
+          Esta etapa não é “enfeite”: ela evita problemas nos próximos capítulos (drivers, updates e desempenho).
+          Faça com calma e marque no checklist.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Configurações iniciais recomendadas</h3>
+            <ul>
+              <li><strong>Nome do PC</strong>: padronize (ex.: <span class="kbd">FGSO-W11-01</span>).</li>
+              <li><strong>Fuso/idioma</strong>: ajuste se necessário (para logs e horários corretos).</li>
+              <li><strong>Windows Update</strong>: verifique atualizações (pode demorar na 1ª vez).</li>
+              <li><strong>Armazenamento</strong>: confira espaço livre no disco.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Privacidade e usabilidade (laboratório)</h3>
+            <ul>
+              <li>Desative opções que você não precisa no laboratório (conforme política local).</li>
+              <li>Mantenha segurança básica ativa (Windows Security).</li>
+              <li>Crie uma pasta de laboratório em <span class="kbd">C:\FGSO</span> (por enquanto).</li>
+              <li><strong>Snapshot</strong> pós‑instalação: <span class="kbd">05-ponto-limpo</span>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Validação rápida (o mínimo para seguir)</h3>
+        <table aria-label="Validação pós-instalação">
+          <thead>
+            <tr>
+              <th>Verificação</th>
+              <th>Como conferir</th>
+              <th>Resultado esperado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Versão do Windows</td>
+              <td>Configurações → Sistema → Sobre</td>
+              <td>Windows 11 instalado</td>
+            </tr>
+            <tr>
+              <td>Usuário local</td>
+              <td>Configurações → Contas</td>
+              <td>Conta local (sem Microsoft)</td>
+            </tr>
+            <tr>
+              <td>Rede (se NAT)</td>
+              <td>Abrir navegador e acessar um site</td>
+              <td>Internet funcionando (opcional)</td>
+            </tr>
+            <tr>
+              <td>Espaço em disco</td>
+              <td>Configurações → Armazenamento</td>
+              <td>Espaço suficiente</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no Cap. 06 você vai redimensionar partições e criar <span class="kbd">D:</span> para dados; no Cap. 07 você usa ferramentas administrativas.
+        </div>
+      </section>
+
+      <section class="card" id="troubleshoot">
+        <h2>Problemas comuns e soluções (sem professor)</h2>
+
+        <details class="block" open>
+          <summary>Problema 1: A VM não dá boot pela ISO <span class="tag">boot</span></summary>
+          <ul>
+            <li>Verifique se a ISO está anexada em <strong>Armazenamento</strong> (drive óptico).</li>
+            <li>Confirme ordem de boot: Óptico antes do Disco.</li>
+            <li>Se necessário, reinicie e use o menu de boot do VirtualBox (quando disponível).</li>
+          </ul>
+        </details>
+
+        <details class="block">
+          <summary>Problema 2: A VM está muito lenta <span class="tag">recursos</span></summary>
+          <ul>
+            <li>Aumente RAM (se o host permitir) e/ou vCPU.</li>
+            <li>Feche programas no host.</li>
+            <li>Verifique se VT-x/AMD-V está habilitado no BIOS/UEFI do host.</li>
+            <li>Use SSD no host, se possível (impacto grande).</li>
+          </ul>
+        </details>
+
+        <details class="block">
+          <summary>Problema 3: Shift+F10 não abre o terminal no OOBE <span class="tag">atalho</span></summary>
+          <ul>
+            <li>Em VM, confirme que o teclado está capturado pela VM (clique dentro da janela).</li>
+            <li>Tente <span class="kbd">Fn</span> + <span class="kbd">Shift</span> + <span class="kbd">F10</span> (alguns notebooks usam Fn).</li>
+            <li>Tente usar o teclado virtual do Windows (caso exista) para enviar F10.</li>
+          </ul>
+        </details>
+
+        <details class="block">
+          <summary>Problema 4: Não aparece “Continuar com configuração limitada” <span class="tag">OOBE</span></summary>
+          <ul>
+            <li>Garanta que você executou <span class="kbd">OOBE\BYPASSNRO</span> e reiniciou.</li>
+            <li>Volte até a etapa de rede e procure “Não tenho Internet”.</li>
+            <li>Se necessário, repita o comando no OOBE (Shift+F10).</li>
+          </ul>
+        </details>
+
+        <div class="callout danger">
+          <strong>Segurança:</strong> não baixe ferramentas aleatórias para “resolver” instalação. Use recursos nativos e, em VM, volte ao snapshot.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (faça sozinho — sem resposta pronta)</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Padronização</h3>
+            <p>Crie duas VMs: <span class="kbd">FGSO-W11-Base</span> e <span class="kbd">FGSO-W11-Teste</span>. Compare RAM/CPU e documente a diferença percebida.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Evidências</h3>
+            <p>Registre 8 prints obrigatórios: criação da VM, ISO anexada, tela “Instalar agora”, escolha de edição, tela de partições, OOBE, comando executado, área de trabalho.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Snapshot com método</h3>
+            <p>Crie snapshots <span class="kbd">05-antes-instalacao</span> e <span class="kbd">05-ponto-limpo</span>. Explique a diferença entre eles e quando usar cada um.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente realizou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>O que é OOBE e por que ele existe no processo de instalação?</li>
+          <li>Qual a diferença entre NAT e Bridge em VMs? Qual é mais seguro para laboratório?</li>
+          <li>Por que partições EFI/MSR/Recuperação são criadas automaticamente?</li>
+          <li>Quais riscos existem ao usar a mesma senha fraca em laboratórios?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo06.html">Capítulo 06</a> você vai trabalhar discos/partições e criar um volume de dados.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 05 (revisado e ampliado) • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Por que usar uma máquina virtual (VM) para instalar o Windows no laboratório?',
+        options: [
+          'Porque é sempre mais rápido que instalar em máquina real.',
+          'Porque isola o ambiente e reduz risco de danificar o sistema do host.',
+          'Porque elimina a necessidade de ISO.',
+          'Porque dispensa qualquer configuração de rede.',
+          'Porque impede atualizações.'
+        ],
+        correct: 1,
+        why: 'VM permite testar e errar com segurança: isolamento e repetibilidade (snapshots) são ideais para laboratório.'
+      },
+      {
+        q: '2) O que é uma ISO no contexto da instalação do Windows?',
+        options: [
+          'Um driver de placa de vídeo.',
+          'Um arquivo de texto com configurações.',
+          'Uma imagem de instalação (como um DVD digital).',
+          'Um antivírus do Windows.',
+          'Um tipo de usuário do sistema.'
+        ],
+        correct: 2,
+        why: 'ISO é uma imagem de instalação. A VM faz boot nela para iniciar o instalador.'
+      },
+      {
+        q: '3) Qual opção de rede é mais recomendada para laboratório em VM (por simplicidade e segurança)?',
+        options: [
+          'Bridge',
+          'NAT',
+          'Sem rede sempre',
+          'Rede pública obrigatória',
+          'Somente Wi‑Fi físico'
+        ],
+        correct: 1,
+        why: 'NAT costuma ser mais simples e reduz exposição da VM na rede externa.'
+      },
+      {
+        q: '4) Qual tipo de instalação é recomendado para VM nova (disco vazio)?',
+        options: [
+          'Atualização',
+          'Instalação personalizada (avançada)',
+          'Reparo automático',
+          'Somente modo de segurança',
+          'Instalação por USB física obrigatória'
+        ],
+        correct: 1,
+        why: 'Em VM nova, “Instalação personalizada” permite usar o disco vazio e deixar o instalador criar partições automaticamente.'
+      },
+      {
+        q: '5) Em que etapa ocorre o bypass da conta Microsoft neste curso?',
+        options: [
+          'Antes de criar a VM',
+          'Durante a cópia de arquivos do instalador',
+          'Durante o OOBE (configuração inicial)',
+          'Após instalar drivers',
+          'Somente após entrar no desktop'
+        ],
+        correct: 2,
+        why: 'O bypass é feito no OOBE, quando o Windows pede rede/conta.'
+      },
+      {
+        q: '6) Qual comando é usado no terminal do OOBE para permitir seguir sem conta Microsoft?',
+        options: [
+          'ipconfig',
+          'msconfig',
+          'OOBE\\BYPASSNRO',
+          'format c:',
+          'netsh winsock reset'
+        ],
+        correct: 2,
+        why: 'O comando OOBE\\BYPASSNRO reinicia e libera a opção de configuração limitada (conta local) em muitos cenários de instalação.'
+      },
+      {
+        q: '7) Qual atalho abre o Prompt de Comando no OOBE (em geral)?',
+        options: [
+          'Ctrl + Alt + Del',
+          'Alt + Tab',
+          'Shift + F10',
+          'Win + E',
+          'F2'
+        ],
+        correct: 2,
+        why: 'Shift + F10 abre o terminal no OOBE. Em notebooks pode ser necessário Fn + Shift + F10.'
+      },
+      {
+        q: '8) Por que é recomendável criar um snapshot “ponto limpo” após a instalação?',
+        options: [
+          'Para nunca mais precisar atualizar.',
+          'Para voltar rapidamente a um estado funcional antes de práticas que podem quebrar a VM.',
+          'Para aumentar a velocidade da internet.',
+          'Para remover o Windows Defender.',
+          'Para reduzir o tamanho do disco automaticamente.'
+        ],
+        correct: 1,
+        why: 'Snapshot “ponto limpo” permite reverter rapidamente erros e repetir atividades sem reinstalar tudo.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise as seções VirtualBox e OOBE.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap05_checklist_v2';
+    const checklistItems = [
+      { id:'c1', title:'Tenho a ISO do Windows 11 e o VirtualBox instalados.', note:'ISO localizada e VirtualBox funcionando.' },
+      { id:'c2', title:'Criei a VM com nome padronizado e recursos coerentes (RAM/CPU/disco).', note:'Ex.: 4GB RAM, 2 vCPU, 64GB disco.' },
+      { id:'c3', title:'Anexei a ISO no armazenamento e iniciei a VM dando boot corretamente.', note:'Instalador abriu.' },
+      { id:'c4', title:'Fiz instalação personalizada em disco vazio e deixei o instalador criar partições.', note:'Sem apagar partições em máquina real.' },
+      { id:'c5', title:'No OOBE, abri o terminal e executei OOBE\\BYPASSNRO.', note:'Shift+F10 (ou Fn+Shift+F10).' },
+      { id:'c6', title:'Escolhi “Não tenho Internet” e “configuração limitada”, criando usuário local.', note:'Conta local ativa.' },
+      { id:'c7', title:'Validei versão/conta e fiz configurações iniciais recomendadas.', note:'Configurações → Sistema → Sobre / Contas.' },
+      { id:'c8', title:'Criei snapshot pós-instalação (ponto limpo) para próximos capítulos.', note:'Ex.: 05-ponto-limpo.' },
+      { id:'c9', title:'Registrei evidências (prints) do processo.', note:'Pelo menos 8 prints sugeridos.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

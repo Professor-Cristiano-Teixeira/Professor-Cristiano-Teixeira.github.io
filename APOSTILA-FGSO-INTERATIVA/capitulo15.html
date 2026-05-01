@@ -1,0 +1,861 @@
+<!-- arquivo: capitulo15.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 15 — Scripts para Suporte: .BAT (1/3) + PowerShell (2/3) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 15 da Apostila FGSO: estrutura essencial para criação de scripts voltados a suporte. 1/3 focado em scripts .BAT (CMD) e 2/3 em scripts PowerShell (PS1). Passo a passo, padrões de logging, validação, rollback, segurança (ExecutionPolicy), atividades, quiz reduzido (5 questões) e checklist." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);}    
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.75); color: var(--text); box-shadow: 0 10px 22px rgba(0,0,0,.25); font-size: 13px;}
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; height: fit-content; position:sticky; top: 74px;}
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 15 • Scripts (.BAT 1/3) + PowerShell (2/3)</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo14.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo16.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 15</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">📜 Scripts .BAT (1/3)</span>
+        <span class="pill">⚡ Scripts PowerShell (2/3)</span>
+        <span class="pill">🧾 Logs, validação e rollback</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos de script (segurança e padrão)</span></a></li>
+        <li><a href="#bat"><span class="n">03</span><span class="t">Scripts .BAT (1/3): estrutura essencial</span></a></li>
+        <li><a href="#ps"><span class="n">04</span><span class="t">Scripts PowerShell (2/3): estrutura essencial</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo prático (BAT + PS) com evidências</span></a></li>
+        <li><a href="#atividades"><span class="n">06</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">07</span><span class="t">Quiz (5 questões)</span></a></li>
+        <li><a href="#checklist"><span class="n">08</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">09</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Regra do capítulo:</strong> scripts de suporte devem gerar <strong>log</strong> e ser <strong>reversíveis</strong> (rollback).
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 15 — Scripts para Suporte: .BAT (1/3) + PowerShell (2/3)</h1>
+        <p>
+          Agora você vai dar o próximo passo: transformar rotinas repetitivas de suporte em <strong>scripts</strong>.
+          A ideia não é “virar programador”, e sim aprender um padrão seguro de automação:
+          <strong>entrada</strong> → <strong>checagem</strong> → <strong>execução</strong> → <strong>log</strong> → <strong>validação</strong> → <strong>rollback</strong>.
+          Vamos dividir o foco: <strong>1/3</strong> em scripts <strong>.BAT</strong> (legado, mas muito presente) e <strong>2/3</strong> em scripts <strong>PowerShell</strong> (padrão moderno).
+        </p>
+        <div class="chips">
+          <span class="chip">Estrutura padrão (SOP → script)</span>
+          <span class="chip">Logs (TXT/CSV)</span>
+          <span class="chip">Tratamento de erro</span>
+          <span class="chip">Execução segura</span>
+          <span class="chip">Reversão (rollback)</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Criar scripts <strong>.BAT</strong> simples com log, variáveis e checagens.</li>
+              <li>Criar scripts <strong>.PS1</strong> com parâmetros, funções, erros e exportação (TXT/CSV).</li>
+              <li>Aplicar o padrão de automação: evidência antes/depois + validação.</li>
+              <li>Organizar entregáveis em pasta padrão (<span class="kbd">C:\FGSO\cap15</span>).</li>
+              <li>Explicar riscos básicos: privilégios, execução de scripts e rollback.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>CMD essencial (Cap. 13) e PowerShell essencial (Cap. 14).</li>
+              <li>Processos/serviços (Cap. 09), desempenho (Cap. 10) e backup (Cap. 11).</li>
+              <li>Conhecimento básico de pastas e logs (Cap. 12/13/14).</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> seus SOPs do Playbook (Cap. 12) podem virar scripts de apoio com o mesmo padrão.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos de script (segurança e padrão)</h2>
+
+        <h3>Automação segura (padrão)</h3>
+        <p>
+          Um script de suporte não pode “fazer coisas escondidas”. Ele precisa ser previsível e auditável.
+          <strong>Onde vou aplicar:</strong> nos dois scripts (BAT e PS) você vai criar uma seção de <em>log</em> e uma validação simples.
+        </p>
+
+        <h3>Privilégios e impacto</h3>
+        <p>
+          Alguns comandos exigem administrador. Quanto maior o privilégio, maior o risco.
+          <strong>Onde vou aplicar:</strong> no passo a passo você vai executar scripts em modo normal e entender quando precisa elevar.
+        </p>
+
+        <h3>Rollback (como desfazer)</h3>
+        <p>
+          Rollback é o plano de reversão caso algo dê errado.
+          <strong>Onde vou aplicar:</strong> seus scripts vão registrar o estado anterior (ou pelo menos orientar como reverter).
+        </p>
+
+        <h3>Execução de scripts (ExecutionPolicy)</h3>
+        <p>
+          PowerShell tem políticas de execução para reduzir risco de scripts maliciosos.
+          <strong>Onde vou aplicar:</strong> você vai consultar a política e usar alternativas seguras (ex.: executar um script local em laboratório).
+        </p>
+
+        <div class="callout warn">
+          <strong>Regra:</strong> scripts sempre geram log em pasta fixa e têm cabeçalho com versão e objetivo.
+        </div>
+      </section>
+
+      <!-- 1/3 BAT -->
+      <section class="card" id="bat">
+        <h2>Scripts .BAT (1/3) — estrutura essencial (CMD)</h2>
+        <p>
+          Scripts <strong>.BAT</strong> ainda são comuns em suporte por compatibilidade e simplicidade.
+          Aqui você aprende o mínimo que realmente importa: <strong>cabeçalho</strong>, <strong>variáveis</strong>, <strong>if</strong>, <strong>errorlevel</strong>, <strong>log</strong> e <strong>caminhos</strong>.
+          <strong>Onde vou aplicar:</strong> você vai criar um BAT que coleta evidências e faz backup simples com robocopy.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Estrutura base (template)</h3>
+            <pre class="language-batch"><code>@echo off
+setlocal EnableExtensions EnableDelayedExpansion
+
+REM ===== METADADOS =====
+REM Nome: suporte_coleta.bat
+REM Versao: 1.0
+REM Objetivo: coletar evidencias e salvar logs
+REM Autor: ______
+
+REM ===== CONFIG =====
+set "BASE=C:\FGSO\cap15"
+set "LOG=%BASE%\logs"
+
+if not exist "%LOG%" mkdir "%LOG%"
+
+echo [%DATE% %TIME%] Iniciando... &gt;&gt; "%LOG%\execucao.log"
+
+REM ===== EXECUCAO =====
+whoami &gt; "%LOG%\usuario.txt"
+ipconfig /all &gt; "%LOG%\ipconfig.txt"
+
+REM ===== STATUS =====
+if %errorlevel% neq 0 (
+  echo [%DATE% %TIME%] ERRO: comando falhou. &gt;&gt; "%LOG%\execucao.log"
+  exit /b 1
+)
+
+echo [%DATE% %TIME%] Finalizado OK. &gt;&gt; "%LOG%\execucao.log"
+exit /b 0</code></pre>
+          </div>
+          <div class="box">
+            <h3>Padrões que você deve lembrar</h3>
+            <ul>
+              <li><span class="kbd">@echo off</span>: reduz ruído.</li>
+              <li><span class="kbd">setlocal</span>: evita “sujar” variáveis do sistema.</li>
+              <li><span class="kbd">set "VAR=valor"</span>: evita erro com espaços.</li>
+              <li><span class="kbd">if not exist</span>: checa pasta/arquivo antes.</li>
+              <li><span class="kbd">%errorlevel%</span>: checa se o comando falhou.</li>
+              <li><span class="kbd">&gt;&gt;</span>: append no log (auditoria).</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> no passo a passo você vai salvar logs e verificar a saída com errorlevel.
+            </div>
+          </div>
+        </div>
+
+        <details class="block">
+          <summary>Exemplo BAT: backup rápido com robocopy (com log) <span class="tag">uso real</span></summary>
+          <pre class="language-batch"><code>@echo off
+setlocal
+set "SRC=%USERPROFILE%\Documents"
+set "DST=D:\DADOS\Backups\Documents"
+set "LOG=D:\DADOS\Backups\logs"
+
+if not exist "%LOG%" mkdir "%LOG%"
+
+robocopy "%SRC%" "%DST%" /E /R:2 /W:2 /LOG+:"%LOG%\robocopy_docs.log"
+
+if %errorlevel% GEQ 8 (
+  echo Falha no robocopy. Verifique o log.
+  exit /b 1
+)
+
+echo Backup concluido. Verifique %LOG%\robocopy_docs.log
+exit /b 0</code></pre>
+          <p class="muted">Observação: códigos do robocopy variam. Neste curso, foque em: log sem “ERROR” + resultado esperado + restore testado (Cap. 11).</p>
+        </details>
+      </section>
+
+      <!-- 2/3 PowerShell -->
+      <section class="card" id="ps">
+        <h2>Scripts PowerShell (2/3) — estrutura essencial (PS1)</h2>
+        <p>
+          PowerShell é a base moderna do suporte: trabalha com objetos, filtros e exportação.
+          Aqui vamos além do “comando solto” e entramos na <strong>estrutura de script</strong>: parâmetros, funções, logging, erros e validação.
+          <strong>Onde vou aplicar isso:</strong> você vai criar um script PS1 que coleta evidências (processos/serviços/rede/eventos) e gera relatório.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Template PS1 (mínimo profissional)</h3>
+            <pre class="language-powershell"><code>&lt;#
+Nome: suporte_coleta.ps1
+Versao: 1.0
+Objetivo: coletar evidencias e gerar relatórios (TXT/CSV)
+Autor: ______
+#&gt;
+
+[CmdletBinding()]
+param(
+  [string]$Base = "C:\FGSO\cap15",
+  [int]$TopN = 10
+)
+
+$LogDir = Join-Path $Base 'logs'
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+
+function Write-Log {
+  param([string]$Message)
+  $line = "[{0}] {1}" -f (Get-Date), $Message
+  $line | Out-File (Join-Path $LogDir 'execucao.log') -Append -Encoding UTF8
+}
+
+try {
+  Write-Log "Início da coleta"
+
+  # Processos (Top por CPU e RAM)
+  Get-Process | Sort-Object CPU -Descending | Select-Object -First $TopN Name,Id,CPU,WS |
+    Export-Csv -NoTypeInformation -Encoding UTF8 (Join-Path $LogDir 'top_cpu.csv')
+
+  Get-Process | Sort-Object WS -Descending | Select-Object -First $TopN Name,Id,WS |
+    Export-Csv -NoTypeInformation -Encoding UTF8 (Join-Path $LogDir 'top_mem.csv')
+
+  # Serviços
+  Get-Service | Select-Object Name,DisplayName,Status,StartType |
+    Export-Csv -NoTypeInformation -Encoding UTF8 (Join-Path $LogDir 'servicos.csv')
+
+  # Rede
+  Get-NetIPConfiguration | Format-List | Out-File (Join-Path $LogDir 'net_ipconfig.txt')
+  Get-DnsClientServerAddress | Out-File (Join-Path $LogDir 'dns_servers.txt')
+
+  # Eventos (últimos 30)
+  Get-WinEvent -LogName System -MaxEvents 30 |
+    Select-Object TimeCreated,Id,LevelDisplayName,ProviderName,Message |
+    Export-Csv -NoTypeInformation -Encoding UTF8 (Join-Path $LogDir 'eventos_sistema.csv')
+
+  Write-Log "Coleta finalizada com sucesso"
+}
+catch {
+  Write-Log ("ERRO: {0}" -f $_.Exception.Message)
+  throw
+}</code></pre>
+            <p class="muted">Esse template já é suficiente para virar um “script de evidências” no seu Playbook (Cap. 12).</p>
+          </div>
+          <div class="box">
+            <h3>O que esse template te ensina</h3>
+            <ul>
+              <li><strong>param()</strong>: entradas do script (Base, TopN).</li>
+              <li><strong>Join-Path</strong>: caminho seguro (evita erros com barras).</li>
+              <li><strong>Write-Log</strong>: função de log padronizado.</li>
+              <li><strong>try/catch</strong>: captura erros e registra.</li>
+              <li><strong>Export-Csv/Out-File</strong>: evidência pronta para auditoria.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> no passo a passo você vai criar, executar e validar o pacote de logs.
+            </div>
+          </div>
+        </div>
+
+        <details class="block" open>
+          <summary>Execução segura e ExecutionPolicy <span class="tag">importante</span></summary>
+          <p>
+            Se o PowerShell bloquear scripts, isso está relacionado à política de execução. No laboratório, o foco é entender e executar com método.
+            Não é necessário “liberar tudo”.
+          </p>
+          <pre class="language-powershell"><code># Ver política atual
+Get-ExecutionPolicy -List
+
+# (Laboratório) Para permitir scripts locais do usuário, sem liberar geral:
+# Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+</code></pre>
+          <div class="callout warn">
+            <strong>Cuidado:</strong> não altere políticas em ambiente real sem orientação institucional.
+          </div>
+        </details>
+
+        <details class="block">
+          <summary>Estrutura recomendada (nível suporte) <span class="tag">checklist</span></summary>
+          <ul>
+            <li><strong>Cabeçalho</strong> (nome, versão, objetivo, autor)</li>
+            <li><strong>param()</strong> para entradas (pastas, quantidade, modo)</li>
+            <li><strong>Checagens</strong> (existência de pasta, privilégios se necessário)</li>
+            <li><strong>Logs</strong> (Write-Log ou Start-Transcript)</li>
+            <li><strong>Execução</strong> (coleta/ação)</li>
+            <li><strong>Validação</strong> (arquivos existem? tamanho? conteúdo?)</li>
+            <li><strong>Rollback</strong> (quando aplicável, orientar ou registrar estado anterior)</li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo prático (BAT + PowerShell) — criar, executar e validar</h2>
+        <p>
+          Você vai criar uma pasta de trabalho, escrever 1 BAT e 1 PS1 e gerar um pacote de evidências.
+          Pasta do capítulo: <span class="kbd">C:\FGSO\cap15</span>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Ambiente recomendado:</strong> VM. Se estiver em máquina real, não rode nada destrutivo. Aqui é coleta e backup controlado.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Preparar a pasta do capítulo</h3>
+            <pre class="language-bash"><code>mkdir C:\FGSO\cap15
+mkdir C:\FGSO\cap15\scripts
+mkdir C:\FGSO\cap15\logs</code></pre>
+            <ul>
+              <li>Crie um arquivo <span class="kbd">leia-me.txt</span> com objetivo e data (pode ser pelo CMD ou Notepad).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Criar o BAT (coleta rápida) e executar</h3>
+            <ul>
+              <li>Abra o Bloco de Notas e salve como: <span class="kbd">C:\FGSO\cap15\scripts\coleta.bat</span></li>
+              <li>Conteúdo sugerido:</li>
+            </ul>
+            <pre class="language-batch"><code>@echo off
+setlocal
+set "BASE=C:\FGSO\cap15"
+set "LOG=%BASE%\logs"
+if not exist "%LOG%" mkdir "%LOG%"
+
+echo [%DATE% %TIME%] BAT: inicio &gt;&gt; "%LOG%\bat_execucao.log"
+whoami &gt; "%LOG%\bat_usuario.txt"
+ipconfig /all &gt; "%LOG%\bat_ipconfig.txt"
+tasklist &gt; "%LOG%\bat_tasklist.txt"
+
+echo [%DATE% %TIME%] BAT: fim &gt;&gt; "%LOG%\bat_execucao.log"
+exit /b 0</code></pre>
+            <ul>
+              <li>Execute no CMD:</li>
+            </ul>
+            <pre class="language-bash"><code>C:\FGSO\cap15\scripts\coleta.bat</code></pre>
+            <ul>
+              <li>Valide com <span class="kbd">dir</span> se os arquivos foram criados em <span class="kbd">C:\FGSO\cap15\logs</span>.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Criar o PS1 (coleta completa) e executar</h3>
+            <ul>
+              <li>Abra o PowerShell e crie o arquivo: <span class="kbd">C:\FGSO\cap15\scripts\coleta.ps1</span></li>
+              <li>Use o template da seção PowerShell (ajuste se necessário).</li>
+              <li>Execute:</li>
+            </ul>
+            <pre class="language-powershell"><code>Set-Location C:\FGSO\cap15\scripts
+# Executar apontando Base para C:\FGSO\cap15
+.\coleta.ps1 -Base "C:\FGSO\cap15" -TopN 10</code></pre>
+            <div class="callout warn">
+              <strong>Se der bloqueio:</strong> confira <span class="kbd">Get-ExecutionPolicy -List</span>. Em laboratório, use CurrentUser RemoteSigned apenas se necessário.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Validação (antes/depois e consistência)</h3>
+            <ul>
+              <li>Confirme que o PS gerou CSVs e TXTs (top_cpu.csv, servicos.csv, eventos_sistema.csv).</li>
+              <li>Abra 1 arquivo CSV e confirme que tem cabeçalho e linhas.</li>
+              <li>Registre no <span class="kbd">leia-me.txt</span> o que foi gerado e onde está.</li>
+            </ul>
+            <pre class="language-powershell"><code>Get-ChildItem C:\FGSO\cap15\logs
+Import-Csv C:\FGSO\cap15\logs\top_cpu.csv | Select-Object -First 3</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Como isso vira entregável (Playbook)</h3>
+            <ul>
+              <li>No Playbook (Cap. 12), adicione um item: “Script de coleta de evidências”.</li>
+              <li>Inclua: objetivo, como executar, onde salva logs, como validar e como anexar evidências.</li>
+            </ul>
+            <div class="callout">
+              <strong>Resultado:</strong> você transforma SOP em script e ganha velocidade de suporte + qualidade de auditoria.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — sem entregar o projeto completo</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — BAT com menu</h3>
+            <p>Crie um BAT com menu simples: (1) ipconfig, (2) tasklist, (3) netstat, salvando cada saída em logs/ com data/hora.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — PS1 com funções</h3>
+            <p>Quebre seu script PS em funções: Get-TopProcess, Get-ServicesReport, Get-NetworkReport, Get-EventReport. Logue início/fim de cada função.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Validação automática</h3>
+            <p>No PS1, após gerar logs, valide se arquivos existem e têm tamanho &gt; 0. Se falhar, registre erro e retorne exit code.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo — 5 questões)</h2>
+        <p class="muted">Quiz reduzido para caber mais passo a passo. (5 questões)</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre script BAT (texto) e PowerShell (objetos) na prática?</li>
+          <li>O que é ExecutionPolicy e por que existe?</li>
+          <li>Quais cuidados tomar ao automatizar ações administrativas?</li>
+          <li>Como versionar scripts (v1.0, v1.1) e documentar mudanças?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo16.html">Capítulo 16</a> você vai fechar o 4º bimestre com o PI final e uma consolidação de automação e rede/usuários/políticas.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 15 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ ===== (5 questões)
+    const quizData = [
+      {
+        q: '1) Em scripts de suporte, por que é importante gerar um log?',
+        options: [
+          'Para ocupar espaço em disco.',
+          'Para auditoria: provar o que foi executado e quando.',
+          'Porque o Windows exige.',
+          'Porque deixa o PC mais rápido.',
+          'Não faz diferença.'
+        ],
+        correct: 1,
+        why: 'Logs permitem auditoria, rastreio de erros e evidência (antes/depois), essencial em suporte.'
+      },
+      {
+        q: '2) No BAT, qual prática ajuda a evitar problemas com espaços em caminhos?',
+        options: [
+          'Nunca usar pastas com espaço.',
+          'Usar set VAR=valor sem aspas.',
+          'Usar set "VAR=valor" e aspas nos caminhos.',
+          'Usar somente letras maiúsculas.',
+          'Usar apenas C:\\Windows.'
+        ],
+        correct: 2,
+        why: 'O padrão set "VAR=valor" e aspas ao redor de caminhos evita erros com espaços e caracteres especiais.'
+      },
+      {
+        q: '3) No PowerShell, qual recurso permite receber entradas como parâmetros?',
+        options: ['echo', 'param()', 'dir', 'cls', 'type'],
+        correct: 1,
+        why: 'param() define parâmetros do script (ex.: Base e TopN), tornando o script reutilizável.'
+      },
+      {
+        q: '4) Qual é a forma correta de tratar erro e registrar no PowerShell?',
+        options: [
+          'Ignorar erros para não assustar.',
+          'Usar try/catch e registrar mensagem no log.',
+          'Reiniciar o PC sempre.',
+          'Apagar arquivos de log.',
+          'Executar como administrador sempre, sem checar.'
+        ],
+        correct: 1,
+        why: 'try/catch captura exceções, registra o erro e permite resposta controlada (falha segura).' 
+      },
+      {
+        q: '5) Qual sequência representa automação segura (padrão do capítulo)?',
+        options: [
+          'Mudança → evidência → validação.',
+          'Evidência antes → execução → log → validação → rollback.',
+          'Apenas executar comandos rápido.',
+          'Formatar o PC para resolver.',
+          'Desativar serviços aleatoriamente.'
+        ],
+        correct: 1,
+        why: 'O padrão correto reduz risco e facilita auditoria e reversão: evidência antes, execução com log, validação e rollback.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise padrão de automação segura e logs.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap15_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei a pasta C:\\FGSO\\cap15 com scripts/ e logs/.', note:'Estrutura do capítulo pronta.' },
+      { id:'c2', title:'Criei e executei um BAT de coleta, gerando arquivos em logs/.', note:'bat_execucao.log e evidências criadas.' },
+      { id:'c3', title:'Entendi o uso de setlocal, variáveis e aspas em caminhos no BAT.', note:'Evita erros com espaços.' },
+      { id:'c4', title:'Criei um PS1 com param(), função Write-Log e try/catch.', note:'Estrutura mínima profissional.' },
+      { id:'c5', title:'Executei o PS1 e gerei CSV/TXT em logs/.', note:'top_cpu.csv, servicos.csv, net_ipconfig.txt...' },
+      { id:'c6', title:'Validei um CSV com Import-Csv e confirmei conteúdo.', note:'Consistência dos dados.' },
+      { id:'c7', title:'Sei explicar ExecutionPolicy e quando ajustar (apenas laboratório).', note:'Get-ExecutionPolicy -List.' },
+      { id:'c8', title:'Consigo descrever como anexar o script ao Playbook (Cap. 12) com evidências.', note:'Objetivo + execução + validação.' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', updateChecklistProgress);
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

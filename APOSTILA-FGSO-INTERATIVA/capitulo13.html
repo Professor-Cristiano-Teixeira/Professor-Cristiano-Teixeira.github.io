@@ -1,0 +1,864 @@
+<!-- arquivo: capitulo13.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 13 — Fundamentos de Rede + CMD Essencial (GUI + Linha de Comando) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 13 da Apostila FGSO: início do 4º bimestre. Fundamentos de rede no Windows 11 (endereçamento, DNS, gateway, testes) e um guia prático de CMD essencial (navegação, arquivos, redirecionamento, variáveis). Inclui passo a passo, tabela de comandos já vistos na apostila, atividades, quiz e checklist." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);}    
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.75); color: var(--text); box-shadow: 0 10px 22px rgba(0,0,0,.25); font-size: 13px;}
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; height: fit-content; position:sticky; top: 74px;}
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    /* Main */
+    .main{display:flex; flex-direction:column; gap:18px;}
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 980px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+    .box{border: 1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+    .callout.danger{border-left-color: rgba(255,107,107,.95)}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Steps */
+    .steps{counter-reset: step; display:grid; gap: 12px;}
+    .step{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .step h3{margin:0 0 8px 0; font-size: 14px;}
+    .step h3:before{counter-increment: step; content: "Passo " counter(step) " — "; color:#dbe7ff;}
+    .step ul{margin:8px 0 0 18px}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top;}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background: rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 13 • Rede básica + CMD essencial + tabela de comandos</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo12.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo14.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 13</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🌐 Rede (fundamentos)</span>
+        <span class="pill">⌨️ CMD essencial (passo a passo)</span>
+        <span class="pill">📋 Tabela de comandos (revisão)</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#conceitos"><span class="n">02</span><span class="t">Conceitos de rede (rápido e aplicável)</span></a></li>
+        <li><a href="#cmd-essencial"><span class="n">03</span><span class="t">CMD essencial: passo a passo</span></a></li>
+        <li><a href="#tabela"><span class="n">04</span><span class="t">Tabela: comandos já vistos na apostila</span></a></li>
+        <li><a href="#passo"><span class="n">05</span><span class="t">Passo a passo prático (rede + logs)</span></a></li>
+        <li><a href="#atividades"><span class="n">06</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">07</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">08</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">09</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Dica:</strong> este capítulo é “base de operação”. Se você domina CMD + coleta de evidências, você resolve problemas muito mais rápido.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 13 — Fundamentos de Rede + CMD Essencial (GUI + Linha de Comando)</h1>
+        <p>
+          Bem-vindo ao <strong>4º bimestre</strong>. Antes de avançar para rede, usuários e políticas, você precisa dominar duas coisas:
+          (1) os <strong>fundamentos de rede</strong> (IP, gateway, DNS) e (2) o <strong>CMD essencial</strong> para navegar, criar evidências e executar comandos com segurança.
+          Este capítulo traz um passo a passo de CMD (o que faltava para “operar” de verdade) e uma tabela revisando todos os comandos já apresentados na apostila.
+        </p>
+        <div class="chips">
+          <span class="chip">IP • Gateway • DNS</span>
+          <span class="chip">Redirecionamento ( &gt; &gt;&gt; | )</span>
+          <span class="chip">Arquivos/Pastas (cd/dir/mkdir)</span>
+          <span class="chip">Diagnóstico (ipconfig/ping/tracert)</span>
+          <span class="chip">Logs e evidências</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos de aprendizagem e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Explicar (e identificar) <strong>IP</strong>, <strong>máscara</strong>, <strong>gateway</strong> e <strong>DNS</strong> em um PC Windows.</li>
+              <li>Executar comandos básicos do <strong>CMD</strong>: navegar, criar pastas, copiar/mover arquivos, ver conteúdo e salvar logs.</li>
+              <li>Usar redirecionamento e pipes (<span class="kbd">&gt;</span>, <span class="kbd">&gt;&gt;</span>, <span class="kbd">|</span>) para criar evidências.</li>
+              <li>Rodar diagnóstico básico de rede (ping, tracert, ipconfig, netstat) e interpretar resultado.</li>
+              <li>Consultar a tabela de comandos já vistos e usar como “cola” de suporte.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Capítulos 05–12 (principalmente 09–11).</li>
+              <li>Ter acesso a um Windows 11 (VM ou máquina real).</li>
+              <li>Conta local com permissões administrativas (para alguns comandos avançados).</li>
+            </ul>
+            <div class="callout">
+              <strong>Observação:</strong> CMD não substitui PowerShell, mas é essencial para operar em qualquer Windows e entender instruções de suporte.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="conceitos">
+        <h2>Conceitos de rede (rápido e aplicável)</h2>
+
+        <h3>Endereço IP (IPv4)</h3>
+        <p>
+          O IP é o “endereço” do seu computador na rede. Em redes locais comuns, ele costuma ser privado (ex.: 192.168.x.x).
+          <strong>Onde vou aplicar:</strong> em <span class="kbd">ipconfig</span> você vai identificar o IPv4 do seu adaptador.
+        </p>
+
+        <h3>Máscara / Prefixo</h3>
+        <p>
+          A máscara define o tamanho da rede local (ex.: 255.255.255.0). Ela determina quem está na “mesma rede”.
+          <strong>Onde vou aplicar:</strong> também aparece no <span class="kbd">ipconfig /all</span>.
+        </p>
+
+        <h3>Gateway padrão</h3>
+        <p>
+          Gateway é a “saída” da rede local para outras redes (ex.: Internet). Em geral é o roteador.
+          <strong>Onde vou aplicar:</strong> se você consegue pingar o gateway mas não navega, o problema pode estar depois do roteador (DNS/Internet).
+        </p>
+
+        <h3>DNS</h3>
+        <p>
+          DNS traduz nomes (www...) para IP. Às vezes a Internet “parece lenta” porque o DNS está falhando.
+          <strong>Onde vou aplicar:</strong> compare <span class="kbd">ping 8.8.8.8</span> (IP) com <span class="kbd">ping www.microsoft.com</span> (nome).
+        </p>
+
+        <div class="callout">
+          <strong>Diagnóstico rápido (método):</strong> IP ok? → Gateway responde? → DNS resolve? → Rota ok? (ping/tracert).
+        </div>
+      </section>
+
+      <section class="card" id="cmd-essencial">
+        <h2>CMD essencial: passo a passo (o mínimo para operar instruções)</h2>
+        <p>
+          Esta é a parte que normalmente falta: saber se mover no CMD e gerar evidências.
+          Você vai praticar: <strong>navegação</strong>, <strong>arquivos/pastas</strong>, <strong>redirecionamento</strong>, <strong>variáveis</strong> e <strong>ajuda</strong>.
+        </p>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Abrir CMD e entender o prompt</h3>
+            <ul>
+              <li>Abra: Menu Iniciar → digite <strong>cmd</strong> → Enter.</li>
+              <li>O prompt mostra algo como: <span class="kbd">C:\\Users\\seuUsuario&gt;</span> (isso é o diretório atual).</li>
+              <li><strong>Onde vou aplicar:</strong> saber o diretório atual evita salvar evidências no lugar errado.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Ajuda e documentação rápida</h3>
+            <ul>
+              <li>Use <span class="kbd">help</span> para listar comandos.</li>
+              <li>Use <span class="kbd">comando /?</span> para ver parâmetros.</li>
+            </ul>
+            <pre class="language-bash"><code>help
+ipconfig /?
+robocopy /?
+</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Navegar por pastas (cd, dir)</h3>
+            <ul>
+              <li><span class="kbd">dir</span> lista arquivos/pastas.</li>
+              <li><span class="kbd">cd</span> muda de diretório.</li>
+              <li><span class="kbd">cd ..</span> volta um nível.</li>
+              <li><span class="kbd">cd \</span> vai para a raiz do disco.</li>
+            </ul>
+            <pre class="language-bash"><code>dir
+cd ..
+cd \
+cd Users
+cd %USERNAME%
+</code></pre>
+            <div class="callout warn">
+              <strong>Dica:</strong> caminhos com espaço exigem aspas: <span class="kbd">cd "Program Files"</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Criar e remover pastas (mkdir, rmdir)</h3>
+            <ul>
+              <li><span class="kbd">mkdir</span> cria pasta.</li>
+              <li><span class="kbd">rmdir</span> remove pasta vazia.</li>
+              <li><span class="kbd">rmdir /s</span> remove pasta com conteúdo (cuidado!).</li>
+            </ul>
+            <pre class="language-bash"><code>mkdir C:\FGSO\cap13
+mkdir C:\FGSO\cap13\logs
+rmdir C:\FGSO\cap13\pasta_vazia</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Criar e ver conteúdo de arquivos (echo, type, more)</h3>
+            <ul>
+              <li><span class="kbd">echo</span> escreve texto.</li>
+              <li><span class="kbd">type</span> exibe o conteúdo de um arquivo.</li>
+              <li><span class="kbd">more</span> pagina a saída (útil para logs grandes).</li>
+            </ul>
+            <pre class="language-bash"><code>echo Relatorio Cap13 &gt; C:\FGSO\cap13\relatorio.txt
+echo Data: %DATE% %TIME% &gt;&gt; C:\FGSO\cap13\relatorio.txt
+type C:\FGSO\cap13\relatorio.txt
+</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Copiar, mover e renomear (copy, move, ren, del)</h3>
+            <ul>
+              <li><span class="kbd">copy</span> copia arquivos.</li>
+              <li><span class="kbd">move</span> move arquivos.</li>
+              <li><span class="kbd">ren</span> renomeia.</li>
+              <li><span class="kbd">del</span> apaga (use com cuidado).</li>
+            </ul>
+            <pre class="language-bash"><code>copy C:\FGSO\cap13\relatorio.txt C:\FGSO\cap13\logs\relatorio_copia.txt
+ren C:\FGSO\cap13\logs\relatorio_copia.txt relatorio_final.txt
+move C:\FGSO\cap13\logs\relatorio_final.txt C:\FGSO\cap13\
+</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Redirecionamento e pipes (essencial para evidências)</h3>
+            <ul>
+              <li><span class="kbd">&gt;</span> cria/substitui arquivo com a saída.</li>
+              <li><span class="kbd">&gt;&gt;</span> adiciona ao final (append).</li>
+              <li><span class="kbd">|</span> envia a saída de um comando para outro (pipe).</li>
+            </ul>
+            <pre class="language-bash"><code>ipconfig /all &gt; C:\FGSO\cap13\logs\ipconfig.txt
+netstat -ano &gt; C:\FGSO\cap13\logs\netstat.txt
+
+tasklist | findstr /i "svchost" &gt; C:\FGSO\cap13\logs\svchosts.txt
+</code></pre>
+            <div class="callout">
+              <strong>Onde vou aplicar isso:</strong> suporte profissional exige evidências em arquivo para relatório e auditoria.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Variáveis de ambiente (para não depender do nome do usuário)</h3>
+            <ul>
+              <li>Variáveis ajudam scripts e comandos a funcionar em qualquer PC.</li>
+              <li>Exemplos: <span class="kbd">%USERNAME%</span>, <span class="kbd">%USERPROFILE%</span>, <span class="kbd">%TEMP%</span>.</li>
+            </ul>
+            <pre class="language-bash"><code>echo Usuario: %USERNAME%
+echo Perfil: %USERPROFILE%
+cd %USERPROFILE%\Documents
+</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Limpar e sair (cls, exit) + boas práticas</h3>
+            <ul>
+              <li><span class="kbd">cls</span> limpa a tela. <span class="kbd">exit</span> fecha o CMD.</li>
+              <li>Boa prática: nunca rode comandos destrutivos (del/rmdir /s) sem conferir o caminho com <span class="kbd">dir</span>.</li>
+            </ul>
+            <pre class="language-bash"><code>cls
+exit</code></pre>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Checklist mental (CMD):</strong> Onde estou? (<span class="kbd">cd</span>) • O que existe aqui? (<span class="kbd">dir</span>) • Para onde vai a saída? (<span class="kbd">&gt;</span>/<span class="kbd">&gt;&gt;</span>)
+        </div>
+      </section>
+
+      <section class="card" id="tabela">
+        <h2>Tabela — comandos já apresentados na apostila e sua função (revisão rápida)</h2>
+        <p class="muted">Use como “cola” de suporte. Tente memorizar o que você usa toda semana e consultar o resto quando precisar.</p>
+
+        <table aria-label="Tabela de comandos da apostila">
+          <thead>
+            <tr>
+              <th>Comando/Ferramenta</th>
+              <th>Tipo</th>
+              <th>Função (resumo)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>OOBE\BYPASSNRO</strong></td><td>CMD (OOBE)</td><td>Permite seguir com configuração limitada/conta local em instalações do Windows 11 (Cap. 05).</td></tr>
+            <tr><td><strong>winver</strong></td><td>CMD/Executar</td><td>Mostra versão/build do Windows (baseline e evidência).</td></tr>
+            <tr><td><strong>taskmgr</strong> / Ctrl+Shift+Esc</td><td>GUI</td><td>Gerenciador de Tarefas: processos, desempenho e inicialização.</td></tr>
+            <tr><td><strong>services.msc</strong></td><td>GUI</td><td>Gerenciar serviços: iniciar/parar, tipo de inicialização, dependências.</td></tr>
+            <tr><td><strong>eventvwr.msc</strong></td><td>GUI</td><td>Visualizador de Eventos: logs do sistema e aplicativos (export .evtx).</td></tr>
+            <tr><td><strong>perfmon</strong></td><td>GUI</td><td>Monitor de Desempenho: contadores, coleta e relatórios.</td></tr>
+            <tr><td><strong>perfmon /rel</strong></td><td>GUI</td><td>Monitor de Confiabilidade: linha do tempo de falhas.</td></tr>
+            <tr><td><strong>resmon</strong></td><td>GUI</td><td>Resource Monitor: detalhes de CPU/RAM/Disco/Rede por processo.</td></tr>
+            <tr><td><strong>devmgmt.msc</strong></td><td>GUI</td><td>Gerenciador de Dispositivos: drivers e alertas de hardware.</td></tr>
+            <tr><td><strong>taskschd.msc</strong></td><td>GUI</td><td>Agendador de Tarefas: tarefas automáticas (logon/horário).</td></tr>
+            <tr><td><strong>msconfig</strong></td><td>GUI</td><td>Diagnóstico de boot (modo seguro/clean boot) — usar com cautela.</td></tr>
+            <tr><td><strong>regedit</strong></td><td>GUI</td><td>Editor do Registro — alto risco sem backup/snapshot.</td></tr>
+            <tr><td><strong>control</strong>, <strong>appwiz.cpl</strong>, <strong>sysdm.cpl</strong></td><td>GUI</td><td>Painel de Controle e atalhos clássicos (programas, sistema, restore).</td></tr>
+
+            <tr><td><strong>tasklist</strong></td><td>CMD</td><td>Lista processos e PIDs (Cap. 09).</td></tr>
+            <tr><td><strong>taskkill</strong></td><td>CMD</td><td>Encerra processos por PID/IM (usar com cuidado).</td></tr>
+            <tr><td><strong>sc query/start/stop</strong></td><td>CMD</td><td>Consulta e controla serviços (Cap. 09).</td></tr>
+            <tr><td><strong>net start/stop</strong></td><td>CMD</td><td>Inicia/para serviços de forma simples (Cap. 09).</td></tr>
+            <tr><td><strong>schtasks</strong></td><td>CMD</td><td>Lista/consulta tarefas agendadas e exporta evidência (Cap. 09).</td></tr>
+            <tr><td><strong>bcdedit</strong></td><td>CMD</td><td>Configuração de boot (apenas leitura nos capítulos; alto risco para escrita).</td></tr>
+
+            <tr><td><strong>sfc /scannow</strong></td><td>CMD (Admin)</td><td>Verifica/repara arquivos do sistema (Cap. 08).</td></tr>
+            <tr><td><strong>DISM /Online /Cleanup-Image /RestoreHealth</strong></td><td>CMD (Admin)</td><td>Repara a imagem do Windows quando SFC não resolve (Cap. 08).</td></tr>
+            <tr><td><strong>chkdsk C: /scan</strong></td><td>CMD (Admin)</td><td>Verifica sistema de arquivos de forma mais segura (Cap. 08).</td></tr>
+
+            <tr><td><strong>typeperf</strong></td><td>CMD</td><td>Coleta contadores de desempenho via CLI (Cap. 10).</td></tr>
+            <tr><td><strong>ipconfig /all</strong></td><td>CMD</td><td>Mostra IP, gateway e DNS (Cap. 10 / 13).</td></tr>
+            <tr><td><strong>ping</strong></td><td>CMD</td><td>Mede latência/conectividade (Cap. 10 / 13).</td></tr>
+            <tr><td><strong>tracert</strong></td><td>CMD</td><td>Mostra rota até um destino (Cap. 10 / 13).</td></tr>
+            <tr><td><strong>netstat -ano</strong></td><td>CMD</td><td>Lista conexões e PIDs (Cap. 10 / 13).</td></tr>
+
+            <tr><td><strong>Get-Process</strong>, <strong>Stop-Process</strong></td><td>PowerShell</td><td>Listar/encerrar processos com filtros (Cap. 09/10).</td></tr>
+            <tr><td><strong>Get-Service</strong>, <strong>Start/Stop/Set-Service</strong></td><td>PowerShell</td><td>Consultar e gerenciar serviços (Cap. 09).</td></tr>
+            <tr><td><strong>Get-Counter</strong></td><td>PowerShell</td><td>Coletar contadores (CPU/RAM/Disco/Rede) com amostras (Cap. 10).</td></tr>
+            <tr><td><strong>Compress-Archive</strong>, <strong>Get-FileHash</strong></td><td>PowerShell</td><td>Gerar ZIP e hash para integridade de backup (Cap. 11).</td></tr>
+            <tr><td><strong>robocopy</strong></td><td>CMD</td><td>Backup de pastas com log e tolerância a erros (Cap. 11/12).</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>Dica:</strong> se você esqueceu parâmetros, use sempre <span class="kbd">comando /?</span>.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo prático: diagnóstico de rede + geração de logs (GUI + CMD)</h2>
+        <p>
+          Objetivo: coletar evidências de rede em arquivos, usando o que você aprendeu no CMD.
+          Você vai salvar tudo em <span class="kbd">C:\\FGSO\\cap13</span>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> se estiver em VM, confira a rede (NAT) e se o Windows tem acesso à internet.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Criar pasta e arquivo de relatório</h3>
+            <ul>
+              <li>Abra CMD e execute:</li>
+            </ul>
+            <pre class="language-bash"><code>mkdir C:\FGSO\cap13
+mkdir C:\FGSO\cap13\logs
+
+echo Relatorio de Rede - Cap13 &gt; C:\FGSO\cap13\relatorio.txt
+echo Data: %DATE% %TIME% &gt;&gt; C:\FGSO\cap13\relatorio.txt</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Coletar configuração de rede (ipconfig)</h3>
+            <ul>
+              <li>Salve a saída completa:</li>
+            </ul>
+            <pre class="language-bash"><code>ipconfig /all &gt; C:\FGSO\cap13\logs\ipconfig.txt</code></pre>
+            <ul>
+              <li>Abra o arquivo e identifique: IPv4, gateway e DNS.</li>
+              <li>Registre no relatório (copiar/colar é permitido):</li>
+            </ul>
+            <pre class="language-bash"><code>type C:\FGSO\cap13\logs\ipconfig.txt | more</code></pre>
+          </div>
+
+          <div class="step">
+            <h3>Teste de conectividade: IP x DNS</h3>
+            <ul>
+              <li>Ping por IP (conectividade geral):</li>
+            </ul>
+            <pre class="language-bash"><code>ping 8.8.8.8 &gt; C:\FGSO\cap13\logs\ping_ip.txt</code></pre>
+            <ul>
+              <li>Ping por nome (testa DNS):</li>
+            </ul>
+            <pre class="language-bash"><code>ping www.microsoft.com &gt; C:\FGSO\cap13\logs\ping_dns.txt</code></pre>
+            <ul>
+              <li>No relatório, escreva uma conclusão curta: “IP ok/DNS ok” ou “IP ok/DNS falha”.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Rota até um destino (tracert)</h3>
+            <ul>
+              <li>Gerar evidência de rota:</li>
+            </ul>
+            <pre class="language-bash"><code>tracert www.microsoft.com &gt; C:\FGSO\cap13\logs\tracert.txt</code></pre>
+            <ul>
+              <li>No relatório, anote: quantos saltos (hops) apareceram e se houve timeouts.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Conexões ativas (netstat) e filtro com findstr</h3>
+            <ul>
+              <li>Salvar conexões:</li>
+            </ul>
+            <pre class="language-bash"><code>netstat -ano &gt; C:\FGSO\cap13\logs\netstat.txt</code></pre>
+            <ul>
+              <li>Filtrar linhas com “ESTABLISHED” (conexões estabelecidas):</li>
+            </ul>
+            <pre class="language-bash"><code>type C:\FGSO\cap13\logs\netstat.txt | findstr /i ESTABLISHED &gt; C:\FGSO\cap13\logs\netstat_established.txt</code></pre>
+            <ul>
+              <li>Explique no relatório: “netstat mostra conexões e PID (para correlacionar com processos)”.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Final: validar pacote de evidências</h3>
+            <ul>
+              <li>Verifique se existem estes arquivos:</li>
+              <ul>
+                <li><span class="kbd">relatorio.txt</span></li>
+                <li><span class="kbd">logs\\ipconfig.txt</span></li>
+                <li><span class="kbd">logs\\ping_ip.txt</span> e <span class="kbd">logs\\ping_dns.txt</span></li>
+                <li><span class="kbd">logs\\tracert.txt</span></li>
+                <li><span class="kbd">logs\\netstat.txt</span> e <span class="kbd">logs\\netstat_established.txt</span></li>
+              </ul>
+              <li>Use <span class="kbd">dir</span> para conferir e tire 1 print do Explorer com a pasta completa (opcional, recomendado).</li>
+            </ul>
+            <pre class="language-bash"><code>dir C:\FGSO\cap13
+dir C:\FGSO\cap13\logs</code></pre>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Resultado esperado:</strong> você sabe operar CMD e coletar evidências de rede em arquivos — base para os próximos capítulos.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3)</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Script manual de evidências</h3>
+            <p>Crie um “pacote de evidências” semelhante ao do passo a passo, mas salvando tudo em uma pasta com data (ex.: cap13_2026-04-29).</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Diagnóstico por hipótese</h3>
+            <p>Escreva 3 hipóteses para “sem internet” e indique qual comando confirma/refuta cada hipótese (IP/gateway/DNS/rota).</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Cola pessoal de comandos</h3>
+            <p>Crie um arquivo <span class="kbd">meus_comandos.txt</span> com seus 15 comandos mais usados (inclua 5 de CMD e 5 de PowerShell) e explique por quê.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença entre gateway e DNS na prática?</li>
+          <li>O que significa timeout no tracert e como interpretar?</li>
+          <li>O que são pipes e redirecionamento e por que isso é útil em suporte?</li>
+          <li>Quais são as vantagens de salvar evidências em arquivo em vez de só “print”?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo14.html">Capítulo 14</a> você vai avançar para configuração de rede no Windows (GUI + CLI), incluindo DNS, adaptadores e perfis de rede.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 13 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Para mudar de diretório no CMD, qual comando você usa?',
+        options: ['dir', 'cd', 'echo', 'ping', 'sc'],
+        correct: 1,
+        why: 'cd (change directory) muda o diretório atual.'
+      },
+      {
+        q: '2) Qual símbolo salva a saída de um comando em um arquivo (substituindo o conteúdo)?',
+        options: ['|', '>>', '>', '&', '#'],
+        correct: 2,
+        why: 'O redirecionamento > cria/substitui o arquivo com a saída do comando.'
+      },
+      {
+        q: '3) Se ping por IP funciona (8.8.8.8) mas ping por nome falha, o problema mais provável é:',
+        options: ['CPU alta', 'DNS', 'Disco cheio', 'Teclado', 'Driver de vídeo'],
+        correct: 1,
+        why: 'Ping por nome depende de DNS. Se IP funciona, a conectividade existe; a tradução de nomes pode estar falhando.'
+      },
+      {
+        q: '4) Qual comando mostra IP, gateway e DNS detalhados?',
+        options: ['ipconfig /all', 'tasklist', 'typeperf', 'robocopy', 'bcdedit'],
+        correct: 0,
+        why: 'ipconfig /all mostra configurações completas de rede (IPv4, gateway, DNS e mais).' 
+      },
+      {
+        q: '5) Qual comando exibe o conteúdo de um arquivo de texto no CMD?',
+        options: ['type', 'mkdir', 'ren', 'net', 'msconfig'],
+        correct: 0,
+        why: 'type mostra o conteúdo de um arquivo (ex.: type relatorio.txt).' 
+      },
+      {
+        q: '6) O que o comando tracert ajuda a identificar?',
+        options: ['Lista de processos', 'Rota/hops até um destino', 'Versão do Windows', 'Drivers instalados', 'Arquivos temporários'],
+        correct: 1,
+        why: 'tracert mostra a rota (saltos) até um destino, útil para investigar latência e pontos de falha.'
+      },
+      {
+        q: '7) Para filtrar a saída de um comando e encontrar uma palavra, você pode usar:',
+        options: ['findstr', 'sysdm.cpl', 'perfmon', 'control', 'chkdsk'],
+        correct: 0,
+        why: 'findstr filtra texto e é muito usado com pipes (|) para criar evidências.'
+      },
+      {
+        q: '8) Qual é a melhor prática ao usar del e rmdir /s?',
+        options: ['Executar sem conferir o caminho', 'Conferir com dir e usar com cuidado (de preferência em laboratório/VM)', 'Usar sempre em C:\\Windows', 'Rodar como administrador sempre', 'Ignorar evidências'],
+        correct: 1,
+        why: 'del e rmdir /s são destrutivos. Verifique o caminho e use em ambiente controlado.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise CMD essencial e diagnóstico IP x DNS.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap13_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Consigo navegar no CMD usando cd/dir e caminhos com aspas.', note:'Sei “onde estou” e como mudar de pasta.' },
+      { id:'c2', title:'Criei pastas e arquivos via CMD (mkdir/echo/type).', note:'Gerei relatorio.txt com data/hora.' },
+      { id:'c3', title:'Consigo usar redirecionamento e pipe (>, >>, |) para salvar evidências.', note:'Criei logs em arquivo.' },
+      { id:'c4', title:'Coletei ipconfig /all e identifiquei IPv4, gateway e DNS.', note:'Consigo apontar no arquivo.' },
+      { id:'c5', title:'Executei ping por IP e por nome e interpretei diferença (DNS).', note:'Registrei conclusão.' },
+      { id:'c6', title:'Gerei tracert e entendi o que são hops/timeouts.', note:'Anotei observações.' },
+      { id:'c7', title:'Gerei netstat -ano e filtrei com findstr.', note:'Sei que netstat mostra PID.' },
+      { id:'c8', title:'Consigo usar a tabela de comandos da apostila como referência rápida.', note:'Sei localizar o comando certo para o problema.' },
+      { id:'c9', title:'Organizei o pacote C:\\FGSO\\cap13 com logs e relatório final.', note:'Arquivos existentes e nomeados.' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', updateChecklistProgress);
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

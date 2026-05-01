@@ -1,0 +1,1013 @@
+<!-- arquivo: capitulo02.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 02 — Tipos de SO, Kernel/Shell e Funções do Sistema Operacional | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 02 da Apostila FGSO: Tipos de sistemas operacionais, Kernel e Shell, e as funções fundamentais do SO (processos, memória, arquivos, E/S, interfaces e APIs)." />
+
+  <!-- Prism (tema escuro) — usado para exemplos conceituais (sem prática até o Cap. 4) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;
+    }
+
+    a{color:#b8d0ff; text-decoration:none}
+    a:hover{color:#fff; text-decoration:underline}
+
+    /* Header */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,11,20,.75);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{max-width:1280px; margin:0 auto; padding: 12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:40px;height:40px;border-radius:12px; background: linear-gradient(135deg, var(--navy), var(--navy-2)); box-shadow: var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14);}    
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.75); color: var(--text); box-shadow: 0 10px 22px rgba(0,0,0,.25); font-size: 13px;}
+    .btn:hover{transform: translateY(-1px); background: rgba(18,58,122,.35); text-decoration:none;}
+    .btn.primary{background: linear-gradient(135deg, var(--navy), var(--navy-2));}
+    .btn.primary:hover{filter:brightness(1.08)}
+
+    /* Layout */
+    .wrap{max-width:1280px; margin:0 auto; padding: 18px; display:grid; grid-template-columns: 320px 1fr; gap:18px;}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr;}}
+
+    .side{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; height: fit-content; position:sticky; top: 74px;}
+    @media (max-width: 980px){.side{position:relative; top:auto;}}
+
+    .side h2{margin:0 0 8px 0; font-size:14px}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom: 10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); font-size:12px; color: var(--muted); width: fit-content;}
+    .meta{display:flex; flex-direction:column; gap:8px; margin: 10px 0 12px 0;}
+
+    .toc{list-style:none; padding:0; margin: 10px 0 0 0; display:flex; flex-direction:column; gap:8px;}
+    .toc a{display:flex; gap:10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: var(--card2); color: var(--text);}
+    .toc a:hover{background: rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; opacity:.9; padding:2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width: 54px; text-align:center;}
+    .toc .t{font-size:13px}
+
+    .main{display:flex; flex-direction:column; gap:18px;}
+
+    .hero{background: linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .hero h1{margin:0 0 6px 0; font-size: 20px;}
+    .hero p{margin: 6px 0; color:#e7eeff; max-width: 92ch;}
+
+    .grid-2{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; margin-top: 10px;}
+    @media (max-width: 980px){.grid-2{grid-template-columns:1fr;}}
+
+    .card{background: var(--card); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;}
+    .card h2{margin:0 0 10px 0; font-size:16px}
+    .card h3{margin: 16px 0 8px 0; font-size:14px; color:#dbe7ff}
+    .card p{margin: 8px 0; color:#eaf0ff}
+    .muted{color:var(--muted)}
+
+    .callout{border-left: 4px solid rgba(184,208,255,.9); background: rgba(7,11,20,.35); border-radius: 12px; padding: 10px 12px; margin: 10px 0;}
+    .callout.warn{border-left-color: rgba(250,160,90,.95)}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px;}
+    .chip{font-size:12px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(7,11,20,.35); padding: 6px 10px; border-radius: 999px;}
+
+    details.block{background: rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 10px 12px; margin: 10px 0;}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center;}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size: 11px; color: var(--muted); border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); padding: 2px 8px; border-radius: 999px; white-space:nowrap}
+
+    .grid-3{display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;}
+    @media (max-width: 980px){.grid-3{grid-template-columns:1fr;}}
+
+    .box{border:1px dashed rgba(255,255,255,.18); border-radius: 14px; padding: 12px; background: rgba(10,31,68,.18);}
+
+    .kbd{font-family:var(--mono); font-size: 12px; background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding: 1px 7px; border-radius: 999px;}
+
+    /* Diagramas simples */
+    .diagram{border:1px solid rgba(255,255,255,.12); background: rgba(7,11,20,.40); border-radius: 14px; padding: 12px; overflow:auto;}
+    .diagram pre{margin:0; font-family:var(--mono); font-size: 12px; line-height:1.35; color:#dfe9ff;}
+
+    /* Quiz */
+    .quiz{display:flex; flex-direction:column; gap:12px;}
+    .q{border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32); border-radius: 14px; padding: 12px;}
+    .q h4{margin:0 0 10px 0; font-size: 14px;}
+    .opts{display:grid; gap:8px; margin: 10px 0;}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding: 10px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); cursor:pointer;}
+    .opt:hover{background: rgba(18,58,122,.18)}
+    .opt input{margin-top: 3px;}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding: 8px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(15,27,51,.65); color: var(--text); font-size: 12px; cursor:pointer;}
+    .mini:hover{background: rgba(18,58,122,.30)}
+
+    .feedback{margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); display:none;}
+    .feedback.ok{background: rgba(50,210,150,.12); border-color: rgba(50,210,150,.35)}
+    .feedback.bad{background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.28)}
+    .feedback .why{color: var(--muted); font-size: 13px; margin-top: 6px;}
+
+    /* Checklist */
+    .checklist{display:grid; gap:10px;}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border-radius: 14px; border:1px solid rgba(255,255,255,.10); background: rgba(7,11,20,.32)}
+    .ck input{margin-top: 3px;}
+    .ck small{display:block; color:var(--muted); margin-top: 4px}
+    .progress{height: 10px; background: rgba(255,255,255,.08); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background: linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85));}
+
+    .sep{height:1px; background: rgba(255,255,255,.10); margin: 12px 0;}
+    .footer{color: var(--muted); font-size: 12px; text-align:center; padding: 10px 0 30px 0;}
+
+    pre[class*="language-"]{border-radius: 14px; border:1px solid rgba(255,255,255,.12); box-shadow: 0 10px 22px rgba(0,0,0,.20)}
+    code{font-family: var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 02 • Tipos de SO • Kernel/Shell • Funções do SO</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="plano.html">📝 Plano da Disciplina</a>
+        <a class="btn" href="capitulo01.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo03.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 02</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">🎯 Foco: teoria (sem prática até o Cap. 4)</span>
+        <span class="pill">⏱️ Estudo sugerido: 50–80 min</span>
+        <span class="pill">🧠 Palavras‑chave: multitarefa, time‑sharing, kernel, shell, PCB, PID, drivers, APIs</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#definicao"><span class="n">02</span><span class="t">O que é um Sistema Operacional?</span></a></li>
+        <li><a href="#tipos"><span class="n">03</span><span class="t">Tipos de Sistemas Operacionais</span></a></li>
+        <li><a href="#multitarefa"><span class="n">04</span><span class="t">Multitarefa: Lote • Time‑sharing • Tempo real</span></a></li>
+        <li><a href="#multiprocess"><span class="n">05</span><span class="t">Múltiplos processadores: acoplados, rede, distribuídos, clusters</span></a></li>
+        <li><a href="#kernel-shell"><span class="n">06</span><span class="t">Kernel e Shell (com diagrama)</span></a></li>
+        <li><a href="#funcoes"><span class="n">07</span><span class="t">Funções do SO (fundamentação)</span></a></li>
+        <li><a href="#aplicar"><span class="n">08</span><span class="t">Onde vou aplicar isso (Cap. 5+)</span></a></li>
+        <li><a href="#passo"><span class="n">09</span><span class="t">Passo a passo (conceitual — sem laboratório)</span></a></li>
+        <li><a href="#atividades"><span class="n">10</span><span class="t">Sugestões de atividades (para Cap. 5+)</span></a></li>
+        <li><a href="#quiz"><span class="n">11</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">12</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">13</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Importante:</strong> até o <strong>Capítulo 04</strong> o estudo é <strong>100% teórico</strong>. As práticas começam no <strong>Capítulo 05</strong>.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero">
+        <h1>Capítulo 02 — Tipos de SO, Kernel/Shell e Funções do Sistema Operacional</h1>
+        <p>
+          Neste capítulo, você vai construir a base conceitual mais importante do curso: <strong>o que o Sistema Operacional (SO) é</strong>,
+          <strong>quais são seus tipos</strong>, como funcionam <strong>Kernel</strong> e <strong>Shell</strong>, e quais são as <strong>funções fundamentais</strong>
+          (processos, memória, arquivos, armazenamento, E/S, interfaces e APIs).
+        </p>
+        <p class="muted">
+          A partir do Capítulo 05, essas ideias serão ligadas diretamente às ferramentas do Windows (Configurações, Painel de Controle, Serviços,
+          Gerenciador de Tarefas, PerfMon, CMD/PowerShell e scripts).
+        </p>
+        <div class="chips" aria-label="Conexões com o curso">
+          <span class="chip">Fundamentação forte (base tecnológica)</span>
+          <span class="chip">MSI1809 (função e arquitetura de SO)</span>
+          <span class="chip">MSI0201/0202 (instalar, configurar, desempenho e segurança — futuro)</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos de aprendizagem e pré-requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Definir um SO como <strong>gerenciador de recursos</strong> e <strong>plataforma de execução</strong>.</li>
+              <li>Diferenciar <strong>monotarefa</strong> e <strong>multitarefa</strong> (lote, tempo compartilhado e tempo real).</li>
+              <li>Explicar o que muda em sistemas com <strong>múltiplos processadores</strong> e os princípios de <strong>disponibilidade, escalabilidade</strong> e <strong>distribuição de carga</strong>.</li>
+              <li>Descrever a diferença entre <strong>Kernel</strong> e <strong>Shell</strong> e como isso aparece no Windows (GUI, CMD e PowerShell).</li>
+              <li>Explicar as funções do SO e termos-chave: <strong>PCB, PID, threads, drivers e APIs</strong>.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré-requisitos recomendados</h3>
+            <ul>
+              <li>Noções básicas de hardware: CPU, RAM, disco e periféricos.</li>
+              <li>Saber que “programa” é um software executável e “processo” é a execução dele (se não souber, este capítulo explica).</li>
+              <li>Leitura calma: alguns conceitos são novos, mas serão revisitados no curso.</li>
+            </ul>
+            <div class="callout warn" style="margin-top:10px">
+              <strong>Sem laboratório:</strong> este capítulo é teórico e prepara as práticas do Cap. 05 em diante.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="definicao">
+        <h2>O que é um Sistema Operacional (SO)?</h2>
+        <p>
+          Um <strong>Sistema Operacional</strong> é o software base que faz duas coisas ao mesmo tempo:
+          <strong>(1) gerenciar recursos</strong> do computador (CPU, memória, armazenamento e dispositivos) e
+          <strong>(2) oferecer uma plataforma</strong> para que aplicativos sejam executados de forma organizada e segura.
+        </p>
+        <p>
+          Pense no SO como um <strong>administrador</strong> que decide quem usa cada recurso, por quanto tempo e com quais permissões.
+          Sem essa administração, os programas disputariam CPU e memória de forma caótica, causando travamentos, corrupção de dados e falhas de segurança.
+        </p>
+        <div class="callout">
+          <strong>Regra de ouro:</strong> quando você vê um aplicativo “rodando”, por trás existe o SO criando processos, gerenciando memória,
+          controlando arquivos e conversando com drivers de hardware.
+        </div>
+      </section>
+
+      <section class="card" id="tipos">
+        <h2>Tipos de Sistemas Operacionais (visão geral)</h2>
+        <p>
+          “Tipos” de SO podem ser classificados pelo modo como executam tarefas, pelo público (usuário final, servidor, embarcado),
+          e pela forma como usam o hardware (um processador, vários, redes/distribuição). Nesta apostila, vamos usar a classificação
+          mais útil para entender <strong>como o SO organiza o trabalho</strong>.
+        </p>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Monotarefa</h3>
+            <p>Executa essencialmente <strong>uma tarefa por vez</strong>. Se um programa está em execução, os demais aguardam.</p>
+            <p class="muted">Útil para contextos simples, mas ruim para uso moderno.</p>
+          </div>
+          <div class="box">
+            <h3>Multitarefa</h3>
+            <p>Permite <strong>várias tarefas</strong> compartilharem CPU e memória, alternando execução (ou realmente paralelas em múltiplos núcleos).</p>
+            <p class="muted">É o padrão em desktops, servidores e celulares.</p>
+          </div>
+          <div class="box">
+            <h3>Tempo real</h3>
+            <p>Um tipo especial onde o foco é cumprir <strong>prazos</strong> (deadlines) com previsibilidade, não apenas “ser rápido”.</p>
+            <p class="muted">Comum em controle industrial, robótica e sistemas críticos.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> quando você aprender a diagnosticar lentidão e travamentos (Cap. 10), você estará enxergando efeitos práticos da multitarefa.
+        </div>
+      </section>
+
+      <section class="card" id="multitarefa">
+        <h2>Multitarefa em detalhes: Lote • Tempo compartilhado • Tempo real</h2>
+
+        <details class="block" open>
+          <summary>Multitarefa por Lote (Batch) <span class="tag">conceito e características</span></summary>
+          <p>
+            Em <strong>lote</strong>, tarefas (jobs) são reunidas em uma fila e executadas em sequência, com pouca ou nenhuma interação do usuário durante a execução.
+            A prioridade é manter o computador ocupado e reduzir o tempo perdido com “trocas” manuais ou repetitivas.
+          </p>
+          <p>
+            Lote não significa “uma tarefa por vez para sempre”. Significa que o modelo mental do uso é:
+            <strong>preparar um conjunto de tarefas</strong> → <strong>executar</strong> → <strong>coletar resultados</strong>.
+            É comum em rotinas administrativas, backups, processamento de dados e automações.
+          </p>
+          <div class="callout">
+            <strong>Aplicação no curso:</strong> scripts e automações (Cap. 15) são uma forma moderna de “lote”.
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>Tempo compartilhado (Time-sharing) <span class="tag">explique muito bem</span></summary>
+          <p>
+            O <strong>tempo compartilhado</strong> é um modelo de multitarefa pensado para muitos usuários (ou muitas tarefas) que precisam de uma sensação de
+            <strong>interação rápida</strong>. A ideia central é: a CPU divide seu tempo em pequenas fatias (time slices) e alterna rapidamente entre processos.
+          </p>
+          <p>
+            Para o usuário, parece que tudo está acontecendo ao mesmo tempo. Na realidade, o sistema está alternando execução tão rápido que a percepção humana
+            não nota a troca. Esse modelo exige que o SO faça escolhas a todo momento:
+            <strong>quem executa agora?</strong> • <strong>quanto tempo?</strong> • <strong>quem deve esperar?</strong>.
+            Esse conjunto de decisões é chamado de <strong>escalonamento</strong> (scheduling).
+          </p>
+          <p>
+            O time-sharing trouxe dois desafios que definem os SOs modernos:
+            <strong>(1) isolamento/proteção</strong> (um usuário não pode interferir no outro) e
+            <strong>(2) justiça e desempenho</strong> (ninguém deve “travAR” o sistema). No Windows, isso aparece como:
+            programas que rodam ao mesmo tempo, serviços em segundo plano, conta de usuário, permissões e prioridade de processos.
+          </p>
+
+          <div class="diagram" aria-label="Diagrama conceitual de time-sharing">
+<pre>
+CPU (tempo) ─────────────────────────────────────────────────────────▶
+
+Processo A: [██]    [██]       [██]          [██]
+Processo B:    [██]    [██]  [██]    [██]
+Processo C:       [██]     [██]         [██]
+
+Legenda: cada [██] é uma fatia de tempo (time slice)
+</pre>
+          </div>
+
+          <div class="callout">
+            <strong>Aplicação no curso:</strong> no Cap. 07/10 você vai identificar processos e serviços e entender por que “muita coisa” roda ao mesmo tempo.
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>Tempo Real (Real-time) <span class="tag">conceito e características</span></summary>
+          <p>
+            Em sistemas de <strong>tempo real</strong>, a prioridade é cumprir prazos com previsibilidade. O objetivo não é apenas “executar rápido”,
+            mas garantir que uma ação aconteça <strong>até um tempo limite</strong>. Um sistema pode ser muito rápido e ainda assim falhar em tempo real,
+            se ele não conseguir garantir o prazo.
+          </p>
+          <p>
+            Em tempo real, o escalonamento é pensado para confiabilidade: tarefas críticas ganham prioridade e o sistema busca reduzir variações
+            (jitter) e atrasos imprevisíveis. É comum diferenciar:
+            <strong>hard real-time</strong> (prazo não pode ser perdido) e <strong>soft real-time</strong> (perder prazo degrada qualidade, mas não causa desastre).
+          </p>
+          <div class="callout">
+            <strong>Aplicação no curso:</strong> embora o Windows não seja um RTOS típico, você verá conceitos de prioridade e responsividade em diagnóstico de desempenho (Cap. 10).
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="multiprocess">
+        <h2>Múltiplos processadores: acoplados, rede, distribuídos e clusters</h2>
+        <p>
+          Quando há mais de um processador (ou múltiplos núcleos, ou várias máquinas trabalhando juntas), o SO precisa lidar com três princípios fundamentais:
+          <strong>disponibilidade</strong> (continuar funcionando mesmo com falhas),
+          <strong>escalabilidade</strong> (melhorar capacidade ao adicionar recursos) e
+          <strong>distribuição de carga</strong> (balancear trabalho para evitar gargalos).
+        </p>
+
+        <details class="block" open>
+          <summary>Fortemente acoplados (tightly coupled) <span class="tag">uma máquina, vários CPUs</span></summary>
+          <p>
+            Em sistemas <strong>fortemente acoplados</strong>, vários processadores compartilham a mesma memória principal e normalmente o mesmo sistema operacional.
+            O SO enxerga tudo como um único computador, mas com mais unidades de processamento.
+          </p>
+          <p>
+            O desafio aqui é sincronização: se dois processadores acessam o mesmo dado ao mesmo tempo, o SO e os programas precisam garantir consistência.
+            Por isso aparecem mecanismos como <strong>locks</strong>, semáforos e seções críticas.
+          </p>
+          <div class="callout">
+            <strong>Aplicação no curso:</strong> ao falar de threads e desempenho (Cap. 10), você verá como múltiplos núcleos podem acelerar ou atrapalhar dependendo do caso.
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>Fracamente acoplados (loosely coupled) <span class="tag">várias máquinas</span></summary>
+          <p>
+            Em sistemas <strong>fracamente acoplados</strong>, você tem várias máquinas conectadas por rede. Aqui entram três ideias importantes:
+            <strong>Sistemas Operacionais de Rede</strong>, <strong>Sistemas Distribuídos</strong> e <strong>Clusters</strong>.
+          </p>
+
+          <div class="grid-3">
+            <div class="box">
+              <h3>SO de Rede</h3>
+              <p>Cada máquina tem seu próprio SO, e a rede permite compartilhar arquivos, impressoras e serviços.</p>
+              <p class="muted">A rede conecta, mas cada máquina continua “autônoma”.</p>
+            </div>
+            <div class="box">
+              <h3>Sistema Distribuído</h3>
+              <p>Busca parecer <strong>um único sistema</strong> para o usuário, mesmo sendo várias máquinas. Há coordenação e transparência.</p>
+              <p class="muted">A complexidade é maior: consistência, falhas e sincronização na rede.</p>
+            </div>
+            <div class="box">
+              <h3>Clusters</h3>
+              <p>Várias máquinas cooperam para oferecer <strong>alta disponibilidade</strong> ou <strong>alto desempenho</strong>.</p>
+              <p class="muted">Geralmente existe balanceamento de carga e tolerância a falhas.</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Aplicação no curso:</strong> mesmo focando Windows desktop, esses conceitos ajudam a entender servidores, redes, serviços e por que a TI busca disponibilidade e escalabilidade.
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="kernel-shell">
+        <h2>Kernel e Shell (o coração e a interface)</h2>
+        <p>
+          A forma mais clara de separar responsabilidades no SO é dividir em <strong>Kernel</strong> e <strong>Shell</strong>.
+          O <strong>Kernel</strong> é o núcleo: ele conversa com hardware, controla processos, memória e dispositivos.
+          O <strong>Shell</strong> é o “meio de campo” entre usuário/aplicativos e o kernel: pode ser gráfico (GUI) ou textual (CLI).
+        </p>
+
+        <div class="diagram" aria-label="Diagrama Kernel/Shell">
+<pre>
+Usuário
+  │
+  ▼
+[ Shell / Interface ]  ← GUI (janelas) | CLI (CMD/PowerShell) | Touch | Voz
+  │  chamadas / comandos
+  ▼
+[ Kernel ]  ← processos | memória | arquivos | dispositivos | segurança
+  │
+  ▼
+Hardware (CPU, RAM, Disco, Rede, Periféricos)
+</pre>
+        </div>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Exemplos de “Shell”</h3>
+            <ul>
+              <li><strong>GUI</strong>: área de trabalho, janelas, menus, Configurações.</li>
+              <li><strong>CLI</strong>: <span class="kbd">cmd.exe</span> (Prompt), <span class="kbd">powershell.exe</span> (PowerShell).</li>
+              <li><strong>Touch/Voz</strong>: interface por toque e assistentes por voz.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Por que isso importa no suporte?</h3>
+            <p>
+              Muitas vezes o problema é na interface (shell) e não no kernel.
+              Ex.: o menu não abre, mas o sistema continua funcionando.
+              Ou o contrário: o kernel está instável (drivers), e tudo trava.
+            </p>
+            <p class="muted">No Cap. 07–10 você aprenderá a diferenciar sintomas e investigar a camada correta.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="funcoes">
+        <h2>Funções dos Sistemas Operacionais (fundamentação)</h2>
+        <p>
+          Agora vamos organizar as funções principais do SO. Para estudo autônomo, use este método:
+          <strong>definição</strong> → <strong>por que existe</strong> → <strong>como aparece no mundo real</strong> → <strong>onde será aplicado no curso</strong>.
+        </p>
+
+        <details class="block" open>
+          <summary>1) Gerenciamento de Processos <span class="tag">PCB • PID • Threads</span></summary>
+          <p>
+            Um <strong>processo</strong> é um programa em execução. O SO precisa criar, pausar, retomar e finalizar processos, além de decidir quem usa a CPU.
+            Para isso, ele mantém informações organizadas em uma estrutura chamada <strong>PCB</strong> (Bloco de Controle de Processo).
+          </p>
+          <p>
+            Cada processo recebe um identificador: <strong>PID</strong>. Isso permite que o SO e ferramentas de administração apontem exatamente “qual processo” está em questão.
+            Dentro de um processo podem existir <strong>threads</strong> (linhas de execução). Threads permitem paralelismo e melhor aproveitamento de múltiplos núcleos,
+            mas exigem coordenação para evitar conflitos.
+          </p>
+          <p class="muted">
+            Em resumo: processo é “o programa rodando”; PID é “o número do processo”; PCB é “a ficha do processo”; thread é “um caminho de execução dentro do processo”.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> Gerenciador de Tarefas/Serviços e diagnóstico de travamentos (Cap. 07 e 10) + scripts para listar/encerrar processos (Cap. 14–15).
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>2) Gerenciamento de Memória <span class="tag">RAM • memória virtual</span></summary>
+          <p>
+            A memória RAM é rápida, mas limitada. O SO decide onde cada processo fica na memória e evita que um processo invada o espaço do outro.
+            Também pode usar <strong>memória virtual</strong>: uma técnica em que parte do conteúdo é movida para disco quando a RAM está pressionada.
+          </p>
+          <p>
+            Quando a memória é mal gerenciada (ou insuficiente), o computador pode ficar lento, travar ou encerrar programas. Em Windows,
+            isso aparece como alto uso de memória, paginação e queda de desempenho.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> PerfMon/Monitor de Recursos e análise de desempenho (Cap. 07 e 10) + boas práticas de manutenção (Cap. 08).
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>3) Gerenciamento de Arquivos <span class="tag">pastas • permissões • nomes</span></summary>
+          <p>
+            Arquivos são a forma mais comum de guardar dados. O SO oferece operações básicas: criar, ler, escrever, renomear, copiar e apagar.
+            Além disso, impõe regras: nomes válidos, estrutura de pastas, atributos e permissões.
+          </p>
+          <p>
+            Sem esse gerenciamento, cada programa teria que “falar diretamente com o disco” do seu próprio jeito, aumentando bugs e riscos.
+            Com o SO, existe um padrão para tudo que salva e carrega dados.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> sistemas de arquivos Windows, backup e recuperação (Cap. 06 e 11) + automação com scripts para organizar arquivos (Cap. 15).
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>4) Armazenamento e Sistemas de Arquivos <span class="tag">NTFS • FAT • ext • APFS</span></summary>
+          <p>
+            O <strong>armazenamento</strong> (SSD/HDD) guarda dados de forma persistente. O <strong>sistema de arquivos</strong> define como esses dados são organizados
+            em blocos, arquivos e diretórios, incluindo metadados (datas, permissões, dono, tamanho).
+          </p>
+          <p>
+            Existem vários sistemas de arquivos, cada um com características e objetivos:
+            <strong>NTFS</strong> (comum no Windows, suporta permissões avançadas e recursos de segurança),
+            <strong>FAT32/exFAT</strong> (muito usados em mídias removíveis por compatibilidade),
+            <strong>ext4</strong> (muito comum em Linux),
+            <strong>APFS</strong> (usado em sistemas Apple). A escolha afeta segurança, desempenho e compatibilidade.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> particionamento, formatação e entendimento do NTFS no Windows (Cap. 06) + recuperação e integridade (Cap. 11).
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>5) Entrada e Saída (E/S) e Drivers <span class="tag">dispositivos</span></summary>
+          <p>
+            Entrada e Saída (E/S) é tudo que conecta o computador ao mundo: teclado, mouse, impressora, disco, rede, áudio, vídeo.
+            Cada dispositivo tem um jeito específico de funcionar. O SO resolve isso com <strong>drivers</strong>, que são módulos (software) que traduzem
+            “pedidos” do sistema para o idioma do hardware.
+          </p>
+          <p>
+            Quando um driver está com problema, você pode ver travamentos, tela azul, dispositivos que não funcionam e falhas intermitentes.
+            Por isso, suporte técnico precisa entender que “problema de hardware” muitas vezes é “problema de driver”.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> drivers e Gerenciador de Dispositivos (Cap. 05 e 07) + diagnóstico por logs e eventos (Cap. 10).
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>6) Interface com o Usuário <span class="tag">CLI • GUI • Touch • Voz • Gestos</span></summary>
+          <p>
+            O SO precisa permitir que pessoas usem o computador. Para isso, oferece interfaces:
+            <strong>CLI</strong> (linha de comando), <strong>GUI</strong> (janelas), <strong>touch</strong>, <strong>voz</strong> e até <strong>gestos naturais</strong>.
+            Cada interface é uma forma de enviar comandos e receber retorno.
+          </p>
+          <p>
+            Em geral, a GUI é mais fácil para iniciantes e tarefas visuais, enquanto a CLI é mais eficiente para automação, diagnóstico e repetição.
+            No curso, você vai aprender as duas: GUI para configurar e CLI/PowerShell para automatizar.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> Painel/Configurações e ferramentas administrativas (Cap. 07) + terminal e PowerShell (Cap. 13–15).
+          </div>
+        </details>
+
+        <details class="block" open>
+          <summary>7) Interface com Aplicativos (APIs) <span class="tag">bibliotecas e chamadas</span></summary>
+          <p>
+            Aplicativos não deveriam precisar conhecer detalhes do hardware (endereços de memória, instruções específicas, protocolos de dispositivo).
+            Em vez disso, o SO oferece <strong>APIs</strong> (Interfaces de Programação de Aplicações): um conjunto de funções e regras para pedir serviços.
+          </p>
+          <p>
+            Exemplo mental: em vez de “escrever diretamente no disco”, um aplicativo chama uma API para salvar um arquivo.
+            O SO então decide permissões, local, cache e escrita física. Isso torna o sistema mais seguro e padronizado.
+          </p>
+          <div class="callout">
+            <strong>Onde vou aplicar isso:</strong> ao entender por que certos programas exigem permissões, drivers ou dependências, e como o Windows integra aplicativos (Cap. 05–08).
+          </div>
+        </details>
+      </section>
+
+      <section class="card" id="aplicar">
+        <h2>Onde vou aplicar isso no curso? (mapa rápido)</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Conceito → capítulo prático</h3>
+            <ul>
+              <li><strong>Processos/threads/PID</strong> → Task Manager, Serviços, PowerShell (Cap. 07, 10, 14–15)</li>
+              <li><strong>Memória</strong> → Monitoramento e diagnóstico (Cap. 10)</li>
+              <li><strong>Arquivos/sistemas de arquivos</strong> → Particionamento e backup (Cap. 06, 11)</li>
+              <li><strong>Drivers/E/S</strong> → instalação, compatibilidade e eventos (Cap. 05, 10)</li>
+              <li><strong>Interfaces</strong> → GUI e CLI/PowerShell (Cap. 07, 13–15)</li>
+              <li><strong>APIs</strong> → compatibilidade, permissões e integração de apps (Cap. 05–08)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Como estudar sozinho (estratégia)</h3>
+            <ol>
+              <li>Para cada função do SO, responda: “Que problema isso resolve?”</li>
+              <li>Depois responda: “Qual seria o caos se isso não existisse?”</li>
+              <li>Por fim, associe a uma ferramenta que você conhece (mesmo que só de ouvir falar).</li>
+            </ol>
+            <p class="muted">Quando começar o laboratório (Cap. 05), suas associações ficarão concretas.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo (conceitual — sem laboratório)</h2>
+        <p>
+          Para manter o curso coerente, <strong>não faremos práticas até o Cap. 04</strong>. Mesmo assim, este “passo a passo” serve como
+          <strong>roteiro mental</strong> do que você fará quando chegar nos capítulos práticos. Pense como um mapa.
+        </p>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Passo 1 — Identificar a camada (Shell ou Kernel)</h3>
+            <p>Quando algo falha, pergunte:</p>
+            <ul>
+              <li>É a <strong>interface</strong> (menu/janelas) que falha? → suspeita de Shell/GUI.</li>
+              <li>É o sistema inteiro que congela/reinicia? → suspeita de Kernel/driver/recursos.</li>
+            </ul>
+            <p class="muted">Você usará isso em diagnósticos (Cap. 07 e 10).</p>
+          </div>
+          <div class="box">
+            <h3>Passo 2 — Mapear o sintoma para a função do SO</h3>
+            <ul>
+              <li>Lentidão geral → processos/memória/armazenamento.</li>
+              <li>Arquivo não abre/some → gerenciamento de arquivos/sistema de arquivos/permissões.</li>
+              <li>Dispositivo não funciona → E/S e drivers.</li>
+              <li>Programa não instala → APIs/dependências/permissões/compatibilidade.</li>
+            </ul>
+            <p class="muted">Isso vira um “método de diagnóstico” do suporte técnico.</p>
+          </div>
+        </div>
+
+        <h3>Exemplo conceitual (não executar agora): como o SO “vê” processos</h3>
+        <p class="muted">O trecho abaixo é apenas ilustrativo, para você reconhecer o formato quando chegar ao Cap. 13–15.</p>
+        <pre class="language-text"><code>// modelo mental (não é comando real do capítulo)
+Processo: Navegador.exe
+PID:  4216
+Threads:  34
+Memória:  850 MB
+Estado: Executando
+Prioridade: Normal
+</code></pre>
+
+        <div class="callout warn">
+          <strong>Reforço:</strong> nada aqui deve ser executado agora. O objetivo é formar o “mapa” para aplicar com ferramentas no Windows depois.
+        </div>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Sugestões de atividades (para quando começar o laboratório — Cap. 05+)</h2>
+        <p class="muted">Estas atividades são propostas futuras. Não execute agora.</p>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 (Cap. 07/10)</h3>
+            <p><strong>Mapa do SO no Windows:</strong> identificar em ferramentas nativas onde aparecem processos, memória, disco e rede.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 (Cap. 06/11)</h3>
+            <p><strong>Sistemas de arquivos:</strong> comparar NTFS vs exFAT em um cenário de compatibilidade e segurança.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 (Cap. 14/15)</h3>
+            <p><strong>Automação:</strong> escrever um script para listar processos e salvar um relatório (com PID e consumo).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque o que você realmente consegue explicar com suas palavras. Isso vale mais do que “apenas ler”.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li><strong>Escalonamento:</strong> pesquise o que é “quantum” de CPU e como prioridades afetam responsividade.</li>
+          <li><strong>Hard vs Soft real-time:</strong> encontre exemplos reais (industrial, multimídia, games).</li>
+          <li><strong>Drivers:</strong> descubra por que drivers assinados existem e quais riscos um driver ruim pode causar.</li>
+          <li><strong>APIs:</strong> procure exemplos de API do Windows (Win32) e como elas escondem detalhes de hardware.</li>
+          <li><strong>Clusters:</strong> pesquise o que é balanceamento de carga e tolerância a falhas (alta disponibilidade).</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> em <a href="capitulo03.html">Capítulo 03</a> você verá fundamentos de virtualização (ainda teórico nesta fase), preparando o laboratório seguro.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 02 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      $('#lastUpdate').textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Um Sistema Operacional pode ser definido principalmente como:',
+        options: [
+          'Um aplicativo que serve apenas para acessar a Internet.',
+          'Um gerenciador de recursos e plataforma para execução organizada de programas.',
+          'Um conjunto de peças de hardware (CPU, RAM e SSD).',
+          'Um vírus que controla o computador.',
+          'Uma planilha para organizar arquivos.'
+        ],
+        correct: 1,
+        why: 'O SO gerencia CPU, memória, armazenamento e dispositivos, e oferece serviços para aplicativos executarem com organização e segurança.'
+      },
+      {
+        q: '2) A principal diferença entre monotarefa e multitarefa é:',
+        options: [
+          'Monotarefa usa apenas SSD; multitarefa usa apenas HD.',
+          'Monotarefa executa uma tarefa por vez; multitarefa organiza várias tarefas compartilhando recursos.',
+          'Monotarefa é sempre mais rápida que multitarefa.',
+          'Multitarefa não precisa de memória.',
+          'Multitarefa só existe em celulares.'
+        ],
+        correct: 1,
+        why: 'Monotarefa foca em uma execução por vez; multitarefa alterna/coordena várias execuções, com escalonamento e isolamento.'
+      },
+      {
+        q: '3) O modelo “lote” (batch) caracteriza-se por:',
+        options: [
+          'Interação contínua do usuário em tempo real com fatias de CPU.',
+          'Execução de tarefas com prazos rígidos que não podem ser perdidos.',
+          'Agrupar jobs e executá-los em sequência, reduzindo intervenções manuais.',
+          'Proibir automação e scripts.',
+          'Executar somente com interface touch.'
+        ],
+        correct: 2,
+        why: 'Batch organiza tarefas em fila e executa em sequência, muito comum em rotinas repetitivas e automações.'
+      },
+      {
+        q: '4) Em tempo compartilhado (time-sharing), a sensação de simultaneidade acontece porque:',
+        options: [
+          'O computador executa somente um processo e pausa tudo o tempo todo.',
+          'A CPU alterna rapidamente entre processos usando fatias de tempo (time slices).',
+          'O sistema nunca troca de tarefa.',
+          'A memória virtual elimina a necessidade de CPU.',
+          'A rede faz o trabalho da CPU.'
+        ],
+        correct: 1,
+        why: 'No time-sharing o SO escalona processos, alternando rapidamente a CPU para dar responsividade a múltiplas tarefas/usuários.'
+      },
+      {
+        q: '5) Um sistema de tempo real é diferente porque:',
+        options: [
+          'Ele precisa ser o mais rápido do mundo, mas não precisa cumprir prazos.',
+          'Ele garante previsibilidade e cumprimento de deadlines, não apenas velocidade média.',
+          'Ele só roda em computadores antigos (válvulas).',
+          'Ele não usa processos.',
+          'Ele nunca usa prioridades.'
+        ],
+        correct: 1,
+        why: 'Tempo real foca em prazos e previsibilidade; perder um prazo pode ser crítico (hard) ou degradar qualidade (soft).' 
+      },
+      {
+        q: '6) Em múltiplos processadores, os princípios de disponibilidade, escalabilidade e distribuição de carga significam:',
+        options: [
+          'Desligar o sistema quando algo falha; não crescer; concentrar trabalho em um processador.',
+          'Continuar operando com falhas, crescer ao adicionar recursos e balancear trabalho para evitar gargalos.',
+          'Usar somente rede e nunca CPU.',
+          'Executar apenas um usuário por vez.',
+          'Trocar sempre o sistema de arquivos.'
+        ],
+        correct: 1,
+        why: 'Esses princípios orientam sistemas multiprocessados/distribuídos: tolerância a falhas, crescimento por adição de recursos e balanceamento.'
+      },
+      {
+        q: '7) Kernel e Shell podem ser entendidos como:',
+        options: [
+          'Kernel é a interface gráfica; Shell é o hardware.',
+          'Kernel é o núcleo que gerencia recursos; Shell é a interface (GUI/CLI) que permite interação e comandos.',
+          'Kernel é um antivírus; Shell é um navegador.',
+          'Shell existe apenas em Linux; Windows não tem.',
+          'Kernel é opcional e pode ser removido sem impacto.'
+        ],
+        correct: 1,
+        why: 'Kernel é o núcleo (processos, memória, drivers); Shell é a camada de interação (GUI, CMD, PowerShell etc.).'
+      },
+      {
+        q: '8) PCB, PID e thread estão relacionados principalmente a:',
+        options: [
+          'Gerenciamento de arquivos e pastas.',
+          'Gerenciamento de processos: identificação e controle da execução.',
+          'Formatação de disco e particionamento.',
+          'Criptografia e BitLocker.',
+          'Impressão e scanners apenas.'
+        ],
+        correct: 1,
+        why: 'PCB é a “ficha” do processo, PID identifica o processo e thread representa caminhos de execução dentro dele.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = $('#quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        const fb = $(`#fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: releia o trecho correspondente e elimine as opções absurdas.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const fb = $(`#fb${qi}`);
+        const chosen = $(`input[name="q${qi}"]:checked`);
+        if(fb && fb.style.display === 'block' && chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = $('#quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap02_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Consigo definir SO como gerenciador de recursos e plataforma de execução.', note:'Diga o que o SO gerencia (CPU, memória, disco, dispositivos) e por que.' },
+      { id:'c2', title:'Consigo diferenciar monotarefa e multitarefa com exemplo.', note:'Use um exemplo simples de “uma tarefa por vez” vs “várias em alternância”.' },
+      { id:'c3', title:'Consigo explicar lote (batch) e citar onde ele aparece hoje.', note:'Ex.: rotinas automáticas, scripts, backups.' },
+      { id:'c4', title:'Consigo explicar muito bem time-sharing (fatias de tempo e escalonamento).', note:'Inclua: sensação de simultaneidade, justiça, responsividade e proteção.' },
+      { id:'c5', title:'Consigo explicar o que é tempo real e a diferença entre hard e soft.', note:'Fale de prazos (deadlines) e previsibilidade.' },
+      { id:'c6', title:'Consigo explicar múltiplos processadores e os princípios: disponibilidade, escalabilidade e distribuição de carga.', note:'Explique com suas palavras e um exemplo.' },
+      { id:'c7', title:'Consigo distinguir Kernel e Shell e relacionar com GUI/CLI no Windows.', note:'Kernel = núcleo; Shell = interface/forma de comando.' },
+      { id:'c8', title:'Consigo explicar PCB, PID e threads e por que isso importa para desempenho e diagnóstico.', note:'PCB = ficha; PID = ID; threads = execuções dentro do processo.' },
+      { id:'c9', title:'Consigo listar as funções do SO (processos, memória, arquivos, E/S, interface, APIs) e o “problema que cada uma resolve”.', note:'Se não souber o problema que resolve, volte na seção Funções.' }
+    ];
+
+    function renderChecklist(){
+      const box = $('#ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      $$('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      $$('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = $$('#ckList input[type="checkbox"]');
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      $('#ckBar').style.width = pct + '%';
+      $('#ckPct').textContent = pct + '%';
+    }
+
+    $('#ckSave').addEventListener('click', saveChecklist);
+    $('#ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>

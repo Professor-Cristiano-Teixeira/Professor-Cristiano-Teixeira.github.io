@@ -1,0 +1,839 @@
+<!-- arquivo: capitulo11.html -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 11 — Backup, Restauração e Continuidade (GUI + Linha de Comando) | Apostila FGSO</title>
+  <meta name="description" content="Capítulo 11 da Apostila FGSO: backup e restauração no Windows 11 com ferramentas gráficas e linha de comando (Histórico de Arquivos, Backup e Restauração (Windows 7), pontos de restauração, cópia/compactação, robocopy, PowerShell Copy-Item/Compress-Archive, wbadmin em cenários compatíveis). Inclui passo a passo prático, validação de restore, atividades, quiz e checklist." />
+
+  <!-- Prism (tema escuro) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --navy:#0a1f44;
+      --navy-2:#123a7a;
+      --bg:#0b1220;
+      --card:rgba(13,23,48,.78);
+      --card2:rgba(7,11,20,.40);
+      --text:#eaf0ff;
+      --muted:#b7c4e3;
+      --line:rgba(255,255,255,.10);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --ok:#32d296;
+      --warn:#faa05a;
+      --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family:var(--sans); color:var(--text);
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(18,58,122,.35), transparent 60%),
+        radial-gradient(900px 600px at 90% 20%, rgba(10,31,68,.55), transparent 65%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      line-height:1.6;}
+    a{color:#b8d0ff; text-decoration:none} a:hover{color:#fff; text-decoration:underline}
+
+    .topbar{position:sticky; top:0; z-index:50; background:rgba(7,11,20,.75); backdrop-filter: blur(10px); border-bottom:1px solid var(--line)}
+    .topbar-inner{max-width:1280px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{width:40px;height:40px;border-radius:12px; background:linear-gradient(135deg,var(--navy),var(--navy-2)); box-shadow:var(--shadow); display:grid; place-items:center; border:1px solid rgba(255,255,255,.14)}
+    .logo span{font-weight:800; letter-spacing:.5px}
+    .title{display:flex; flex-direction:column; line-height:1.12}
+    .title strong{font-size:14px; color:#dfe9ff}
+    .title small{font-size:12px; color:var(--muted)}
+
+    .nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btn{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.75); color:var(--text); box-shadow:0 10px 22px rgba(0,0,0,.25); font-size:13px}
+    .btn:hover{transform:translateY(-1px); background:rgba(18,58,122,.35); text-decoration:none}
+    .btn.primary{background:linear-gradient(135deg,var(--navy),var(--navy-2))}
+
+    .wrap{max-width:1280px; margin:0 auto; padding:18px; display:grid; grid-template-columns:320px 1fr; gap:18px}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr}}
+
+    .side{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; height:fit-content; position:sticky; top:74px}
+    @media (max-width:980px){.side{position:relative; top:auto}}
+    .crumb{font-size:12px; color:var(--muted); margin-bottom:10px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); font-size:12px; color:var(--muted); width:fit-content}
+    .meta{display:flex; flex-direction:column; gap:8px; margin:10px 0 12px}
+
+    .toc{list-style:none; padding:0; margin:10px 0 0; display:flex; flex-direction:column; gap:8px}
+    .toc a{display:flex; gap:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:var(--card2); color:var(--text)}
+    .toc a:hover{background:rgba(18,58,122,.25)}
+    .toc .n{font-family:var(--mono); font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); min-width:54px; text-align:center}
+
+    .main{display:flex; flex-direction:column; gap:18px}
+    .hero{background:linear-gradient(135deg, rgba(10,31,68,.88), rgba(18,58,122,.35)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .hero h1{margin:0 0 6px; font-size:20px}
+    .hero p{margin:6px 0; color:#e7eeff; max-width:92ch}
+
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .chip{font-size:12px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(7,11,20,.35); padding:6px 10px; border-radius:999px}
+
+    .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px}
+    .card h2{margin:0 0 10px; font-size:16px}
+    .card h3{margin:16px 0 8px; font-size:14px; color:#dbe7ff}
+    .muted{color:var(--muted)}
+
+    .grid-2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+    .grid-3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+    @media (max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+    .box{border:1px dashed rgba(255,255,255,.18); border-radius:14px; padding:12px; background:rgba(10,31,68,.18)}
+
+    .callout{border-left:4px solid rgba(184,208,255,.9); background:rgba(7,11,20,.35); border-radius:12px; padding:10px 12px; margin:10px 0}
+    .callout.warn{border-left-color:rgba(250,160,90,.95)}
+    .callout.danger{border-left-color:rgba(255,107,107,.95)}
+
+    details.block{background:rgba(7,11,20,.32); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:10px 12px; margin:10px 0}
+    details.block summary{cursor:pointer; font-weight:800; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center}
+    details.block summary::-webkit-details-marker{display:none}
+    .tag{font-family:var(--mono); font-size:11px; color:var(--muted); border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); padding:2px 8px; border-radius:999px; white-space:nowrap}
+
+    .kbd{font-family:var(--mono); font-size:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding:1px 7px; border-radius:999px}
+
+    .diagram{border:1px solid rgba(255,255,255,.12); background:rgba(7,11,20,.40); border-radius:14px; padding:12px; overflow:auto}
+    .diagram pre{margin:0; font-family:var(--mono); font-size:12px; line-height:1.35; color:#dfe9ff}
+
+    .steps{counter-reset: step; display:grid; gap:12px}
+    .step{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .step h3{margin:0 0 8px; font-size:14px}
+    .step h3:before{counter-increment: step; content:"Passo " counter(step) " — "; color:#dbe7ff}
+    .step ul{margin:8px 0 0 18px}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top}
+    th{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:#dbe7ff; background:rgba(10,31,68,.35)}
+    td{font-size:13px; color:#eaf0ff}
+
+    .quiz{display:flex; flex-direction:column; gap:12px}
+    .q{border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32); border-radius:14px; padding:12px}
+    .q h4{margin:0 0 10px; font-size:14px}
+    .opts{display:grid; gap:8px; margin:10px 0}
+    .opt{display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.04); cursor:pointer}
+    .opt:hover{background:rgba(18,58,122,.18)}
+    .opt input{margin-top:3px}
+    .qactions{display:flex; gap:10px; flex-wrap:wrap}
+    .mini{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(15,27,51,.65); color:var(--text); font-size:12px; cursor:pointer}
+    .mini:hover{background:rgba(18,58,122,.30)}
+    .feedback{margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); display:none}
+    .feedback.ok{background:rgba(50,210,150,.12); border-color:rgba(50,210,150,.35)}
+    .feedback.bad{background:rgba(255,107,107,.10); border-color:rgba(255,107,107,.28)}
+    .feedback .why{color:var(--muted); font-size:13px; margin-top:6px}
+
+    .checklist{display:grid; gap:10px}
+    .ck{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(7,11,20,.32)}
+    .ck input{margin-top:3px}
+    .ck small{display:block; color:var(--muted); margin-top:4px}
+    .progress{height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.10)}
+    .bar{height:100%; width:0%; background:linear-gradient(90deg, rgba(184,208,255,.9), rgba(50,210,150,.85))}
+
+    .footer{color:var(--muted); font-size:12px; text-align:center; padding:10px 0 30px}
+
+    pre[class*="language-"]{border-radius:14px; border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 22px rgba(0,0,0,.20)}
+    code{font-family:var(--mono)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>FG</span></div>
+        <div class="title">
+          <strong>Apostila FGSO</strong>
+          <small>Capítulo 11 • Backup, restauração e continuidade (GUI + CLI)</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação">
+        <a class="btn" href="index.html">🏠 Índice</a>
+        <a class="btn" href="capitulo10.html">⟵ Anterior</a>
+        <a class="btn primary" href="capitulo12.html">Próximo ➜</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <aside class="side" aria-label="Sumário do capítulo">
+      <div class="crumb">Você está em: <a href="index.html">Apostila</a> › <strong>Capítulo 11</strong></div>
+      <h2>Neste capítulo</h2>
+      <div class="meta">
+        <span class="pill">💾 Backup & Restore</span>
+        <span class="pill">🧰 GUI + CMD + PowerShell</span>
+        <span class="pill">🧪 Teste de restauração</span>
+      </div>
+
+      <ul class="toc">
+        <li><a href="#objetivos"><span class="n">01</span><span class="t">Objetivos e pré‑requisitos</span></a></li>
+        <li><a href="#teoria"><span class="n">02</span><span class="t">Teoria: backup, restore e continuidade</span></a></li>
+        <li><a href="#estrategia"><span class="n">03</span><span class="t">Estratégia 3‑2‑1 e tipos de backup</span></a></li>
+        <li><a href="#gui"><span class="n">04</span><span class="t">Ferramentas gráficas (GUI)</span></a></li>
+        <li><a href="#cli"><span class="n">05</span><span class="t">Linha de comando (robocopy/PowerShell)</span></a></li>
+        <li><a href="#passo"><span class="n">06</span><span class="t">Passo a passo prático (backup + teste de restore)</span></a></li>
+        <li><a href="#erros"><span class="n">07</span><span class="t">Erros comuns e como evitar</span></a></li>
+        <li><a href="#atividades"><span class="n">08</span><span class="t">Atividades práticas (2–3)</span></a></li>
+        <li><a href="#quiz"><span class="n">09</span><span class="t">Quiz interativo</span></a></li>
+        <li><a href="#checklist"><span class="n">10</span><span class="t">Checklist do aluno</span></a></li>
+        <li><a href="#pesquisas"><span class="n">11</span><span class="t">Pesquisas complementares</span></a></li>
+      </ul>
+
+      <div class="callout warn" style="margin-top:12px">
+        <strong>Recomendação:</strong> em VM, crie snapshot <span class="kbd">11-antes-backup</span>. Em máquina real, nunca teste restore sem ter backup real de dados importantes.
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="hero" aria-label="Apresentação">
+        <h1>Capítulo 11 — Backup, Restauração e Continuidade (GUI + Linha de Comando)</h1>
+        <p>
+          Backup não é “copiar e torcer”. Backup é um processo: <strong>planejar</strong>, <strong>executar</strong>, <strong>validar</strong> e <strong>restaurar</strong> quando necessário.
+          Neste capítulo você vai praticar um método completo no Windows 11: backup de arquivos com ferramentas gráficas e com linha de comando,
+          geração de logs e, principalmente, <strong>teste de restauração</strong> (prova de que o backup funciona).
+        </p>
+        <div class="chips">
+          <span class="chip">Histórico de Arquivos / Backup & Restore</span>
+          <span class="chip">Ponto de Restauração (revisão)</span>
+          <span class="chip">robocopy</span>
+          <span class="chip">Compress-Archive</span>
+          <span class="chip">Logs e auditoria</span>
+          <span class="chip">Teste de restore</span>
+        </div>
+      </section>
+
+      <section class="card" id="objetivos">
+        <h2>Objetivos e pré‑requisitos</h2>
+        <div class="grid-2">
+          <div class="box">
+            <h3>Ao final deste capítulo você será capaz de:</h3>
+            <ul>
+              <li>Diferenciar <strong>backup</strong>, <strong>sincronização</strong> e <strong>snapshot</strong> (VM).</li>
+              <li>Aplicar a estratégia <strong>3‑2‑1</strong> e escolher o tipo de backup adequado.</li>
+              <li>Fazer backup de arquivos via <strong>GUI</strong> e via <strong>CLI</strong> (robocopy/PowerShell).</li>
+              <li>Gerar evidências: logs, checks e relatório.</li>
+              <li>Executar um <strong>teste de restauração</strong> (restaurar arquivo apagado/alterado).</li>
+              <li>Definir rotina mínima de backup para laboratório e para uso real.</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Pré‑requisitos</h3>
+            <ul>
+              <li>Windows 11 instalado (Cap. 05).</li>
+              <li>Partição de dados (Cap. 06) é recomendada: <span class="kbd">D:</span> para backups.</li>
+              <li>Ferramentas administrativas (Cap. 07) e manutenção (Cap. 08) revisadas.</li>
+            </ul>
+            <div class="callout">
+              <strong>Dica:</strong> crie uma pasta padrão: <span class="kbd">D:\\DADOS\\Backups</span> (ou <span class="kbd">C:\\FGSO\\Backups</span> se não tiver D:).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="teoria">
+        <h2>Teoria: backup, restauração e continuidade (com “onde vou aplicar isso”)</h2>
+
+        <h3>Backup x Sincronização x Snapshot</h3>
+        <p>
+          <strong>Backup</strong> é uma cópia independente para recuperar dados depois. <strong>Sincronização</strong> mantém arquivos iguais em dois lugares (e pode sincronizar erros).
+          <strong>Snapshot</strong> (na VM) é um ponto de retorno do estado da máquina virtual, útil para laboratório, mas não substitui backup de dados.
+          <strong>Onde vou aplicar:</strong> você vai usar snapshot para segurança do laboratório e backup (robocopy/zip) para proteger seus arquivos.
+        </p>
+
+        <h3>RPO e RTO (conceito de continuidade)</h3>
+        <p>
+          <strong>RPO</strong> (Recovery Point Objective) é quanto você pode perder (ex.: até 24h de trabalho). <strong>RTO</strong> (Recovery Time Objective) é quanto tempo pode ficar parado.
+          <strong>Onde vou aplicar:</strong> ao definir rotina diária/semana e ao escolher backup incremental vs completo.
+        </p>
+
+        <h3>Backup “que nunca foi testado” não é backup</h3>
+        <p>
+          A regra do suporte: se você nunca restaurou, você não sabe se funciona. Por isso, este capítulo inclui um <strong>teste de restore</strong> obrigatório.
+          <strong>Onde vou aplicar:</strong> você vai apagar/alterar um arquivo de teste e restaurar a partir do backup.
+        </p>
+
+        <div class="callout">
+          <strong>Meta do capítulo:</strong> terminar com um procedimento repetível, evidências salvas e um restore comprovado.
+        </div>
+      </section>
+
+      <section class="card" id="estrategia">
+        <h2>Estratégia 3‑2‑1 e tipos de backup</h2>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Regra 3‑2‑1 (simples e poderosa)</h3>
+            <ul>
+              <li><strong>3</strong> cópias dos dados (original + 2 cópias)</li>
+              <li><strong>2</strong> mídias diferentes (ex.: disco interno + externo)</li>
+              <li><strong>1</strong> cópia fora do computador (ex.: nuvem ou disco externo guardado)</li>
+            </ul>
+            <p class="muted">Em laboratório, você pode simular “fora do computador” usando outra pasta/unidade, mas em ambiente real use mídia externa/nuvem.</p>
+          </div>
+          <div class="box">
+            <h3>Tipos de backup (resumo)</h3>
+            <ul>
+              <li><strong>Completo</strong>: copia tudo (mais lento, mais simples).</li>
+              <li><strong>Incremental</strong>: copia só o que mudou desde o último backup.</li>
+              <li><strong>Diferencial</strong>: copia o que mudou desde o último completo.</li>
+            </ul>
+            <p class="muted">Ferramentas diferentes implementam isso de formas diferentes. Robocopy com /MIR replica estado atual (cuidado!).</p>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Atenção:</strong> /MIR pode apagar no destino o que não existe na origem. Use com método e com logs.
+        </div>
+      </section>
+
+      <section class="card" id="gui">
+        <h2>Ferramentas gráficas (GUI) — o que usar no Windows 11</h2>
+
+        <div class="grid-3">
+          <div class="box">
+            <h3>Histórico de Arquivos</h3>
+            <p>Protege arquivos do usuário com versões ao longo do tempo (quando configurado).</p>
+            <p class="muted">Onde aplicar: restaurar versões anteriores de documentos.</p>
+          </div>
+          <div class="box">
+            <h3>Backup e Restauração (Windows 7)</h3>
+            <p>Ferramenta clássica do Painel de Controle; em alguns cenários permite imagem do sistema.</p>
+            <p class="muted">Onde aplicar: cenários legados e algumas rotinas corporativas.</p>
+          </div>
+          <div class="box">
+            <h3>Ponto de Restauração</h3>
+            <p>Reverte configurações do sistema (não substitui backup de arquivos).</p>
+            <p class="muted">Onde aplicar: depois de driver/update quebrar o sistema.</p>
+          </div>
+        </div>
+
+        <details class="block" open>
+          <summary>Como acessar rapidamente <span class="tag">atalhos</span></summary>
+          <ul>
+            <li><span class="kbd">Win</span>+<span class="kbd">R</span> → <span class="kbd">control</span> → procure por “Histórico de Arquivos” e “Backup e Restauração (Windows 7)”.</li>
+            <li><span class="kbd">Win</span>+<span class="kbd">R</span> → <span class="kbd">sysdm.cpl</span> → aba Proteção do Sistema (pontos de restauração).</li>
+          </ul>
+        </details>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no passo a passo você fará backup via GUI (cópia/zip e/ou Histórico de Arquivos, conforme disponível) e depois fará restore.
+        </div>
+      </section>
+
+      <section class="card" id="cli">
+        <h2>Linha de comando (CMD + PowerShell) — ferramentas profissionais</h2>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>robocopy (CMD) — padrão de mercado</h3>
+            <p class="muted">Ideal para backup de pastas com logs e tolerância a erros.</p>
+            <pre class="language-bash"><code>REM Backup simples (copia arquivos novos/alterados)
+robocopy "C:\Users\%USERNAME%\Documents" "D:\DADOS\Backups\Documents" /E /R:2 /W:2 /LOG+:"D:\DADOS\Backups\logs\robocopy_docs.log"
+
+REM Dry-run (simulação) — mostra o que faria sem copiar
+robocopy "C:\Users\%USERNAME%\Documents" "D:\DADOS\Backups\Documents" /E /L /R:1 /W:1</code></pre>
+            <div class="callout warn"><strong>Cuidado:</strong> evite /MIR sem entender. Ele espelha e pode apagar no destino.</div>
+          </div>
+          <div class="box">
+            <h3>PowerShell — copiar e compactar</h3>
+            <pre class="language-powershell"><code># Copiar pasta (simples)
+Copy-Item "$env:USERPROFILE\Documents" "D:\DADOS\Backups\Documents_PS" -Recurse
+
+# Compactar em ZIP (backup portátil)
+Compress-Archive -Path "$env:USERPROFILE\Documents\*" -DestinationPath "D:\DADOS\Backups\docs_backup.zip" -Force
+
+# Gerar hash do zip (integridade)
+Get-FileHash "D:\DADOS\Backups\docs_backup.zip" | Out-File "D:\DADOS\Backups\logs\hash_docs_backup.txt"</code></pre>
+            <p class="muted">Compress-Archive facilita transportar o backup e ajuda a validar integridade com hash.</p>
+          </div>
+        </div>
+
+        <details class="block">
+          <summary>wbadmin (avançado/compatibilidade) <span class="tag">opcional</span></summary>
+          <p>
+            <strong>wbadmin</strong> é ferramenta de backup do Windows (mais comum em edições/ambientes compatíveis). Em algumas instalações pode estar limitada.
+            Aqui fica como referência, não como obrigação.
+          </p>
+          <pre class="language-bash"><code>wbadmin /?
+REM exemplo conceitual (não executar sem entender):
+REM wbadmin start backup -backupTarget:E: -include:C:\Users\%USERNAME%\Documents -quiet</code></pre>
+          <div class="callout warn"><strong>Use apenas em laboratório</strong> e somente após entender parâmetros. Prefira robocopy/zip para este curso.</div>
+        </details>
+
+        <div class="callout">
+          <strong>Onde vou aplicar isso:</strong> no passo a passo você vai gerar um backup por robocopy e um zip com hash, e depois restaurar um arquivo apagado.
+        </div>
+      </section>
+
+      <section class="card" id="passo">
+        <h2>Passo a passo prático (backup + teste de restauração)</h2>
+        <p>
+          Objetivo: criar backups em <span class="kbd">D:\\DADOS\\Backups</span> (ou <span class="kbd">C:\\FGSO\\Backups</span>) e provar que funciona restaurando um arquivo.
+          Você vai produzir evidências em <span class="kbd">C:\\FGSO\\cap11</span>.
+        </p>
+
+        <div class="callout warn">
+          <strong>Antes de começar:</strong> crie snapshot <span class="kbd">11-antes-backup</span> (VM). Depois, crie uma pasta de dados (se ainda não tiver): <span class="kbd">D:\\DADOS\\FGSO</span>.
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3>Criar pastas padrão</h3>
+            <ul>
+              <li>Crie <span class="kbd">C:\\FGSO\\cap11</span> e <span class="kbd">C:\\FGSO\\cap11\\logs</span>.</li>
+              <li>Crie destino de backup (escolha um):</li>
+              <ul>
+                <li><span class="kbd">D:\\DADOS\\Backups\\Documents</span> (recomendado)</li>
+                <li><span class="kbd">C:\\FGSO\\Backups\\Documents</span> (se não existir D:)</li>
+              </ul>
+              <li>Crie um arquivo de teste em Documentos: <span class="kbd">teste_backup.txt</span> com um texto qualquer.</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Backup via GUI (simples e didático)</h3>
+            <ul>
+              <li>Abra o Explorador e vá em <span class="kbd">Documentos</span>.</li>
+              <li>Copie a pasta/arquivos de teste para a pasta de backup (arrastar/soltar ou Ctrl+C/Ctrl+V).</li>
+              <li>Registre um print mostrando o arquivo no destino.</li>
+            </ul>
+            <div class="callout">
+              <strong>Onde isso ajuda:</strong> é o método mais básico. Útil quando você precisa de cópia rápida, mas não registra log automaticamente.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Backup via CLI (robocopy com log)</h3>
+            <ul>
+              <li>Abra Prompt/Terminal.</li>
+              <li>Execute (ajuste destino se necessário):</li>
+            </ul>
+            <pre class="language-bash"><code>mkdir D:\DADOS\Backups\logs
+robocopy "C:\Users\%USERNAME%\Documents" "D:\DADOS\Backups\Documents" /E /R:2 /W:2 /LOG+:"D:\DADOS\Backups\logs\robocopy_docs.log"</code></pre>
+            <ul>
+              <li>Copie o log para <span class="kbd">C:\\FGSO\\cap11\\logs</span> (ou referencie o caminho no relatório).</li>
+              <li>Abra o log e procure por “Ended” e estatísticas (Files, Dirs).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Backup portátil: ZIP + Hash (PowerShell)</h3>
+            <ul>
+              <li>Abra PowerShell e execute:</li>
+            </ul>
+            <pre class="language-powershell"><code>New-Item -ItemType Directory -Force -Path "D:\DADOS\Backups\logs" | Out-Null
+Compress-Archive -Path "$env:USERPROFILE\Documents\*" -DestinationPath "D:\DADOS\Backups\docs_backup.zip" -Force
+Get-FileHash "D:\DADOS\Backups\docs_backup.zip" | Out-File "D:\DADOS\Backups\logs\hash_docs_backup.txt"</code></pre>
+            <ul>
+              <li>Confirme que o ZIP existe e tem tamanho plausível.</li>
+              <li>Salve print do arquivo ZIP e do hash (ou copie o hash para o relatório).</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <h3>Teste de restauração (obrigatório)</h3>
+            <ul>
+              <li>Em <span class="kbd">Documentos</span>, edite <span class="kbd">teste_backup.txt</span> e altere o conteúdo.</li>
+              <li>Depois, <strong>apague</strong> o arquivo (ou renomeie para simular perda).</li>
+              <li>Restaure de uma das formas:</li>
+              <ul>
+                <li><strong>Do destino do robocopy</strong>: copie o arquivo de volta.</li>
+                <li><strong>Do ZIP</strong>: abra o zip e extraia o arquivo para Documentos.</li>
+              </ul>
+              <li>Confirme que o arquivo voltou e abra para validar o conteúdo.</li>
+              <li>Registre print do arquivo restaurado + evidência do local de origem.</li>
+            </ul>
+            <div class="callout">
+              <strong>Se você conseguiu restaurar:</strong> parabéns — agora você provou que seu backup é útil.
+            </div>
+          </div>
+
+          <div class="step">
+            <h3>Relatório final (cap11)</h3>
+            <ul>
+              <li>Crie <span class="kbd">C:\\FGSO\\cap11\\relatorio.txt</span> com:</li>
+              <li>1) Estratégia (3‑2‑1 adaptada ao laboratório)</li>
+              <li>2) O que foi backupado (quais pastas)</li>
+              <li>3) Ferramentas usadas (GUI, robocopy, zip+hash)</li>
+              <li>4) Evidências geradas (prints + logs + hash)</li>
+              <li>5) Resultado do teste de restauração (funcionou? como?)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>Boa prática:</strong> depois de ajustar uma rotina, crie snapshot <span class="kbd">11-pos-backup</span> (VM) para manter o laboratório estável.
+        </div>
+      </section>
+
+      <section class="card" id="erros">
+        <h2>Erros comuns e como evitar</h2>
+
+        <div class="grid-2">
+          <div class="box">
+            <h3>Erros comuns</h3>
+            <ul>
+              <li>Não testar restauração (descobre tarde demais que falhou).</li>
+              <li>Usar sincronização como backup (sincroniza erro/criptografia).</li>
+              <li>Guardar backup no mesmo disco físico (se o disco falhar, perde tudo).</li>
+              <li>Usar <span class="kbd">robocopy /MIR</span> sem entender (pode apagar destino).</li>
+              <li>Não registrar logs/evidências (difícil auditar).</li>
+            </ul>
+          </div>
+          <div class="box">
+            <h3>Como evitar</h3>
+            <ul>
+              <li>Obrigatório: teste de restore com arquivo de prova.</li>
+              <li>Separar cópias: pasta dedicada + zip + (em real) mídia externa/nuvem.</li>
+              <li>Usar logs e hash para integridade.</li>
+              <li>Fazer dry-run com <span class="kbd">robocopy /L</span> antes de mudanças agressivas.</li>
+              <li>Documentar em playbook (vai ajudar no Cap. 12 — PI do bimestre).</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="block">
+          <summary>Quando o robocopy retorna códigos (RC) <span class="tag">interpretação</span></summary>
+          <p>
+            Robocopy retorna códigos que não são “0 = ok” sempre. Ex.: códigos podem indicar que arquivos foram copiados.
+            O importante é ler o log: erros reais aparecem como “ERROR”.
+          </p>
+          <p class="muted">No laboratório, o foco é: log sem erros + restore funcionando.</p>
+        </details>
+      </section>
+
+      <section class="card" id="atividades">
+        <h2>Atividades práticas (2–3) — para você desenvolver</h2>
+        <div class="grid-3">
+          <div class="box">
+            <h3>Atividade 1 — Backup incremental com robocopy</h3>
+            <p>Crie 10 arquivos novos, rode robocopy novamente e compare o log: quantos arquivos realmente foram copiados?</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 2 — Integridade com hash</h3>
+            <p>Gere hash do zip, altere um arquivo dentro e gere hash novamente. Explique por que o hash muda e o que isso prova.</p>
+          </div>
+          <div class="box">
+            <h3>Atividade 3 — Playbook pessoal</h3>
+            <p>Escreva um playbook de 1 página: rotina semanal de backup + teste mensal de restore. Inclua onde guardar e como auditar.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="quiz">
+        <h2>Quiz do capítulo (interativo)</h2>
+        <p class="muted">Responda e clique em <strong>Enviar Resposta</strong>. Você verá feedback e poderá clicar em <strong>Ver Gabarito</strong>.</p>
+        <div class="quiz" id="quizBox" aria-label="Quiz"></div>
+        <div class="callout" id="quizScore" style="display:none"></div>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>Checklist do aluno (interativo)</h2>
+        <p class="muted">Marque apenas o que você realmente executou/entende.</p>
+        <div class="progress" aria-label="Progresso do checklist"><div class="bar" id="ckBar"></div></div>
+        <p class="muted"><span id="ckPct">0%</span> concluído</p>
+        <div class="checklist" id="ckList"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px">
+          <button class="mini" id="ckSave">💾 Salvar</button>
+          <button class="mini" id="ckReset">🧹 Limpar</button>
+        </div>
+      </section>
+
+      <section class="card" id="pesquisas">
+        <h2>Pesquisas complementares</h2>
+        <ul>
+          <li>Qual a diferença prática entre backup incremental e diferencial?</li>
+          <li>Por que sincronização (nuvem) pode não ser backup em ransomware?</li>
+          <li>O que é RPO e RTO e como isso muda a estratégia de backup?</li>
+          <li>Quais são vantagens e riscos de usar /MIR no robocopy?</li>
+          <li>Por que um teste de restore é a prova do backup?</li>
+        </ul>
+        <div class="callout">
+          <strong>Próximo capítulo:</strong> no <a href="capitulo12.html">Capítulo 12</a> você vai consolidar o 3º bimestre com um projeto integrador: padronização, automação básica e evidências.
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><strong>Apostila FGSO</strong> • Capítulo 11 • tema navy • última atualização: <span id="lastUpdate"></span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Data
+    (function(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const el = document.getElementById('lastUpdate');
+      if(el) el.textContent = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    })();
+
+    // ===== QUIZ =====
+    const quizData = [
+      {
+        q: '1) Qual a diferença principal entre backup e sincronização?',
+        options: [
+          'Não existe diferença; são sinônimos.',
+          'Backup é cópia independente para recuperar; sincronização mantém iguais e pode sincronizar erros.',
+          'Backup só existe na nuvem; sincronização só existe em HD.',
+          'Backup apaga arquivos automaticamente; sincronização não.',
+          'Sincronização cria imagem do sistema; backup não.'
+        ],
+        correct: 1,
+        why: 'Backup é cópia independente para recuperação. Sincronização replica estados (inclusive erros), então não substitui backup.'
+      },
+      {
+        q: '2) O que significa a regra 3-2-1?',
+        options: [
+          '3 senhas, 2 antivírus e 1 firewall.',
+          '3 cópias, 2 mídias diferentes e 1 cópia fora do computador.',
+          '3 PCs, 2 roteadores e 1 servidor.',
+          '3 atualizações, 2 reinícios e 1 verificação.',
+          '3 partições, 2 discos e 1 pendrive.'
+        ],
+        correct: 1,
+        why: '3-2-1 reduz risco de perda total: múltiplas cópias, mídias diferentes e uma cópia externa.'
+      },
+      {
+        q: '3) Qual afirmação é mais correta?',
+        options: [
+          'Se eu fiz backup uma vez, nunca preciso repetir.',
+          'Se eu nunca testei restauração, não sei se o backup funciona.',
+          'Backup não precisa de evidências.',
+          'Snapshot de VM substitui backup de arquivos pessoais.',
+          'Backup só serve para empresas.'
+        ],
+        correct: 1,
+        why: 'Teste de restore é a prova do backup. Sem restore testado, você não tem garantia.'
+      },
+      {
+        q: '4) Qual ferramenta é mais indicada para copiar pastas com logs e tolerância a erros?',
+        options: ['Paint', 'robocopy', 'calc', 'mspaint', 'notepad'],
+        correct: 1,
+        why: 'Robocopy é ferramenta profissional para cópia/backup com logs e parâmetros de retry.'
+      },
+      {
+        q: '5) O que o parâmetro /L do robocopy faz?',
+        options: [
+          'Apaga todos os arquivos do destino.',
+          'Executa um dry-run: lista o que faria sem copiar.',
+          'Cria um arquivo ZIP.',
+          'Repara arquivos do sistema.',
+          'Desliga o PC.'
+        ],
+        correct: 1,
+        why: '/L simula a execução (lista), útil para verificar antes de mudanças potencialmente perigosas.'
+      },
+      {
+        q: '6) Por que gerar hash de um backup ZIP pode ser útil?',
+        options: [
+          'Para deixar o arquivo mais bonito.',
+          'Para medir integridade: se o hash muda, o arquivo mudou.',
+          'Para aumentar a velocidade da rede.',
+          'Para criar novas partições.',
+          'Para ativar o Windows.'
+        ],
+        correct: 1,
+        why: 'Hash permite verificar se o arquivo foi alterado/corrompido, ajudando auditoria e integridade.'
+      },
+      {
+        q: '7) Qual é uma prática perigosa com robocopy se usada sem entender?',
+        options: ['Usar /E', 'Usar /LOG', 'Usar /MIR', 'Usar /R:2', 'Usar /W:2'],
+        correct: 2,
+        why: '/MIR espelha e pode apagar no destino o que não existe na origem. Requer método e verificação.'
+      },
+      {
+        q: '8) Qual é o objetivo do teste de restauração neste capítulo?',
+        options: [
+          'Aumentar o desempenho do Windows.',
+          'Provar que o backup permite recuperar um arquivo apagado/alterado.',
+          'Desativar o antivírus.',
+          'Instalar drivers.',
+          'Criar um usuário novo.'
+        ],
+        correct: 1,
+        why: 'O teste de restore é a prova prática de que o backup realmente funciona.'
+      }
+    ];
+
+    function renderQuiz(){
+      const box = document.getElementById('quizBox');
+      box.innerHTML = '';
+      quizData.forEach((item, idx) => {
+        const q = document.createElement('div');
+        q.className = 'q';
+        q.innerHTML = `
+          <h4>${item.q}</h4>
+          <div class="opts">
+            ${item.options.map((opt, i) => `
+              <label class="opt">
+                <input type="radio" name="q${idx}" value="${i}" />
+                <div><strong>${String.fromCharCode(65+i)})</strong> ${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="qactions">
+            <button class="mini" data-action="check" data-q="${idx}">📤 Enviar Resposta</button>
+            <button class="mini" data-action="show" data-q="${idx}">🔎 Ver Gabarito</button>
+          </div>
+          <div class="feedback" id="fb${idx}"></div>
+        `;
+        box.appendChild(q);
+      });
+
+      box.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const qi = Number(btn.dataset.q);
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        const fb = document.getElementById(`fb${qi}`);
+
+        if(action === 'check'){
+          if(!chosen){
+            fb.className = 'feedback bad';
+            fb.style.display = 'block';
+            fb.innerHTML = `<strong>⚠️ Selecione uma alternativa.</strong><div class="why">Dica: revise 3-2-1, robocopy e teste de restore.</div>`;
+            return;
+          }
+          const ok = Number(chosen.value) === quizData[qi].correct;
+          fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+          fb.style.display = 'block';
+          fb.innerHTML = ok
+            ? `<strong>✅ Correto!</strong><div class="why">${quizData[qi].why}</div>`
+            : `<strong>❌ Ainda não.</strong><div class="why">${quizData[qi].why}</div>`;
+          updateScore();
+        }
+
+        if(action === 'show'){
+          const g = quizData[qi].correct;
+          const letter = String.fromCharCode(65+g);
+          fb.className = 'feedback ok';
+          fb.style.display = 'block';
+          fb.innerHTML = `<strong>📌 Gabarito: ${letter}</strong><div class="why">${quizData[qi].why}</div>`;
+        }
+      });
+    }
+
+    function updateScore(){
+      let correct = 0;
+      let answered = 0;
+      quizData.forEach((_, qi) => {
+        const chosen = document.querySelector(`input[name="q${qi}"]:checked`);
+        if(chosen){
+          answered++;
+          if(Number(chosen.value) === quizData[qi].correct) correct++;
+        }
+      });
+      const score = document.getElementById('quizScore');
+      if(answered === 0){
+        score.style.display = 'none';
+        return;
+      }
+      const pct = Math.round((correct/quizData.length)*100);
+      score.style.display = 'block';
+      score.innerHTML = `<strong>Seu progresso:</strong> ${correct}/${quizData.length} corretas (${pct}%). <span class="muted">(Refaça para revisar.)</span>`;
+    }
+
+    renderQuiz();
+
+    // ===== CHECKLIST =====
+    const ckKey = 'FGSO_cap11_checklist_v1';
+    const checklistItems = [
+      { id:'c1', title:'Criei C:\\FGSO\\cap11 e organizei evidências.', note:'cap11 + logs + relatorio.txt.' },
+      { id:'c2', title:'Defini um destino de backup (D:\\DADOS\\Backups ou C:\\FGSO\\Backups).', note:'Pasta criada e padronizada.' },
+      { id:'c3', title:'Fiz backup via GUI (cópia simples) e registrei print.', note:'Arquivo apareceu no destino.' },
+      { id:'c4', title:'Fiz backup via robocopy e gerei log.', note:'robocopy_docs.log salvo.' },
+      { id:'c5', title:'Criei um ZIP do backup e gerei hash.', note:'docs_backup.zip + hash_docs_backup.txt.' },
+      { id:'c6', title:'Executei teste de restauração (obrigatório) e funcionou.', note:'Arquivo apagado/alterado foi recuperado.' },
+      { id:'c7', title:'Expliquei diferença entre backup, sincronização e snapshot.', note:'Consigo dar exemplos.' },
+      { id:'c8', title:'Consigo explicar 3-2-1 e adaptar para laboratório.', note:'Mesmo que sem mídia externa real.' },
+      { id:'c9', title:'Escrevi relatorio.txt com estratégia, ferramentas e evidências.', note:'Inclui resultado do restore.' },
+      { id:'c10', title:'Criei snapshot pós-rotina (VM) ou ponto de retorno equivalente.', note:'11-pos-backup (opcional mas recomendado).' }
+    ];
+
+    function renderChecklist(){
+      const box = document.getElementById('ckList');
+      box.innerHTML = '';
+      const saved = loadChecklist();
+      checklistItems.forEach(item => {
+        const row = document.createElement('label');
+        row.className = 'ck';
+        row.innerHTML = `
+          <input type="checkbox" data-id="${item.id}" ${saved[item.id] ? 'checked' : ''} />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <small>${item.note}</small>
+          </div>
+        `;
+        box.appendChild(row);
+      });
+      box.addEventListener('change', () => updateChecklistProgress());
+      updateChecklistProgress();
+    }
+
+    function loadChecklist(){
+      try{ return JSON.parse(localStorage.getItem(ckKey) || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => state[cb.dataset.id] = cb.checked);
+      localStorage.setItem(ckKey, JSON.stringify(state));
+      toast('Checklist salvo! ✅');
+    }
+
+    function resetChecklist(){
+      document.querySelectorAll('#ckList input[type="checkbox"]').forEach(cb => cb.checked = false);
+      localStorage.removeItem(ckKey);
+      updateChecklistProgress();
+      toast('Checklist limpo.');
+    }
+
+    function updateChecklistProgress(){
+      const cbs = Array.from(document.querySelectorAll('#ckList input[type="checkbox"]'));
+      const done = cbs.filter(cb => cb.checked).length;
+      const pct = Math.round((done / cbs.length) * 100);
+      document.getElementById('ckBar').style.width = pct + '%';
+      document.getElementById('ckPct').textContent = pct + '%';
+    }
+
+    document.getElementById('ckSave').addEventListener('click', saveChecklist);
+    document.getElementById('ckReset').addEventListener('click', resetChecklist);
+    renderChecklist();
+
+    // Toast
+    function toast(msg){
+      let t = document.getElementById('toast');
+      if(!t){
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.position = 'fixed';
+        t.style.left = '50%';
+        t.style.bottom = '18px';
+        t.style.transform = 'translateX(-50%)';
+        t.style.background = 'rgba(7,11,20,.85)';
+        t.style.border = '1px solid rgba(255,255,255,.14)';
+        t.style.color = 'white';
+        t.style.padding = '10px 12px';
+        t.style.borderRadius = '999px';
+        t.style.boxShadow = '0 12px 30px rgba(0,0,0,.35)';
+        t.style.zIndex = '9999';
+        t.style.fontSize = '13px';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{t.style.opacity='0';}, 1600);
+    }
+  </script>
+</body>
+</html>
