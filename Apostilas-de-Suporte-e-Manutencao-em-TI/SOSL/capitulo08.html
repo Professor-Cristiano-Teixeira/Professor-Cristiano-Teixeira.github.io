@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — FHS e Organização do Sistema</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo08.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOSL</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais e Software Livre</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Fundamentos de SO e Tipos de Software</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Licenciamento de Software</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Software Livre e Código Aberto</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — VirtualBox e ISO do Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Instalação do Linux Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Interfaces Gráficas no Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Inicialização e systemd</a></li>
+              <li><a class="dropdown-item active" href="capitulo08.html">Cap. 08 — Estrutura de Diretórios e FHS</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Linha de Comando</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Gerenciamento de Pacotes</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Processos e Monitoramento</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Arquivos e Backup</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Texto e Pipelines</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Usuários e Permissões</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Shell Script e Automação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Manutenção e Implantação</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 08 — Estrutura de Diretórios e FHS</h1>
+          <p class="mb-2"><strong>Carga:</strong> 3–4h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório em VM Linux Mint Cinnamon no VirtualBox</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Linux Mint 21.x (Cinnamon), Terminal Bash, utilitários GNU</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar a finalidade dos diretórios padrão do Linux conforme o FHS.</li><li>Navegar pela árvore de diretórios identificando onde ficam configurações, binários e dados variáveis.</li><li>Aplicar boas práticas ao organizar arquivos de usuário e logs de atividades.</li><li>Produzir um inventário de diretórios-chave e justificar o uso de cada um no relatório técnico.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Reconhecer e classificar diretórios do sistema segundo o FHS.</li><li>Localizar arquivos de configuração em /etc e dados variáveis em /var.</li><li>Utilizar comandos de inspeção (ls, tree, du, find) para auditoria básica.</li><li>Documentar evidências técnicas de forma clara (portfólio).</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Inicialização e systemd</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Linha de Comando</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 08)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Contexto:</strong> Este capítulo introduz a hierarquia de diretórios do Linux (FHS) com foco prático em Linux Mint. O aluno deverá entender “onde moram” configurações, binários, bibliotecas, dados voláteis e temporários, e como isso impacta manutenção e suporte.</p><p><strong>Estrutura da aula:</strong></p><ol><li><strong>Aquecimento (10 min):</strong> Revisão rápida do boot e onde o kernel e o GRUB residem no disco.</li><li><strong>Exposição teórica (30–40 min):</strong> FHS, diretórios essenciais e suas finalidades, boas práticas.</li><li><strong>Laboratório guiado (60–70 min):</strong> Navegar e inventariar /, /etc, /var, /usr, /opt, /home, /tmp. Uso de ls, tree, du, find.</li><li><strong>Consolidação (20–30 min):</strong> Redigir relatório técnico com evidências (saídas de comandos) e justificativas.</li></ol><p><strong>Materiais:</strong> VM Linux Mint Cinnamon atualizada; terminal Bash; pacote tree (se necessário).</p><p><strong>Avaliação:</strong> Entregáveis de inventário e relatório técnico; questionário ao final do capítulo; checklist individual.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-2">
+          <h3 class="h6 fw-bold">O que é o FHS (Filesystem Hierarchy Standard)?</h3>
+          <p>O FHS é um padrão que recomenda como os diretórios e arquivos devem ser organizados em sistemas tipo Unix, incluindo Linux. Ele descreve quais pastas existem na raiz do sistema, o que cada uma deve conter e como os dados devem ser separados entre sistema, aplicativos, dados variáveis e arquivos de usuário.</p>
+          <p>Seguir o FHS facilita manutenção, suporte e automação, pois técnicos e scripts “sabem” onde procurar configurações, logs e executáveis, independentemente da distribuição.</p>
+          <p><em>Onde vou aplicar isso?</em> Durante o passo a passo, você usará o FHS para localizar arquivos de configuração em <code>/etc</code>, logs em <code>/var</code>, binários em <code>/usr/bin</code> e assim por diante, registrando evidências no relatório.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Visão geral da raiz “/” e diretórios essenciais</h3>
+          <p>A raiz <code>/</code> é o topo da árvore de diretórios. Tudo está montado abaixo dela. Alguns diretórios-chave:</p>
+          <ul>
+            <li><strong>/boot</strong>: arquivos de inicialização (kernel, initrd, GRUB).</li>
+            <li><strong>/etc</strong>: configurações do sistema, geralmente arquivos texto.</li>
+            <li><strong>/home</strong>: diretórios pessoais dos usuários.</li>
+            <li><strong>/var</strong>: dados variáveis (logs, filas, caches, spool de impressão).</li>
+            <li><strong>/usr</strong>: aplicações e bibliotecas “do sistema” para uso geral; grande parte dos binários fica aqui.</li>
+            <li><strong>/opt</strong>: softwares opcionais de terceiros instalados fora da árvore padrão.</li>
+            <li><strong>/tmp</strong>: arquivos temporários, podem ser limpos na reinicialização.</li>
+          </ul>
+          <p><em>Onde vou aplicar isso?</em> Você navegará por cada diretório, listará conteúdos relevantes e descreverá finalidades, compondo um inventário.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Local vs. sistema: por que separar configurações e dados?</h3>
+          <p>Em geral, <code>/etc</code> guarda configurações de todo o sistema; <code>/var</code> guarda dados que mudam com frequência (logs, caches, filas). Essa separação permite backups seletivos e facilita recuperação: restaurar <code>/etc</code> reconfigura serviços; verificar <code>/var/log</code> ajuda no troubleshooting.</p>
+          <p>Já <code>/usr</code> contém binários e bibliotecas compartilhadas, e <code>/opt</code> comporta softwares opcionais que não seguem a organização do <code>/usr</code>. Os dados do usuário ficam em <code>/home</code>, isolados do sistema.</p>
+          <p><em>Onde vou aplicar isso?</em> No relatório, você explicará por que logs ficam em <code>/var/log</code> e por que ajustes de serviços residem em <code>/etc</code>.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Boas práticas de organização</h3>
+          <p>Mantenha arquivos pessoais em <code>/home/SEU_USUARIO</code> e nunca diretamente em <code>/</code> ou <code>/usr</code>. Evite alterar arquivos em <code>/usr</code> manualmente; prefira os gerenciadores de pacotes. Em <code>/opt</code>, agrupe softwares de terceiros em subpastas com nome e versão.</p>
+          <p>Para logs pessoais de laboratório, use uma pasta em <code>~/lab-logs</code> e padronize nomes com data. Documente mudanças em configurações: registre o arquivo, a linha alterada e a motivação no seu portfólio.</p>
+          <p><em>Onde vou aplicar isso?</em> No passo a passo você criará um diretório de evidências e salvará as saídas dos comandos para anexar ao portfólio.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Inventário do FHS no Linux Mint</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Navegar pelos diretórios principais, coletar evidências (saídas de comandos) e produzir um relatório técnico que descreve finalidades e conteúdos-chave de /, /boot, /etc, /home, /var, /usr, /opt e /tmp.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-2">
+          <h3 class="h6 fw-bold">1) Preparação do ambiente e pasta de evidências</h3>
+          <p>Abra o Terminal no Linux Mint. Crie uma pasta no seu <code>home</code> para armazenar as evidências deste capítulo.</p>
+          <pre class="language-bash"><code># criar pasta de trabalho e subpastas
+mkdir -p ~/portifolio-sosl/cap08/{comandos,relatorio,prints}
+# registrar versão do sistema (evidence)
+hostnamectl | tee ~/portifolio-sosl/cap08/comandos/001_hostnamectl.txt
+lsb_release -a | tee ~/portifolio-sosl/cap08/comandos/002_lsb_release.txt
+# instalar utilitário tree (se necessário)
+sudo apt update &amp;&amp; sudo apt install -y tree
+</code></pre>
+          <div class="alert alert-light border mb-0" role="note">
+            Dica: use tee para salvar a saída em arquivo e ver no terminal ao mesmo tempo.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">2) Raiz “/”: visão geral</h3>
+          <p>Liste os diretórios de primeiro nível e grave a saída.</p>
+          <pre class="language-bash"><code># conteúdo da raiz
+ls -l / | tee ~/portifolio-sosl/cap08/comandos/010_ls_root.txt
+# árvore superficial da raiz (nível 1)
+sudo tree -L 1 / | tee ~/portifolio-sosl/cap08/comandos/011_tree_root_L1.txt
+</code></pre>
+          <p>No relatório, descreva os diretórios que aparecerem e destaque aqueles que você explorará em detalhe nas próximas etapas.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">3) /boot: kernel e inicialização</h3>
+          <p>Inspecione os arquivos relacionados ao boot.</p>
+          <pre class="language-bash"><code># arquivos em /boot
+ls -lh /boot | tee ~/portifolio-sosl/cap08/comandos/020_ls_boot.txt
+# se o GRUB estiver em /boot/grub
+sudo ls -lh /boot/grub | tee ~/portifolio-sosl/cap08/comandos/021_ls_boot_grub.txt
+</code></pre>
+          <p>No relatório, explique o papel do kernel (vmlinuz), initrd/initramfs e configurações do GRUB.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">4) /etc: arquivos de configuração</h3>
+          <p>Encontre e registre exemplos de configurações importantes.</p>
+          <pre class="language-bash"><code># listar /etc e alguns subdiretórios comuns
+ls -lh /etc | tee ~/portifolio-sosl/cap08/comandos/030_ls_etc.txt
+ls -lh /etc/network 2&gt;/dev/null | tee ~/portifolio-sosl/cap08/comandos/031_ls_etc_network.txt
+ls -lh /etc/systemd 2&gt;/dev/null | tee ~/portifolio-sosl/cap08/comandos/032_ls_etc_systemd.txt
+# localizar arquivos .conf mais comuns
+sudo find /etc -maxdepth 2 -name "*.conf" | sort | head -n 30 | tee ~/portifolio-sosl/cap08/comandos/033_find_etc_conf.txt
+</code></pre>
+          <p>Descreva no relatório a diferença entre arquivos em <code>/etc</code> e dados de execução em <code>/var</code>.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">5) /home: dados dos usuários</h3>
+          <p>Verifique os diretórios dos usuários e o espaço ocupado.</p>
+          <pre class="language-bash"><code># diretórios dos usuários
+ls -lh /home | tee ~/portifolio-sosl/cap08/comandos/040_ls_home.txt
+# uso de disco por pasta (du)
+sudo du -sh /home/* 2&gt;/dev/null | sort -h | tee ~/portifolio-sosl/cap08/comandos/041_du_home.txt
+</code></pre>
+          <p>No relatório, explique por que backups geralmente priorizam <code>/home</code> e como isso se relaciona com manutenção preventiva.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">6) /var: dados variáveis e logs</h3>
+          <p>Explore logs e outros dados variáveis.</p>
+          <pre class="language-bash"><code># principais subpastas de /var
+ls -lh /var | tee ~/portifolio-sosl/cap08/comandos/050_ls_var.txt
+ls -lh /var/log | tee ~/portifolio-sosl/cap08/comandos/051_ls_var_log.txt
+# localizar os 10 maiores arquivos em /var/log
+sudo find /var/log -type f -printf "%s %p\n" 2&gt;/dev/null | sort -nr | head -n 10 | tee ~/portifolio-sosl/cap08/comandos/052_top_logs.txt
+</code></pre>
+          <p>No relatório, comente o papel de <code>/var/log</code> no troubleshooting e cite exemplos de arquivos encontrados.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">7) /usr e /opt: binários, bibliotecas e softwares opcionais</h3>
+          <p>Identifique onde estão os binários e bibliotecas.</p>
+          <pre class="language-bash"><code># estrutura principal de /usr
+ls -lh /usr | tee ~/portifolio-sosl/cap08/comandos/060_ls_usr.txt
+ls -lh /usr/bin | head -n 20 | tee ~/portifolio-sosl/cap08/comandos/061_ls_usr_bin_head.txt
+ls -lh /usr/lib | head -n 20 | tee ~/portifolio-sosl/cap08/comandos/062_ls_usr_lib_head.txt
+# verificar /opt para softwares de terceiros
+ls -lh /opt 2&gt;/dev/null | tee ~/portifolio-sosl/cap08/comandos/063_ls_opt.txt
+</code></pre>
+          <p>No relatório, diferencie quando usar <code>/usr</code> (gerenciado por pacotes) e quando <code>/opt</code> (apps de terceiros).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">8) /tmp: arquivos temporários</h3>
+          <p>Entenda a finalidade de <code>/tmp</code> e riscos ao armazenar dados importantes lá.</p>
+          <pre class="language-bash"><code># listar temporários
+ls -lh /tmp | tee ~/portifolio-sosl/cap08/comandos/070_ls_tmp.txt
+# criar e testar um arquivo temporário
+echo "teste temporário" &gt; /tmp/exemplo_cap08.txt
+ls -lh /tmp/exemplo_cap08.txt | tee ~/portifolio-sosl/cap08/comandos/071_tmp_example.txt
+</code></pre>
+          <p>No relatório, aponte boas práticas: não guardar dados críticos em <code>/tmp</code>; uso para arquivos de sessão e caches temporários.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">9) Consolidando o inventário e gerando o relatório</h3>
+          <p>Crie um arquivo de relatório com os tópicos, colando trechos relevantes das saídas geradas, com comentários e justificativas.</p>
+          <pre class="language-bash"><code># criar modelo de relatório
+cat &gt; ~/portifolio-sosl/cap08/relatorio/relatorio_cap08.md &lt;&lt;'EOF'
+# Relatório Cap. 08 — FHS e Estrutura de Diretórios
+- Sistema: $(hostnamectl --pretty 2&gt;/dev/null || hostname)
+- Data: $(date)
+
+## Diretórios analisados
+1. / (raiz) — finalidade geral...
+2. /boot — contém kernel, initramfs e GRUB...
+3. /etc — arquivos de configuração...
+4. /home — dados de usuários...
+5. /var — dados variáveis e logs...
+6. /usr — binários e bibliotecas...
+7. /opt — softwares de terceiros...
+8. /tmp — arquivos temporários...
+
+## Evidências (amostras)
+- /etc (amostra): ver comandos/030_ls_etc.txt
+- /var/log (maiores): ver comandos/052_top_logs.txt
+- /usr/bin (amostra): ver comandos/061_ls_usr_bin_head.txt
+
+## Conclusões
+- Separação entre config (/etc) e dados variáveis (/var) ajuda em backup e troubleshooting.
+- Manter dados de usuário em /home facilita migração e restauração.
+EOF
+
+# abrir no editor de sua preferência (nano)
+nano ~/portifolio-sosl/cap08/relatorio/relatorio_cap08.md
+</code></pre>
+          <div class="alert alert-light border mb-0" role="note">
+            Entregue o relatório acompanhado da pasta “comandos/” com as saídas capturadas.
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a navegação pelo FHS e a documentação técnica do sistema.</p>
+        <div class="card-soft bg-white p-4 mt-2">
+          <ol class="mb-0">
+            <li><strong>Mapeamento de serviços:</strong> escolha dois serviços do sistema (ex.: cups, ssh, cron) e identifique onde ficam seus arquivos de configuração em <code>/etc</code> e seus logs em <code>/var/log</code>. Registre as evidências em novos arquivos na pasta <code>comandos/</code> e resuma no relatório.</li>
+            <li><strong>Inventário de binários:</strong> use <code>which</code> e <code>dpkg -S</code> para localizar 5 comandos comuns (ex.: ls, grep, nano, systemctl, journalctl), indicando o pacote e o caminho em <code>/usr/bin</code> ou similar. Documente no relatório.</li>
+            <li><strong>Organização pessoal:</strong> crie uma estrutura em <code>~/portifolio-sosl/cap08</code> para armazenar versões do relatório (v1, v2...) e explique sua convenção de nomes e datas no próprio relatório.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Completude do inventário: diretórios analisados e descrições corretas.</li>
+            <li>Qualidade das evidências: comandos adequados e saídas anexadas.</li>
+            <li>Clareza do relatório: estrutura, justificativas e conclusões técnicas.</li>
+            <li>Boas práticas: organização da pasta de trabalho e padronização de nomes.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Guia Foca Linux — seções sobre FHS e estrutura de diretórios (https://www.guiafoca.org/).</li><li>Arch Wiki — “Filesystem Hierarchy” e páginas de diretórios específicos (https://wiki.archlinux.org/).</li><li>Documentação do Linux Mint — organização do sistema e ferramentas (https://linuxmint.com/documentation.php).</li><li>Tanenbaum, A. — capítulos sobre organização de sistemas de arquivos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 08</h2>
+        <ul><li>Pasta “cap08” com subpastas “comandos/”, “relatorio/” e “prints/”.</li><li>Arquivo “relatorio_cap08.md” descrevendo finalidades e evidências dos diretórios analisados.</li><li>Arquivos de saída das inspeções (ls, tree, du, find), salvos em “comandos/”.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Inicialização e systemd</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Linha de Comando</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais e Software Livre — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual diretório é recomendado para arquivos de configuração do sistema segundo o FHS?","alternativas":{"A":"/usr","B":"/etc","C":"/var","D":"/opt","E":"/home"},"correta":"B"},{"id":"q2","titulo":"Onde normalmente ficam os logs do sistema e de serviços?","alternativas":{"A":"/etc/log","B":"/usr/log","C":"/var/log","D":"/opt/logs","E":"/tmp/log"},"correta":"C"},{"id":"q3","titulo":"Qual opção descreve corretamente a finalidade de /usr?","alternativas":{"A":"Armazenar arquivos temporários do sistema","B":"Manter diretórios pessoais dos usuários","C":"Conter programas e bibliotecas de uso geral do sistema","D":"Armazenar configurações locais do usuário","E":"Ser ponto de montagem para dispositivos removíveis"},"correta":"C"},{"id":"q4","titulo":"Para softwares de terceiros que não seguem a hierarquia padrão, o local mais adequado é:","alternativas":{"A":"/opt","B":"/bin","C":"/sbin","D":"/boot","E":"/mnt"},"correta":"A"},{"id":"q5","titulo":"Qual é o risco principal de guardar dados importantes em /tmp?","alternativas":{"A":"O sistema impede a leitura de /tmp","B":"/tmp é montado como somente leitura","C":"Conteúdo pode ser apagado em reinicializações ou por rotinas de limpeza","D":"/tmp é criptografado e inacessível a serviços","E":"/tmp não existe em sistemas Linux"},"correta":"C"},{"id":"q6","titulo":"Qual diretório contém arquivos relacionados ao processo de inicialização (kernel e GRUB)?","alternativas":{"A":"/home","B":"/etc","C":"/boot","D":"/var","E":"/srv"},"correta":"C"},{"id":"q7","titulo":"A separação entre /etc e /var é importante porque:","alternativas":{"A":"/etc guarda dados variáveis e /var guarda configurações","B":"/etc e /var são equivalentes","C":"/etc guarda configurações e /var guarda dados variáveis","D":"/etc guarda apenas binários e /var bibliotecas","E":"Nenhuma das anteriores"},"correta":"C"},{"id":"q8","titulo":"Em um backup que prioriza dados do usuário, qual diretório é tipicamente mais crítico?","alternativas":{"A":"/usr","B":"/home","C":"/var","D":"/etc","E":"/opt"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei a estrutura de pastas em ~/portifolio-sosl/cap08 para evidências."},{"id":"c2","texto":"Registrei informações do sistema (hostnamectl, lsb_release)."},{"id":"c3","texto":"Inspecionei a raiz / com ls e tree e salvei as saídas."},{"id":"c4","texto":"Analisei /boot e identifiquei kernel/initramfs/GRUB."},{"id":"c5","texto":"Listei arquivos e subpastas relevantes em /etc."},{"id":"c6","texto":"Verifiquei diretórios de usuário e uso de disco em /home."},{"id":"c7","texto":"Explorei /var e mapeei logs em /var/log."},{"id":"c8","texto":"Inspecionei /usr (binários e bibliotecas) e /opt (terceiros)."},{"id":"c9","texto":"Entendi os usos e riscos de /tmp e testei um arquivo temporário."},{"id":"c10","texto":"Elaborei o relatório técnico com evidências e conclusões."}];
+    const CHECKLIST_KEY = 'SOSL_CAP08_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 09 — CLI: Sintaxe e Ajuda</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo09.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOSL</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais e Software Livre</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos de SO e Tipos de Software</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Licenciamento de Software</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Software Livre e Código Aberto</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — VirtualBox e ISO do Linux Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Instalação do Linux Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Interfaces Gráficas no Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Inicialização do Linux e systemd</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Estrutura de Diretórios e FHS</a></li>
+              <li><a class="dropdown-item active" href="capitulo09.html">Capítulo 09 — Linha de Comando: sintaxe e ajuda</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Gerenciamento de Pacotes</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Processos e Monitoramento</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Gerenciamento de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Texto, Pipelines e Edição</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Usuários, Grupos e Permissões</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Shell Script e Automação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Manutenção, Backup e Implantação</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 09 — Linha de Comando no Linux: sintaxe, globbing, histórico e sistemas de ajuda</h1>
+          <p class="mb-2"><strong>Carga:</strong> Não definido</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Roteiro prático de CLI com relatório de comandos e saídas</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> VirtualBox + Linux Mint Cinnamon (Terminal Bash)</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Interpretar a sintaxe de comandos (comando, opções e argumentos) e utilizar globbing para seleção de arquivos.</li><li>Navegar no sistema de arquivos via terminal e consultar informações básicas de data/hora e do sistema.</li><li>Utilizar histórico de comandos, atalhos e aliases para aumentar produtividade.</li><li>Aplicar sistemas de ajuda (man, --help, apropos, info) para aprender comandos de forma autônoma.</li><li>Registrar e descrever saídas de comandos em um roteiro técnico reprodutível.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Operar o terminal Bash com segurança e eficiência.</li><li>Pesquisar e interpretar documentação técnica nativa do sistema.</li><li>Organizar e comunicar resultados técnicos (saídas/logs) em portfólio.</li><li>Resolver problemas simples usando ferramentas de ajuda e histórico.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Estrutura de Diretórios e FHS</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gerenciamento de Pacotes no Mint</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 09)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul class="mb-0">
+  <li>Contextualização (10 min): por que usar a linha de comando? Vantagens em automação, suporte e documentação.</li>
+  <li>Teoria (30–40 min): sintaxe de comandos, globbing, histórico/atalhos e sistemas de ajuda (man, --help, apropos, info).</li>
+  <li>Laboratório guiado (60–80 min): roteiro de 15+ comandos essenciais, com coleta de saídas e anotações.</li>
+  <li>Consolidação (20 min): criar aliases úteis e salvar histórico/relatório no portfólio.</li>
+  <li>Avaliação formativa: checklist e questionário de múltipla escolha ao final.</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">1) Sintaxe de comandos: comando, opções e argumentos</h3>
+    <p>Na maioria dos utilitários do Linux, a estrutura segue o padrão: comando [opções] [argumentos]. Opções modificam o comportamento do comando (ex.: -l, -a, --human-readable), enquanto argumentos indicam alvos (arquivos, diretórios, padrões).</p>
+    <p>Exemplo: ls -l /etc lista o diretório /etc em formato detalhado; já ls -la /home mostra arquivos comuns e ocultos (-a) no diretório /home.</p>
+    <p>Opções curtas geralmente começam com hífen único (-) e podem ser combinadas; opções longas usam dois hífens (--) e costumam ser mais legíveis.</p>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso no passo a passo:</strong> você usará a sintaxe em todos os comandos do roteiro (ls, cat, date, uname, hostnamectl, etc.).</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">2) Globbing: curingas para correspondência de nomes</h3>
+    <p>Globbing é a expansão de padrões de nomes pelo shell. Os curingas mais comuns são: * (qualquer sequência), ? (um caractere) e [abc] (conjunto). Isso permite selecionar múltiplos arquivos sem listar manualmente.</p>
+    <p>Exemplos: ls *.conf lista arquivos que terminam com .conf; cp doc?.txt backup/ copia arquivos doc1.txt, doc2.txt, etc.; ls /var/log/[ma]* filtra nomes que começam com m ou a.</p>
+    <p>Importante: globbing é feito pelo shell antes da execução do comando. Se nenhum arquivo corresponder, o comportamento pode variar (no Bash padrão, o padrão não expandido é passado ao comando).</p>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso no passo a passo:</strong> você usará globbing para listar e filtrar arquivos (ex.: /var/log/*.log, *.conf).</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">3) Histórico, autocompletar, edição e aliases</h3>
+    <p>O shell armazena comandos recentes e permite recuperá-los com as setas do teclado. O autocompletar (Tab) reduz digitação e erros. A edição de linha (atalhos como Ctrl+A, Ctrl+E) acelera correções.</p>
+    <p>O comando history exibe o histórico; !n reexecuta o comando de número n; !! repete o último comando. Aliases são atalhos criados com alias nome='comando'. Eles podem ser persistidos no arquivo ~/.bashrc.</p>
+    <p>Use com responsabilidade: revise o comando antes de reexecutá-lo pelo histórico; cuidado ao criar aliases para comandos potencialmente perigosos (ex.: rm).</p>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso no passo a passo:</strong> você configurará aliases úteis, usará history para revisar comandos e registrará saídas.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">4) Sistemas de ajuda: man, --help, apropos e info</h3>
+    <p>O manual de referência (man) é a principal fonte de consulta local. A sintaxe é man comando e as seções do manual classificam tipos de páginas (1: comandos, 5: formatos de arquivo, 8: administração, etc.).</p>
+    <p>Muitas ferramentas oferecem --help com um resumo rápido de opções. O apropos busca por palavras-chave nas páginas do manual. Já info apresenta documentação em um formato navegável quando disponível.</p>
+    <p>Práticas recomendadas: consultar man antes de executar algo desconhecido; usar exemplos da seção EXAMPLES; combinar man com apropos para descobrir comandos relacionados.</p>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso no passo a passo:</strong> você usará man, --help e apropos para aprender e justificar escolhas no relatório.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">5) Data/hora e informações do sistema</h3>
+    <p>Comandos como date, timedatectl, uname e hostnamectl permitem verificar o relógio do sistema, fuso horário, versão do kernel e detalhes de hardware/virtualização.</p>
+    <p>Essas informações são úteis em relatórios de suporte e diagnóstico. Saber rapidamente a versão do kernel e do sistema facilita buscar soluções compatíveis.</p>
+    <p>Combine com whoami, id e pwd para contextualizar o ambiente atual e permissões.</p>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso no passo a passo:</strong> você coletará data/hora, kernel e hostname no início do roteiro CLI.</div>
+  </div>
+
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Roteiro CLI essencial com 15+ comandos</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Executar um roteiro guiado de linha de comando no Linux Mint (VM), registrando cada comando, opção, explicação e saída principal para compor um relatório técnico do portfólio.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">Preparação do ambiente</h3>
+    <ol class="mb-0">
+      <li>Abra o Terminal no Linux Mint (Menu Iniciar → Terminal) ou com Ctrl+Alt+T.</li>
+      <li>Confirme o usuário atual e diretório de trabalho:</li>
+    </ol>
+    <pre class="language-bash"><code>whoami
+pwd</code></pre>
+    <p class="mb-0 text-muted small">Registre o usuário exibido e o caminho (provavelmente /home/seu_usuario).</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">1) Navegação básica e listagem</h3>
+    <p>Entenda a estrutura do FHS navegando por diretórios e listando conteúdos.</p>
+    <pre class="language-bash"><code># mostrar diretório atual
+pwd
+
+# listar itens do diretório atual em formato longo
+ls -l
+
+# incluir arquivos ocultos (iniciados por .)
+ls -la
+
+# mudar para /etc e listar apenas arquivos .conf
+cd /etc
+ls -l *.conf
+
+# voltar para a pasta do usuário (atalho ~)
+cd ~
+pwd</code></pre>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Aplicação dos conceitos:</strong> Sintaxe de comandos, globbing (*.conf) e navegação (cd, pwd) em ação.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">2) Visualização de arquivos e paginação</h3>
+    <p>Use cat para exibir conteúdos curtos e less para explorar arquivos longos com rolagem.</p>
+    <pre class="language-bash"><code># exibir conteúdo de um arquivo de configuração comum
+sudo cat /etc/hosts
+
+# usar paginação (sair com 'q')
+less /etc/services
+
+# buscar dentro do less (pressione / e digite termo, ex.: http)
+# /http</code></pre>
+    <p class="mb-0 text-muted small">No less, navegue com setas, Page Up/Page Down e saia com q.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">3) Data/hora e informações do sistema</h3>
+    <pre class="language-bash"><code># data e hora atuais
+date
+
+# status do relógio e fuso horário
+timedatectl
+
+# versão do kernel e arquitetura
+uname -a
+
+# informações de host e SO
+hostnamectl</code></pre>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Aplicação dos conceitos:</strong> Coleta de contexto do ambiente para relatório técnico.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">4) Sistemas de ajuda</h3>
+    <pre class="language-bash"><code># ajuda rápida via --help
+ls --help
+
+# manual (seção 1 por padrão)
+man ls
+
+# buscar por palavras-chave relacionadas a "list"
+apropos list
+
+# documentação info (quando disponível)
+info coreutils 'ls invocation'</code></pre>
+    <p class="mb-0 text-muted small">Dica: no man, use /termo para buscar e n/N para navegar entre ocorrências.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">5) Histórico, atalhos e aliases</h3>
+    <pre class="language-bash"><code># ver últimos comandos
+history | tail -n 10
+
+# reexecutar o último comando
+!!
+
+# reexecutar comando de número específico (ex.: 123)
+!123
+
+# criar alias temporário (somente nesta sessão)
+alias ll='ls -alF --group-directories-first'
+
+# testar o alias
+ll
+
+# tornar um alias persistente (adicione ao ~/.bashrc)
+echo "alias ll='ls -alF --group-directories-first'" &gt;&gt; ~/.bashrc
+# recarregar configurações
+source ~/.bashrc</code></pre>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Aplicação dos conceitos:</strong> Produtividade: histórico, reexecução e criação de atalhos confiáveis.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">6) Roteiro de 15+ comandos essenciais (com descrições)</h3>
+    <p>Execute cada comando, anote em seu relatório: objetivo, sintaxe utilizada, principais opções e uma amostra da saída.</p>
+    <pre class="language-bash"><code># 1. pwd — exibe o diretório atual
+pwd
+
+# 2. ls — lista arquivos
+ls -lah
+
+# 3. cd — troca de diretório
+cd /var/log &amp;&amp; pwd
+
+# 4. cat — concatena/exibe conteúdo
+cat /etc/hostname
+
+# 5. less — paginação
+less /var/log/syslog
+
+# 6. date — data/hora
+date "+%Y-%m-%d %H:%M:%S %Z"
+
+# 7. uname — info do kernel
+uname -srmo
+
+# 8. hostnamectl — detalhes do host
+hostnamectl
+
+# 9. man — manual
+man uname
+
+# 10. apropos — busca no manual
+apropos password | head
+
+# 11. echo — imprime texto/variáveis
+echo "Minha HOME é: $HOME"
+
+# 12. history — histórico de comandos
+history | tail -n 5
+
+# 13. id — identidade do usuário
+id
+
+# 14. touch — cria arquivo vazio
+cd ~ &amp;&amp; touch teste_cli.txt &amp;&amp; ls -l teste_cli.txt
+
+# 15. rm — remove arquivo (use com cuidado)
+rm -i teste_cli.txt
+
+# 16. file — tipo do arquivo
+file /bin/bash
+
+# 17. which — caminho do comando
+which ls</code></pre>
+    <p class="mb-0 text-muted small">Se algum arquivo de log não existir na sua distribuição, substitua por outro existente em /var/log.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">7) Globbing na prática</h3>
+    <pre class="language-bash"><code># listar apenas logs .log
+ls /var/log/*.log
+
+# listar arquivos que começam com "sys" e um caractere a mais
+ls /var/log/sys?
+
+# listar arquivos começando com m ou a
+ls /var/log/[ma]*
+
+# copiar apenas arquivos .conf do /etc para uma pasta de trabalho
+mkdir -p ~/cli_lab/etc_conf
+cp /etc/*.conf ~/cli_lab/etc_conf 2&gt;/dev/null
+ls -l ~/cli_lab/etc_conf | head</code></pre>
+    <div class="alert alert-warning border mt-2 mb-0"><strong>Observação:</strong> Use 2&gt;/dev/null para suprimir mensagens de erro ao copiar/listar padrões sem correspondência.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">8) Registrando saídas para o relatório</h3>
+    <p>Redirecione saídas para um arquivo para compor o portfólio. Inclua cabeçalhos e contexto.</p>
+    <pre class="language-bash"><code># criar pasta e arquivo de relatório
+mkdir -p ~/cli_lab
+REPORT=~/cli_lab/relatorio_cli.txt
+
+# registrar contexto do ambiente
+{
+  echo "==== CONTEXTO ===="
+  date
+  hostnamectl
+  echo
+  echo "==== ROTEIRO ===="
+} &gt; "$REPORT"
+
+# exemplo de registro de um comando com sua saída
+{
+  echo
+  echo "--- Comando: ls -lah ~ ---"
+  ls -lah ~
+} &gt;&gt; "$REPORT"
+
+# verificar o relatório
+less "$REPORT"</code></pre>
+    <div class="alert alert-light border mt-2 mb-0"><strong>Aplicação dos conceitos:</strong> Redirecionamento de saída e documentação técnica reprodutível.</div>
+  </div>
+
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso da CLI, da ajuda integrada e do registro técnico, promovendo autonomia de estudo.</p>
+        <div class="vstack gap-3">
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">Atividade 1 — Mini-guia de um comando</h3>
+    <p>Escolha um comando do sistema (ex.: ls, uname, date, file). Produza um mini-guia com: propósito, opções mais úteis (curtas e longas), exemplos práticos e trecho de saída. Referencie trechos do man e do --help.</p>
+  </div>
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">Atividade 2 — Globbing útil</h3>
+    <p>Crie três exemplos de globbing que acelerem tarefas reais, como listar arquivos por extensão, prefixo e conjunto de letras. Explique cada padrão e o contexto de uso.</p>
+  </div>
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">Atividade 3 — Kit de produtividade</h3>
+    <p>Defina 3 aliases produtivos no ~/.bashrc (ex.: ll, grep colorido, atalho para pasta de trabalho). Documente os aliases criados, por que foram escolhidos e um exemplo de uso.</p>
+  </div>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (autoavaliação e portfólio)</h3>
+  <ul class="mb-0">
+    <li>Correção técnica dos comandos e opções utilizadas.</li>
+    <li>Clareza e completude das explicações e do relatório de saídas.</li>
+    <li>Aplicação correta de globbing e justificativa dos padrões.</li>
+    <li>Uso adequado dos sistemas de ajuda (citando man, --help, apropos).</li>
+    <li>Organização do material no portfólio (estrutura de pastas e arquivos).</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Guia Foca Linux — seção de comandos básicos e shell: https://www.guiafoca.org/</li><li>Manual do Linux Mint (documentação): https://linuxmint.com/documentation.php</li><li>ArchWiki — Bash e globbing (conceitos gerais): https://wiki.archlinux.org/</li><li>GNU Coreutils — documentação oficial: https://www.gnu.org/software/coreutils/manual/</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 09</h2>
+        <ul><li>Relatório CLI em ~/cli_lab/relatorio_cli.txt com contexto, comandos e saídas.</li><li>Mini-guia de um comando com exemplos e referências de man/--help.</li><li>Registro dos aliases criados no ~/.bashrc e seus usos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Estrutura de Diretórios e FHS</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gerenciamento de Pacotes no Mint</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais e Software Livre — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a estrutura geral correta de um comando no Linux?","alternativas":{"A":"[opções] comando [argumentos]","B":"comando [opções] [argumentos]","C":"[argumentos] [opções] comando","D":"comando [argumentos] [opções]","E":"[comando] {opções} {argumentos}"},"correta":"B"},{"id":"q2","titulo":"Qual alternativa descreve corretamente globbing no shell?","alternativas":{"A":"Execução paralela de processos.","B":"Mecanismo de expandir padrões de nomes (como * e ?) antes do comando rodar.","C":"Criptografia de nomes de arquivos.","D":"Carregamento dinâmico de módulos do kernel.","E":"Apenas a combinação de opções curtas com longas."},"correta":"B"},{"id":"q3","titulo":"Sobre o comando history, assinale a correta:","alternativas":{"A":"history apaga automaticamente o histórico ao ser executado.","B":"!! repete o último comando executado.","C":"!n apenas mostra o comando de número n, sem executá-lo.","D":"history não funciona no Bash, apenas no Zsh.","E":"history só guarda os últimos 3 comandos."},"correta":"B"},{"id":"q4","titulo":"Ao consultar documentação local de comandos, qual opção é mais indicada para um resumo rápido de opções?","alternativas":{"A":"man","B":"info","C":"--help","D":"apropos","E":"/proc"},"correta":"C"},{"id":"q5","titulo":"Em man pages, qual seção normalmente trata de comandos de usuário?","alternativas":{"A":"1","B":"2","C":"3","D":"5","E":"8"},"correta":"A"},{"id":"q6","titulo":"Qual comando exibe informações detalhadas sobre o host e o sistema operacional?","alternativas":{"A":"uname -r","B":"hostnamectl","C":"whoami","D":"pwd","E":"timedatectl status"},"correta":"B"},{"id":"q7","titulo":"Qual padrão globbing listaria arquivos começando com “sys” seguidos de exatamente um caractere?","alternativas":{"A":"sys*","B":"sys?","C":"sys[]","D":"sys{}","E":"sys??"},"correta":"B"},{"id":"q8","titulo":"Qual comando cria um alias persistente no Bash para a listagem detalhada?","alternativas":{"A":"alias ll='ls -al' (apenas)","B":"echo alias ll='ls -al' > ~/.bashrc","C":"echo \"alias ll='ls -al'\" >> ~/.bashrc && source ~/.bashrc","D":"man alias persistente","E":"apropos alias persistente"},"correta":"C"},{"id":"q9","titulo":"Qual combinação está correta para coletar versão do kernel e arquitetura?","alternativas":{"A":"uname -a","B":"hostnamectl -k","C":"man kernel","D":"date -k","E":"whoami -k"},"correta":"A"},{"id":"q10","titulo":"Qual afirmação é correta sobre apropos?","alternativas":{"A":"Executa comandos com privilégios elevados.","B":"Edita arquivos de configuração automaticamente.","C":"Busca por palavras-chave nas páginas do manual.","D":"Mostra apenas exemplos práticos de uso.","E":"Desinstala utilitários obsoletos."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Abri o terminal e confirmei usuário e diretório atual com whoami e pwd."},{"id":"c2","texto":"Naveguei pelo sistema de arquivos e usei ls com opções (-l, -a)."},{"id":"c3","texto":"Usei globbing para filtrar arquivos (ex.: *.conf, [ma]*)."},{"id":"c4","texto":"Consultei ajuda com --help e man, e usei apropos para buscar termos."},{"id":"c5","texto":"Coletei informações de data/hora, kernel e host (date, uname, hostnamectl)."},{"id":"c6","texto":"Usei history, atalhos (!!, !n) e criei pelo menos um alias útil."},{"id":"c7","texto":"Registrei comandos e saídas em um relatório em ~/cli_lab/relatorio_cli.txt."},{"id":"c8","texto":"Organizei arquivos do laboratório na pasta ~/cli_lab e revisei o material."}];
+    const CHECKLIST_KEY = 'SOSL_CAP09_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

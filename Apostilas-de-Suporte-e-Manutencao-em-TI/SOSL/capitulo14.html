@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 14 — Usuários, Grupos e Permissões</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo14.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOSL</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais e Software Livre</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Fundamentos de SO e Tipos de Software</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Licenciamento de Software</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Software Livre e Código Aberto</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — VirtualBox e ISO do Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Instalação do Linux Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Interfaces Gráficas no Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Boot e systemd</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — FHS e Diretórios</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Linha de Comando</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Pacotes no Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Processos e Monitoramento</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Arquivos e Backup</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Texto, Pipelines e Edição</a></li>
+              <li><a class="dropdown-item active" href="capitulo14.html">Cap. 14 — Usuários, Grupos e Permissões</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Shell Script e Automação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Manutenção e Implantação</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 14 — Usuários, Grupos e Permissões</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6 horas</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Administração de Linux Mint Cinnamon em VM (controle de acesso)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> VirtualBox, Linux Mint Cinnamon, Bash, GNU coreutils</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Criar, modificar e remover usuários e grupos de forma segura.</li><li>Interpretar e editar os arquivos /etc/passwd, /etc/shadow e /etc/group com ferramentas adequadas.</li><li>Configurar permissões de arquivos e diretórios com chmod, chown, chgrp e compreender rwx e modos numéricos/simbólicos.</li><li>Definir políticas de criação de arquivos via umask e configurar acesso administrativo com sudo.</li><li>Aplicar e testar políticas de acesso em um cenário prático com grupo suporte e pastas compartilhadas.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Configurar e administrar contas e permissões no Linux (MSI: administração de usuários).</li><li>Aplicar boas práticas de segurança mínima necessária (principle of least privilege).</li><li>Documentar procedimentos e validar resultados com evidências e logs.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 13</a>
+              <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 15</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 14)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Objetivo geral:</strong> Capacitar o estudante a controlar o acesso ao sistema por meio de gerenciamento de contas, grupos e permissões, aplicando boas práticas de segurança no Linux Mint.</p><p><strong>Conteúdos:</strong> contas e grupos (useradd, usermod, userdel, groupadd), arquivos de banco de contas (/etc/passwd, /etc/shadow, /etc/group), permissões rwx em arquivos/diretórios, modos simbólico e octal (chmod), propriedade (chown, chgrp), umask, sudo/visudo.</p><p><strong>Metodologia:</strong> exposição dialogada com demonstrações em terminal; prática guiada em VM; checagem com comandos de verificação e exercícios de fixação.</p><p><strong>Recursos:</strong> VM VirtualBox com Linux Mint Cinnamon atualizado; terminal; editor de texto (nano); documentação do Mint/Guia Foca.</p><p><strong>Avaliação formativa:</strong> validação por checklist, execução correta dos comandos, evidências (prints, logs) e quiz final.</p><p><strong>Segurança:</strong> executar como usuário comum; usar sudo apenas quando necessário; editar sudoers via visudo para evitar corrupção do arquivo.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">1) Contas de usuários e grupos</h3>
+          <p>Em sistemas Linux, cada ação é executada por um usuário associado a um identificador numérico (UID). Usuários podem pertencer a um ou mais grupos, que reúnem contas sob um mesmo identificador de grupo (GID). Grupos facilitam a concessão de permissões de forma coletiva.</p>
+          <p>No Mint, usuários comuns têm UIDs geralmente a partir de 1000. O usuário root (UID 0) é o administrador. Utilizamos ferramentas como useradd, usermod, userdel para gerenciar contas, e groupadd, groupmod, groupdel para grupos.</p>
+          <p><em>Onde vou aplicar isso:</em> você criará o grupo “suporte” e três usuários com diferentes perfis e pertenceres a grupos no passo a passo.</p>
+
+          <h3 class="h6 fw-bold mt-3">2) Arquivos de contas: /etc/passwd, /etc/shadow e /etc/group</h3>
+          <p>O arquivo /etc/passwd lista usuários e informações básicas em campos separados por dois-pontos, incluindo o shell e o diretório home. As senhas não ficam nele por segurança; ficam em /etc/shadow, com hashes protegidos. O /etc/group define os grupos e seus membros.</p>
+          <p>Nunca edite esses arquivos diretamente sem necessidade. Prefira as ferramentas apropriadas ou, se indispensável, use vipw/vigr para travas seguras.</p>
+          <p><em>Onde vou aplicar isso:</em> você vai consultar esses arquivos com cat/grep e comandos como getent para conferir se as contas e grupos foram criados corretamente.</p>
+
+          <h3 class="h6 fw-bold mt-3">3) Permissões rwx: leitura (r), escrita (w), execução (x)</h3>
+          <p>Cada arquivo/diretório possui três conjuntos de permissões: para o usuário proprietário (u), para o grupo (g) e para outros (o). Em arquivos, r permite ler o conteúdo, w modificar, x executar. Em diretórios, r lista nomes, w cria/remove/renomeia entradas, x permite entrar (atravessar) no diretório.</p>
+          <p>O comando ls -l mostra as permissões no formato -rwxr-x---. O primeiro caractere indica tipo (arquivo, diretório, link etc.), seguido pelas permissões de u, g e o.</p>
+          <p><em>Onde vou aplicar isso:</em> você vai definir permissões de uma pasta compartilhada para o grupo suporte e restringir o acesso de outros usuários.</p>
+
+          <h3 class="h6 fw-bold mt-3">4) chmod: modos simbólico e octal</h3>
+          <p>O chmod altera permissões. Em modo simbólico, use operadores +, - e =, por exemplo: chmod g+wx pasta ou chmod o= arquivo. No modo octal, cada conjunto rwx vira um número: r=4, w=2, x=1. Somando, 7=rwx, 5=rx, 6=rw. Ex.: chmod 770 pasta concede rwx a usuário e grupo, e nada a outros.</p>
+          <p><em>Onde vou aplicar isso:</em> você usará chmod 2770 para configurar a pasta do grupo com o bit SGID e garantir que novos arquivos herdem o grupo.</p>
+
+          <h3 class="h6 fw-bold mt-3">5) Propriedade: chown e chgrp</h3>
+          <p>Todo arquivo tem um proprietário (usuário) e um grupo proprietário. Use chown usuario:grupo caminho para ajustar ambos, e chgrp grupo caminho para alterar apenas o grupo. É comum definir diretórios de equipe com propriedade do grupo e permissões adequadas.</p>
+          <p><em>Onde vou aplicar isso:</em> você definirá o grupo suporte como proprietário da pasta compartilhada, garantindo colaboração entre membros.</p>
+
+          <h3 class="h6 fw-bold mt-3">6) umask: permissões padrão na criação</h3>
+          <p>A umask define quais permissões serão removidas quando novos arquivos/diretórios são criados. Por exemplo, umask 002 resulta em arquivos como 664 e diretórios 775, úteis para colaboração em grupo. Ajustar a umask ajuda a manter políticas consistentes.</p>
+          <p><em>Onde vou aplicar isso:</em> você vai verificar e, se necessário, ajustar a umask para que novos arquivos na pasta do grupo respeitem a colaboração.</p>
+
+          <h3 class="h6 fw-bold mt-3">7) sudo e visudo</h3>
+          <p>O sudo permite executar tarefas administrativas temporariamente com privilégios elevados. A configuração reside em /etc/sudoers e arquivos dentro de /etc/sudoers.d. Edite sempre com visudo, que valida a sintaxe antes de salvar, reduzindo risco de travar o acesso administrativo.</p>
+          <p><em>Onde vou aplicar isso:</em> você concederá acesso sudo controlado a um dos usuários do grupo suporte e testará comandos administrativos com segurança.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Controle de acesso com usuários, grupos e permissões</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Criar o grupo suporte, três usuários com perfis distintos, configurar sudo para um deles e montar uma pasta compartilhada com permissões apropriadas, testando acessos.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Pré-requisitos</h3>
+          <ul>
+            <li>VM do Linux Mint Cinnamon atualizada.</li>
+            <li>Conta com privilégios sudo.</li>
+            <li>Terminal aberto. Execute apenas onde indicado com sudo.</li>
+          </ul>
+
+          <hr>
+          <h3 class="h6 fw-bold">1) Criar o grupo “suporte”</h3>
+          <p>Crie um grupo dedicado para a equipe de suporte.</p>
+          <pre class="language-bash"><code>sudo groupadd suporte
+# verifique:
+getent group suporte</code></pre>
+
+          <hr>
+          <h3 class="h6 fw-bold">2) Criar três usuários com perfis distintos</h3>
+          <p>Criaremos: ana (analista, com sudo), bruno (técnico), clara (estagiária). Todos no grupo suporte como grupo suplementar. Cada um terá diretório home e shell bash padrão.</p>
+          <pre class="language-bash"><code># criar contas com diretório home (-m) e shell bash (-s)
+/usr/sbin/useradd -m -s /bin/bash ana
+/usr/sbin/useradd -m -s /bin/bash bruno
+/usr/sbin/useradd -m -s /bin/bash clara
+
+# definir senhas
+sudo passwd ana
+sudo passwd bruno
+sudo passwd clara
+
+# adicionar todos ao grupo 'suporte'
+sudo usermod -aG suporte ana
+sudo usermod -aG suporte bruno
+sudo usermod -aG suporte clara
+
+# conferir associações:
+id ana
+id bruno
+id clara</code></pre>
+          <div class="alert alert-light border" role="note">
+            Dica: em algumas distribuições, useradd está em /usr/sbin. Use o caminho completo se necessário.
+          </div>
+
+          <hr>
+          <h3 class="h6 fw-bold">3) Configurar sudo apenas para “ana”</h3>
+          <p>Adicione “ana” ao grupo sudo (Mint/Ubuntu) ou crie uma regra específica em /etc/sudoers.d. Usaremos o grupo sudo para simplicidade.</p>
+          <pre class="language-bash"><code># adicionar 'ana' ao grupo administrativo
+sudo usermod -aG sudo ana
+
+# verificar se está no grupo
+id ana
+
+# teste de sudo (faça login como ana)
+su - ana
+sudo -v   # validação de credenciais; pedirá a senha da ana
+exit      # volte ao usuário anterior</code></pre>
+          <div class="alert alert-warning" role="alert">
+            Sempre edite regras com <strong>visudo</strong> se precisar customizar. Ex.: sudo visudo -f /etc/sudoers.d/suporte-ana
+          </div>
+
+          <hr>
+          <h3 class="h6 fw-bold">4) Criar pasta compartilhada do grupo</h3>
+          <p>Diretório onde membros do grupo suporte podem colaborar. Usaremos SGID para herdar o grupo e permissões 2770.</p>
+          <pre class="language-bash"><code>sudo mkdir -p /srv/suporte
+# definir proprietário para root:suporte (grupo do suporte)
+sudo chown root:suporte /srv/suporte
+# ativar SGID (2) e permissões rwx para usuário/grupo
+sudo chmod 2770 /srv/suporte
+
+# conferir
+ls -ld /srv/suporte
+# saída esperada (exemplo): drwxrws--- 2 root suporte ... /srv/suporte</code></pre>
+
+          <hr>
+          <h3 class="h6 fw-bold">5) Ajustar umask para colaboração (opcional)</h3>
+          <p>Para que novos arquivos no diretório tenham escrita para o grupo, os usuários podem usar umask 002 na sessão ou em ~/.profile.</p>
+          <pre class="language-bash"><code># testar temporariamente numa sessão dos usuários:
+umask
+umask 002
+# criar um arquivo de teste e verificar permissões
+cd /srv/suporte
+touch teste.txt
+ls -l teste.txt
+# espere -rw-rw---- (664) para arquivos, respeitando o SGID do diretório</code></pre>
+
+          <hr>
+          <h3 class="h6 fw-bold">6) Testar acessos com os três usuários</h3>
+          <p>Faça login como cada usuário e teste criação/leitura/escrita no diretório do grupo.</p>
+          <pre class="language-bash"><code># como 'ana'
+su - ana
+cd /srv/suporte
+echo "nota da ana" &gt; nota_ana.txt
+ls -l
+exit
+
+# como 'bruno'
+su - bruno
+cd /srv/suporte
+cat nota_ana.txt
+echo "anotação do bruno" &gt;&gt; nota_ana.txt
+ls -l
+exit
+
+# como 'clara'
+su - clara
+cd /srv/suporte
+echo "rascunho da clara" &gt; rascunho.txt
+ls -l
+exit</code></pre>
+
+          <hr>
+          <h3 class="h6 fw-bold">7) Restringir acesso de “outros” e validar</h3>
+          <p>Já definimos 2770, então “outros” não acessam. Valide com um usuário fora do grupo.</p>
+          <pre class="language-bash"><code># criar um usuário temporário sem estar no grupo suporte
+sudo useradd -m -s /bin/bash visitante
+sudo passwd -d visitante  # sem senha para testes locais (use somente em VM de laboratório)
+su - visitante
+cd /srv/suporte
+# deve falhar: "Permissão negada"
+exit
+sudo userdel -r visitante</code></pre>
+
+          <hr>
+          <h3 class="h6 fw-bold">8) Ajustes de propriedade e permissões específicas</h3>
+          <p>Se algum arquivo estiver com grupo incorreto, corrija com chgrp. Para dar controle a um membro específico, use chown no arquivo.</p>
+          <pre class="language-bash"><code># corrigir grupo de todos os arquivos existentes para 'suporte'
+sudo chgrp -R suporte /srv/suporte
+
+# exemplo: dar propriedade de um arquivo à ana
+sudo chown ana:suporte /srv/suporte/rascunho.txt
+
+# remover escrita para 'outros' em um arquivo sensível (por garantia)
+chmod o-rwx /srv/suporte/nota_ana.txt</code></pre>
+
+          <hr>
+          <h3 class="h6 fw-bold">9) Conferir bancos de contas e grupos</h3>
+          <p>Examine /etc/passwd, /etc/group, /etc/shadow com comandos de leitura (não edite diretamente).</p>
+          <pre class="language-bash"><code>getent passwd ana
+getent group suporte
+sudo awk -F: '/^ana:|^bruno:|^clara:/{print $1,$4,$6,$7}' /etc/passwd
+sudo awk -F: '/^suporte:/{print}' /etc/group</code></pre>
+
+          <hr>
+          <h3 class="h6 fw-bold">10) Registrar evidências</h3>
+          <p>Capture saídas de comandos e prints que demonstrem:</p>
+          <ul>
+            <li>Criação de usuários e grupo (id, getent).</li>
+            <li>Pasta /srv/suporte com SGID e 2770 (ls -ld).</li>
+            <li>Criação/edição de arquivos pelos três usuários.</li>
+            <li>Falha de acesso por usuário fora do grupo.</li>
+          </ul>
+          <pre class="language-bash"><code># exemplo de relatório simples
+{
+  echo "Relatório suporte - $(date)"
+  echo "Grupos:"
+  getent group suporte
+  echo "Usuários:"
+  id ana; id bruno; id clara
+  echo "Diretório /srv/suporte:"
+  ls -ld /srv/suporte
+  echo "Conteúdo:"
+  ls -l /srv/suporte
+} | tee ~/relatorio_suporte.txt</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o domínio de contas, grupos, permissões e sudo em cenários próximos ao suporte real.</p>
+        <div class="card-soft bg-white p-4">
+          <ol class="mb-0">
+            <li>Criar o grupo projetos e dois subgrupos: projetoA e projetoB. Criar quatro usuários e distribuí-los entre os subgrupos. Configurar /srv/projetoA e /srv/projetoB com SGID e 2770, testando colaboração entre membros e isolamento entre projetos.</li>
+            <li>Personalizar umask: definir umask 002 para os usuários dos projetos via ~/.profile. Mostrar evidências de que arquivos/diretórios novos herdam permissões de colaboração.</li>
+            <li>Configurar uma regra sudo dedicada: criar /etc/sudoers.d/projetoA-ops permitindo que um usuário execute apenas systemctl status e journalctl -u nome-servico sem senha. Validar com visudo e capturar testes.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Corretude técnica das configurações e comandos.</li>
+            <li>Organização e clareza das evidências (saídas, prints, relatórios).</li>
+            <li>Aplicação de boas práticas de segurança (mínimo privilégio, uso de visudo).</li>
+            <li>Capacidade de diagnóstico e validação (testes de acesso e correções).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Guia Foca Linux — capítulos sobre usuários, grupos e permissões: https://www.guiafoca.org/</li><li>Documentação do Linux Mint — administração do sistema: https://linuxmint.com/documentation.php</li><li>Arch Wiki — Users and groups; File permissions and attributes</li><li>Manuais: man useradd, usermod, groupadd, passwd, chmod, chown, umask, sudoers</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 14</h2>
+        <ul><li>Relatório técnico com evidências da criação de usuários/grupos, configuração de permissões e testes de acesso.</li><li>Scripts ou comandos utilizados, com comentários breves.</li><li>Prints de ls -l, id, getent, e testes de sudo.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 13</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 15</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais e Software Livre — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual arquivo armazena os hashes de senha dos usuários no Linux?","alternativas":{"A":"/etc/passwd","B":"/etc/shadow","C":"/etc/group","D":"/etc/login.defs","E":"/etc/sudoers"},"correta":"B"},{"id":"q2","titulo":"Qual comando adiciona um usuário existente a um grupo suplementar sem removê-lo de outros grupos?","alternativas":{"A":"usermod -G grupo usuario","B":"useradd -aG grupo usuario","C":"usermod -aG grupo usuario","D":"groupadd -a usuario grupo","E":"adduser -G usuario grupo"},"correta":"C"},{"id":"q3","titulo":"Dado o modo octal 2770 aplicado a um diretório, o que significa o primeiro dígito ‘2’?","alternativas":{"A":"Sticky bit","B":"SetUID","C":"SetGID","D":"Execução para outros","E":"Somente leitura"},"correta":"C"},{"id":"q4","titulo":"Em um diretório, a permissão ‘x’ concede principalmente:","alternativas":{"A":"Criar e excluir arquivos","B":"Ler o conteúdo dos arquivos","C":"Listar nomes de arquivos","D":"Permitir entrada (atravessar) no diretório","E":"Alterar proprietário"},"correta":"D"},{"id":"q5","titulo":"Qual comando altera proprietário e grupo simultaneamente para usuario:grupo?","alternativas":{"A":"chmod usuario:grupo arquivo","B":"chgrp usuario:grupo arquivo","C":"chown usuario:grupo arquivo","D":"usermod usuario:grupo arquivo","E":"setfacl -m u:usuario arquivo"},"correta":"C"},{"id":"q6","titulo":"Com umask 002, quais são as permissões típicas de diretórios recém-criados por usuários?","alternativas":{"A":"700","B":"755","C":"775","D":"770","E":"750"},"correta":"C"},{"id":"q7","titulo":"Qual ferramenta deve ser usada para editar com segurança as regras do sudoers?","alternativas":{"A":"nano /etc/sudoers","B":"visudo","C":"vim /etc/sudoers","D":"gedit /etc/sudoers","E":"edit /etc/sudoers"},"correta":"B"},{"id":"q8","titulo":"Qual conjunto de permissões garante leitura e execução para grupo e nenhum acesso a outros?","alternativas":{"A":"740","B":"750","C":"760","D":"770","E":"755"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei o grupo 'suporte' e conferi com getent group suporte."},{"id":"c2","texto":"Criei os usuários ana, bruno e clara com diretórios home e shell bash."},{"id":"c3","texto":"Adicionei os três usuários ao grupo 'suporte' e validei com id."},{"id":"c4","texto":"Concedi privilégios sudo apenas para a usuária ana e testei com sudo -v."},{"id":"c5","texto":"Criei /srv/suporte com SGID e permissões 2770 e verifiquei com ls -ld."},{"id":"c6","texto":"Ajustei/validei umask 002 para colaboração no diretório do grupo."},{"id":"c7","texto":"Testei criação e edição de arquivos no diretório por ana, bruno e clara."},{"id":"c8","texto":"Validei que um usuário fora do grupo não acessa /srv/suporte."},{"id":"c9","texto":"Ajustei propriedades e permissões com chown/chgrp/chmod quando necessário."},{"id":"c10","texto":"Gerei um relatório com evidências (comandos, saídas e prints)."}];
+    const CHECKLIST_KEY = 'chk_SOSL_cap14';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

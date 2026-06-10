@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — Fechamento, satisfação e Base de Conhecimento</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo08.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">TECS</span>
+        <span style="color: var(--cor-principal);">Técnicas de Suporte</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">01 — Operação de Serviços e Central de Serviços: visão geral</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">02 — Ferramentas de gestão de chamados</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">03 — Gerenciamento de Incidentes: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">04 — Abertura e registro de chamados</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">05 — Classificação, categorização e triagem</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">06 — Diagnóstico inicial e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">07 — Escalonamento e restauração de serviço</a></li>
+              <li><a class="dropdown-item active" href="capitulo08.html">08 — Fechamento, satisfação e Base de Conhecimento</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">09 — Itens de Configuração, CMDB e scripts</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">10 — Incidentes de hardware e manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">11 — Incidentes de software e sistemas operacionais</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">12 — Técnicas de atendimento e comunicação</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">13 — Monitoramento, eventos e filas</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">14 — Gerenciamento de Problemas e causa raiz</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">15 — Métricas, relatórios e melhoria contínua</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">16 — Simulação integradora de Central de Serviços</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 08 — Fechamento, satisfação e Base de Conhecimento</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (2h teoria + 2h prática)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Central de Serviços simulada (GLPI ou similar)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ferramenta de tickets (GLPI/OTRS/YouTrack/Jira Service Management), editor Markdown, planilha para métricas</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Aplicar critérios formais de fechamento de incidentes garantindo qualidade e aderência a SLA.</li><li>Coletar e interpretar pesquisa de satisfação (CSAT/NPS) para retroalimentar melhorias.</li><li>Produzir e publicar artigos de Base de Conhecimento padronizados e reutilizáveis (KCS-aligned).</li><li>Documentar solução final e workarounds no ticket e na KB, anexando evidências.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Encerrar chamados com validação do usuário e documentação completa.</li><li>Mensurar satisfação e registrar feedback de forma ética e objetiva.</li><li>Redigir artigos técnicos claros, com passos e critérios de sucesso.</li><li>Trabalhar orientado a SLA e comunicação profissional.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 07 — Escalonamento e restauração de serviço</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 09 — Itens de Configuração, CMDB e scripts</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 08)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li><strong>Abertura (10 min):</strong> contextualização do fechamento no fluxo de incidentes e relação com SLA.</li><li><strong>Conceitos (40 min):</strong> critérios de fechamento; validação com usuário; satisfação (CSAT/NPS); fundamentos de KB e KCS; padrões de artigo.</li><li><strong>Demo (20 min):</strong> fechamento de ticket em ferramenta de tickets e criação de artigo de KB a partir do ticket.</li><li><strong>Prática guiada (40 min):</strong> os alunos fecham 2 tickets simulados, coletam satisfação e publicam 1 artigo de KB cada.</li><li><strong>Compartilhamento (10 min):</strong> revisão rápida de artigos publicados, padronização e melhorias.</li><li><strong>Encerramento (10 min):</strong> checklist do capítulo, dúvidas e direcionamento das atividades extras.</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">1) Critérios de fechamento de incidente</h3>
+          <p>Fechar um incidente não é apenas “clicar em encerrar”. É confirmar que o serviço foi restaurado conforme o escopo e que as evidências e registros estão completos. Os critérios incluem: descrição clara da causa (quando conhecida), solução aplicada ou workaround, evidências da restauração, validação do usuário e atualização de campos como categoria, prioridade, tempo gasto e SLA.</p>
+          <p>Um fechamento de qualidade sustenta relatórios confiáveis (MTTR, FCR) e nutre a base de conhecimento. Sem isso, métricas e lições aprendidas ficam comprometidas.</p>
+          <p><em>Onde vou aplicar isso:</em> nos passos 1, 2 e 4 do Passo a Passo (encerramento e atualização do ticket).</p>
+
+          <h3 class="h6 fw-bold mt-3">2) Validação com o usuário e comunicação de encerramento</h3>
+          <p>Validação é a confirmação explícita do usuário de que o serviço está operacional. Em geral, busca-se uma resposta do solicitante ou evidência objetiva (teste bem-sucedido). A comunicação deve ser clara, respeitosa e registrar próximos passos quando houver solução temporária.</p>
+          <p><em>Onde vou aplicar isso:</em> no passo 2 (mensagem de confirmação e registro da validação).</p>
+
+          <h3 class="h6 fw-bold mt-3">3) Pesquisa de satisfação (CSAT/NPS) e feedback</h3>
+          <p>CSAT mede a satisfação em uma escala (por exemplo, 1 a 5), enquanto NPS avalia a recomendação (0 a 10). O objetivo é captar percepções do usuário sobre atendimento, prazo e qualidade, transformando feedback em melhoria.</p>
+          <p>Cuidado com viés: perguntas simples, objetivas e enviadas logo após a resolução. Respeite privacidade e comunique o propósito da pesquisa.</p>
+          <p><em>Onde vou aplicar isso:</em> no passo 3 (envio de pesquisa e registro de respostas).</p>
+
+          <h3 class="h6 fw-bold mt-3">4) Base de Conhecimento (KB) e padrões de documentação</h3>
+          <p>KB é um repositório de soluções, procedimentos e FAQs. Um bom artigo inclui: título claro, contexto/sintomas, ambiente afetado, causa (se conhecida), solução passo a passo, critérios de sucesso, anexos/capturas, palavras-chave e data/versão.</p>
+          <p>Padronização facilita busca e reuso. Use linguagem simples, passos numerados e imagens legíveis.</p>
+          <p><em>Onde vou aplicar isso:</em> nos passos 4 e 5 (criação e publicação de artigo a partir do ticket).</p>
+
+          <h3 class="h6 fw-bold mt-3">5) KCS em alto nível (Knowledge-Centered Service)</h3>
+          <p>KCS propõe capturar conhecimento durante a resolução do incidente (“capture while solving”), evoluir artigos conforme uso, e medir valor pelo reuso e feedback. Não é necessário adotar KCS completo para obter benefícios: incorporar “criar/ligar/medir/melhorar” já eleva a maturidade.</p>
+          <p><em>Onde vou aplicar isso:</em> no passo 5 (ligar ticket ao artigo e medir reuso/satisfação).</p>
+
+          <h3 class="h6 fw-bold mt-3">6) Relação com SLA e métricas</h3>
+          <p>O fechamento adequado permite calcular SLA cumprido, MTTR e FCR. Campos de tempo, marco de restauração e encerramento devem estar atualizados. Quando houver workaround, documente para evitar reincidência e facilitar futura solução definitiva.</p>
+          <p><em>Onde vou aplicar isso:</em> no passo 1 (atualização dos campos de SLA) e passo 6 (métricas básicas).</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Fechamento do incidente, satisfação e artigo de KB</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Encerrar um incidente corretamente, coletar satisfação do usuário e transformar a solução em um artigo de Base de Conhecimento reutilizável.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Passo 1 — Revisar o ticket e atualizar campos críticos</h3>
+          <ol>
+            <li>Verifique se o serviço foi restaurado e se os testes foram documentados.</li>
+            <li>Atualize categoria, subcategoria, CI (se aplicável), prioridade final, tempo gasto e marcos de SLA.</li>
+            <li>Descreva a solução aplicada ou o workaround de forma objetiva.</li>
+            <li>Anexe evidências: prints, logs, IDs de mudança (quando houver).</li>
+          </ol>
+          <p class="mb-1"><strong>Exemplo de resumo de solução (modelo texto):</strong></p>
+          <pre class="language-text"><code>[Solução]
+- Sintoma: Usuário não conseguia imprimir na fila "Financeiro".
+- Causa provável: Spooler travado após atualização do driver.
+- Ação: Reiniciado serviço "Spooler de Impressão" e reinstalado driver XYZ v2.3.
+- Evidência: Impressão de teste "teste_fin_2024-05.pdf" concluída com sucesso (anexo).
+- Status SLA: Restaurado em 2h15 (SLA 4h). Fase de monitoramento por 24h.</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Passo 2 — Validar com o usuário e comunicar o encerramento</h3>
+          <ol>
+            <li>Envie mensagem solicitando confirmação de que o serviço está operacional.</li>
+            <li>Se o usuário confirmar, registre a validação. Se não responder, siga o procedimento padrão da organização (ex.: 48h para fechamento com evidência).</li>
+          </ol>
+          <p class="mb-1"><strong>Modelo de mensagem ao usuário (e-mail/chat):</strong></p>
+          <pre class="language-text"><code>Assunto: Confirmação de restauração do seu chamado {{TICKET_ID}}
+
+Olá, {{NOME_USUARIO}}.
+Realizamos os procedimentos e o serviço parece operacional. Você pode, por favor, validar se o problema foi resolvido?
+
+Resumo:
+- Incidente: {{TITULO_TICKET}}
+- Ação aplicada: {{RESUMO_ACAO}}
+- Evidência: {{EVIDENCIA}}
+
+Se estiver tudo certo, responder "OK". Caso contrário, descreva o que ainda ocorre.
+Obrigado! — Central de Serviços</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Passo 3 — Enviar pesquisa de satisfação (CSAT/NPS)</h3>
+          <ol>
+            <li>Logo após a validação, envie a pesquisa curta (1 a 3 perguntas).</li>
+            <li>Registre as respostas no ticket ou planilha/módulo de pesquisas.</li>
+          </ol>
+          <p class="mb-1"><strong>Modelo simples de pesquisa (JSON para sistema de formulário):</strong></p>
+          <pre class="language-json"><code>{
+  "formId": "csat_padrao_v1",
+  "title": "Pesquisa de Satisfação do Atendimento",
+  "questions": [
+    { "id": "q1", "type": "scale-1-5", "label": "Quão satisfeito(a) você ficou com a solução?" },
+    { "id": "q2", "type": "scale-0-10", "label": "Qual a chance de recomendar nosso atendimento (NPS)?" },
+    { "id": "q3", "type": "text", "label": "Comentário opcional" }
+  ]
+}</code></pre>
+          <p class="mb-1"><strong>Exemplo de exportação (CSV) para análise:</strong></p>
+          <pre class="language-text"><code>ticket_id,usuario,csat,nps,comentario,data
+INC-2315,joao.silva,5,9,"Atendeu rápido.",2024-05-13
+INC-2318,maria.souza,3,6,"Poderia ter mais instruções.",2024-05-14</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Passo 4 — Escrever o artigo de KB (padrão)</h3>
+          <ol>
+            <li>Transforme a solução do ticket em artigo, removendo dados sensíveis.</li>
+            <li>Use título claro, contexto, passos numerados e critérios de sucesso.</li>
+            <li>Inclua tags e palavras-chave que usuários realmente pesquisariam.</li>
+          </ol>
+          <p class="mb-1"><strong>Modelo de artigo (Markdown):</strong></p>
+          <pre class="language-markdown"><code># Impressora não imprime na fila "Financeiro" — Spooler travado
+
+Resumo: Restaura a impressão quando o serviço de spooler travou após atualização do driver.
+Ambiente: Windows 10/11, Impressora XYZ v2.3, Rede corporativa.
+
+Sintomas:
+- Impressões ficam na fila "Em espera".
+- Mensagem de erro intermitente do spooler.
+
+Causa provável:
+- Serviço "Spooler de Impressão" travado após atualização do driver XYZ v2.3.
+
+Passo a passo:
+1) Abrir "Serviços" e localizar "Spooler de Impressão".
+2) Clicar em "Reiniciar".
+3) Reinstalar o driver XYZ v2.3 (link interno: \\share\drivers\xyz_v2.3).
+4) Realizar impressão de teste em "Financeiro".
+
+Critérios de sucesso:
+- Documento de teste impresso sem erro.
+- Fila sem pendências.
+
+Observações:
+- Se reincidir, avaliar rollback do driver para v2.2 e abrir Problema.
+
+Tags: impressora, spooler, driver, financeiro, impressão travada
+Versão: 1.0 | Data: 2024-05-13 | Autor: central.servicos</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Passo 5 — Publicar e vincular artigo à ocorrência</h3>
+          <ol>
+            <li>Publique o artigo na KB e defina visibilidade (pública/interna).</li>
+            <li>Vincule o ticket ao artigo para rastrear reuso.</li>
+          </ol>
+          <p class="mb-1"><strong>Exemplo de metadados (YAML front matter para seu CMS/KB):</strong></p>
+          <pre class="language-yaml"><code>id: KB-IMP-001
+title: Impressora não imprime — Spooler travado (XYZ v2.3)
+visibility: internal
+tags: [impressora, spooler, driver, financeiro]
+related_tickets: [INC-2315, INC-2318]
+owner_group: ServiceDesk
+review_after: 90d</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Passo 6 — Medir e registrar resultados</h3>
+          <ol>
+            <li>Atualize o ticket com status “Fechado” e registre tempos (abertura, restauração, encerramento).</li>
+            <li>Exporte CSAT/NPS semanal e acompanhe tendências.</li>
+            <li>Monitore reuso do artigo (visualizações, resolução por autoatendimento).</li>
+          </ol>
+          <p class="mb-1"><strong>Consulta exemplo (SQL genérico para relatório):</strong></p>
+          <pre class="language-sql"><code>SELECT
+  DATE(closed_at) AS dia,
+  COUNT(*) AS fechados,
+  AVG(TIMESTAMPDIFF(MINUTE, opened_at, resolved_at)) AS mttr_min,
+  ROUND(AVG(csat),2) AS csat_medio
+FROM tickets
+LEFT JOIN csat_respostas USING(ticket_id)
+WHERE closed_at BETWEEN '2024-05-01' AND '2024-05-31'
+GROUP BY dia
+ORDER BY dia;</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o processo de fechamento, satisfação e documentação em KB.</p>
+        <div class="card-soft bg-white p-4">
+          <ol class="mb-0">
+            <li><strong>Fechamento completo:</strong> Pegue 2 tickets simulados e aplique o fluxo completo (validação + CSAT + encerramento). Gere um breve relatório com tempos e status de SLA.</li>
+            <li><strong>Artigo de KB:</strong> Escreva 1 artigo baseado em um dos tickets, seguindo o modelo proposto, com título, passos e critérios de sucesso.</li>
+            <li><strong>Melhoria de artigo:</strong> Escolha um artigo de colega, revise e proponha 3 melhorias objetivas (clareza, imagens, tags).</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold mb-2">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Completude do fechamento (validação, solução, evidências, SLA).</li>
+            <li>Qualidade do artigo (clareza, estrutura, critérios de sucesso, tags).</            li>
+            <li>Aderência à comunicação profissional e prazos.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>ITIL v4 — Gerenciamento de Incidentes: critérios de restauração e encerramento.</li><li>Knowledge-Centered Service (KCS) — princípios “capture, structure, reuse, improve”.</li><li>GLPI/OTRS/Jira Service Management — módulo de KB e pesquisas de satisfação.</li><li>Métricas de Help Desk (CSAT, NPS, FCR, MTTR) — boas práticas e armadilhas comuns.</li><li>Redação técnica: linguagem clara, voz ativa e padronização de procedimentos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 08</h2>
+        <ul><li>2 tickets encerrados com validação e campos de SLA atualizados.</li><li>1 relatório curto com CSAT/NPS obtidos e observações.</li><li>1 artigo de KB padronizado e publicado (visibilidade interna).</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color:var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 07 — Escalonamento e restauração de serviço</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 09 — Itens de Configuração, CMDB e scripts</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Técnicas de Suporte — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é o objetivo principal ao fechar um incidente no contexto de Gerenciamento de Incidentes?","alternativas":{"A":"Atingir a maior nota de satisfação possível.","B":"Registrar o máximo de detalhes técnicos, independentemente da relevância.","C":"Confirmar restauração do serviço, documentar solução e encerrar conforme critérios e SLA.","D":"Vincular o ticket a uma mudança (RFC), sempre.","E":"Gerar um novo problema no Problem Management."},"correta":"C"},{"id":"q2","titulo":"Sobre validação com o usuário no fechamento, assinale a alternativa correta:","alternativas":{"A":"Não é necessária; basta o técnico afirmar que está tudo funcionando.","B":"É desejável, mas só em incidentes críticos.","C":"Deve ocorrer de forma explícita ou com evidência objetiva do funcionamento.","D":"Só o gestor pode validar, o usuário não.","E":"Deve ser substituída por uma gravação de tela do técnico."},"correta":"C"},{"id":"q3","titulo":"CSAT e NPS são, respectivamente:","alternativas":{"A":"Indicadores de disponibilidade e capacidade.","B":"Satisfação do cliente e tendência de recomendação.","C":"Tempo de resposta e tempo de resolução.","D":"Índices de custo e de produtividade.","E":"Métricas de segurança e conformidade."},"correta":"B"},{"id":"q4","titulo":"Qual estrutura é mais adequada para um artigo de Base de Conhecimento?","alternativas":{"A":"Título criativo, sem contexto, com parágrafos longos.","B":"Título claro, contexto/sintomas, ambiente, causa (se houver), passos, critérios de sucesso, anexos e tags.","C":"Apenas um print de tela com uma seta indicando o botão a clicar.","D":"Somente comandos avançados sem explicação.","E":"Somente perguntas e respostas curtas (FAQ) sem detalhes."},"correta":"B"},{"id":"q5","titulo":"No espírito do KCS, a criação de conhecimento deve acontecer:","alternativas":{"A":"Somente ao final do mês, em mutirão.","B":"Apenas pela equipe de qualidade.","C":"Durante a resolução do incidente, evoluindo com o uso e feedback.","D":"Depois de aprovada pelo diretor de TI.","E":"Nunca; a KB deve ser estática."},"correta":"C"},{"id":"q6","titulo":"Qual campo NÃO é tipicamente essencial ao encerrar um ticket?","alternativas":{"A":"Solução aplicada/Workaround.","B":"Validação do usuário ou evidência de funcionamento.","C":"Vínculo com CI (quando aplicável).","D":"Número do crachá do técnico.","E":"Atualização de tempos/SLA."},"correta":"D"},{"id":"q7","titulo":"Por que padronizar artigos da KB com tags e palavras-chave?","alternativas":{"A":"Para aumentar o tamanho do documento.","B":"Para facilitar a busca e o reuso pelos atendentes e usuários.","C":"Para substituir o treinamento técnico.","D":"Para cumprir uma exigência legal.","E":"Para evitar que usuários encontrem os artigos."},"correta":"B"},{"id":"q8","titulo":"Ao coletar CSAT/NPS, uma boa prática é:","alternativas":{"A":"Enviar pesquisas longas com 20 perguntas.","B":"Aguardar semanas após o fechamento para enviar a pesquisa.","C":"Enviar perguntas curtas e objetivas logo após a resolução.","D":"Solicitar que o usuário escreva um relatório técnico detalhado.","E":"Coletar apenas quando a nota for alta."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Atualizei categoria, prioridade final, tempos e marcos de SLA no ticket."},{"id":"c2","texto":"Registrei solução aplicada ou workaround de forma objetiva."},{"id":"c3","texto":"Validei com o usuário (ou anexei evidência de funcionamento)."},{"id":"c4","texto":"Enviei e registrei pesquisa de satisfação (CSAT/NPS)."},{"id":"c5","texto":"Redigi artigo de KB com título claro, passos e critérios de sucesso."},{"id":"c6","texto":"Adicionei tags/palavras-chave e publiquei o artigo com visibilidade adequada."},{"id":"c7","texto":"Vinculei o ticket ao artigo de KB e registrei resultados."}];
+    const CHECKLIST_KEY = 'tecs-cap08-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

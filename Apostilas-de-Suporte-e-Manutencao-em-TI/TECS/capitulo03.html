@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 03 — Gerenciamento de Incidentes</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo03.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">TECS</span>
+        <span style="color: var(--cor-principal);">Técnicas de Suporte</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Operação de Serviços e Central de Serviços</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Ferramentas de gestão de chamados</a></li>
+              <li><a class="dropdown-item active" href="capitulo03.html">Capítulo 03 — Gerenciamento de Incidentes</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Abertura e registro de chamados</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Classificação, categorização e triagem</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Diagnóstico inicial e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Escalonamento e restauração de serviço</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Fechamento, satisfação e Base de Conhecimento</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Itens de Configuração, CMDB e scripts</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Incidentes de hardware e manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Incidentes de software e sistemas operacionais</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Técnicas de atendimento e comunicação</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento, eventos e filas</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Gerenciamento de Problemas e causa raiz</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Métricas, relatórios e melhoria contínua</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Simulação integradora de Central de Serviços</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 03 — Gerenciamento de Incidentes: fundamentos</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Central de Serviços simulada com sistema de tickets (GLPI ou similar)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> GLPI/OTRS/Tool simulada, Windows/Linux, Planilhas, Editor de texto, Navegador</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Definir incidente, impacto, urgência e prioridade com precisão.</li><li>Explicar o objetivo do processo: restaurar o serviço rapidamente, minimizando impacto ao negócio.</li><li>Diferenciar incidente, requisição de serviço e problema.</li><li>Construir e aplicar uma matriz Impacto × Urgência para priorizar tickets.</li><li>Configurar regras de priorização no sistema de chamados e validar casos de teste.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Aplicar gerenciamento de incidentes do registro ao fechamento com foco em SLA.</li><li>Comunicar-se de forma objetiva com usuários e equipes internas durante o tratamento do incidente.</li><li>Documentar decisões de priorização e justificativas técnicas.</li><li>Utilizar ferramenta de tickets para configurar e operar filas com diferentes prioridades.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 02</a>
+              <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 04</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 03)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p class="mb-2"><strong>1) Abertura (15 min):</strong> Apresentação dos objetivos, revisão rápida dos capítulos 01 e 02, alinhamento de termos: incidente, impacto, urgência, prioridade.</p><p class="mb-2"><strong>2) Exposição dialogada (40 min):</strong> Conceitos fundamentais do Gerenciamento de Incidentes; exemplos práticos; diferenciação incidente × requisição × problema; objetivo de restaurar o serviço.</p><p class="mb-2"><strong>3) Demonstração (20 min):</strong> Como modelar uma matriz Impacto × Urgência e mapear para níveis de prioridade no sistema de tickets.</p><p class="mb-2"><strong>4) Prática guiada (60 min):</strong> Alunos constroem matriz própria, configuram regras de prioridade na ferramenta e testam com cenários simulados.</p><p class="mb-2"><strong>5) Discussão e registro (20 min):</strong> Justificativas de priorização, registro no ticket e atenção ao SLA.</p><p class="mb-0"><strong>6) Encerramento (15 min):</strong> Checklist de aprendizagem, atividades adicionais e questionário.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">O que é um incidente?</h3>
+          <p>Incidente é qualquer interrupção não planejada de um serviço de TI ou redução na sua qualidade. Não precisa haver indisponibilidade total; uma lentidão severa também é incidente se impactar o usuário ou o negócio.</p>
+          <p>Exemplos: sistema ERP fora do ar, impressoras de um andar indisponíveis, Wi‑Fi instável, login falhando para um grupo de usuários.</p>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> Identificar corretamente “incidente” na abertura do ticket e usar o fluxo de priorização no Passo 1 e 2 do passo a passo.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Impacto, urgência e prioridade</h3>
+          <p><strong>Impacto</strong> mede a extensão do efeito no negócio (quantidade de pessoas/serviços afetados, criticidade do serviço, risco financeiro/operacional).</p>
+          <p><strong>Urgência</strong> mede o quão rapidamente o incidente precisa ser resolvido (prazo para afetar o negócio, eventos/prazos próximos, degradação em curso).</p>
+          <p><strong>Prioridade</strong> é o resultado da combinação entre impacto e urgência. Serve para ordenar atendimento e alocar recursos de forma racional.</p>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> Construir a matriz Impacto × Urgência e atribuir prioridade automaticamente no Passo 3.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Objetivo do processo de Gerenciamento de Incidentes</h3>
+          <p>O objetivo principal é <strong>restaurar o serviço o mais rápido possível</strong>, minimizando impacto para o negócio e usuários, seguindo SLAs acordados.</p>
+          <p>Isso pode incluir aplicar <em>workarounds</em> temporários para recuperar a operação enquanto a causa definitiva é tratada por outro processo (ex.: Problemas/Mudanças).</p>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> Decidir por restauração rápida (até com workaround) durante o atendimento, especialmente nas regras de comunicação no Passo 5.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Incidente x Requisição x Problema</h3>
+          <p><strong>Incidente:</strong> algo que quebrou ou está degradado (ex.: “não consigo imprimir”).</p>
+          <p><strong>Requisição de serviço:</strong> pedido padrão com procedimento conhecido (ex.: criar usuário, instalar software aprovado).</p>
+          <p><strong>Problema:</strong> causa raiz de um ou mais incidentes (ex.: driver de impressora com bug causando falhas recorrentes).</p>
+          <p>Separar corretamente evita filas confusas e melhora métricas (FCR, MTTR) e satisfação do usuário.</p>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> No Passo 2, classificar o ticket para o fluxo adequado (incidente ou requisição) e indicar quando abrir um problema.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">SLA, comunicação e escalonamento</h3>
+          <p>SLAs definem prazos de resposta e solução por prioridade. A comunicação constante com o usuário reduz ansiedade e evita reaberturas.</p>
+          <p>Escalonar corretamente (funcional ou hierárquico) quando necessário protege o SLA e acelera a restauração.</p>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> No Passo 4 e 5, registrar SLAs por prioridade e mensagens-padrão de atualização ao usuário.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Matriz Impacto × Urgência e regras de prioridade</h3>
+          <p>A matriz é uma tabela 3×3 (ou 4×4) que cruza impacto e urgência e retorna uma prioridade padronizada (P1, P2, P3...); quanto mais alta a prioridade, menor o tempo alvo de solução.</p>
+          <p>Exemplo (3 níveis): Alto/Médio/Baixo para impacto e urgência. O mapeamento para P1–P5 deve ser consistente e divulgado a toda a equipe.</p>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> No Passo 3, você criará essa matriz e configurará as regras no sistema de tickets.</div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Construção e aplicação da Matriz Impacto × Urgência</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Criar uma matriz de priorização, configurar as regras na ferramenta de chamados e validar com cenários simulados, garantindo restauração rápida e alinhamento a SLA.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Passo 1 — Definir critérios de Impacto e Urgência</h3>
+          <p>Crie definições simples e observáveis para cada nível. Exemplo (ajuste à sua realidade escolar/empresa):</p>
+          <ul>
+            <li><strong>Impacto Alto:</strong> serviço crítico parado, afeta uma turma/sede inteira ou função essencial (ex.: internet do laboratório offline).</li>
+            <li><strong>Impacto Médio:</strong> grupo/setor afetado ou função importante degrada (ex.: impressoras de um andar falhando).</li>
+            <li><strong>Impacto Baixo:</strong> usuário individual ou função não crítica prejudicada.</li>
+          </ul>
+          <ul class="mt-2">
+            <li><strong>Urgência Alta:</strong> prazo iminente, avaliação/prova/entrega, risco financeiro/operacional imediato.</li>
+            <li><strong>Urgência Média:</strong> prazo próximo ou degradação crescente.</li>
+            <li><strong>Urgência Baixa:</strong> sem prazo imediato, impacto tolerável temporariamente.</li>
+          </ul>
+          <p>Registre esses critérios em um documento curto e anexe no sistema (base de conhecimento ou arquivo de configuração).</p>
+          <pre class="language-json"><code>{
+  "impacto": {
+    "alto": "Serviço crítico parado; muitos usuários afetados",
+    "medio": "Grupo/setor afetado; degradação relevante",
+    "baixo": "Usuário individual; função não crítica"
+  },
+  "urgencia": {
+    "alta": "Prazo imediato/risco alto",
+    "media": "Prazo próximo/degradação",
+    "baixa": "Sem prazo imediato"
+  }
+}</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Passo 2 — Distinguir Incidente, Requisição e Problema na abertura</h3>
+          <p>Use as descrições do usuário e os critérios abaixo para escolher o tipo:</p>
+          <ul>
+            <li><strong>Incidente:</strong> “parou de funcionar”, “está muito lento”, “erro ao abrir”.</li>
+            <li><strong>Requisição:</strong> “preciso de acesso”, “instalar software”, “criar conta”.</li>
+            <li><strong>Problema (registro separado):</strong> recorrência com causa desconhecida que exige análise de raiz.</li>
+          </ul>
+          <p>Configure campos obrigatórios para forçar a seleção correta. Exemplo de template de ticket:</p>
+          <pre class="language-yaml"><code>tipo: incidente | requisicao
+servico: &lt;categoria/servico&gt;
+descricao: |
+  &lt;relato do usuário com 5W2H&gt;
+impacto: alto | medio | baixo
+urgencia: alta | media | baixa
+anexos: [opcional]
+</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Passo 3 — Construir a Matriz Impacto × Urgência e mapear prioridades</h3>
+          <p>Monte uma tabela 3×3 e atribua prioridades P1 (mais alta) a P5 (mais baixa). Exemplo:</p>
+          <pre class="language-csv"><code>Impacto\Urgencia,Alta,Media,Baixa
+Alto,P1,P2,P3
+Medio,P2,P3,P4
+Baixo,P3,P4,P5</code></pre>
+          <p>Registre tempos alvo por prioridade (exemplo didático):</p>
+          <pre class="language-json"><code>{
+  "SLA": {
+    "P1": {"resposta":"15 min","solucao":"4 h"},
+    "P2": {"resposta":"30 min","solucao":"8 h"},
+    "P3": {"resposta":"4 h","solucao":"16 h"},
+    "P4": {"resposta":"8 h","solucao":"40 h"},
+    "P5": {"resposta":"16 h","solucao":"5 dias"}
+  }
+}</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Passo 4 — Configurar as regras na ferramenta de chamados</h3>
+          <p>Na maioria dos sistemas, é possível criar regras de negócio (gatilhos) que ajustam a prioridade conforme impacto e urgência. Se não houver, utilize um campo calculado manualmente.</p>
+          <p>Exemplo genérico de pseudorregra:</p>
+          <pre class="language-js"><code>// pseudo-regra: ao salvar/atualizar um ticket
+function mapearPrioridade(impacto, urgencia) {
+  const idx = { alto:0, medio:1, baixo:2 };
+  const mat = [
+    ['P1','P2','P3'],
+    ['P2','P3','P4'],
+    ['P3','P4','P5']
+  ];
+  return mat[idx[impacto]][idx[urgencia]];
+}</code></pre>
+          <p>Em GLPI, por exemplo, crie regras em “Regras de negócios” para preencher o campo “Prioridade”. Em outras ferramentas, use automações equivalentes.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Passo 5 — Validar com cenários simulados e comunicar o usuário</h3>
+          <p>Crie ao menos 6 tickets de teste variando impacto e urgência. Verifique se a prioridade calculada está correta e se o SLA associado é aplicado.</p>
+          <p>Padronize mensagens de atualização para cada prioridade, mantendo o usuário informado.</p>
+          <pre class="language-text"><code>[P1] Estamos tratando seu incidente com prioridade máxima. Próxima atualização em 15 minutos.
+[P2] Seu incidente foi priorizado. Previsão de atualização em 30 a 60 minutos.
+[P3-P5] Incidente registrado. Atualizações conforme janela padrão do SLA.</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Passo 6 — Registrar evidências e orientar escalonamento</h3>
+          <p>Em incidentes P1/P2, antecipe escalonamento funcional se a restauração não ocorrer no primeiro atendimento. Documente hipótese, testes e ações; anexe prints/logs.</p>
+          <pre class="language-bash"><code># Coletar informações rápidas (Windows)
+ipconfig /all
+ping -n 5 gateway.exemplo
+tracert sistema.exemplo.local
+wevtutil qe System /c:20 /rd:true /f:text
+
+# Coletar informações rápidas (Linux)
+ip a
+ping -c 5 8.8.8.8
+traceroute sistema.exemplo.local
+journalctl -n 50</code></pre>
+          <p>Feche o ticket somente após validação do usuário ou evidência clara de restauração, conforme política do capítulo 08.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a aplicação da matriz Impacto × Urgência, priorização e registro adequado no sistema de chamados.</p>
+        <div class="card-soft bg-white p-4 mb-3">
+          <ol class="mb-0">
+            <li>Monte uma matriz própria 3×3 (ou 4×4) adaptada ao seu contexto e publique como um artigo de KB. Inclua tempos de resposta e solução por prioridade.</li>
+            <li>Crie 6 tickets simulados (3 incidentes, 3 requisições). Verifique se as regras de prioridade funcionaram e anote correções necessárias.</li>
+            <li>Escreva um mini-guia de comunicação com o usuário para P1, P2 e P3, com mensagens padrão de atualização.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold mb-2">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correção técnica na definição de impacto/urgência e no mapeamento de prioridades.</li>
+            <li>Clareza e completude da documentação (tickets e KB).</li>
+            <li>Aderência a SLA e coerência da comunicação com o usuário.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>ITIL v4 — Visão geral de Gerenciamento de Incidentes e Operação de Serviços.</li><li>Boas práticas de priorização: como times de Service Desk definem impacto e urgência.</li><li>Comparativo de ferramentas de tickets (GLPI, OTRS, outros) e suas automações de SLA.</li><li>Diferença entre Incidentes e Problemas: uso de KEDB e artigos de “erros conhecidos”.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 03</h2>
+        <ul><li>Matriz Impacto × Urgência publicada (documento/KB) com prioridades e SLAs.</li><li>Configuração de regras de prioridade na ferramenta de chamados (prints ou export de regras).</li><li>6 tickets simulados com priorização correta e mensagens de atualização registradas.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 02</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 04</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Técnicas de Suporte — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é o principal objetivo do Gerenciamento de Incidentes?","alternativas":{"A":"Encontrar a causa raiz definitiva do erro","B":"Aplicar mudanças em produção","C":"Restaurar o serviço rapidamente, minimizando impacto","D":"Criar novos serviços","E":"Documentar a arquitetura de TI"},"correta":"C"},{"id":"q2","titulo":"O que melhor diferencia incidente de requisição de serviço?","alternativas":{"A":"Incidente é sempre de hardware; requisição sempre de software","B":"Incidente é algo que falhou; requisição é um pedido padrão","C":"Incidente é opcional; requisição é obrigatória","D":"Incidente não precisa de ticket; requisição precisa","E":"Incidente nunca tem SLA; requisição sempre tem"},"correta":"B"},{"id":"q3","titulo":"Impacto e urgência servem para:","alternativas":{"A":"Definir categoria técnica do chamado","B":"Calcular automaticamente a prioridade","C":"Substituir a necessidade de comunicação com o usuário","D":"Cancelar tickets duplicados","E":"Evitar registro de evidências"},"correta":"B"},{"id":"q4","titulo":"Na matriz 3×3, um incidente de Impacto Alto e Urgência Baixa resultaria em qual prioridade no exemplo do capítulo?","alternativas":{"A":"P1","B":"P2","C":"P3","D":"P4","E":"P5"},"correta":"C"},{"id":"q5","titulo":"Qual opção representa boa prática de comunicação durante um P1?","alternativas":{"A":"Aguardar a solução completa para só então avisar","B":"Enviar atualizações frequentes e curtas dentro do SLA","C":"Explicar detalhes técnicos complexos para o usuário final","D":"Não registrar mensagens no ticket para ganhar tempo","E":"Pedir ao usuário que procure outra equipe"},"correta":"B"},{"id":"q6","titulo":"Quando abrir um registro de Problema relacionado a um incidente?","alternativas":{"A":"Quando for uma solicitação recorrente de instalação","B":"Quando houver causa raiz conhecida e já resolvida","C":"Quando houver recorrência sem causa raiz conhecida","D":"Quando o usuário exigir prioridade máxima","E":"Quando o ticket for fechado com satisfação alta"},"correta":"C"},{"id":"q7","titulo":"O que é considerado incidente?","alternativas":{"A":"Pedido de criação de uma nova conta de e-mail","B":"Parada não planejada do ERP afetando várias pessoas","C":"Solicitação de compra de mouse","D":"Agendamento de manutenção preventiva","E":"Aprovação de orçamento da TI"},"correta":"B"},{"id":"q8","titulo":"Qual par melhor define os conceitos?","alternativas":{"A":"Impacto = pressa do usuário; Urgência = número de usuários","B":"Impacto = criticidade/abrangência; Urgência = tempo/pressão de prazo","C":"Impacto = tempo de resposta; Urgência = categoria técnica","D":"Impacto = complexidade técnica; Urgência = custo do equipamento","E":"Impacto = quantidade de anexos; Urgência = tamanho do ticket"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Defini os critérios de impacto (alto/médio/baixo) com exemplos claros."},{"id":"c2","texto":"Defini os critérios de urgência (alta/média/baixa) vinculados a prazos/risco."},{"id":"c3","texto":"Construí a matriz Impacto × Urgência e mapeei para P1–P5."},{"id":"c4","texto":"Configurei as regras de prioridade na ferramenta de tickets."},{"id":"c5","texto":"Validei com pelo menos 6 cenários simulados e ajustei regras se necessário."},{"id":"c6","texto":"Padronizei mensagens de comunicação por prioridade (P1, P2, P3...)."},{"id":"c7","texto":"Registrei evidências (logs/prints) e critérios de escalonamento no ticket."},{"id":"c8","texto":"Publiquei a matriz e os SLAs como artigo de KB."}];
+    const CHECKLIST_KEY = 'TECS-CAP03-CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 13 — Monitoramento, eventos e filas</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo13.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">TECS</span>
+        <span style="color: var(--cor-principal);">Técnicas de Suporte</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Operação de Serviços e Central de Serviços</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Ferramentas de gestão de chamados</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Gerenciamento de Incidentes: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Abertura e registro de chamados</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Classificação, categorização e triagem</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Diagnóstico inicial e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Escalonamento e restauração de serviço</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Fechamento, satisfação e Base de Conhecimento</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Itens de Configuração, CMDB e scripts</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Incidentes de hardware e manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Incidentes de software e sistemas operacionais</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Técnicas de atendimento e comunicação</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento, eventos e filas</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Gerenciamento de Problemas e causa raiz</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Métricas, relatórios e melhoria contínua</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Simulação integradora de Central de Serviços</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 13 — Monitoramento, eventos e filas</h1>
+          <p class="mb-2"><strong>Carga:</strong> Não especificado</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Não aplicável</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ferramenta de tickets (ex.: GLPI ou similar), painel de monitoramento (ex.: Zabbix/Prometheus) e e-mail/chat corporativo</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Identificar a diferença entre eventos de monitoramento e incidentes de suporte, integrando-os ao fluxo de atendimento.</li><li>Interpretar métricas e dashboards de fila para priorização dinâmica de chamados conforme SLA.</li><li>Configurar alertas básicos e transformar sinais de monitoramento em tickets qualificados.</li><li>Aplicar critérios de impacto e urgência para organizar a fila de 20+ tickets e reduzir MTTR.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Operar ferramentas de monitoramento e correlacionar eventos a serviços e CIs.</li><li>Atuar sobre painéis de fila para priorizar, reatribuir e comunicar status com foco em SLA.</li><li>Documentar alertas, evidências e ações no ticket, mantendo trilha de auditoria.</li><li>Tomar decisão rápida entre workaround e escalonamento com base em métricas.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Técnicas de atendimento e comunicação</a>
+              <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gerenciamento de Problemas e causa raiz</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 13)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li>Introdução: papel do monitoramento na Central de Serviços, benefícios e riscos de não utilizá-lo.</li><li>Conceitos: evento x incidente; SLAs e alertas; leitura de dashboards de fila.</li><li>Ferramentas: visão geral de um monitor (ex.: Zabbix/Prometheus) e de um sistema de tickets (ex.: GLPI).</li><li>Demonstração: como um alerta vira ticket; categorização, priorização e comunicação.</li><li>Prática guiada: priorização de uma fila com 20 tickets usando critérios de impacto, urgência e SLA.</li><li>Registro e documentação: evidências do evento, vínculo com CI e atualização do ticket.</li><li>Retrospectiva: avaliar ganhos de MTTR e oportunidades de automação (ações e gatilhos).</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Eventos x Incidentes</h3>
+          <p>Evento é qualquer alteração de estado de um componente ou serviço monitorado, como uso de CPU acima de 90% por 5 minutos, serviço parado ou disco com pouco espaço. Nem todo evento é um incidente.</p>
+          <p>Incidente é uma interrupção não planejada ou degradação da qualidade do serviço. Um evento se torna incidente quando afeta o usuário/negócio, o SLA ou a disponibilidade, exigindo ação do suporte.</p>
+          <p>Onde vou aplicar isso: na triagem automática de alertas para decidir o que vira ticket, o que é ignorado e o que apenas gera tendência para análise futura.</p>
+
+          <h3 class="h6 fw-bold mt-4">2) Dashboards de fila e priorização dinâmica</h3>
+          <p>Dashboards de fila exibem o estado atual dos chamados: abertos, em andamento, pendentes, por prioridade, por SLA e por técnico. A priorização dinâmica usa métricas em tempo real para reorganizar a fila conforme impactos e prazos.</p>
+          <p>Critérios comuns: prioridade (P1 a P4), tempo restante de SLA, número de usuários afetados, serviços críticos, dependências e escalonamentos pendentes. Ferramentas costumam oferecer filtros e ordenações para suportar decisões rápidas.</p>
+          <p>Onde vou aplicar isso: ao ordenar e atacar a fila de 20 tickets, garantindo que chamados críticos com SLA próximo do vencimento sejam tratados primeiro.</p>
+
+          <h3 class="h6 fw-bold mt-4">3) SLAs e alertas</h3>
+          <p>SLAs definem tempos-alvo de atendimento (tempo de resposta) e de resolução (tempo total). Alertas de monitoramento e do próprio sistema de tickets podem notificar quando um SLA está prestes a estourar.</p>
+          <p>Configurando alertas adequados, a equipe atua proativamente: ao receber “SLA TTR < 30 min” você antecipa a ação ou escalona, evitando violações.</p>
+          <p>Onde vou aplicar isso: ao configurar notificações e ao priorizar chamados em risco, comunicando o usuário e registrando as ações no ticket.</p>
+
+          <h3 class="h6 fw-bold mt-4">4) Correlação de eventos e CIs (CMDB)</h3>
+          <p>Vincular eventos ao Item de Configuração (CI) correto permite entender a abrangência e o histórico. Um mesmo CI pode gerar múltiplos tickets ao longo do tempo; a correlação reduz duplicidade e direciona o técnico certo.</p>
+          <p>Onde vou aplicar isso: ao criar o ticket a partir de um alerta, vinculando o CI impactado e consultando histórico para identificar padrões ou erros conhecidos.</p>
+
+          <h3 class="h6 fw-bold mt-4">5) Comunicação e atualização de status</h3>
+          <p>Ao atuar com base em eventos, comunique claramente: problema identificado, impacto, ação em andamento, previsão e próximos passos. Registre tudo no ticket para transparência e auditoria.</p>
+          <p>Onde vou aplicar isso: cada mudança de status ou descoberta técnica deve ser registrada com data/hora, evidências e resumo objetivo, mantendo o usuário informado.</p>
+
+          <h3 class="h6 fw-bold mt-4">6) Métricas relacionadas: MTTR, FCR e backlog</h3>
+          <p>MTTR (Mean Time To Restore) mede o tempo médio de restauração; FCR (First Call Resolution) mede resolução no primeiro contato; backlog é o volume de chamados pendentes. O uso eficaz de monitoramento e filas reduz MTTR e backlog, e pode melhorar FCR.</p>
+          <p>Onde vou aplicar isso: ao finalizar o atendimento, registre início/fim e ações para que relatórios reflitam desempenho real e suportem melhoria contínua.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Dashboard, Eventos e Priorização da Fila</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Integrar alertas ao fluxo de chamados, transformar eventos relevantes em tickets, priorizar uma fila de 20 tickets com base em SLA e impacto, comunicar-se com o usuário e registrar evidências.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Etapa 1 — Identificar eventos relevantes</h3>
+          <p>Abra o painel do seu monitor (ex.: Zabbix/Prometheus) e filtre os eventos das últimas 24 horas. Classifique mentalmente: informativos, advertências e críticos.</p>
+          <p>Critérios práticos: evento crítico em serviço essencial ou queda de disponibilidade é candidato a virar incidente; eventos repetidos em um CI podem indicar tendência e merecem análise de problema.</p>
+
+          <p class="mb-1"><strong>Exemplo de consulta Prometheus (filtrar instâncias com CPU alta):</strong></p>
+          <pre class="language-sql"><code>100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) &gt; 90</code></pre>
+
+          <div class="alert alert-light border mt-3 mb-0" role="note">
+            Dica: Se o seu ambiente não usa Prometheus, adapte o filtro ao seu monitor (por exemplo, acionadores/trigger no Zabbix).
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 2 — Converter evento em ticket</h3>
+          <p>Para cada evento relevante, crie um ticket no sistema (ex.: GLPI). Preencha obrigatórios: título claro, categoria, impacto, urgência, CI vinculado, evidências e anexos (prints do alerta, logs).</p>
+
+          <p class="mb-1"><strong>Exemplo de campos (JSON simbólico para automação via API):</strong></p>
+          <pre class="language-json"><code>{
+  "title": "CPU acima de 90% - Servidor APP01",
+  "category": "Infraestrutura &gt; Servidores",
+  "impact": "Alto",
+  "urgency": "Alta",
+  "priority": "P1",
+  "ci": "APP01",
+  "description": "Alerta do monitor às 10:32. CPU &gt; 90% por 7 min. Serviço de aplicação pode degradar.",
+  "attachments": [
+    "screenshot_alerta_cpu.png"
+  ],
+  "source": "Monitoramento",
+  "sla_group": "Produção"
+}</code></pre>
+
+          <p class="mb-1"><strong>Exemplo de evidência (Linux - últimos erros de serviço):</strong></p>
+          <pre class="language-bash"><code># logs do serviço da aplicação
+journalctl -u app.service -p err --since "30 min ago" --no-pager</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 3 — Vincular CI e checar histórico</h3>
+          <p>Localize o CI (ex.: APP01) e verifique histórico de incidentes. Incidentes anteriores semelhantes podem apontar workaround rápido ou erro conhecido (KEDB).</p>
+
+          <p class="mb-1"><strong>Exemplo de consulta SQL (histórico do CI):</strong></p>
+          <pre class="language-sql"><code>-- Exemplo genérico: tickets dos últimos 60 dias para o CI APP01
+SELECT id, title, priority, opened_at, closed_at
+FROM tickets
+WHERE ci = 'APP01' AND opened_at &gt;= CURRENT_DATE - INTERVAL '60 days'
+ORDER BY opened_at DESC;</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 4 — Priorizar a fila de 20 tickets</h3>
+          <p>Abra o dashboard da fila e ordene por: prioridade (P1 a P4), tempo restante de SLA, número de usuários afetados e criticidade do serviço. Reatribua ou escalone tickets conforme necessidade.</p>
+
+          <p class="mb-1"><strong>Filtro prático (pseudo-consulta):</strong></p>
+          <pre class="language-sql"><code>-- Ordenar por prioridade e proximidade do SLA
+SELECT id, title, priority, sla_due_in_minutes
+FROM tickets
+WHERE status IN ('Novo','Em Andamento')
+ORDER BY
+  CASE priority WHEN 'P1' THEN 1 WHEN 'P2' THEN 2 WHEN 'P3' THEN 3 ELSE 4 END,
+  sla_due_in_minutes ASC;</code></pre>
+
+          <p class="mb-1"><strong>Exemplo de checklist de priorização:</strong></p>
+          <pre class="language-bash"><code>- [ ] P1 com SLA &lt; 60 min tratados primeiro
+- [ ] Serviços críticos (ERP, e-mail, rede) acima de serviços de apoio
+- [ ] Incidentes que bloqueiam operação antes de requisições
+- [ ] Tickets com pendência de escalonamento destravados
+- [ ] Comunicação enviada para tickets que extrapolarão SLA</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 5 — Comunicação e atualização do ticket</h3>
+          <p>Envie atualização objetiva ao usuário afetado e registre no ticket: diagnóstico, ação aplicada, previsão e próximos passos. Se precisar escalonar, informe o motivo e o grupo destino.</p>
+
+          <p class="mb-1"><strong>Modelo de atualização (texto curto):</strong></p>
+          <pre class="language-text"><code>Olá, identificamos alto uso de CPU no servidor APP01 afetando o sistema X.
+Ação: ajuste de limite do serviço e reinício controlado às 10:45.
+Previsão: normalização em ~15 minutos. Próximo passo: monitorar por 30 min.
+Manteremos você informado(a). Obrigado!</code></pre>
+
+          <p class="mb-1"><strong>Exemplo PowerShell (Windows) para evidência de processo pesado:</strong></p>
+          <pre class="language-powershell"><code>Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 | Format-Table -AutoSize</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 6 — Encerramento e lições</h3>
+          <p>Após restauração, documente causa, ação e prevenção. Se aplicável, crie artigo de KB com workaround ou ajuste definitivo. Registre tempos para MTTR.</p>
+
+          <p class="mb-1"><strong>Modelo de encerramento (resumo):</strong></p>
+          <pre class="language-text"><code>Causa: pico de carga após deploy.
+Ação: ajuste de threads e recycle controlado.
+Prevenção: alerta específico + limite de autoescalonamento.
+Tempos: início 10:32, restauração 10:50, teste 10:55 (MTTR 23 min).</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a leitura de eventos, a priorização da fila e a comunicação efetiva, com foco em SLA e restauração rápida.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Crie um cenário com 20 tickets (planilha ou na sua ferramenta) contendo: título, prioridade, SLA restante, serviço afetado e número de usuários. Reordene justificando os 5 primeiros.</li>
+            <li>Selecione 3 eventos de monitoramento reais ou simulados e converta em tickets completos (com CI e evidências). Anexe prints e um resumo do diagnóstico inicial.</li>
+            <li>Redija 2 atualizações de status curtas para usuários diferentes: uma para incidente P1 próximo do SLA e outra para P3 com workaround aplicado.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correção técnica na identificação de eventos relevantes e vínculo com CIs.</li>
+            <li>Priorização coerente com SLA, impacto e urgência.</li>
+            <li>Clareza e objetividade na comunicação escrita.</li>
+            <li>Registro de evidências e rastreabilidade no ticket.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Diferenciação de eventos, incidentes e problemas segundo ITIL v4.</li><li>Boas práticas de configuração de alertas em plataformas de monitoramento.</li><li>Métricas de Service Desk: como ler e agir sobre dashboards de fila.</li><li>Integrações entre ferramentas de monitoramento e sistemas de tickets.</li><li>Estratégias para reduzir MTTR e evitar estouro de SLA.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 13</h2>
+        <ul><li>Fila de 20 tickets priorizada com justificativa dos 5 primeiros.</li><li>3 tickets gerados a partir de eventos com CI vinculado e evidências.</li><li>2 mensagens de atualização de status para usuários com contextos diferentes.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Técnicas de atendimento e comunicação</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gerenciamento de Problemas e causa raiz</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Técnicas de Suporte — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a melhor definição de evento no contexto de monitoramento?","alternativas":{"A":"Uma interrupção não planejada de um serviço.","B":"Qualquer mudança de estado relevante observada por uma ferramenta de monitoramento.","C":"Um pedido formal de um usuário por algo novo.","D":"Uma falha de hardware confirmada.","E":"Um item de configuração na CMDB."},"correta":"B"},{"id":"q2","titulo":"Quando um evento deve ser tratado como incidente?","alternativas":{"A":"Sempre que gerar qualquer log.","B":"Apenas quando houver um e-mail do usuário.","C":"Quando afetar a disponibilidade/qualidade do serviço ou o SLA do negócio.","D":"Quando for informado por um gerente.","E":"Somente quando for de hardware."},"correta":"C"},{"id":"q3","titulo":"Qual critério NÃO é adequado para priorizar uma fila de 20 tickets?","alternativas":{"A":"Tempo restante para vencer o SLA.","B":"Impacto (número de usuários/serviço crítico).","C":"Urgência (necessidade temporal).","D":"Cor da interface do ticket.","E":"Escalonamentos pendentes."},"correta":"D"},{"id":"q4","titulo":"O vínculo de um ticket a um CI (Item de Configuração) é importante principalmente para:","alternativas":{"A":"Aumentar o número de tickets.","B":"Atribuir o ticket automaticamente ao financeiro.","C":"Correlacionar histórico, reduzir duplicidade e direcionar a equipe correta.","D":"Garantir que o ticket nunca seja fechado.","E":"Remover logs do sistema."},"correta":"C"},{"id":"q5","titulo":"Qual é o objetivo prático de configurar alertas de SLA no sistema de tickets?","alternativas":{"A":"Criar mais chamados para a equipe.","B":"Atuar proativamente antes do estouro, priorizando e escalonando quando necessário.","C":"Desativar notificações dos usuários.","D":"Eliminar a necessidade de triagem.","E":"Impedir que o usuário acompanhe o status."},"correta":"B"},{"id":"q6","titulo":"MTTR está mais diretamente relacionado a:","alternativas":{"A":"Tempo médio para restaurar o serviço.","B":"Tempo médio entre falhas.","C":"Taxa de resolução no primeiro contato.","D":"Quantidade total de tickets por mês.","E":"Percentual de uso de CPU."},"correta":"A"},{"id":"q7","titulo":"Em uma comunicação de status ao usuário, o mais importante é:","alternativas":{"A":"Usar termos técnicos complexos.","B":"Descrever causa, ação, impacto, previsão e próximos passos de forma objetiva.","C":"Enviar apenas quando encerrar o ticket.","D":"Evitar registrar no ticket para não alongar o histórico.","E":"Indicar que a culpa é do usuário."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Distingui eventos informativos, advertências e críticos no painel de monitoramento."},{"id":"c2","texto":"Transformei eventos relevantes em tickets completos com CI e evidências."},{"id":"c3","texto":"Configurei ou revisei alertas de SLA no sistema de tickets."},{"id":"c4","texto":"Priorizei a fila considerando prioridade, SLA restante, impacto e urgência."},{"id":"c5","texto":"Comuniquei o status ao usuário de forma clara e objetiva."},{"id":"c6","texto":"Registrei diagnósticos, ações e tempos para cálculo de MTTR."},{"id":"c7","texto":"Verifiquei histórico do CI e KEDB antes de escalar."},{"id":"c8","texto":"Apliquei workaround quando adequado e documentei a solução definitiva."},{"id":"c9","texto":"Gerei lições aprendidas e/ou artigo de KB quando aplicável."}];
+    const CHECKLIST_KEY = 'tecs-cap13-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

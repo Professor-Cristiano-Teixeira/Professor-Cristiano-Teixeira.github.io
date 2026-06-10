@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 05 — Instalação do Linux Mint: particionamento e multiboot</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo05.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOSL</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais e Software Livre</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Fundamentos de Sistemas Operacionais e Tipos de Software</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Licenciamento de Software: conceitos e modelos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Software Livre e Código Aberto: histórico e aplicações</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Preparação do Ambiente: VirtualBox e ISO do Linux Mint</a></li>
+              <li><a class="dropdown-item active" href="capitulo05.html">Cap. 05 — Instalação do Linux Mint: particionamento e multiboot</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Interfaces Gráficas no Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Inicialização do Linux e alvos do systemd</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Estrutura de Diretórios e FHS</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Linha de Comando: sintaxe e ajuda</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Gerenciamento de Pacotes no Mint</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Processos e Monitoramento</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Gerenciamento de Arquivos: navegação, cópia e backup</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Texto e Pipelines; Edição de Configurações</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Usuários, Grupos e Permissões</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Introdução ao Shell Script e Automação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Manutenção Preventiva, Backup e Implantação</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 05 — Instalação do Linux Mint: particionamento e multiboot</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6 h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório prático em VM com Linux Mint Cinnamon (VirtualBox)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> VirtualBox, ISO Linux Mint Cinnamon, UEFI/GRUB, ext4</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Realizar a instalação do Linux Mint em VM com particionamento manual seguro.</li><li>Planejar e criar as partições EFI, raiz (/) e /home, configurando swap adequadamente.</li><li>Explicar conceitos de sistemas de arquivos (ext4) e pontos de montagem.</li><li>Compreender o papel do GRUB e princípios de multiboot.</li><li>Documentar a instalação com evidências e checklist de pós-instalação.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Planejamento de instalação e particionamento em ambiente virtualizado.</li><li>Configuração de boot UEFI/Legacy e compreensão do GRUB.</li><li>Aplicação do FHS na definição de pontos de montagem.</li><li>Registro técnico de procedimentos e validação de resultados.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 04 — Preparação do Ambiente</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 06 — Interfaces Gráficas no Linux</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 05)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul><li>Aquecimento (15 min): revisão do Cap. 04 (VM pronta, ISO validada) e verificação de requisitos (UEFI habilitado na VM, disco virtual vazio).</li><li>Exposição (30 min): conceitos de particionamento (GPT, EFI, /, /home, swap), sistemas de arquivos (ext4) e GRUB/multiboot.</li><li>Demostração (15 min): tour pelo instalador do Linux Mint (telas principais, opções de segurança, idioma, teclado, rede).</li><li>Prática guiada (120–150 min): instalação completa com particionamento manual; validação de boot; pós-instalação básica.</li><li>Registro e avaliação (30 min): checklist de verificação, captura de telas e relatório técnico breve.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Esquema de partições: por que separar EFI, raiz (/) e /home?</h3>
+          <p>Particionar um disco significa dividi-lo logicamente em áreas independentes para organizar dados e facilitar manutenção. Em ambientes Linux modernos com UEFI, é comum criar: (a) uma partição do sistema EFI (ESP), onde ficam arquivos de boot; (b) a partição raiz (/), que contém o sistema Linux e aplicativos; e (c) uma partição /home, destinada aos seus arquivos e configurações de usuário.</p>
+          <p>Separar /home permite reinstalar o sistema mantendo dados pessoais intactos, desde que a partição /home não seja formatada. A ESP garante que o firmware UEFI encontre o carregador de boot, enquanto a raiz concentra o restante do sistema, simplificando backups e diagnósticos.</p>
+          <p>Onde vou aplicar isso: você usará este esquema durante o particionamento manual no instalador para criar e montar as partições adequadas.</p>
+
+          <h3 class="h6 fw-bold mt-4">2) Tabela de partições GPT e partição EFI (ESP)</h3>
+          <p>A GPT (GUID Partition Table) substitui a MBR, suportando discos grandes e mais partições. Em modo UEFI, o firmware procura uma ESP formatada em FAT32 (tamanho típico entre 100 e 550 MB). Nela, ficam arquivos do gerenciador de boot como o GRUB.</p>
+          <p>No VirtualBox, ao criar a VM em modo UEFI, o instalador do Mint detectará e utilizará a ESP corretamente. Se estiver em modo BIOS/Legacy, não há ESP; o GRUB será instalado no MBR.</p>
+          <p>Onde vou aplicar isso: na criação da ESP no passo de particionamento e na seleção do alvo de instalação do carregador de inicialização.</p>
+
+          <h3 class="h6 fw-bold mt-4">3) Sistemas de arquivos e pontos de montagem</h3>
+          <p>O sistema de arquivos define como dados são organizados. O ext4 é padrão estável no Linux desktop/servidor. Pontos de montagem são diretórios onde partições ficam acessíveis: por exemplo, “/” para o sistema, “/home” para dados do usuário e “/boot/efi” para a ESP.</p>
+          <p>Ao formatar partições, atribuímos tipo (ext4, swap, fat32) e ponto de montagem. Isso permite que o sistema, após o boot, acesse cada partição pelo diretório correspondente.</p>
+          <p>Onde vou aplicar isso: ao configurar cada partição no instalador (tipo ext4 para / e /home; FAT32 para ESP; swap como área de troca).</p>
+
+          <h3 class="h6 fw-bold mt-4">4) Swap: o que é e quando usar</h3>
+          <p>A swap é uma área de troca usada quando a RAM está cheia, permitindo ao sistema manter estabilidade. Em desktops com bastante RAM, a swap pode ser menor ou até um arquivo de swap. Em ambientes didáticos, uma partição de 2 a 4 GB é suficiente para testes.</p>
+          <p>Para hibernação, a swap deve ser aproximadamente igual ou maior que a RAM. Neste capítulo, focaremos em criar uma partição de swap simples.</p>
+          <p>Onde vou aplicar isso: ao definir uma partição do tipo “swap” no particionamento manual.</p>
+
+          <h3 class="h6 fw-bold mt-4">5) GRUB e noções de multiboot</h3>
+          <p>O GRUB é o gerenciador de boot que carrega o kernel do Linux. Em multiboot, o GRUB pode detectar outros sistemas operacionais e listar opções no menu de inicialização. Em VM, geralmente haverá apenas um SO, mas é importante entender como o GRUB se integra ao UEFI/BIOS.</p>
+          <p>Se você instalar outro SO depois, poderá atualizar o GRUB com um comando para detectar novas entradas.</p>
+          <p>Onde vou aplicar isso: na etapa de instalação do carregador de inicialização e, posteriormente, verificando o menu do GRUB após o primeiro boot.</p>
+
+          <h3 class="h6 fw-bold mt-4">6) Boas práticas de instalação e registro</h3>
+          <p>Antes de aplicar mudanças em disco, revise tamanhos e pontos de montagem. Faça capturas de tela das telas de particionamento e anote as escolhas. Após a instalação, valide rede, atualização de pacotes e espaço em disco. Mantenha um diário de bordo com comandos, logs e prints.</p>
+          <p>Onde vou aplicar isso: durante todo o passo a passo e na seção de pós-instalação, garantindo rastreabilidade do que foi feito.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Instalar o Linux Mint com particionamento manual (UEFI) em VM</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Concluir a instalação do Linux Mint Cinnamon em máquina virtual do VirtualBox, criando manualmente as partições EFI, raiz (/) e /home, configurando swap e validando o boot com GRUB.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Pré-requisitos e checagens iniciais</h3>
+          <ul>
+            <li>VM criada conforme Cap. 04, com UEFI habilitado (Configurações da VM → Sistema → Habilitar EFI).</li>
+            <li>ISO do Linux Mint Cinnamon anexada ao drive ótico da VM.</li>
+            <li>Disco virtual com pelo menos 30 GB.</li>
+          </ul>
+          <p class="mb-1"><strong>Comandos úteis pós-boot live (opcional):</strong></p>
+          <pre class="language-bash"><code># Verificar modo de boot (UEFI) pela presença de /sys/firmware/efi
+[ -d /sys/firmware/efi ] &amp;&amp; echo "UEFI ativo" || echo "Modo BIOS/Legacy"
+
+# Listar discos detectados
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT
+
+# Verificar memória disponível (para dimensionar swap de forma consciente)
+free -h</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Iniciar pelo Live e abrir o Instalador</h3>
+          <ol class="mb-0">
+            <li>Inicie a VM e selecione “Start Linux Mint”. Aguarde o carregamento do ambiente live.</li>
+            <li>Conecte-se à rede se necessário (ícone de rede) para permitir atualização de pacotes durante a instalação.</li>
+            <li>Clique em “Install Linux Mint” na área de trabalho.</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">2) Idioma, teclado e multimídia</h3>
+          <ol>
+            <li>Selecione “Português (Brasil)” como idioma e avance.</li>
+            <li>Escolha o layout de teclado correto (teste na caixa de texto).</li>
+            <li>Na tela de “Multimídia”, você pode marcar a instalação de codecs. Em laboratórios sem internet, deixe desmarcado.</li>
+          </ol>
+          <p class="mb-0 text-muted">Dica: marcar codecs facilita a reprodução de mídia após a instalação.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">3) Tipo de instalação e particionamento manual</h3>
+          <ol>
+            <li>Na etapa “Tipo de instalação”, selecione “Algo mais” para particionar manualmente.</li>
+            <li>Confirme que a tabela de partição do disco é GPT. Se o disco estiver vazio, o instalador criará conforme necessário.</li>
+          </ol>
+          <p class="mb-1"><strong>Estratégia de particionamento recomendada (exemplo para 30 GB):</strong></p>
+          <ul>
+            <li>ESP (EFI System Partition): 512 MB, tipo FAT32, ponto de montagem “/boot/efi”.</li>
+            <li>raiz (/): 18 GB, tipo ext4, ponto de montagem “/”.</li>
+            <li>/home: 10 GB, tipo ext4, ponto de montagem “/home”.</li>
+            <li>swap: 2 GB (ou conforme RAM disponível).</li>
+          </ul>
+          <p class="mb-0 text-muted">Ajuste tamanhos conforme a capacidade do seu disco virtual.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">4) Criando as partições no instalador</h3>
+          <ol>
+            <li>Selecione o disco (ex.: /dev/sda ou /dev/vda) e clique em “Novo” para criar a ESP:
+              <ul>
+                <li>Tamanho: 512 MB; Tipo: FAT32; Usar como: Sistema EFI; Ponto de montagem: /boot/efi.</li>
+              </ul>
+            </li>
+            <li>Crie a partição raiz (/):
+              <ul>
+                <li>Tamanho: ~18 GB; Sistema de arquivos: ext4; Ponto de montagem: /; Formatar: Sim.</li>
+              </ul>
+            </li>
+            <li>Crie a partição /home:
+              <ul>
+                <li>Tamanho: ~10 GB; Sistema de arquivos: ext4; Ponto de montagem: /home; Formatar: Sim.</li>
+              </ul>
+            </li>
+            <li>Crie a partição swap:
+              <ul>
+                <li>Tamanho: 2 GB; Tipo de uso: área de troca (swap).</li>
+              </ul>
+            </li>
+            <li>No campo “Dispositivo para instalação do carregador de inicialização”, selecione a ESP ou o disco (em UEFI, o instalador cuidará da ESP automaticamente).</li>
+            <li>Revise cuidadosamente e clique em “Instalar agora”. Confirme as alterações quando solicitado.</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">5) Usuário, fuso horário e instalação</h3>
+          <ol>
+            <li>Informe fuso horário (ex.: São Paulo) e prossiga.</li>
+            <li>Crie o usuário, hostname e defina uma senha forte. Marque “Requerer minha senha para entrar” por padrão.</li>
+            <li>Aguarde a cópia de arquivos. Aproveite para registrar prints da tela de particionamento e resumo.</li>
+            <li>Ao concluir, clique em “Reiniciar agora”. Remova a mídia ISO quando solicitado.</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">6) Primeiro boot, GRUB e validações</h3>
+          <ol>
+            <li>Verifique o GRUB (pode aparecer rapidamente) e deixe iniciar o Linux Mint.</li>
+            <li>Faça login e abra um Terminal para checagens:</li>
+          </ol>
+          <pre class="language-bash"><code># Confirmar partições e pontos de montagem
+lsblk -f
+
+# Verificar espaço (raiz e /home)
+df -hT | grep -E "/$|/home$|/boot/efi"
+
+# Checar modo UEFI
+[ -d /sys/firmware/efi ] &amp;&amp; echo "UEFI ativo" || echo "BIOS/Legacy"
+
+# Atualizar índices e sistema (se houver internet)
+sudo apt update &amp;&amp; sudo apt upgrade -y</code></pre>
+          <p class="mb-0 text-muted">Se futuramente adicionar outro SO, rode: <code>sudo update-grub</code> para detectar novas entradas.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">7) Pós-instalação essencial</h3>
+          <ol>
+            <li>Instale atualizações e codecs (se não o fez na instalação).</li>
+            <li>Instale utilitários úteis de diagnóstico:</li>
+          </ol>
+          <pre class="language-bash"><code>sudo apt install -y neofetch htop git curl</code></pre>
+          <ol start="3">
+            <li>Capture evidências: saída de <code>lsblk -f</code>, <code>df -hT</code> e prints das telas do instalador.</li>
+            <li>Registre tudo no seu portfólio: passos, comandos, resultados e conclusões.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o processo de instalação, particionamento e validação, produzindo evidências técnicas organizadas.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Reinstalação controlada: Repita a instalação alterando os tamanhos de / e /home (mantendo ESP=512 MB e swap=2 GB). Compare a saída do <code>df -hT</code> antes/depois e explique impactos no uso de espaço.</li>
+            <li>Exploração do GRUB: Acesse <code>/boot/efi</code> e liste o conteúdo. Em seguida, rode <code>sudo update-grub</code> e salve a saída, comentando as entradas detectadas.</li>
+            <li>Backup pós-instalação: Crie um tar da sua pasta de usuário e meça o tamanho do arquivo final.</li>
+          </ol>
+          <pre class="language-bash"><code># exemplo de backup simples da /home/usuario (ajuste $USER)
+tar -czvf /home/$USER/backup-home.tgz /home/$USER
+ls -lh /home/$USER/backup-home.tgz</code></pre>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correta criação e configuração das partições (ESP, /, /home, swap).</li>
+            <li>Sistema inicia corretamente via GRUB em modo UEFI.</li>
+            <li>Registro completo com prints, comandos e conclusões técnicas.</li>
+            <li>Boa organização do portfólio e clareza na comunicação técnica.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação do Linux Mint — Instalação e pós-instalação: https://linuxmint.com/documentation.php</li><li>Guia Foca Linux: Particionamento e sistemas de arquivos — https://www.guiafoca.org/</li><li>Arch Wiki: EFI system partition (conceitos gerais) — https://wiki.archlinux.org/</li><li>Livro “Linux – a Bíblia” (capítulos de instalação e bootloader).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 05</h2>
+        <ul><li>Relatório técnico curto com: esquema de particionamento adotado (tamanhos e tipos), justificativas e prints das telas-chave.</li><li>Saídas de validação: <code>lsblk -f</code> e <code>df -hT</code> após a instalação.</li><li>Comprovante de atualização do sistema (<code>sudo apt update &amp;&amp; sudo apt upgrade -y</code>) e versão do kernel (<code>uname -r</code>).</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color:var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 04 — Preparação do Ambiente</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 06 — Interfaces Gráficas no Linux</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais e Software Livre — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual a principal função da partição EFI (ESP) em sistemas com UEFI?","alternativas":{"A":"Armazenar dados pessoais dos usuários","B":"Servir como área de swap","C":"Conter arquivos do carregador de boot (ex.: GRUB) em FAT32","D":"Montar a raiz (/) do sistema","E":"Atuar como cache de pacotes do APT"},"correta":"C"},{"id":"q2","titulo":"No esquema recomendado para este capítulo, quais pontos de montagem são criados, além da ESP e da swap?","alternativas":{"A":"/boot e /var","B":"/ e /home","C":"/usr e /opt","D":"/tmp e /srv","E":"/etc e /bin"},"correta":"B"},{"id":"q3","titulo":"Qual sistema de arquivos é usualmente utilizado para as partições raiz (/) e /home no Linux Mint?","alternativas":{"A":"NTFS","B":"FAT32","C":"ext4","D":"exFAT","E":"Btrfs (obrigatório)"},"correta":"C"},{"id":"q4","titulo":"Em qual situação a swap deve ser, tipicamente, igual ou maior que a RAM?","alternativas":{"A":"Quando pretende usar hibernação","B":"Quando o disco é GPT","C":"Quando usa VirtualBox","D":"Quando o sistema é 64-bit","E":"Quando o teclado é ABNT2"},"correta":"A"},{"id":"q5","titulo":"Qual comando ajuda a verificar os pontos de montagem e tipos de sistemas de arquivos após a instalação?","alternativas":{"A":"uname -r","B":"free -h","C":"df -hT","D":"echo $SHELL","E":"ip a"},"correta":"C"},{"id":"q6","titulo":"O que o comando sudo update-grub faz em um sistema Mint/Ubuntu?","alternativas":{"A":"Formata a partição /home","B":"Atualiza o kernel para a versão mais nova","C":"Reconfigura a tabela de partições GPT","D":"Regera a configuração do GRUB, detectando sistemas instalados","E":"Apaga entradas do GRUB"},"correta":"D"},{"id":"q7","titulo":"Qual a vantagem prática de ter /home em partição separada?","alternativas":{"A":"Eliminar a necessidade de backup","B":"Permitir reinstalar o sistema preservando dados pessoais","C":"Acelerar o boot em 10x","D":"Dispensar o uso de GRUB","E":"Permitir múltiplos kernels ao mesmo tempo"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"VM configurada com UEFI habilitado e ISO do Linux Mint anexada."},{"id":"c2","texto":"Defini e criei as partições: ESP (FAT32), raiz (/) e /home (ext4) e swap."},{"id":"c3","texto":"Revisei tamanhos e pontos de montagem antes de aplicar as mudanças."},{"id":"c4","texto":"Instalação concluída e primeiro boot realizado com GRUB funcionando."},{"id":"c5","texto":"Validação executada com lsblk -f e df -hT; evidências registradas."},{"id":"c6","texto":"Sistema atualizado (apt update/upgrade) e utilitários básicos instalados."},{"id":"c7","texto":"Relatório técnico com prints e conclusões salvo no portfólio."}];
+    const CHECKLIST_KEY = 'SOSL_CAP05_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

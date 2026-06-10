@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 — Escalonamento e restauração</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo07.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">TECS</span>
+        <span style="color: var(--cor-principal);">Técnicas de Suporte</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Operação e Central de Serviços</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Ferramentas de chamados</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Gerenciamento de Incidentes</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Abertura e registro</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Classificação e triagem</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Diagnóstico inicial</a></li>
+              <li><a class="dropdown-item active" href="capitulo07.html">Capítulo 07 — Escalonamento e restauração</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Fechamento e KB</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — CIs e CMDB</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Incidentes de hardware</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Incidentes de software</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Técnicas de atendimento</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento e filas</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Problemas e causa raiz</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Métricas e melhoria</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Simulação integradora</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 07 — Escalonamento e restauração de serviço</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h (3h teoria + 3h prática)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Operação simulada de Central de Serviços (GLPI ou similar)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> GLPI/OTRS/Freshdesk (simulado), e-mail padrão, scripts de atendimento, matriz Impacto x Urgência</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Decidir corretamente quando escalar funcional ou hierarquicamente um incidente.</li><li>Aplicar workarounds seguros para restaurar o serviço rapidamente, documentando riscos e limitações.</li><li>Manter comunicação clara com usuários e equipes durante o escalonamento, respeitando SLAs.</li><li>Atualizar tickets com critérios de qualidade: histórico, evidências, responsáveis e prazos.</li><li>Encadear ações do diagnóstico inicial à restauração, reduzindo MTTR.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Gerenciar incidentes com foco em restauração rápida e segura.</li><li>Executar escalonamento funcional e hierárquico segundo critérios de prioridade.</li><li>Comunicar status e próximos passos de forma objetiva e profissional.</li><li>Documentar ações, decisões e evidências no sistema de chamados.</li><li>Trabalhar colaborativamente com outras equipes mantendo aderência a SLA.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 06 — Diagnóstico inicial e troubleshooting</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 08 — Fechamento, satisfação e KB</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 07)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul>
+  <li>Contextualização (20 min): Revisão rápida do fluxo de incidentes e dos critérios Impacto x Urgência. Apresentação dos tipos de escalonamento.</li>
+  <li>Teoria aplicada (60 min): Escalonamento funcional vs. hierárquico; uso de workarounds; comunicação e atualização do ticket durante a ponte de atendimento.</li>
+  <li>Demonstração guiada (30 min): Preenchimento de campos chave no GLPI (ou similar), mudança de grupo, prioridade e registro de comunicação.</li>
+  <li>Prática em pares (60 min): Simular 3 casos de escalonamento com comunicação via comentários e e-mail padrão, incluindo workaround.</li>
+  <li>Debriefing (20 min): Análise dos tempos, qualidade da documentação e aderência ao SLA.</li>
+  <li>Avaliação formativa (10 min): Mini-quiz e checklist individual.</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">1) O que é escalonamento e por que é necessário?</h3>
+  <p>Escalonar é transferir a responsabilidade de um incidente para outro nível de suporte ou para a gestão quando o caso exige competências, permissões ou decisões que excedem o escopo do atendente atual. O objetivo é reduzir o tempo de restauração (MTTR) e garantir aderência ao SLA quando há bloqueios técnicos ou organizacionais.</p>
+  <p>Escalonar é diferente de “passar o problema para frente”: requer critérios claros, comunicação estruturada e documentação completa para não gerar retrabalho. A decisão deve considerar impacto, urgência, prioridade e o tempo já consumido no diagnóstico.</p>
+  <p>Onde vou aplicar isso: você usará os critérios de escalonamento no Passo a Passo ao decidir entre manter o incidente no 1º nível, escalar para especialistas (2º/3º nível) ou envolver a gestão.</p>
+
+  <h3 class="h6 fw-bold mt-4">2) Escalonamento funcional vs. hierárquico</h3>
+  <p>Escalonamento funcional ocorre quando o incidente é direcionado a um time ou profissional com competências técnicas específicas (por exemplo, redes, banco de dados, impressão). O foco é obter conhecimento técnico para restaurar o serviço.</p>
+  <p>Escalonamento hierárquico é acionado para tomada de decisão gerencial, definição de prioridades entre áreas, autorização de exceções ou quando há risco elevado (por exemplo, impacto corporativo alto, incidentes críticos/P1).</p>
+  <p>Boas práticas: definir matrizes claras de roteamento e horários de cobertura; registrar quem assumiu; informar o usuário e atualizar o SLA se aplicável.</p>
+  <p>Onde vou aplicar isso: no roteiro prático, você usará regras de roteamento e comunicará corretamente ao trocar o grupo/responsável do ticket.</p>
+
+  <h3 class="h6 fw-bold mt-4">3) Workaround vs. solução definitiva</h3>
+  <p>Workaround é uma medida alternativa que restaura parcialmente ou contorna o erro, reduzindo o impacto até que a correção definitiva seja aplicada. Ex.: mapear impressora em servidor alternativo, reverter para driver estável ou isolar um nó problemático.</p>
+  <p>Solução definitiva elimina a causa do incidente. Normalmente exige janela de mudança, testes e, às vezes, intervenção de equipes de projeto ou infraestrutura, podendo ser tratada como Requisição de Mudança (RFC) no processo de Mudanças.</p>
+  <p>Critérios: segurança, risco, documentação e comunicação transparente sobre limitações do workaround ao usuário.</p>
+  <p>Onde vou aplicar isso: no Passo a Passo, você registrará o workaround no ticket, evidências e plano de normalização.</p>
+
+  <h3 class="h6 fw-bold mt-4">4) Comunicação durante o escalonamento</h3>
+  <p>Comunicação efetiva reduz ansiedade do usuário e evita duplicidade de esforços entre equipes. Deve incluir status atual, próximo passo, responsável, prazo estimado e canais de atualização. Use linguagem objetiva e evite jargões excessivos.</p>
+  <p>Tipos: atualização interna (comentários e anexos técnicos) e externa (mensagens ao solicitante). Ambas devem ser registradas no ticket para manter trilha de auditoria.</p>
+  <p>Onde vou aplicar isso: você enviará mensagens-modelo e comentários técnicos no sistema de chamados e por e-mail padronizado durante as simulações.</p>
+
+  <h3 class="h6 fw-bold mt-4">5) Priorização prática com Impacto x Urgência</h3>
+  <p>A prioridade é derivada da combinação entre impacto (quantidade de usuários/serviços afetados e criticidade) e urgência (tempo máximo tolerável). Use a matriz definida no capítulo 03 e valide contra o SLA do serviço.</p>
+  <p>Onde vou aplicar isso: antes de escalar, você recalculará a prioridade com base em novas informações, atualizando o ticket e justificando a decisão.</p>
+
+  <h3 class="h6 fw-bold mt-4">6) Critérios de qualidade da documentação</h3>
+  <p>Registre o que foi feito, por que foi feito e o resultado. Inclua evidências: logs, prints, códigos de erro, timestamps, quem executou, versão de driver/patch, e o vínculo com itens de configuração (CI) quando aplicável.</p>
+  <p>Onde vou aplicar isso: no preenchimento de campos obrigatórios, no histórico do ticket e na seção de solução/contorno, garantindo que outro técnico consiga dar continuidade sem perda de contexto.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passos">
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Escalonar e restaurar com segurança e rapidez</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Aplicar critérios de escalonamento, registrar workaround e manter comunicação clara, atualizando o ticket até a restauração.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Passo 1 — Reavaliar prioridade e confirmar escopo</h3>
+  <p>Antes de escalar, confirme impacto e urgência com base em evidências atuais. Se novas informações elevarem o impacto (ex.: vários setores afetados), atualize a prioridade.</p>
+  <pre class="language-markdown"><code># Checklist rápido
+- [ ] Impacto confirmado (qtd. usuários/serviço crítico?)
+- [ ] Urgência confirmada (prazo/horário de pico?)
+- [ ] SLA do serviço identificado
+- [ ] Evidências mínimas coletadas (prints, logs, erros)</code></pre>
+  <p>Atualize campos de prioridade e anexe evidências.</p>
+  <pre class="language-json"><code>{
+  "ticketId": 1234,
+  "prioridade": "Alta",
+  "impacto": "Múltiplos setores",
+  "urgencia": "Alta",
+  "sla": "4h resposta / 8h solução"
+}</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Passo 2 — Decidir tipo de escalonamento</h3>
+  <p>Se o bloqueio é técnico, utilize escalonamento funcional; se for decisão/risco/SLA, acione escalonamento hierárquico. Registre a justificativa no histórico.</p>
+  <pre class="language-text"><code>Justificativa de escalonamento:
+Bloqueio técnico em servidor de impressão (spooler com falhas recorrentes). Necessário suporte de Infra/Windows para análise de logs do servidor e aplicação de hotfix.</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Passo 3 — Roteamento no sistema de chamados</h3>
+  <p>Altere grupo/responsável e mantenha o atendente atual em cópia. Ajuste status para “Em atendimento (2º nível)” e garanta que o SLA continue sendo controlado.</p>
+  <pre class="language-bash"><code># Exemplo (ilustrativo) via API REST (GLPI-like)
+curl -X POST https://helpdesk.local/api/ticket/1234 \
+  -H "Authorization: Bearer &lt;TOKEN&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "group": "Infraestrutura-Windows",
+    "status": "Em atendimento (2º nível)",
+    "priority": "High",
+    "assigned_to": "u_joao.infra",
+    "tags": ["escalonado", "infra"]
+  }'</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Passo 4 — Registrar workaround seguro (se aplicável)</h3>
+  <p>Quando possível, implemente um contorno temporário para restaurar o serviço do usuário, documentando limitações e plano de normalização.</p>
+  <pre class="language-markdown"><code>Workaround aplicado:
+- Ação: Redirecionar impressões para servidor PRN02 (fila "Financeiro-PRN02").
+- Risco: Fila mais lenta em horário de pico.
+- Limitação: Sem duplex automático.
+- Plano: Após hotfix no PRN01, reverter mapeamentos e validar impressão duplex.</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Passo 5 — Comunicação com usuário e times</h3>
+  <p>Envie atualização ao solicitante em linguagem clara e registre comunicação interna para a equipe técnica.</p>
+  <pre class="language-markdown"><code>Mensagem ao usuário (externa):
+Olá, &lt;Nome&gt;.
+Seu incidente #1234 foi escalonado para a equipe de Infraestrutura. Aplicamos um contorno temporário para manter suas impressões ativas. Previsão de atualização: hoje, 16h.
+Atenciosamente, Service Desk.
+
+Comentário interno (técnico):
+Log de evento 7031 no PRN01 — falha no Spooler. Possível correlação com KBxxxxxxx. Solicitada análise e hotfix. Evidências anexadas.</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Passo 6 — Acompanhar SLA e atualizar histórico</h3>
+  <p>Monitore prazos. Se houver risco de violação de SLA, reforce escalonamento ou acione a gestão. Atualize o ticket a cada marco relevante.</p>
+  <pre class="language-bash"><code># Atualização de status e tempo estimado
+curl -X POST https://helpdesk.local/api/ticket/1234/comment \
+  -H "Authorization: Bearer &lt;TOKEN&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "public",
+    "text": "Equipe de Infra aplicando hotfix. Nova estimativa: 16h."
+  }'</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Passo 7 — Validar restauração e plano de normalização</h3>
+  <p>Após a ação do time escalado, valide com o usuário a restauração do serviço e, se houve workaround, execute o plano de retorno ao estado normal, registrando testes e resultados.</p>
+  <pre class="language-markdown"><code>Validação:
+- Impressão local em PRN01 OK (mono/duplex).
+- 5 páginas de teste sem erro. Confirmação do usuário por e-mail.
+- Reversão do mapeamento para PRN01 concluída.</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Passo 8 — Preparar insumos para fechamento (handoff ao Cap. 08)</h3>
+  <p>Deixe o ticket pronto para encerramento formal: solução documentada, evidências anexadas, campos preenchidos, referência ao CI e apontamento de horas se necessário.</p>
+  <pre class="language-json"><code>{
+  "solution_type": "Restauracao + Hotfix",
+  "solution": "Aplicado hotfix KBxxxxxxx no PRN01 e revertido workaround. Testes validados com usuário.",
+  "evidences": ["print_log_7031.png", "cmd_verificacao.txt"],
+  "ci_linked": "SRV-PRN01"
+}</code></pre>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a tomada de decisão de escalonamento, documentação de workaround e comunicação profissional, mantendo aderência ao SLA.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol class="mb-0">
+    <li>Crie 3 tickets fictícios (P2, P3 e P4) e decida o tipo de escalonamento para cada um. Registre justificativa, grupo de destino e mensagem ao usuário. Anexe prints ou logs simulados.</li>
+    <li>Implemente um workaround documentado para um incidente de “aplicativo travando” (ex.: rollback de versão). Registre riscos e plano de normalização.</li>
+    <li>Elabore um modelo de comunicação interna e externa para incidentes críticos (P1), incluindo campos: status, próximo passo, ETA, responsável e canal de atualização.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+  <ul class="mb-0">
+    <li>Decisão de escalonamento coerente com impacto e urgência.</li>
+    <li>Documentação completa: histórico, evidências, responsáveis e prazos.</li>
+    <li>Comunicação clara, objetiva e profissional (linguagem adequada ao público).</li>
+    <li>Aderência ao SLA e acompanhamento proativo.</li>
+    <li>Aplicação de workaround seguro e plano de normalização quando cabível.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>ITIL 4 Foundation: práticas de Incident Management e Service Desk — objetivos e interfaces com Change Enablement.</li><li>Modelos de matrizes Impacto x Urgência e políticas de priorização em Service Desk.</li><li>Boas práticas de comunicação em incidentes críticos (P1): status page e war room.</li><li>Uso de KEDB (Known Error Database) e workarounds padronizados.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 07</h2>
+        <ul><li>Três tickets com escalonamento documentado (tipo, justificativa, grupo, mensagens e evidências).</li><li>Um registro de workaround completo com riscos e plano de normalização.</li><li>Dois modelos de comunicação (externa ao usuário e interna técnica) prontos para reutilização.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 06 — Diagnóstico inicial e troubleshooting</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 08 — Fechamento, satisfação e KB</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Técnico em Informática — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Quando utilizar escalonamento funcional em vez do hierárquico?","alternativas":{"A":"Quando é necessária decisão gerencial para priorizar um serviço.","B":"Quando há conflito entre áreas e é preciso arbitragem.","C":"Quando o bloqueio é técnico e requer especialistas de outro domínio.","D":"Quando o usuário solicita falar com o gerente.","E":"Quando o SLA já foi violado e não há mais o que fazer."},"correta":"C"},{"id":"q2","titulo":"Qual opção descreve melhor um workaround?","alternativas":{"A":"Solução definitiva que elimina a causa raiz.","B":"Medida temporária para contornar o erro e restaurar o serviço.","C":"Abertura de um novo ticket para a equipe de projetos.","D":"Cancelamento do incidente para não impactar métricas.","E":"Reclassificação do incidente para prioridade baixa."},"correta":"B"},{"id":"q3","titulo":"Qual informação NÃO pode faltar na comunicação ao usuário durante o escalonamento?","alternativas":{"A":"Status atual e próximo passo.","B":"Nome do gerente geral da empresa.","C":"Responsável técnico e prazo estimado (ETA).","D":"Canal de atualização (ticket/e-mail).","E":"Número do incidente."},"correta":"B"},{"id":"q4","titulo":"O que caracteriza o escalonamento hierárquico?","alternativas":{"A":"Transferência para outro técnico do mesmo nível.","B":"Abertura de um problema no KEDB.","C":"Acionamento da gestão para decisão, priorização ou riscos elevados.","D":"Envio do ticket para a base de conhecimento.","E":"Criação automática de uma RFC."},"correta":"C"},{"id":"q5","titulo":"Antes de escalar, qual ação é a MAIS adequada?","alternativas":{"A":"Encerrar o ticket e aguardar retorno do usuário.","B":"Alterar a prioridade para a máxima sem justificativa.","C":"Reavaliar impacto e urgência, anexar evidências e atualizar o ticket.","D":"Remover todos os anexos para reduzir o tamanho do ticket.","E":"Pedir ao usuário que reabra o ticket com mais detalhes."},"correta":"C"},{"id":"q6","titulo":"Sobre documentação, qual prática é correta?","alternativas":{"A":"Registrar apenas o que deu errado, sem citar quem atuou.","B":"Informar o que foi feito, por que e o resultado, com evidências.","C":"Usar linguagem excessivamente técnica para parecer detalhado.","D":"Evitar timestamps para economizar tempo.","E":"Registrar a solução apenas por e-mail, sem atualizar o ticket."},"correta":"B"},{"id":"q7","titulo":"Se há risco de violação de SLA e o time técnico ainda não respondeu, você deve:","alternativas":{"A":"Aguardar até o prazo final.","B":"Mudar a prioridade para baixa para ganhar tempo.","C":"Reforçar escalonamento e, se necessário, acionar escalonamento hierárquico.","D":"Encerrar o ticket preventivamente.","E":"Transferir para qualquer outro grupo disponível."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Reavaliei impacto e urgência com base em evidências atualizadas."},{"id":"c2","texto":"Atualizei prioridade e campos do ticket conforme a matriz Impacto x Urgência."},{"id":"c3","texto":"Decidi corretamente entre escalonamento funcional ou hierárquico."},{"id":"c4","texto":"Registrei justificativa clara para o escalonamento no histórico do ticket."},{"id":"c5","texto":"Ajustei grupo/responsável e garanti controle de SLA após o roteamento."},{"id":"c6","texto":"Apliquei (se cabível) workaround seguro com riscos e limitações documentadas."},{"id":"c7","texto":"Comuniquei o usuário com status, próximo passo, responsável e ETA."},{"id":"c8","texto":"Publiquei comentários técnicos internos com logs/prints e ações executadas."},{"id":"c9","texto":"Monitorei SLA e reforcei escalonamento quando necessário."},{"id":"c10","texto":"Validei restauração com o usuário e executei o plano de normalização."},{"id":"c11","texto":"Deixei o ticket pronto para fechamento com evidências e vínculo de CI."}];
+    const CHECKLIST_KEY = 'TECS_cap07_checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>
