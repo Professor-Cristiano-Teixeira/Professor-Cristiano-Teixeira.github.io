@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 06 — Administração de Objetos no AD</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo06.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos e Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Planejamento e Licenciamento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Laboratório de Virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Instalação do Windows Server</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Serviços de Diretório e DC</a></li>
+              <li><a class="dropdown-item active" href="capitulo06.html">Capítulo 06 — Administração de Objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Políticas de Grupo (GPO)</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — DNS em Domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — DHCP para Servidores</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Impressão e Atualizações</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Backup e Continuidade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento e Manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração e Troubleshooting</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 06 — Administração de objetos no AD: OUs, usuários, grupos e delegação</h1>
+          <p class="mb-2"><strong>Carga:</strong> —</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratórios em VMs (VirtualBox) com Windows Server 2025 e clientes Windows</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows Server 2025, Active Directory Domain Services, RSAT, PowerShell</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Planejar e criar estrutura de Unidades Organizacionais (OUs) baseada em departamentos e funções.</li><li>Criar e administrar contas de usuários e computadores com padrões de nomenclatura e UPNs adequados.</li><li>Diferenciar tipos e escopos de grupos e aplicá-los corretamente para acesso e administração.</li><li>Delegar controle de forma segura e mínima para equipes ou pessoas específicas.</li><li>Automatizar tarefas comuns de administração do AD com RSAT e PowerShell.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Organização hierárquica de objetos de diretório com foco em segurança.</li><li>Aplicação de boas práticas de grupos e permissões.</li><li>Delegação de tarefas com princípio do menor privilégio.</li><li>Uso de ferramentas gráficas (MMC/RSAT) e linha de comando (PowerShell).</li><li>Documentação padronizada de mudanças e evidências.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 05</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 07</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 06)</h2>
+        <div class="card-soft bg-white p-4 mt-3">- Abertura (10 min): objetivos, contexto e revisão rápida do Cap. 05 (DC e DNS).<br>- Exposição dialogada (35 min): OUs vs Grupos, nomenclatura, tipos/escopos de grupos, UPNs e perfis, delegação de controle e boas práticas.<br>- Demonstração (25 min): criação de OUs, usuários, grupos e delegação via RSAT/ADUC e PowerShell.<br>- Laboratório guiado (60–80 min): passo a passo proposto neste capítulo em VMs do VirtualBox.<br>- Registro de evidências (contínuo): capturas de tela, comandos usados e anotações de decisões.<br>- Encerramento (10 min): checklist, quiz e orientações para atividades derivadas.</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) OUs vs Grupos: papéis diferentes</h3>
+          <p>Unidades Organizacionais (OUs) são contêineres lógicos usados para organizar objetos do diretório (usuários, grupos, computadores) por critérios como departamentos, locais ou funções. Elas servem para escopo de administração (delegação) e aplicação de GPOs. Não controlam acesso a recursos diretamente.</p>
+          <p>Grupos são coleções de identidades que simplificam a concessão de permissões. Em vez de conceder acesso usuário a usuário, dá-se acesso a um grupo. Assim, OUs organizam e delimitam administração; grupos concedem acesso a recursos e também podem facilitar delegação.</p>
+          <p>Onde vou aplicar isso: na criação da árvore de OUs e na definição dos grupos por departamento e função, garantindo clareza administrativa e segurança.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">2) Estratégias de organização de OUs</h3>
+          <p>Uma boa estrutura de OUs deve refletir a realidade da organização, ser estável ao longo do tempo e facilitar GPOs e delegação. Estratégias comuns: por departamento (RH, Vendas, TI), por localidade (SP, RJ, PE) ou híbrida (Localidade/Departamento). Evite estruturas profundas demais e nomes ambíguos.</p>
+          <p>Inclua OUs dedicadas para “Grupos”, “Usuários” e “Computadores” quando fizer sentido. Crie uma OU “TI” para contas administrativas e “Servidores” para máquinas críticas, separando GPOs de hardening. Não aplique GPOs diretamente no domínio se puder evitá-lo; prefira OUs.</p>
+          <p>Onde vou aplicar isso: no passo a passo, ao construir a árvore de OUs base e mover objetos para os locais corretos.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">3) Padrões de nomenclatura e UPNs</h3>
+          <p>Padrões de nomes reduzidos e consistentes facilitam administração e automação. Exemplos: usuários “nome.sobrenome” ou “iniciais.sobrenome”; computadores “PC-SETOR-NNN”; grupos “GRP-SETOR-FUNCAO” (ex.: GRP-RH-LeituraFolha). O UPN (User Principal Name) costuma ser “usuario@dominio.local/corp.com”.</p>
+          <p>Defina também atributos como Display Name (“Sobrenome, Nome”), departamento e cargo para favorecer filtros e relatórios. Documente os padrões para uso em scripts e onboarding.</p>
+          <p>Onde vou aplicar isso: ao criar usuários e grupos, configurando UPN, Display Name e nomes padronizados para garantir coerência.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">4) Tipos e escopos de grupos</h3>
+          <p>Tipos: Security (usados para permissões) e Distribution (listas de e-mail; não concedem acesso). Escopos: Domain Local (DL), Global (G) e Universal (U). O escopo define onde o grupo pode ter membros e onde pode ser usado para conceder permissões, especialmente em ambientes com múltiplos domínios.</p>
+          <p>Boa prática AGDLP: Usuários em Grupos Globais (G); Grupos Globais em Domain Local (DL); Domain Local com permissões em recursos. Em florestas com múltiplos domínios, considere uso de Universal (U) para consolidar grupos, atento a replicação do GC.</p>
+          <p>Onde vou aplicar isso: ao criar grupos para permissões de pastas e delegação, seguindo o padrão AGDLP para minimizar complexidade.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">5) Delegação de controle e menor privilégio</h3>
+          <p>Delegação permite conceder tarefas administrativas específicas (ex.: redefinir senhas no OU “Vendas”) sem dar direitos de administrador de domínio. Use o assistente “Delegate Control” no ADUC para delegar ações com escopo restrito.</p>
+          <p>Sempre siga o princípio do menor privilégio e documente: quem recebeu, o quê, quando e por quê. Prefira delegar a grupos (ex.: GRP-ServiceDesk-ResetSenha) e não a usuários diretamente.</p>
+          <p>Onde vou aplicar isso: no passo a passo, delegando tarefas como criar contas, mover objetos e resetar senhas em OUs específicas.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">6) Perfis, pastas e atributos de conta</h3>
+          <p>Atributos do usuário (perfil de logon, caminho do script, unidade organizacional) ajudam na padronização. Scripts de logon e mapeamento de unidades podem ser configurados via GPO, mas também podem ser definidos por atributo do usuário.</p>
+          <p>Campos como “Profile Path” e “Home Folder” são úteis em ambientes com Roaming Profiles ou pastas pessoais em servidor de arquivos. Avalie o impacto em rede e armazenamento e aplique conforme política da organização.</p>
+          <p>Onde vou aplicar isso: ao preencher atributos dos usuários e preparar grupos para permissões em compartilhamentos (Cap. 10).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">7) Ferramentas RSAT e PowerShell</h3>
+          <p>Para administração do AD, utilize ADUC (dsa.msc), Active Directory Administrative Center (dsac.exe) e módulos RSAT. A automação via PowerShell (módulo ActiveDirectory) agiliza criação em massa, consultas e ajustes.</p>
+          <p>Cmdlets comuns: New-ADUser, Set-ADUser, Unlock-ADAccount, New-ADGroup, Add-ADGroupMember, Get-ADUser, Get-ADComputer e Move-ADObject.</p>
+          <p>Onde vou aplicar isso: no passo a passo para acelerar criação de objetos e registrar evidências de comandos usados.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Estruturando OUs, usuários, grupos e delegação no AD</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Construir a árvore de OUs por departamento, criar usuários e grupos com padronização, aplicar AGDLP em permissões simuladas e delegar tarefas administrativas com segurança, usando ADUC/RSAT e PowerShell.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Pré-requisitos do laboratório</h3>
+          <ul class="mb-0">
+            <li>VM Windows Server 2025 promovida a DC (Cap. 05) e cliente Windows ingressado no domínio.</li>
+            <li>RSAT instaladas no servidor e/ou estação de administração.</li>
+            <li>Conta com privilégio para criar OUs, usuários e grupos no domínio.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Planejar a estrutura de OUs</h3>
+          <p>Defina a estrutura a seguir (ajuste nomes ao seu domínio):</p>
+          <pre class="language-none"><code>Contoso.local
+ └── Corp
+     ├── TI
+     │   ├── Usuarios
+     │   ├── Grupos
+     │   └── Computadores
+     ├── RH
+     │   ├── Usuarios
+     │   └── Computadores
+     ├── Vendas
+     │   ├── Usuarios
+     │   └── Computadores
+     └── Servidores</code></pre>
+          <p>Crie as OUs no ADUC (dsa.msc) ou via PowerShell.</p>
+          <pre class="language-powershell"><code># Abra PowerShell como administrador do domínio
+Import-Module ActiveDirectory
+
+# Ajuste o domínio base
+$domainDN = (Get-ADDomain).DistinguishedName
+
+# Criação da OU raiz "Corp" e sub-OUs
+New-ADOrganizationalUnit -Name "Corp" -Path $domainDN -ProtectedFromAccidentalDeletion $true
+$corp = "OU=Corp,$domainDN"
+
+"TI","RH","Vendas","Servidores" | ForEach-Object {
+  New-ADOrganizationalUnit -Name $_ -Path $corp -ProtectedFromAccidentalDeletion $true
+}
+
+# Sub-OUs padronizadas
+$areas = @("TI","RH","Vendas")
+foreach($ou in $areas){
+  $base = "OU=$ou,$corp"
+  "Usuarios","Grupos","Computadores" | ForEach-Object {
+    if($_ -eq "Grupos" -and $ou -ne "TI"){ return } # exemplo: Grupos centralizados em TI (ajuste à sua realidade)
+    New-ADOrganizationalUnit -Name $_ -Path $base -ProtectedFromAccidentalDeletion $true
+  }
+}</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">2) Padrões de nomenclatura e criação de usuários</h3>
+          <p>Usaremos “nome.sobrenome” como SamAccountName e UPN “nome.sobrenome@contoso.local”. Preencha DisplayName como “Sobrenome, Nome”.</p>
+          <pre class="language-powershell"><code># Criação de usuários de exemplo
+$passwd = Read-Host "Digite a senha padrão temporária" -AsSecureString
+$users = @(
+  @{ GivenName="Ana"; Surname="Silva"; Dept="RH"; Title="Analista" },
+  @{ GivenName="Bruno"; Surname="Souza"; Dept="Vendas"; Title="Vendedor" },
+  @{ GivenName="Carla"; Surname="Lima"; Dept="TI"; Title="Suporte" }
+)
+
+$domain = (Get-ADDomain).DNSRoot
+foreach($u in $users){
+  $sam = ("{0}.{1}" -f $u.GivenName,$u.Surname).ToLower()
+  $upn = "$sam@$domain"
+  $ouPath = "OU=Usuarios,OU=$($u.Dept),OU=Corp,$((Get-ADDomain).DistinguishedName)"
+  New-ADUser -Name "$($u.GivenName) $($u.Surname)" `
+             -GivenName $u.GivenName -Surname $u.Surname `
+             -SamAccountName $sam -UserPrincipalName $upn `
+             -DisplayName ("{0}, {1}" -f $u.Surname,$u.GivenName) `
+             -Department $u.Dept -Title $u.Title `
+             -Path $ouPath -ChangePasswordAtLogon $true -Enabled $true `
+             -AccountPassword $passwd
+}</code></pre>
+          <p>Verifique no ADUC se os usuários foram criados nas OUs corretas.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">3) Criação de grupos e estratégia AGDLP</h3>
+          <p>Crie grupos globais por departamento para reunir usuários e grupos Domain Local para aplicação de permissões a recursos.</p>
+          <pre class="language-powershell"><code># Grupos Globais (G) por departamento
+$gg = @("GG-RH-Usuarios","GG-Vendas-Usuarios","GG-TI-Usuarios")
+$pathGG = "OU=Grupos,OU=TI,OU=Corp,$((Get-ADDomain).DistinguishedName)"
+foreach($g in $gg){
+  New-ADGroup -Name $g -GroupScope Global -GroupCategory Security -Path $pathGG -SamAccountName $g -Description "Grupo Global de $g"
+}
+
+# Grupos Domain Local (DL) para permissões de recursos (ex.: pastas no Cap. 10)
+$dl = @("DL-CompartRH-Leitura","DL-CompartRH-Escrita","DL-CompartVendas-Leitura","DL-CompartVendas-Escrita")
+foreach($d in $dl){
+  New-ADGroup -Name $d -GroupScope DomainLocal -GroupCategory Security -Path $pathGG -SamAccountName $d -Description "Domain Local $d"
+}
+
+# Adicionar usuários aos GG por departamento
+Add-ADGroupMember -Identity "GG-RH-Usuarios" -Members (Get-ADUser -Filter "Department -eq 'RH'").SamAccountName
+Add-ADGroupMember -Identity "GG-Vendas-Usuarios" -Members (Get-ADUser -Filter "Department -eq 'Vendas'").SamAccountName
+Add-ADGroupMember -Identity "GG-TI-Usuarios" -Members (Get-ADUser -Filter "Department -eq 'TI'").SamAccountName
+
+# Mapear GG -> DL (AGDLP)
+Add-ADGroupMember -Identity "DL-CompartRH-Leitura" -Members "GG-RH-Usuarios"
+Add-ADGroupMember -Identity "DL-CompartVendas-Leitura" -Members "GG-Vendas-Usuarios"</code></pre>
+          <p>Mais adiante, associe DLs às ACLs dos compartilhamentos no servidor de arquivos (Cap. 10).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">4) Movimentação e limpeza de objetos</h3>
+          <p>Mantenha o diretório limpo movendo computadores recém ingressados da OU padrão “Computers” para as OUs corretas. Isso ajuda na aplicação de GPOs adequadas e na delegação.</p>
+          <pre class="language-powershell"><code># Mover computadores pelo prefixo do nome (ex.: PC-RH-*)
+$dnBase = (Get-ADDomain).DistinguishedName
+$destRH = "OU=Computadores,OU=RH,OU=Corp,$dnBase"
+$destVendas = "OU=Computadores,OU=Vendas,OU=Corp,$dnBase"
+
+Get-ADComputer -Filter "Name -like 'PC-RH-*'" -SearchBase "CN=Computers,$dnBase" | ForEach-Object {
+  Move-ADObject -Identity $_.DistinguishedName -TargetPath $destRH
+}
+
+Get-ADComputer -Filter "Name -like 'PC-VEND-*'" -SearchBase "CN=Computers,$dnBase" | ForEach-Object {
+  Move-ADObject -Identity $_.DistinguishedName -TargetPath $destVendas
+}</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">5) Delegação de controle (Reset de senha e gerenciamento básico)</h3>
+          <p>Crie um grupo para o Service Desk e delegue tarefas limitadas na OU “Vendas/Usuarios”. No ADUC: clique direito na OU → Delegate Control → adicione o grupo → escolha tarefas como “Reset user passwords and force password change at next logon”.</p>
+          <pre class="language-powershell"><code># Grupo de Service Desk
+$pathGG = "OU=Grupos,OU=TI,OU=Corp,$((Get-ADDomain).DistinguishedName)"
+New-ADGroup -Name "GG-ServiceDesk-ResetSenha" -GroupScope Global -GroupCategory Security -Path $pathGG
+
+# Exemplos de permissões via DSACLS (avançado, use com cautela)
+# Delegar Reset Password na OU de Vendas/Usuarios
+$ouVendasUsers = "OU=Usuarios,OU=Vendas,OU=Corp,$((Get-ADDomain).DistinguishedName)"
+$grp = "GG-ServiceDesk-ResetSenha"
+
+# DSACLS requer DN do objeto de permissão. Exemplo (somente referência):
+# dsacls "OU=Usuarios,OU=Vendas,OU=Corp,DC=contoso,DC=local" /G "CONTOSO\GG-ServiceDesk-ResetSenha:CA;Reset Password"
+# Para fins didáticos, prefira o assistente gráfico na primeira vez.</code></pre>
+          <div class="alert alert-light border mt-3 mb-0" role="note">
+            Dica: delegue a grupos, nunca a usuários diretamente. Documente: escopo, tarefas, responsável e data.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">6) Atributos de perfil e scripts de logon</h3>
+          <p>Exemplo de preenchimento de “Home Folder” e “Profile Path” para um usuário específico. Avalie política institucional antes de adotar perfis móveis.</p>
+          <pre class="language-powershell"><code># Ajustar atributos de um usuário
+$user = Get-ADUser -Identity "ana.silva"
+Set-ADUser $user -HomeDirectory "\\filesrv\home\ana.silva" -HomeDrive "H:"
+Set-ADUser $user -ProfilePath "\\filesrv\profiles\ana.silva"
+Set-ADUser $user -ScriptPath "Scripts\logon.cmd"</code></pre>
+          <p>O script “logon.cmd” pode mapear pastas com base em grupo (com GPOs é mais robusto; veremos no Cap. 07).</p>
+          <pre class="language-batch"><code>@echo off
+whoami /groups | findstr /I "GG-RH-Usuarios" &gt;nul && net use H: \\filesrv\RH
+whoami /groups | findstr /I "GG-Vendas-Usuarios" &gt;nul && net use H: \\filesrv\Vendas</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">7) Verificações e evidências</h3>
+          <p>Valide a existência e localização de objetos, membros de grupos e delegações aplicadas. Registre capturas e exporte relatórios simples.</p>
+          <pre class="language-powershell"><code># Conferências
+Get-ADOrganizationalUnit -Filter * -SearchBase "OU=Corp,$((Get-ADDomain).DistinguishedName)" | Select Name,DistinguishedName
+
+Get-ADGroupMember "GG-RH-Usuarios" | Select Name,SamAccountName
+Get-ADUser -Filter * -SearchBase "OU=Usuarios,OU=RH,OU=Corp,$((Get-ADDomain).DistinguishedName)" | Select Name,Department
+
+# Exportar para CSV (evidência)
+Get-ADUser -Filter * -Properties Department,Title | Select Name,SamAccountName,Department,Title | Export-Csv .\usuarios.csv -NoTypeInformation -Encoding UTF8</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a criação e organização de objetos no AD, aplicação de AGDLP e delegação mínima segura.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Crie uma OU “Estágios” com sub-OUs “Usuarios” e “Computadores”. Adote padrão de nomes “estagio.nome.sobrenome”. Crie 3 estagiários e mova 1 computador para a OU “Computadores”.</li>
+            <li>Implemente grupos “GG-Estagios-Usuarios” e “DL-CompartEstagios-Leitura”. Adicione os estagiários ao GG e o GG ao DL. Prepare-se para usar esse DL em permissões de pasta no Cap. 10.</li>
+            <li>Crie um grupo “GG-Lideres-RH” e delegue na OU “RH/Usuarios” a permissão de reset de senha e desbloqueio de conta apenas para esse grupo. Documente os passos e teste com uma conta de líder simulada.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (para autoavaliação)</h3>
+          <ul class="mb-0">
+            <li>Estrutura de OUs coerente, com proteção contra exclusão acidental ativada.</li>
+            <li>Padrões de nomenclatura aplicados de forma consistente (SamAccountName, UPN, DisplayName).</li>
+            <li>Uso correto de tipos/escopos de grupos e mapeamento AGDLP.</li>
+            <li>Delegação mínima, bem documentada e testada.</li>
+            <li>Evidências completas: capturas, comandos, relatórios CSV.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Boas práticas de design de OUs e impacto na aplicação de GPOs.</li><li>Detalhes de replicação do AD para grupos Universais e o Catálogo Global.</li><li>Delegação de controle com DSACLS: cenários e cuidados.</li><li>Padrões AGDLP e AGUDLP em ambientes com múltiplos domínios.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 06</h2>
+        <ul><li>Diagrama simples da estrutura de OUs implementada.</li><li>Lista exportada (CSV) de usuários com Departamento e Cargo.</li><li>Relatório curto descrevendo grupos criados (tipo, escopo e finalidade) e delegações aplicadas.</li><li>Capturas de tela das OUs, grupos e assistente de “Delegate Control”.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 05</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 07</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual a principal finalidade de uma OU no AD?","alternativas":{"A":"Conceder permissões a arquivos e pastas","B":"Organizar objetos e delimitar escopo de administração e GPOs","C":"Criar contas de usuário automaticamente","D":"Substituir grupos de segurança","E":"Controlar logs de eventos"},"correta":"B"},{"id":"q2","titulo":"No padrão AGDLP, onde ficam os usuários?","alternativas":{"A":"Diretamente em grupos Domain Local","B":"Em grupos Universais","C":"Em grupos Globais, que entram nos Domain Local","D":"Diretamente nas ACLs dos recursos","E":"Apenas na OU de Usuários"},"correta":"C"},{"id":"q3","titulo":"Qual tipo de grupo é usado para permissões?","alternativas":{"A":"Distribution","B":"Security","C":"Local","D":"Universal","E":"Owner"},"correta":"B"},{"id":"q4","titulo":"Qual boa prática para delegação de controle?","alternativas":{"A":"Delegar sempre no nível do domínio","B":"Delegar a usuários individuais","C":"Usar grupos para delegar e aplicar menor privilégio","D":"Dar Domain Admin temporariamente","E":"Evitar qualquer delegação"},"correta":"C"},{"id":"q5","titulo":"Qual vantagem de padronizar SamAccountName e UPN?","alternativas":{"A":"Acelerar a replicação do AD","B":"Permitir logon offline","C":"Facilitar automação, busca e consistência administrativa","D":"Evitar necessidade de GPOs","E":"Eliminar uso de grupos"},"correta":"C"},{"id":"q6","titulo":"Qual escopo de grupo é indicado para conceder permissões a recursos locais de um domínio?","alternativas":{"A":"Global","B":"Universal","C":"Domain Local","D":"Distribution","E":"Enterprise"},"correta":"C"},{"id":"q7","titulo":"Qual ferramenta gráfica auxilia a delegar controle de forma assistida?","alternativas":{"A":"Event Viewer (eventvwr.msc)","B":"Active Directory Users and Computers (dsa.msc)","C":"Disk Management (diskmgmt.msc)","D":"Local Security Policy (secpol.msc)","E":"Task Scheduler (taskschd.msc)"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Planejei e desenhei a estrutura de OUs coerente com a organização."},{"id":"c2","texto":"Criei OUs com proteção contra exclusão acidental habilitada."},{"id":"c3","texto":"Defini padrão de nomenclatura para usuários, computadores e grupos."},{"id":"c4","texto":"Criei usuários com UPN, DisplayName e atributos de departamento/cargo."},{"id":"c5","texto":"Implementei grupos de segurança com escopos adequados (AGDLP)."},{"id":"c6","texto":"Movi computadores das OUs padrão para as OUs corretas."},{"id":"c7","texto":"Deleguei controle mínimo a um grupo específico e documentei."},{"id":"c8","texto":"Validei membros de grupos e exportei relatórios (CSV) como evidência."},{"id":"c9","texto":"Registrei capturas de tela e comandos utilizados no laboratório."}];
+    const CHECKLIST_KEY = 'SOPS_cap06_checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

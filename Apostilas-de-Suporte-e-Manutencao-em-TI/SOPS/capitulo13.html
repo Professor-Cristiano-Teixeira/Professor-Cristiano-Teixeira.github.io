@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 13 — Monitoramento, Logs e Manutenção Preventiva</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo13.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos de sistemas operacionais para servidores e modelo Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Planejamento, licenciamento e boas práticas</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Laboratório de virtualização com VirtualBox</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Instalação do Windows Server 2025 e pós-instalação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Serviços de Diretório: conceitos e promoção a Controlador de Domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Administração de objetos no AD: OUs, usuários, grupos e delegação</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Políticas de Grupo (GPO): escopo, herança e segurança</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — DNS em ambientes de domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Endereçamento e DHCP para servidores</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Servidor de Arquivos: compartilhamentos, permissões e quotas</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Serviços de impressão e atualização</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Backup, restauração e continuidade de negócios</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento, logs e manutenção preventiva</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Automação com PowerShell para administração</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Introdução a servidores Linux/FreeBSD e serviços equivalentes</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração, troubleshooting e projeto final</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 13 — Monitoramento, Logs e Manutenção Preventiva</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h (2h teoria, 4h prática)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório em VMs (VirtualBox) com Windows Server 2025 e estação cliente</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows Server 2025, PowerShell, Performance Monitor, Event Viewer</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Configurar e interpretar logs no Event Viewer para diagnosticar e prevenir incidentes.</li><li>Montar coletores de dados e relatórios no Performance Monitor para acompanhar saúde e desempenho do servidor.</li><li>Automatizar manutenções preventivas com Agendador de Tarefas e rotinas de limpeza/atualização.</li><li>Estabelecer procedimentos de escalonamento e documentação de ocorrências.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Monitorar serviços críticos com métricas e alertas básicos.</li><li>Correlacionar eventos e logs para identificar causas raiz.</li><li>Planejar e executar manutenção preventiva segura (atualização, limpeza, verificação de integridade).</li><li>Documentar evidências e escalar incidentes conforme criticidade.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Backup, restauração e continuidade de negócios</a>
+              <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Automação com PowerShell para administração</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 13)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul><li>Aquecimento (10 min): revisar disponibilidade e indicadores de saúde do servidor.</li><li>Teoria (40 min): Event Viewer, Performance Monitor, práticas de manutenção e documentação.</li><li>Demo (20 min): criação de coletores de dados e leitura de logs.</li><li>Laboratório guiado (120 min): configurar logs, alertas, coletores e tarefas agendadas; gerar relatório e registrar evidências.</li><li>Consolidação (20 min): discussão de métricas, limiares e plano de manutenção.</li><li>Avaliação formativa: checklist e quiz ao final do capítulo.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">1) Logs e o Event Viewer (Visão Geral)</h3>
+  <p>O Event Viewer (Visualizador de Eventos) centraliza registros do sistema, segurança e aplicativos. Ele organiza eventos por logs (Windows Logs e Applications and Services Logs), níveis (Information, Warning, Error, Critical) e fontes (serviços, drivers, componentes). A leitura correta dos eventos permite identificar comportamentos anômalos e causas raiz de incidentes.</p>
+  <p>Onde vou aplicar isso: durante o passo a passo você criará filtros personalizados (Custom Views), exportará eventos relevantes e utilizará IDs de evento para diagnosticar problemas.</p>
+
+  <h3 class="h6 fw-bold">2) Tipos de Logs e IDs de Evento</h3>
+  <p>Os principais logs do Windows Server são: System (hardware, drivers e serviços do SO), Application (aplicativos e serviços instalados), Security (auditoria de sucesso/falha), Setup (eventos de instalação), Forwarded Events (assinatura de eventos remotos). Cada evento possui um Event ID e uma fonte; alguns IDs são bem conhecidos na administração diária.</p>
+  <p>Onde vou aplicar isso: você mapeará IDs críticos do seu ambiente e criará um relatório exportável para investigação de falhas recorrentes.</p>
+
+  <h3 class="h6 fw-bold">3) Performance Monitor (PerfMon) e Contadores</h3>
+  <p>O Performance Monitor mede recursos como CPU, memória, disco e rede por meio de contadores. Alguns contadores úteis: Processor(_Total)\% Processor Time; Memory\Available MBytes; PhysicalDisk(_Total)\Avg. Disk sec/Read/Write; Network Interface\Bytes Total/sec. A análise de tendências ajuda a prever gargalos e planejar capacidade.</p>
+  <p>Onde vou aplicar isso: você criará um Data Collector Set (DCS) para coletar métricas-chave e gerar um relatório automático.</p>
+
+  <h3 class="h6 fw-bold">4) Linhas de Base (Baselines) e Limiares</h3>
+  <p>Uma baseline representa o comportamento “normal” do servidor sob carga típica. A partir dela, definem-se limiares de alerta (por exemplo, CPU média acima de 80% por 15 minutos). Sem baseline, alertas podem ser imprecisos e gerar falsos positivos/negativos.</p>
+  <p>Onde vou aplicar isso: você executará coletas por um período e comparará com janelas de pico, definindo limites práticos para seu relatório.</p>
+
+  <h3 class="h6 fw-bold">5) Alertas e Ações</h3>
+  <p>PerfMon e o Agendador de Tarefas permitem acionar ações quando uma condição ocorre (gravar entrada em log, executar script, enviar e-mail via script). Alertas básicos indicam tendência de esgotamento de recursos (disco cheio, memória baixa) antes de acontecer a indisponibilidade.</p>
+  <p>Onde vou aplicar isso: você criará um alerta de espaço em disco e vinculará a execução de um script simples de limpeza não-destrutiva.</p>
+
+  <h3 class="h6 fw-bold">6) Manutenção Preventiva</h3>
+  <p>Manutenção preventiva inclui atualização controlada (WSUS/patches), verificação de integridade de disco (chkdsk offline em janela de manutenção), limpeza de temporários/logs antigos, revisão de serviços e drivers, e checagem de backups. A periodicidade deve ser definida conforme criticidade do serviço.</p>
+  <p>Onde vou aplicar isso: você montará um plano mensal com tarefas automatizadas e pontos de verificação, registrando no diário de bordo.</p>
+
+  <h3 class="h6 fw-bold">7) Escalonamento e Documentação</h3>
+  <p>Nem todo incidente pode ser resolvido no primeiro nível. Procedimentos de escalonamento definem quando acionar especialistas, fornecedores ou mudar a prioridade. A documentação (tickets, relatórios, prints, export de logs) garante rastreabilidade e aprendizado organizacional.</p>
+  <p>Onde vou aplicar isso: você criará um modelo simples de relatório pós-incidente e checklist de escalonamento por severidade.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passos">
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Monitorar e manter o servidor de forma preventiva</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Configurar visão de logs no Event Viewer, criar um Data Collector Set no Performance Monitor, implantar alertas básicos e automatizar manutenções com o Agendador de Tarefas, gerando relatório final.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">1) Preparação do Ambiente</h3>
+  <ol class="mb-0">
+    <li>Abra o Server Manager e confirme:
+      <ul>
+        <li>Hostname e IP estático configurados (Cap. 04).</li>
+        <li>Atualizações aplicadas recentemente (Cap. 11/12).</li>
+      </ul>
+    </li>
+    <li>Crie uma pasta para armazenar coletas e relatórios: C:\Monitoramento\Coletas e C:\Monitoramento\Relatorios.</li>
+  </ol>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">2) Event Viewer — Filtros e Exportação</h3>
+  <ol>
+    <li>Abra o Event Viewer (eventvwr.msc) e navegue até Windows Logs > System.</li>
+    <li>Clique em Filter Current Log e aplique:
+      <ul>
+        <li>Níveis: Warning, Error, Critical.</li>
+        <li>Fonte (exemplos): Disk, Service Control Manager, DNS Server (se aplicável).</li>
+      </ul>
+    </li>
+    <li>Salve como Custom View: “Infra — Críticos e Warnings (7d)”.</li>
+    <li>Exporte os eventos filtrados para C:\Monitoramento\Relatorios\eventos_sistema.evtx.</li>
+  </ol>
+  <p class="mb-1"><strong>PowerShell (exportação rápida por ID/Log):</strong></p>
+  <pre class="language-powershell"><code># Exportar eventos de Sistema (últimos 7 dias) com nível Warning+ e gravar CSV
+$inicio = (Get-Date).AddDays(-7)
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=2,3; StartTime=$inicio} |
+  Select-Object TimeCreated, Id, LevelDisplayName, ProviderName, Message |
+  Export-Csv -NoTypeInformation C:\Monitoramento\Relatorios\eventos_sistema_7d.csv</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">3) Performance Monitor — Data Collector Set (DCS)</h3>
+  <ol>
+    <li>Abra Performance Monitor (perfmon.exe) > Data Collector Sets > User Defined.</li>
+    <li>New > Data Collector Set. Nome: “Baseline-Servidor”. Create manually.</li>
+    <li>Escolha Performance Counter. Adicione contadores:
+      <ul>
+        <li>Processor(_Total)\% Processor Time</li>
+        <li>Memory\Available MBytes</li>
+        <li>LogicalDisk(_Total)\% Free Space</li>
+        <li>PhysicalDisk(_Total)\Avg. Disk sec/Read e /Write</li>
+        <li>Network Interface\Bytes Total/sec (interface ativa)</li>
+      </ul>
+    </li>
+    <li>Sample interval: 15 segundos. Directory: C:\Monitoramento\Coletas\Baseline-Servidor.</li>
+    <li>Finalize e Inicie o DCS por 30 minutos em período de uso típico.</li>
+  </ol>
+  <p class="mb-1"><strong>PowerShell (criação de DCS por linha de comando):</strong></p>
+  <pre class="language-powershell"><code># Criar um conjunto de coletores de dados simples via logman
+$nome = "Baseline-Servidor"
+$dir  = "C:\Monitoramento\Coletas\Baseline-Servidor"
+New-Item -ItemType Directory -Path $dir -Force | Out-Null
+
+logman create counter $nome -c `
+ "\Processor(_Total)\% Processor Time" `
+ "\Memory\Available MBytes" `
+ "\LogicalDisk(_Total)\% Free Space" `
+ "\PhysicalDisk(_Total)\Avg. Disk sec/Read" `
+ "\PhysicalDisk(_Total)\Avg. Disk sec/Write" `
+ "\Network Interface(*)\Bytes Total/sec" `
+ -si 00:00:15 -o "$dir\$nome.blg" -f bin -v mmddhhmm
+
+logman start $nome
+# Para parar manualmente após janela de coleta:
+# logman stop Baseline-Servidor</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">4) Relatórios e Linhas de Base</h3>
+  <ol>
+    <li>Após a coleta, pare o DCS e abra Reports > User Defined > Baseline-Servidor para visualizar os resultados.</li>
+    <li>Exportar para HTML/CSV para análise e anexar ao seu diário de bordo.</li>
+    <li>Defina limiares preliminares:
+      <ul>
+        <li>CPU média &lt; 70%; pico &lt; 90% por curtos períodos.</li>
+        <li>Memória disponível &gt; 500 MB (ajuste conforme função do servidor).</li>
+        <li>Disco livre &gt; 15% e latência média &lt; 20 ms (workloads variam).</li>
+      </ul>
+    </li>
+  </ol>
+  <pre class="language-powershell"><code># Converter BLG para CSV (requer relog.exe)
+$in = "C:\Monitoramento\Coletas\Baseline-Servidor\Baseline-Servidor.blg"
+$out = "C:\Monitoramento\Relatorios\Baseline-Servidor.csv"
+relog $in -f CSV -o $out</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">5) Alertas e Ações Automatizadas</h3>
+  <ol>
+    <li>Crie um script de verificação de disco e limpeza segura (temporários e logs antigos).</li>
+    <li>Agende execução quando % Free Space cair abaixo de 15% (gatilho por tempo, com verificação no script).</li>
+  </ol>
+  <p class="mb-1"><strong>Script PowerShell (limpeza segura e alerta):</strong></p>
+  <pre class="language-powershell"><code># C:\Monitoramento\Scripts\limpeza_disco.ps1
+param([int]$MinimoLivrePercent = 15)
+
+$drive = Get-PSDrive -Name C
+$livrePercent = [math]::Round(($drive.Free/$drive.Used)*100,2)
+
+Write-Host "Espaço livre estimado: $livrePercent%"
+
+if($livrePercent -lt $MinimoLivrePercent){
+  Write-Host "Iniciando limpeza segura..."
+  $pastas = @("$env:TEMP","C:\Windows\Temp","C:\Temp")
+  foreach($p in $pastas){
+    if(Test-Path $p){
+      Get-ChildItem -Path $p -Recurse -Force -ErrorAction SilentlyContinue |
+        Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+    }
+  }
+  # Apagar logs antigos (ex.: &gt; 14 dias) em pasta de logs de aplicativo
+  $logDir = "C:\LogsAplicacao"
+  if(Test-Path $logDir){
+    Get-ChildItem $logDir -File -Recurse | Where-Object {$_.LastWriteTime -lt (Get-Date).AddDays(-14)} |
+      Remove-Item -Force -ErrorAction SilentlyContinue
+  }
+  # Registrar evento customizado
+  $src = "ManutencaoPreventiva"
+  if(-not (Get-EventLog -LogName Application -Source $src -ErrorAction SilentlyContinue)){
+    New-EventLog -LogName Application -Source $src
+  }
+  Write-EventLog -LogName Application -Source $src -EventId 1001 -EntryType Warning `
+    -Message "Limpeza de disco executada. Livre=$livrePercent%."
+}else{
+  Write-Host "Sem ação. Espaço suficiente."
+}</code></pre>
+
+  <p class="mb-1"><strong>Agendador de Tarefas (Task Scheduler):</strong></p>
+  <ol>
+    <li>Abra Task Scheduler > Create Task.</li>
+    <li>Triggers: diário, a cada 1 hora (repetir por 1 dia).</li>
+    <li>Actions: Start a program:
+      <ul>
+        <li>Program/script: powershell.exe</li>
+        <li>Add arguments: -ExecutionPolicy Bypass -File "C:\Monitoramento\Scripts\limpeza_disco.ps1" -MinimoLivrePercent 15</li>
+      </ul>
+    </li>
+    <li>Conditions/Settings: permitir execução sob demanda; parar se exceder 30 min.</li>
+  </ol>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">6) Rotina de Atualização e Checagem de Serviços</h3>
+  <ol>
+    <li>Verifique serviços críticos (ex.: DNS, DHCP, Print Spooler) e configure Recovery (restart on failure).</li>
+    <li>Programe janela de manutenção para atualização mensal e reinício controlado (conforme política).</li>
+  </ol>
+  <pre class="language-powershell"><code># Conferir e forçar reinício automático de um serviço crítico
+$svc = "Dnscache" # exemplo
+Set-Service -Name $svc -StartupType Automatic
+Get-Service $svc
+
+# Reinício se parado
+if((Get-Service $svc).Status -ne "Running"){
+  Restart-Service $svc -Force
+}</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">7) Documentação e Escalonamento</h3>
+  <ol>
+    <li>Registre em C:\Monitoramento\Relatorios:
+      <ul>
+        <li>CSV/HTML de desempenho (baseline e pós-limpeza).</li>
+        <li>Export de eventos relevantes.</li>
+        <li>Prints das configurações de DCS e tarefas agendadas.</li>
+      </ul>
+    </li>
+    <li>Crie um resumo pós-incidente com: contexto, evento raiz (ID/Source), ação tomada, resultado, próximos passos, necessidade de escalonamento.</li>
+  </ol>
+  <pre class="language-markup"><code>&lt;RelatorioPosIncidente&gt;
+  &lt;Data&gt;2026-05-29&lt;/Data&gt;
+  &lt;Servidor&gt;SRV-DC01&lt;/Servidor&gt;
+  &lt;Sintomas&gt;Queda de desempenho às 10:15&lt;/Sintomas&gt;
+  &lt;EventosChave&gt;System: Disk Warning ID 51; Application: App Error ID 1000&lt;/EventosChave&gt;
+  &lt;Acoes&gt;Limpeza de temporários; verificação de latência de disco&lt;/Acoes&gt;
+  &lt;Resultado&gt;Latência normalizada; CPU estável&lt;/Resultado&gt;
+  &lt;Pendencias&gt;Agendar checagem de disco offline na próxima janela&lt;/Pendencias&gt;
+  &lt;EscalonarPara&gt;Equipe de Storage se latência &gt; 25ms por 1h&lt;/EscalonarPara&gt;
+&lt;/RelatorioPosIncidente&gt;</code></pre>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso do Event Viewer, PerfMon e automações simples para prevenir falhas.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol>
+    <li>Crie um Custom View focado em erros do Service Control Manager na última semana e gere um relatório CSV com os 20 eventos mais recentes.</li>
+    <li>Monte um DCS “Pico-Serviço” com intervalo de 5s por 15 minutos durante carga simulada (copiar arquivos grandes, navegação, etc.) e compare com a baseline.</li>
+    <li>Adapte o script de limpeza para arquivar logs de aplicativo em ZIP antes de apagar (apenas logs com mais de 14 dias).</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold mb-2">Critérios de avaliação (autoavaliação)</h3>
+  <ul class="mb-0">
+    <li>Corretude técnica das configurações (filtros, contadores, tarefas).</li>
+    <li>Qualidade do relatório (clareza, dados relevantes, evidências anexadas).</li>
+    <li>Adequação dos limiares e justificativas baseadas nos dados coletados.</li>
+    <li>Automação funcional e não destrutiva, com logs de execução.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Boas práticas de contadores no Windows Server para diferentes workloads (AD DS, DNS, File Server).</li><li>Estratégias de rotação e retenção de logs em servidores Windows e ferramentas de centralização.</li><li>Modelos de SLO/SLI e definição de limiares de alerta práticos.</li><li>Uso do Reliability Monitor (perfmon /rel) para identificação de falhas de estabilidade.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 13</h2>
+        <ul><li>Custom View exportado e arquivo CSV dos eventos filtrados (últimos 7 dias).</li><li>DCS criado, arquivo BLG/CSV e relatório com análise de baseline e picos.</li><li>Script de manutenção preventiva funcional e tarefa agendada configurada.</li><li>Relatório pós-incidente preenchido com evidências.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Backup, restauração e continuidade de negócios</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Automação com PowerShell para administração</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual log do Event Viewer registra eventos de hardware, drivers e serviços do sistema?","alternativas":{"A":"Application","B":"Security","C":"System","D":"Setup","E":"Forwarded Events"},"correta":"C"},{"id":"q2","titulo":"Qual afirmativa melhor define uma linha de base (baseline) de desempenho?","alternativas":{"A":"Um alarme que dispara quando um contador atinge 100%.","B":"O conjunto de eventos mais críticos do último mês.","C":"Uma referência do comportamento normal do servidor para comparação futura.","D":"Um relatório contendo apenas erros e falhas.","E":"Uma lista de serviços a serem reiniciados diariamente."},"correta":"C"},{"id":"q3","titulo":"Qual contador é mais apropriado para avaliar latência de disco?","alternativas":{"A":"Processor(_Total)\\% Processor Time","B":"Memory\\Available MBytes","C":"PhysicalDisk(_Total)\\Avg. Disk sec/Read","D":"LogicalDisk(_Total)\\% Free Space","E":"Network Interface\\Bytes Total/sec"},"correta":"C"},{"id":"q4","titulo":"Ao criar um Data Collector Set (DCS), qual boa prática de amostragem para monitoramento geral?","alternativas":{"A":"1 segundo sempre, independentemente da carga.","B":"15 segundos em períodos típicos e 5 segundos em janelas de pico.","C":"5 minutos para reduzir tamanho de arquivo, sempre.","D":"Apenas uma amostra única diária.","E":"Intervalo aleatório entre 1 e 300 segundos."},"correta":"B"},{"id":"q5","titulo":"Qual ação é adequada para manutenção preventiva sem risco de perda de dados do usuário?","alternativas":{"A":"Remover toda a pasta C:\\Windows\\System32.","B":"Apagar logs de eventos atuais do Windows.","C":"Limpar temporários de usuário e do sistema e arquivar logs antigos.","D":"Desabilitar o serviço de antivírus permanentemente.","E":"Executar chkdsk /f em horário de pico."},"correta":"C"},{"id":"q6","titulo":"Em um processo de escalonamento, qual item NÃO pode faltar ao enviar para o próximo nível?","alternativas":{"A":"Descrição do incidente e impacto.","B":"Evidências (eventos, gráficos, scripts utilizados).","C":"Opiniões pessoais sem dados.","D":"Ações realizadas e resultados.","E":"Recomendação de próximos passos."},"correta":"C"},{"id":"q7","titulo":"Qual comando pode ser usado para converter arquivos BLG em CSV para análise?","alternativas":{"A":"ipconfig","B":"relog","C":"nslookup","D":"dcdiag","E":"wevtutil"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei a pasta de trabalho e estruturei Coletas/Relatorios/Scripts."},{"id":"c2","texto":"Configurei um Custom View no Event Viewer e exportei eventos relevantes."},{"id":"c3","texto":"Montei um Data Collector Set (DCS) com contadores essenciais."},{"id":"c4","texto":"Gerei relatório (BLG/CSV) e analisei a baseline."},{"id":"c5","texto":"Implementei script de manutenção preventiva (limpeza segura)."},{"id":"c6","texto":"Agendei a execução do script no Task Scheduler."},{"id":"c7","texto":"Defini limiares de alerta e documentei justificativas."},{"id":"c8","texto":"Produzi um relatório pós-incidente com evidências."}];
+    const CHECKLIST_KEY = 'chk_sops_cap13';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

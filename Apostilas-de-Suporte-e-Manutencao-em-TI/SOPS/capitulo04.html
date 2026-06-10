@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 — Instalação do Windows Server 2025</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo04.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">01 — Fundamentos e modelo Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">02 — Planejamento, licenciamento e boas práticas</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">03 — Laboratório com VirtualBox</a></li>
+              <li><a class="dropdown-item active" href="capitulo04.html">04 — Instalação do Windows Server 2025</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">05 — AD DS: conceitos e promoção a DC</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">06 — Administração de objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">07 — Políticas de Grupo (GPO)</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">08 — DNS em ambientes de domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">09 — Endereçamento e DHCP</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">11 — Impressão e WSUS</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">12 — Backup e Restauração</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">13 — Monitoramento e manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">16 — Integração e troubleshooting</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 04 — Instalação do Windows Server 2025 e pós-instalação</h1>
+          <p class="mb-2"><strong>Carga:</strong> não definida no plano; sugestão: 4–6h (laboratório)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório de domínio em VMs (Servidor + Cliente)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> VirtualBox, Windows Server 2025, Ferramentas MMC/RSAT</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Realizar a instalação do Windows Server 2025 em VM com boas práticas.</li><li>Configurar hostname, IP estático, DNS e NTP de forma padronizada e segura.</li><li>Aplicar atualizações, drivers e ajustes de firewall pós-instalação.</li><li>Diferenciar Server Core de Desktop Experience e selecionar a edição adequada ao cenário.</li><li>Utilizar ferramentas locais e remotas (MMC/RSAT) para administração básica do servidor.</li><li>Documentar cada etapa com capturas de tela e registros técnicos.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Instalar e configurar sistemas operacionais de servidores seguindo padrões.</li><li>Executar hardening inicial e manutenção pós-instalação.</li><li>Gerenciar rede básica do servidor (IPv4, DNS, NTP, firewall).</li><li>Operar consoles administrativas locais e remotas.</li><li>Registrar evidências técnicas e validar funcionamento.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Laboratório com VirtualBox</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: AD DS: conceitos e promoção a DC</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 04)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li><strong>Abertura (10 min):</strong> objetivos, requisitos, topologia de laboratório (VirtualBox: 1 VM Servidor, 1 VM Cliente).</li><li><strong>Conceitos (25–35 min):</strong> edições, Server Core vs Desktop, roles/features, rede, NTP, atualizações, firewall, MMC/RSAT.</li><li><strong>Demonstração (20–30 min):</strong> instalação guiada e pós-instalação essencial.</li><li><strong>Prática guiada (60–90 min):</strong> alunos executam o passo a passo completo com registro de evidências.</li><li><strong>Validação (15–20 min):</strong> testes de conectividade, atualização, logs e tarefas administrativas.</li><li><strong>Fechamento (10 min):</strong> checklist, atividades propostas e entrega parcial do Projeto Integrador (bimestre 1).</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Edições do Windows Server 2025 e papéis (roles/features)</h3>
+          <p>O Windows Server 2025 possui edições com escopos distintos, geralmente Standard e Datacenter. A escolha impacta recursos como virtualização (direitos de VM), Storage Replica, Shielded VMs e funcionalidades avançadas. Além disso, a adição de papéis (roles) e recursos (features) transforma o servidor em serviços específicos, como AD DS, DNS, DHCP, File Services, Print Services, entre outros.</p>
+          <p>Entender as diferenças evita sobrecusto e subdimensionamento. Para um laboratório didático e pequenas implantações, a edição Standard costuma atender. A seleção de roles e features deve seguir um planejamento de requisitos, segurança e manutenção.</p>
+          <p><em>Onde vou aplicar isso:</em> na seleção da mídia/edição e durante a pós-instalação ao decidir quais roles/features serão instalados no projeto.</p>
+          <hr>
+          <h3 class="h6 fw-bold">2) Server Core vs Desktop Experience</h3>
+          <p>O Server Core é uma instalação mínima, sem GUI completa, focada em segurança, menor superfície de ataque, menos atualizações e melhor performance. A edição com Desktop Experience provê interface gráfica completa, facilitando curva de aprendizado e compatibilidade de ferramentas legadas.</p>
+          <p>Para ambientes de produção, o Core é recomendado quando possível. Em contextos educacionais ou de migração, a Desktop Experience pode acelerar a adoção. Avalie também o uso de administração remota (RSAT) para gerenciar servidores Core.</p>
+          <p><em>Onde vou aplicar isso:</em> na tela de seleção de imagem/instalação, definindo entre Core ou Desktop de acordo com o objetivo do laboratório e requisitos do projeto.</p>
+          <hr>
+          <h3 class="h6 fw-bold">3) Pós-instalação: hostname, IP estático, DNS e NTP</h3>
+          <p>Após instalar, padronize o nome do host (hostname) seguindo convenções: localização-função-sequência (ex.: SRV-DC01). Configure endereço IPv4 estático, máscara, gateway e DNS com base no plano de endereçamento. Servidores não devem usar DHCP para IP principal.</p>
+          <p>Sincronize tempo via NTP para garantir integridade de logs e funcionamento de serviços como Kerberos (AD). Utilize fontes confiáveis ou um concentrador interno.</p>
+          <p><em>Onde vou aplicar isso:</em> no passo a passo ao renomear o servidor, definir IP e apontar DNS/NTP, validando com testes de rede e tempo.</p>
+          <hr>
+          <h3 class="h6 fw-bold">4) Atualizações, drivers e firewall</h3>
+          <p>Atualizações reduzem riscos e corrigem bugs. Ajuste Windows Update para checar e instalar patches de segurança. Drivers atualizados garantem estabilidade, especialmente de rede e armazenamento.</p>
+          <p>O firewall do Windows Server deve permanecer ativo. Crie exceções mínimas necessárias aos serviços. Evite desativar o firewall na totalidade; prefira regras específicas e documentadas.</p>
+          <p><em>Onde vou aplicar isso:</em> na execução de Windows Update, instalação de drivers e criação de regras no firewall conforme os serviços futuros (ex.: DNS, DHCP, File Server).</p>
+          <hr>
+          <h3 class="h6 fw-bold">5) Ferramentas de gerenciamento local e remoto (MMC/RSAT)</h3>
+          <p>As Consoles MMC (Microsoft Management Console) permitem administrar roles, serviços e políticas. O RSAT (Remote Server Administration Tools) no Windows 10/11 habilita administração remota de AD, DNS, DHCP e mais, centralizando a gestão.</p>
+          <p>Conhecer snap-ins (Services.msc, Event Viewer, Server Manager) e o uso do PowerShell é essencial para automação e padronização. Em servidores Core, a administração remota torna-se ainda mais relevante.</p>
+          <p><em>Onde vou aplicar isso:</em> ao validar serviços, checar logs, usar Server Manager e configurar RSAT no cliente para administrar o servidor de laboratório.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-pass">
+        <h2 class="h4 fw-bold">Passo a Passo — Instalação do Windows Server 2025 e configuração pós-instalação</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Instalar o Windows Server 2025 em uma VM, aplicar configurações essenciais (hostname, IP estático, DNS, NTP, updates, firewall) e preparar o ambiente para os próximos capítulos (AD, DNS, DHCP).</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Pré-requisitos (laboratório)</h3>
+          <ul>
+            <li>VirtualBox instalado; ISO do Windows Server 2025 disponível.</li>
+            <li>Topologia mínima: 1 VM Servidor (2 vCPU, 4–6 GB RAM, 60 GB disco), 1 VM Cliente (Windows 10/11).</li>
+            <li>Rede VirtualBox: Host-only para comunicação interna; NAT opcional para acesso à Internet.</li>
+            <li>Plano de endereçamento (exemplo): 192.168.56.0/24. Servidor: 192.168.56.10; Cliente: 192.168.56.20; Gateway (se necessário): 192.168.56.1; DNS inicial: 192.168.56.10 (futuro DC) ou DNS público temporário.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">1) Criar VM do Servidor no VirtualBox</h3>
+          <ol>
+            <li>Novo > Nome: SRV-BASE01; Tipo: Microsoft Windows; Versão: Windows 2022/2025 (64-bit).</li>
+            <li>Memória: 4096–6144 MB; CPUs: 2; Habilitar I/O APIC e EFI se necessário.</li>
+            <li>Disco: VDI dinamicamente alocado com 60 GB.</li>
+            <li>Rede: Adaptador 1 = Host-only; Adaptador 2 = NAT (opcional para updates).</li>
+            <li>Anexar ISO do Windows Server 2025 na unidade óptica da VM.</li>
+          </ol>
+          <p class="mb-1"><strong>Comandos úteis (host):</strong></p>
+          <pre class="language-bash"><code># Listar redes Host-only do VirtualBox
+VBoxManage list hostonlyifs
+
+# Criar um Host-only (se precisar) e configurar DHCP desativado
+VBoxManage hostonlyif create
+VBoxManage hostonlyif ipconfig "vboxnet0" --ip 192.168.56.1 --netmask 255.255.255.0</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">2) Instalação do Windows Server 2025</h3>
+          <ol>
+            <li>Inicialize a VM e siga o assistente de instalação.</li>
+            <li>Selecione edição adequada (Standard) e a variação (Server Core ou Desktop Experience). Para aprendizagem, escolha Desktop Experience.</li>
+            <li>Instalação limpa (Custom), selecione o disco e prossiga.</li>
+            <li>Defina a senha do usuário Administrador ao final.</li>
+          </ol>
+          <p><em>Dica:</em> documente com capturas de tela as telas principais (edição, tipo de instalação, particionamento).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">3) Configuração inicial: hostname e IP estático</h3>
+          <p>Faça logon como Administrador e abra o Windows Terminal ou PowerShell.</p>
+          <p class="mb-1"><strong>Renomear computador e reiniciar:</strong></p>
+          <pre class="language-powershell"><code># Executar no PowerShell elevado
+Rename-Computer -NewName "SRV-BASE01" -Restart</code></pre>
+          <p class="mb-1"><strong>Definir IP estático (após reinício):</strong></p>
+          <pre class="language-powershell"><code># Identificar nome do adaptador
+Get-NetAdapter | Where-Object {$_.Status -eq "Up"} | Format-Table -Auto
+
+# Exemplo: definir IPv4 estático no adaptador "Ethernet"
+New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 192.168.56.10 -PrefixLength 24 -DefaultGateway 192.168.56.1
+
+# DNS primário (temporário se ainda sem AD)
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 1.1.1.1,8.8.8.8
+
+# Verificar
+ipconfig /all
+Resolve-DnsName microsoft.com</code></pre>
+          <p>Padronize o hostname seguindo a convenção definida no plano da organização.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">4) Sincronização de tempo (NTP)</h3>
+          <p>Configurar tempo é essencial para autenticação e logs coerentes.</p>
+          <pre class="language-powershell"><code># Ver o status do serviço de tempo
+w32tm /query /status
+
+# Definir servidores NTP externos confiáveis (exemplo)
+w32tm /config /manualpeerlist:"time.windows.com,0x9 pool.ntp.org,0x9" /syncfromflags:manual /update
+net stop w32time &amp; net start w32time
+w32tm /resync
+
+# Consultar configuração
+w32tm /query /configuration</code></pre>
+          <p>Quando promover o servidor a DC, a hierarquia de tempo muda (PDC Emulator como autoridade). Revisitaremos no capítulo de AD.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">5) Atualizações do sistema e drivers</h3>
+          <p>Mantenha a VM conectada a Internet (adaptador NAT). Aplique atualizações de segurança.</p>
+          <pre class="language-powershell"><code># Windows Update via PowerShell (precisa do módulo PSWindowsUpdate em alguns cenários)
+# Em GUI: Configurações &gt; Windows Update &gt; Verificar atualizações
+
+# Instalar drivers (se apropriado, como Guest Additions do VirtualBox)
+# No VirtualBox: Dispositivos &gt; Inserir imagem de CD dos Additions
+# Em seguida, executar o instalador dentro do SO convidado</code></pre>
+          <p>Após instalar Additions, confira melhoria de vídeo, integração de mouse e rede.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">6) Firewall do Windows: manter ativo e criar regras pontuais</h3>
+          <p>O firewall deve permanecer habilitado. Ajuste regras apenas quando necessário.</p>
+          <pre class="language-powershell"><code># Listar perfis e status
+Get-NetFirewallProfile | Format-Table Name, Enabled
+
+# Exemplo: permitir ICMP (ping) para diagnóstico
+New-NetFirewallRule -DisplayName "ICMPv4 Echo-In" -Protocol ICMPv4 -IcmpType 8 -Direction Inbound -Action Allow
+
+# Exemplo: habilitar regra para serviço específico (DNS quando instalado)
+# As roles costumam criar suas próprias regras; evite criar duplicadas sem necessidade</code></pre>
+          <p>Documente toda exceção com justificativa, porta, protocolo e periodo de vigência.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">7) Ferramentas de administração local e remota (MMC/RSAT)</h3>
+          <p>No servidor, abra o Server Manager, Services.msc e Event Viewer para explorar. No cliente Windows 10/11, instale RSAT para administração remota.</p>
+          <pre class="language-powershell"><code># No Windows 10/11 (cliente) - instalar RSAT via Features on Demand
+Get-WindowsCapability -Name RSAT* -Online | Select-Object Name, State
+Get-WindowsCapability -Name RSAT* -Online | Where-Object State -eq NotPresent | Add-WindowsCapability -Online
+
+# Habilitar WinRM no servidor para administração remota
+Enable-PSRemoting -Force
+
+# Testar conexão remota de PowerShell (no cliente)
+Test-WsMan -ComputerName 192.168.56.10</code></pre>
+          <p>Valide snap-ins como “Computer Management” e “Event Viewer” apontando para o servidor.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">8) Validação e documentação</h3>
+          <ul>
+            <li>Ping entre cliente e servidor.</li>
+            <li><code>ipconfig /all</code> e <code>Resolve-DnsName</code> operando.</li>
+            <li>Hora sincronizada (<code>w32tm /query /status</code>).</li>
+            <li>Firewall ativo e com regras mínimas necessárias.</li>
+          </ul>
+          <pre class="language-ini"><code>; Modelo de registro (trecho) em texto
+[Identificação]
+Hostname=SRV-BASE01
+IP=192.168.56.10/24
+Gateway=192.168.56.1
+DNS=1.1.1.1;8.8.8.8 (temporário)
+DataInstalacao=2025-XX-XX
+
+[Validações]
+PingCliente=OK
+DNSResolucao=OK
+NTP=OK
+Updates=OK
+Firewall=Ativo</code></pre>
+          <p>Guarde capturas e este registro em seu repositório de evidências.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a instalação e a configuração inicial do servidor, praticando padronização, segurança e documentação.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li><strong>Variante Core:</strong> Repita a instalação usando Server Core. Configure hostname, IP, DNS e NTP via PowerShell. Compare consumo de RAM e quantidade de updates com a edição Desktop.</li>
+            <li><strong>Templates de VM:</strong> Crie um snapshot “Pós-Instalação Limpa”. Em seguida, generalize a VM (sysprep /generalize) e crie um template para futuros servidores de laboratório.</li>
+            <li><strong>Administração Remota Completa:</strong> No cliente, instale RSAT e conecte-se ao servidor para gerenciar Services, Event Viewer e Firewall. Salve evidências e um checklist das ações realizadas.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold mb-2">Projeto Integrador — Entrega 1 (fim do 1º bimestre)</h3>
+          <p>Entregue uma VM Windows Server 2025 instalada e configurada (hostname padrão, IP estático, NTP, atualizações aplicadas, firewall ativo) e um relatório técnico com evidências. Este artefato será base para os próximos serviços (AD DS, DNS, DHCP).</p>
+          <ul class="mb-0">
+            <li>VM funcional com rede Host-only e NAT (opcional para updates).</li>
+            <li>Registro técnico contendo: parâmetros de rede, comandos usados e prints.</li>
+            <li>Snapshot “Pós-Instalação Validada”.</li>
+          </ul>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold mb-2">Critérios de Avaliação</h3>
+          <ul class="mb-0">
+            <li>Padronização e conformidade (nomenclatura, IP, DNS, NTP) — 30%.</li>
+            <li>Segurança e boas práticas (firewall ativo, mínimos privilégios) — 30%.</li>
+            <li>Qualidade técnica das evidências e documentação — 25%.</li>
+            <li>Funcionamento validado (testes de rede, tempo e updates) — 15%.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Comparativo detalhado entre Server Core e Desktop Experience no Windows Server 2025.</li><li>Boas práticas de endereçamento IPv4 para serviços de diretório e DNS internos.</li><li>Hierarquia de tempo no AD (PDC Emulator) e impactos do NTP.</li><li>Estratégias de hardening inicial em servidores Windows recém-instalados.</li><li>Uso do RSAT em Windows 11: módulos e limitações comuns.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 04</h2>
+        <ul><li>VM Windows Server 2025 instalada e com pós-instalação concluída.</li><li>Registro técnico com parâmetros de rede, NTP, firewall e comandos utilizados.</li><li>Snapshot “Pós-Instalação Validada”.</li><li>Projeto Integrador — Entrega 1: pacote com VM + relatório de evidências.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Laboratório com VirtualBox</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: AD DS: conceitos e promoção a DC</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a principal vantagem do Server Core em relação ao Desktop Experience?","alternativas":{"A":"Mais compatibilidade com aplicações GUI","B":"Menor superfície de ataque e menos atualizações","C":"Maior consumo de memória para caching","D":"Habilita todos os roles automaticamente","E":"Dispensa administração remota"},"correta":"B"},{"id":"q2","titulo":"Após a instalação, qual configuração NÃO é recomendada para servidores?","alternativas":{"A":"Definir endereço IP estático","B":"Padronizar hostname","C":"Desabilitar completamente o firewall","D":"Configurar servidores NTP confiáveis","E":"Aplicar atualizações de segurança"},"correta":"C"},{"id":"q3","titulo":"Ao configurar NTP no Windows Server, qual comando ajuda a forçar a sincronização imediata?","alternativas":{"A":"ipconfig /renew","B":"Get-Date -Resync","C":"w32tm /resync","D":"time /syncnow","E":"Set-TimeZone -Sync"},"correta":"C"},{"id":"q4","titulo":"Em um laboratório com VirtualBox, qual combinação de redes atende melhor conectividade interna e acesso à Internet para updates?","alternativas":{"A":"Apenas Bridge","B":"Apenas Host-only","C":"Host-only + NAT","D":"Apenas NAT","E":"Nenhuma interface de rede"},"correta":"C"},{"id":"q5","titulo":"Qual ferramenta permite administração remota de AD, DNS e DHCP a partir de um cliente Windows 10/11?","alternativas":{"A":"Notepad++","B":"RSAT","C":"Telnet","D":"Remote Desktop apenas","E":"FTP Client"},"correta":"B"},{"id":"q6","titulo":"Em relação a roles e features, assinale a alternativa correta:","alternativas":{"A":"Roles são recursos de usuário e features são apenas de hardware","B":"Roles transformam o servidor em um provedor de serviços específicos","C":"Features substituem a necessidade de roles","D":"Instalar todas as roles melhora a segurança","E":"Roles e features são sinônimos"},"correta":"B"},{"id":"q7","titulo":"Qual comando PowerShell renomeia o computador e reinicia?","alternativas":{"A":"Rename-Host -Name SRV -Restart","B":"Rename-Computer -NewName SRV -Restart","C":"Set-ComputerName SRV; Restart-Host","D":"Set-Hostname SRV -Reboot","E":"Change-Name SRV /reboot"},"correta":"B"},{"id":"q8","titulo":"Ao definir DNS no servidor ainda sem AD, qual prática é aceitável temporariamente?","alternativas":{"A":"Não configurar DNS","B":"Usar 0.0.0.0 como DNS","C":"Apontar para DNS públicos confiáveis","D":"Desativar o serviço de rede","E":"Usar DHCP para DNS e IP do servidor"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei a VM do servidor no VirtualBox com CPU, RAM e disco adequados."},{"id":"c2","texto":"Instalei o Windows Server 2025 (edição adequada)."},{"id":"c3","texto":"Padronizei o hostname conforme convenção."},{"id":"c4","texto":"Configurei IP estático, máscara, gateway e DNS."},{"id":"c5","texto":"Ajustei sincronização de tempo (NTP) e conferi o status."},{"id":"c6","texto":"Apliquei atualizações de segurança e instalei drivers necessários."},{"id":"c7","texto":"Mantive o firewall ativo e documentei exceções (se houver)."},{"id":"c8","texto":"Habilitei administração remota (WinRM) e testei RSAT no cliente."},{"id":"c9","texto":"Realizei validações (ping, resolução DNS, w32tm) com sucesso."},{"id":"c10","texto":"Registrei evidências (prints, comandos e configurações) e criei snapshot final."}];
+    const CHECKLIST_KEY = 'chk_SOPS_04';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

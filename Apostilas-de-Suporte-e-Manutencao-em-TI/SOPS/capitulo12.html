@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 12 — Backup e Continuidade</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo12.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Fundamentos e Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Planejamento e Licenciamento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Laboratório com VirtualBox</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Instalação do Windows Server</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — AD DS: Conceitos e Promoção</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Administração de Objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Políticas de Grupo (GPO)</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — DNS em Ambientes de Domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Endereçamento e DHCP</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Impressão e Atualização</a></li>
+              <li><a class="dropdown-item active" href="capitulo12.html">Cap. 12 — Backup e Continuidade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Monitoramento e Manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Integração e Troubleshooting</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 12 — Backup, restauração e continuidade de negócios</h1>
+          <p class="mb-2"><strong>Carga:</strong> não definido</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório de domínio e serviços (AD DS, DNS, Arquivos) em VMs</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows Server 2025, PowerShell, wbadmin, VirtualBox, VSS</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Planejar políticas de backup alinhadas a objetivos de negócio (RPO/RTO).</li><li>Configurar Windows Server Backup para rotinas Full, Incremental e System State.</li><li>Executar testes de restauração (arquivos, pasta, System State) com segurança em VM separada.</li><li>Documentar procedimentos de DR/BCP e validar retenção e cópias offsite.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Selecionar estratégia de backup conforme requisitos de disponibilidade e risco.</li><li>Automatizar e monitorar jobs de backup e seus relatórios.</li><li>Realizar restores seguros e verificáveis em ambiente controlado.</li><li>Aplicar boas práticas de retenção, rotação de mídias e cópias offsite.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Serviços de impressão e atualização</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Monitoramento, logs e manutenção preventiva</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 12)</h2>
+        <div class="card-soft bg-white p-4 mt-3">- Aquecimento (10 min): revisar riscos comuns (falha de disco, erro humano, malware) e impacto em serviços do domínio.<br>- Teoria (40–60 min): modelos de backup (full, incremental, diferencial), RPO/RTO, VSS, Windows Server Backup, retenção e offsite, DR/BCP.<br>- Demonstração (20 min): configurar Windows Server Backup, criar job e executar primeiro backup.<br>- Laboratório guiado (60–90 min): configurar backup do System State, realizar backup de dados, simular restauração de arquivos e de System State em VM separada.<br>- Registro de evidências (contínuo): capturas de tela, logs, scripts e anotações de problemas/soluções.<br>- Encerramento (10 min): checklist de lições aprendidas e próximos passos (integração com monitoramento).<br>- Avaliação: relatório técnico com plano de backup/DR e evidências de restore.</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">1) Objetivos de Backup: RPO e RTO</h3>
+          <p>RPO (Recovery Point Objective) define quanto de dado você pode perder entre o último backup válido e um incidente. RTO (Recovery Time Objective) define o tempo máximo aceitável para restaurar o serviço após uma falha. Essas metas orientam a frequência dos backups, a tecnologia escolhida e os procedimentos de restauração.</p>
+          <p>Onde aplicar: na definição da agenda de backups e na escolha de modelos e retenção no passo a passo.</p>
+
+          <h3 class="h6 fw-bold mt-3">2) Modelos de backup: Full, Incremental e Diferencial</h3>
+          <p>Backup Full copia todos os dados selecionados. É simples para restaurar, porém consome mais tempo e espaço. Backup Incremental copia apenas o que mudou desde o último backup (de qualquer tipo), acelerando execuções diárias e economizando armazenamento, mas exigindo cadeia de incrementais na restauração. Backup Diferencial copia o que mudou desde o último Full; restaura com o Full + último Diferencial.</p>
+          <p>Onde aplicar: na configuração de agendas no Windows Server Backup e planejamento de retenção.</p>
+
+          <h3 class="h6 fw-bold mt-3">3) VSS (Volume Shadow Copy Service)</h3>
+          <p>O VSS permite criar snapshots consistentes de volumes em uso, garantindo que arquivos bloqueados ou serviços críticos (como AD DS) sejam copiados de forma íntegra. Writers VSS de aplicações (como o do System State/AD) coordenam a consistência.</p>
+          <p>Onde aplicar: ao executar backups em produção e realizar restores consistentes do System State.</p>
+
+          <h3 class="h6 fw-bold mt-3">4) Windows Server Backup (WSB)</h3>
+          <p>Ferramenta nativa do Windows Server que realiza backups em disco, volume, pasta/arquivo e System State. Permite agendamento, retenção automática em discos dedicados e restauração granular. Também possui interface PowerShell via cmdlets/wbadmin.</p>
+          <p>Onde aplicar: configuração do recurso, criação de job agendado e execução do primeiro backup.</p>
+
+          <h3 class="h6 fw-bold mt-3">5) System State e AD DS</h3>
+          <p>O System State inclui componentes críticos como Registry, Boot files, COM+, e, em Controladores de Domínio, a base do Active Directory. Restaurar o System State de DCs exige procedimentos específicos (Directory Services Restore Mode – DSRM), evitando corrupção de replicação.</p>
+          <p>Onde aplicar: no laboratório de restauração de System State em VM separada, simulando um DC.</p>
+
+          <h3 class="h6 fw-bold mt-3">6) Retenção, rotação e cópia offsite</h3>
+          <p>Defina políticas que atendam compliance e riscos: quanto tempo manter (retenção), quantos pontos de restauração, esquema de rotação (por exemplo, GFS — diário/semanal/mensal) e armazenamento fora do site (offsite) para desastres físicos. Em ambientes simples, discos externos rotativos com criptografia já elevam a resiliência.</p>
+          <p>Onde aplicar: ao definir destinos de backup e política de troca de mídias/unidades no passo a passo.</p>
+
+          <h3 class="h6 fw-bold mt-3">7) DR/BCP: Recuperação de Desastres e Continuidade</h3>
+          <p>DR foca na restauração de serviços de TI após incidentes severos; BCP cobre continuidade do negócio como um todo. Tenha runbooks com contatos, prioridades de sistemas, inventário e passos de recuperação. Testes periódicos de restore validam seu plano na prática.</p>
+          <p>Onde aplicar: na criação do runbook, no teste de restore e na documentação final do capítulo.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Backup do System State e Dados com Teste de Restore</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Configurar o Windows Server Backup para proteger dados e o System State de um servidor (preferencialmente DC em laboratório), executar um primeiro backup, e validar o processo restaurando arquivos e o System State em VM separada, documentando resultados.</p>
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold"><i class="bi bi-1-circle me-1"></i>Preparação do laboratório</h3>
+          <ol class="mb-0">
+            <li>Abra sua topologia no VirtualBox com ao menos: 1 VM Servidor (Windows Server 2025) e 1 VM clone para testes de restore (desligada). Mantenha snapshots para rollback.</li>
+            <li>Provisione um disco adicional virtual (VHD/VMDK) para a VM Servidor dedicado ao backup, ou conecte um disco externo virtual. Evite usar o disco do SO como destino.</li>
+            <li>Confirme espaço livre suficiente: para o primeiro Full, considere no mínimo 1,5–2x do tamanho dos dados protegidos, principalmente para System State + dados.</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-2-circle me-1"></i>Instalar o recurso Windows Server Backup</h3>
+          <p>Use o Server Manager (Add Roles and Features) ou PowerShell:</p>
+          <pre class="language-powershell"><code># Executar em PowerShell elevado
+Install-WindowsFeature -Name Windows-Server-Backup -IncludeManagementTools
+
+# Verificar instalação
+Get-WindowsFeature Windows-Server-Backup</code></pre>
+          <p>Onde vou aplicar: habilita a interface e os cmdlets necessários para agendar e executar backups.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-3-circle me-1"></i>Primeiro backup manual — System State</h3>
+          <p>Execute um backup de System State para validar o VSS e conferir o tempo de execução.</p>
+          <pre class="language-powershell"><code># Ajuste a letra da unidade de backup (ex.: E:)
+$destino = "E:"
+wbadmin start systemstatebackup -backuptarget:$destino -quiet
+
+# Verificar histórico
+wbadmin get versions</code></pre>
+          <div class="alert alert-warning mb-0 mt-2" role="alert"><i class="bi bi-shield-lock me-1"></i>Nunca execute restauração de System State em produção sem janela e plano formal. Use VMs de laboratório.</div>
+          <p class="mt-2 mb-0">Onde vou aplicar: cria ponto de recuperação crítico para AD/registro/serviços.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-4-circle me-1"></i>Backup de dados — compartilhamentos/pastas</h3>
+          <p>Inclua pastas de dados (por exemplo, D:\Departamentos). Você pode optar por Full/Incremental com wbadmin:</p>
+          <pre class="language-powershell"><code># Backup de volume ou pastas específicas (ex.: D:\Dados)
+$destino = "E:"
+wbadmin start backup -backuptarget:$destino -include:D: -quiet
+
+# Para pastas específicas
+wbadmin start backup -backuptarget:$destino -include:"D:\Dados;D:\Perfis" -quiet</code></pre>
+          <p>Alternativa via GUI: Windows Server Backup &gt; Backup Once &gt; Custom &gt; Add Items &gt; selecione volumes/pastas e destino.</p>
+          <p class="mb-0">Onde vou aplicar: protege arquivos do servidor, preparando o teste de restauração granular.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-5-circle me-1"></i>Agendar backups recorrentes</h3>
+          <p>Crie política alinhada a RPO/RTO. Exemplo: Full semanal + Incremental diário.</p>
+          <pre class="language-powershell"><code># Exemplo com agendamento usando a GUI:
+# Windows Server Backup &gt; Backup Schedule &gt;
+# - Selecionar Itens: System State + Volumes/Pastas
+# - Horário: Diário 22:00
+# - Destino: Disco dedicado (recomendado) e permitir WSB gerenciar a retenção.
+
+# Com Task Scheduler e wbadmin (modelo):
+$acao = New-ScheduledTaskAction -Execute "wbadmin.exe" -Argument 'start backup -backuptarget:E: -include:D: -quiet'
+$trigger = New-ScheduledTaskTrigger -Daily -At 22:00
+Register-ScheduledTask -Action $acao -Trigger $trigger -TaskName "Backup_Dados_Diario" -Description "Backup diário de dados" -User "SYSTEM" -RunLevel Highest</code></pre>
+          <p class="mb-0">Onde vou aplicar: garante execução automática e previsível do backup.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-6-circle me-1"></i>Teste de restauração — arquivo/pasta</h3>
+          <ol>
+            <li>Crie um arquivo de teste em D:\Dados\LAB\excluir_me.txt e faça backup.</li>
+            <li>Exclua o arquivo e faça a restauração granular do item.</li>
+          </ol>
+          <pre class="language-powershell"><code># Listar versões de backup
+wbadmin get versions
+
+# Restaurar arquivo/pasta (ajuste versão e caminho)
+# Observação: o parâmetro -version aceita o carimbo listado em get versions.
+wbadmin start recovery -version:2024-05-28-220000 -itemType:File -items:"D:\Dados\LAB\excluir_me.txt" -recoveryTarget:"D:\Dados\LAB" -quiet</code></pre>
+          <p class="mb-0">Onde vou aplicar: valida recuperação rápida para incidentes simples (erro humano, ransomware após isolamento, etc.).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-7-circle me-1"></i>Teste de restauração — System State em VM separada</h3>
+          <ol>
+            <li>Clone a VM do DC de laboratório ou use a VM separada. Isole a rede (Host-only sem outros DCs) para evitar replicação indevida.</li>
+            <li>Anexe o disco de backup à VM de teste (somente leitura se possível).</li>
+            <li>Inicialize a VM de teste em Modo de Restauração dos Serviços de Diretório (DSRM) quando necessário.</li>
+            <li>Restaure o System State na VM de teste:</li>
+          </ol>
+          <pre class="language-powershell"><code># Em PowerShell elevado na VM de teste
+wbadmin get versions
+
+# Restaurar System State
+wbadmin start systemstaterecovery -version:2024-05-28-220000 -quiet
+
+# Após a restauração, reinicie conforme instruções, mantenha a VM isolada para validações.</code></pre>
+          <div class="alert alert-info mb-0 mt-2" role="alert"><i class="bi bi-info-circle me-1"></i>Verifique serviços do AD (dcdiag), DNS, e logins. Não reintroduza este DC na rede de produção de laboratório para evitar conflitos de USN/replicação.</div>
+          <p class="mt-2 mb-0">Onde vou aplicar: valida o plano de DR para AD/serviços críticos.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-8-circle me-1"></i>Retenção, rotação e cópias offsite</h3>
+          <ul>
+            <li>Implemente rotação de mídias (por exemplo, GFS: diárias, semanais, mensais).</li>
+            <li>Criptografe mídias e armazene uma cópia offsite (cofre, nuvem, outro prédio).</li>
+            <li>Documente calendário de trocas e responsável.</li>
+          </ul>
+          <pre class="language-bash"><code># Exemplo (Linux host) para copiar disco de backup montado para um repositório offsite via rclone:
+rclone sync /mnt/backup empresa-offsite:backups/SRV-DC01 --checksum --bwlimit 4M --log-file=rclone.log</code></pre>
+          <p class="mb-0">Onde vou aplicar: aumenta resiliência contra desastres físicos e ataques generalizados.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold"><i class="bi bi-9-circle me-1"></i>Documentação e evidências</h3>
+          <ul>
+            <li>Registre versão do SO, escopo de backup, destinos, janelas e retenção.</li>
+            <li>Anexe capturas do WSB, saídas do wbadmin, horários e duração.</li>
+            <li>Inclua resultados de testes de restore (arquivos e System State) com validações.</li>
+            <li>Atualize o runbook de DR/BCP com contatos e priorização de serviços.</li>
+          </ul>
+          <pre class="language-powershell"><code># Exportar eventos do Windows Server Backup
+wevtutil epl Microsoft-Windows-Backup/Operational C:\Temp\WSB.evtx
+
+# Gerar relatório simples de versões disponíveis
+wbadmin get versions &gt; C:\Temp\backup_versions.txt</code></pre>
+          <p class="mb-0">Onde vou aplicar: facilita auditorias, repetições do processo e melhoria contínua.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o domínio de políticas de backup, execução e restauração validada, além de documentação técnica.</p>
+        <div class="card-soft bg-white p-4">
+          <ol class="mb-0">
+            <li>Projetar uma política GFS mínima para o seu laboratório (diário/semanal/mensal), indicando RPO/RTO estimados e capacidade de armazenamento requerida.</li>
+            <li>Criar dois agendamentos: um para System State e outro para dados, em horários distintos. Entregar capturas da configuração e logs de execução.</li>
+            <li>Executar um “restore drill”: restaurar uma pasta excluída acidentalmente e registrar o tempo total de recuperação e lições aprendidas.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de Avaliação</h3>
+          <ul class="mb-0">
+            <li>Correta aplicação de conceitos (modelos de backup, VSS, System State).</li>
+            <li>Execução técnica: agendamentos funcionais, logs e evidências claras.</li>
+            <li>Restauração bem-sucedida e validação consistente.</li>
+            <li>Documentação objetiva: RPO/RTO, runbook de DR/BCP e conclusões.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Boas práticas de rotação de mídias e o esquema GFS em ambientes SMB.</li><li>Uso avançado do wbadmin e integração com scripts PowerShell para relatórios.</li><li>Consistência de aplicações com VSS Writers (AD, SQL Server, Exchange — visão conceitual).</li><li>Estratégias de offsite e 3-2-1 backup (3 cópias, 2 mídias, 1 offsite).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 12</h2>
+        <ul><li>Plano de backup com RPO/RTO, retenção e esquema de rotação.</li><li>Capturas e logs do Windows Server Backup (instalação, jobs e primeira execução).</li><li>Evidências de restauração de arquivos/pastas e validações.</li><li>Relatório de teste de restauração de System State em VM isolada.</li><li>Runbook atualizado de DR/BCP com lições aprendidas.</li><li>Projeto Integrador (2º bimestre) — Entrega incremental: Integrar DHCP/Arquivos/Backup/Automação, incluindo scripts de verificação de backup e relatório diário.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Serviços de impressão e atualização</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Monitoramento, logs e manutenção preventiva</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual afirmação melhor descreve RPO e RTO?","alternativas":{"A":"RPO é o tempo de restauração; RTO é a perda de dados aceitável.","B":"RPO é o ponto máximo de perda de dados aceitável; RTO é o tempo máximo para restaurar.","C":"RPO e RTO são a mesma métrica em contextos distintos.","D":"RTO sempre é menor que RPO.","E":"RPO e RTO não se aplicam a backups, apenas a alta disponibilidade."},"correta":"B"},{"id":"q2","titulo":"Em um backup incremental, o que é copiado?","alternativas":{"A":"Apenas arquivos alterados desde o último backup Full.","B":"Todos os arquivos selecionados, sempre.","C":"Apenas arquivos alterados desde o último backup (de qualquer tipo).","D":"Apenas metadados de arquivos para economizar espaço.","E":"Somente o System State."},"correta":"C"},{"id":"q3","titulo":"Para que serve o VSS (Volume Shadow Copy Service)?","alternativas":{"A":"Ele criptografa os arquivos durante o backup.","B":"Fornece snapshots consistentes de volumes, mesmo com arquivos em uso.","C":"É um serviço de servidor de arquivos.","D":"Remove arquivos antigos automaticamente.","E":"Desativa o firewall para acelerar o backup."},"correta":"B"},{"id":"q4","titulo":"O que está incluído no System State de um Controlador de Domínio?","alternativas":{"A":"Somente arquivos do usuário.","B":"Apenas o registro do Windows.","C":"Componentes críticos como Registry e, em DCs, a base do AD.","D":"Somente drivers de dispositivo.","E":"Apenas logs do Event Viewer."},"correta":"C"},{"id":"q5","titulo":"Qual combinação é típica de política balanceada de backups?","alternativas":{"A":"Apenas Full diário.","B":"Full semanal + Incremental diário.","C":"Apenas Diferencial mensal.","D":"Incremental mensal + Diferencial diário.","E":"Apenas System State anual."},"correta":"B"},{"id":"q6","titulo":"Ao restaurar System State de um DC de laboratório, qual cuidado é essencial?","alternativas":{"A":"Habilitar replicação com todos os DCs durante o restore.","B":"Nunca usar DSRM.","C":"Isolar a VM/ambiente para evitar replicação indesejada.","D":"Remover o VSS do servidor antes do restore.","E":"Instalar um segundo firewall."},"correta":"C"},{"id":"q7","titulo":"Qual prática melhora a resiliência contra desastres físicos?","alternativas":{"A":"Manter todas as cópias no mesmo rack.","B":"Desabilitar logs de backup para economizar espaço.","C":"Armazenar cópias offsite e usar rotação de mídias (3-2-1).","D":"Eliminar backups diferenciais.","E":"Executar backup apenas quando ocorre falha."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Instalei o recurso Windows Server Backup no servidor."},{"id":"c2","texto":"Executei um backup de System State com sucesso e salvei o log."},{"id":"c3","texto":"Configurei backup de dados (volumes/pastas críticas)."},{"id":"c4","texto":"Agendei políticas de backup alinhadas a RPO/RTO."},{"id":"c5","texto":"Realizei restauração de arquivo/pasta e validei a integridade."},{"id":"c6","texto":"Fiz teste de restauração de System State em VM isolada."},{"id":"c7","texto":"Defini retenção, rotação de mídias e estratégia offsite."},{"id":"c8","texto":"Documentei plano de backup, DR/BCP e evidências de execução."}];
+    const CHECKLIST_KEY = 'chk_SOPS_cap12';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

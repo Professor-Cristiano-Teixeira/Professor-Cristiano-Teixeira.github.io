@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 — Gestão de Configuração e CMDB</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo10.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SGTI</span>
+        <span style="color: var(--cor-principal);">Suporte e Gestão da Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Fundamentos de Suporte Técnico e ITSM</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Comunicação e Relacionamento no Atendimento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Visão Geral do ITIL v4 e o SVS</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Gestão de Incidentes</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Gestão de Problemas</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Ferramentas de Chamados e Níveis de Suporte</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — SLAs, OLAs e Métricas</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Documentação Técnica e POPs</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Gestão de Mudanças</a></li>
+              <li><a class="dropdown-item active" href="capitulo10.html">Cap. 10 — Gestão de Configuração e CMDB</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Gestão de Ativos e Licenças</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Monitoramento, Disponibilidade e Continuidade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Segurança no Atendimento e Rastreabilidade</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Controle de Estoque e Logística de TI</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Automação e IA aplicadas ao Suporte</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Simulação Integrada</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 10 — Gestão de Configuração e CMDB</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Operação de Service Desk com ITIL v4 (incidente → problema → mudança → CMDB)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Planilha (Excel/Google Sheets), ferramenta de chamados (simulada), repositório de documentação (wiki/drive)</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Definir Itens de Configuração (CIs), atributos e relacionamentos.</li><li>Construir e manter uma mini-CMDB confiável, incluindo auditoria básica.</li><li>Usar a CMDB para análise de impacto em incidentes, problemas e mudanças.</li><li>Documentar processos de descoberta e atualização de CIs com base em POP.</li><li>Integrar registros de mudança e chamados à CMDB para rastreabilidade.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Classificar ativos como CIs e registrar seus atributos essenciais.</li><li>Mapear dependências entre serviços, servidores, aplicações e usuários.</li><li>Executar descoberta manual e auditoria periódica da CMDB.</li><li>Relacionar tickets e mudanças a CIs afetados para análise de impacto.</li><li>Comunicar achados e atualizar documentação conforme POPs.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Gestão de Mudanças</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gestão de Ativos e Licenças</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 10)</h2>
+        <div class="card-soft bg-white p-4 mt-3">- Abertura (15 min): objetivos do capítulo, revisão rápida de mudança (Cap. 09) e conexão com CMDB.<br>- Teoria (45–60 min): conceitos de CI, atributos, tipos de relacionamentos, modelos de dados; descoberta e auditoria; uso em análise de impacto.<br>- Demonstração (20 min): estrutura de planilha para mini-CMDB; exemplos de consulta/relacionamento.<br>- Prática guiada (60–80 min): montar mini-CMDB (≥20 CIs), registrar relacionamentos e vínculos com chamados/mudanças; simular falha e analisar impacto.<br>- Fechamento (10 min): checklist de qualidade da CMDB, dúvidas e próximos passos (Cap. 11).</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">1) O que é Gestão de Configuração e CMDB</h3>
+          <p>A Gestão de Configuração garante que os componentes de um serviço de TI (Itens de Configuração, ou CIs) e seus relacionamentos estejam identificados, controlados e confiáveis. A CMDB (Configuration Management Database) é o repositório que armazena esses registros, permitindo visibilidade do ambiente e suporte a decisões.</p>
+          <p>Na prática, a CMDB conecta pessoas, processos e tecnologia: relaciona serviços a servidores, aplicações, bancos de dados, redes e até documentação. Com isso, incidentes são resolvidos mais rápido, mudanças são planejadas com menos risco e auditorias ficam objetivas.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao montar a mini-CMDB e utilizá-la para prever impacto de uma falha de servidor e para associar tickets aos CIs afetados.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">2) Itens de Configuração (CIs), Atributos e Classes</h3>
+          <p>Um CI é qualquer componente que precise ser gerenciado para entregar um serviço: hardware (PCs, switches), software (sistemas, drivers), documentação (POPs), contratos/licenças e até serviços lógicos. Para padronizar, definimos classes (ex.: Servidor, Aplicação, Estação, Impressora, Serviço) com atributos mínimos por classe.</p>
+          <p>Atributos comuns: identificador único, nome, descrição, proprietário, ambiente (produção/homologação), versão, local, status (em uso, reserva, desativado), e dados técnicos (CPU, RAM, IP) conforme a classe. A definição clara evita registros incompletos e inconsistentes.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao escolher as colunas da planilha e registrar 20 CIs com atributos essenciais.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">3) Relacionamentos entre CIs</h3>
+          <p>Relacionamentos mostram dependências: “hospeda”, “depende de”, “conecta-se a”, “faz parte de”, “backup de”, “documentado por”. Eles permitem entender a cadeia de impacto: se o switch A falhar, quais servidores e serviços são afetados?</p>
+          <p>É importante usar verbos consistentes e direção clara (A hospeda B; B é hospedado por A). Mesmo em planilhas, é possível representar relacionamentos via colunas de referência ou abas específicas.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao construir a aba Relacionamentos e preencher pares CI_origem → CI_destino com o tipo de relação.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">4) Descoberta, Auditoria e Manutenção</h3>
+          <p>A CMDB precisa refletir o ambiente real. Descoberta é o processo de coletar dados (manualmente, por script ou por ferramenta). Auditoria compara o “registrado” com o “observado” para corrigir divergências. Manutenção é a rotina de atualizar a CMDB a cada mudança relevante (instalações, remoções, alterações).</p>
+          <p>Mesmo sem ferramentas pagas, scripts simples e checklists periódicos mantêm a qualidade. Planejar frequências (semanal/mensal) e responsáveis evita desatualização.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao executar a auditoria básica dos 20 CIs com um checklist e evidências.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">5) CMDB na Análise de Impacto e Mudanças</h3>
+          <p>A CMDB apoia a análise de impacto: antes de uma mudança, verificamos quais CIs dependem do CI alvo para planejar janelas, comunicação e rollback. Em incidentes, ajuda a priorizar e escalar corretamente.</p>
+          <p>Além disso, vincular tickets e RFCs (solicitações de mudança) aos CIs afetados cria rastreabilidade e histórico, útil para Problemas e melhorias.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao simular uma falha e, usando a aba Relacionamentos, listar serviços/usuários impactados e registrar os vínculos no chamado.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">6) Qualidade de Dados e Governança da CMDB</h3>
+          <p>Dados precisos exigem padrões: nomenclatura, atributos mínimos obrigatórios, validações (listas suspensas), controle de versões e trilha de alterações. Defina POPs simples para criar, alterar e desativar CIs.</p>
+          <p>Indicadores úteis: percentual de CIs com atributos completos, divergências encontradas na auditoria, tempo médio de atualização após mudança e taxa de tickets vinculados a CIs.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao configurar validações na planilha e registrar um mini-POP de atualização da CMDB.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-pass">
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Construção e Uso de uma Mini-CMDB</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Criar uma mini-CMDB em planilha com ao menos 20 CIs, registrar relacionamentos, executar uma auditoria básica e utilizar a CMDB para análise de impacto de uma falha simulada, vinculando CIs a chamados e mudanças.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 1 — Preparar a planilha (estrutura e validações)</h3>
+          <ol class="mb-0">
+            <li>Crie um arquivo “CMDB_SGTI.xlsx” (ou Google Sheets) com as abas: CIs, Relacionamentos, Auditoria, Dicionário.</li>
+            <li>Na aba Dicionário, defina listas para validação:
+              <ul>
+                <li>Classe: Servidor, Estação, Aplicação, Serviço, Impressora, Switch, Roteador, BancoDeDados, Documentação.</li>
+                <li>Status: Em uso, Reserva, Em manutenção, Desativado.</li>
+                <li>Ambiente: Produção, Homologação, Desenvolvimento, Teste.</li>
+                <li>Tipo de relação: Hospeda, Depende de, Conecta-se a, Faz parte de, Backup de, Documentado por.</li>
+              </ul>
+            </li>
+            <li>Na aba CIs, crie as colunas:
+              <em>ID_CI, Nome, Classe, Descrição, Proprietário, Ambiente, Status, Local, IP/Host, SO/Versão, Observações</em>.
+              Aplique validação de dados em Classe, Ambiente e Status com as listas da aba Dicionário.</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Exemplo de cabeçalho (CSV) para a aba CIs:</strong></p>
+          <pre class="language-csv"><code>ID_CI,Nome,Classe,Descrição,Proprietário,Ambiente,Status,Local,IP/Host,SO/Versão,Observações
+CI-001,SRV-APP-01,Servidor,Servidor de aplicação principal,TI,Produção,Em uso,DC Sala 1,10.0.1.10,Ubuntu 22.04,LTS atualizado
+CI-002,SRV-DB-01,Servidor,Servidor de banco de dados,TI,Produção,Em uso,DC Sala 1,10.0.1.20,Ubuntu 22.04,Replica síncrona com SRV-DB-02
+CI-003,APP-ESCOLA,Aplicação,Sistema acadêmico,TI,Produção,Em uso,Cloud,app.escola.local,v1.8.2,Depende de SRV-DB-01
+...</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 2 — Preencher ao menos 20 CIs</h3>
+          <ol class="mb-0">
+            <li>Cadastre 20 CIs misturando classes (mínimo recomendado: 3 servidores, 1 banco de dados, 5 estações, 1 switch, 1 impressora, 4 aplicações/serviços, 2 itens de documentação, 3 outros).</li>
+            <li>Mantenha a nomenclatura consistente (ex.: SRV-APP-01, PC-LAB01-05, SW-ANDAR2-01). Evite campos vazios em atributos obrigatórios.</li>
+            <li>Revise a consistência dos dados (IP válido, versão preenchida quando aplicável, status coerente com o ambiente).</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Dica de automação (opcional) para gerar IDs em lote com PowerShell:</strong></p>
+          <pre class="language-powershell"><code>$base = 1..20 | ForEach-Object { "CI-{0:D3}" -f $_ }
+$base | ForEach-Object { $_ }</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 3 — Registrar relacionamentos</h3>
+          <ol class="mb-0">
+            <li>Na aba Relacionamentos, crie as colunas: <em>ID_Rel, CI_Origem, Tipo_Relacao, CI_Destino, Observações</em>.</li>
+            <li>Use validação de dados em Tipo_Relacao com a lista da aba Dicionário. Referencie CHAVE exata dos CIs (ID_CI) nas colunas CI_Origem e CI_Destino.</li>
+            <li>Cadastre pelo menos 25 relacionamentos. Exemplos: SRV-APP-01 “Hospeda” APP-ESCOLA; APP-ESCOLA “Depende de” SRV-DB-01; SRV-DB-01 “Conecta-se a” SW-ANDAR2-01.</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Exemplo (CSV) de relacionamentos:</strong></p>
+          <pre class="language-csv"><code>ID_Rel,CI_Origem,Tipo_Relacao,CI_Destino,Observações
+REL-001,CI-001,Hospeda,CI-003,APP-ESCOLA no SRV-APP-01
+REL-002,CI-003,Depende de,CI-002,APP depende do banco
+REL-003,CI-002,Conecta-se a,CI-010,Uplink switch core
+REL-004,CI-015,Documentado por,CI-020,POP de atualização
+...</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 4 — Vincular chamados e mudanças a CIs</h3>
+          <ol class="mb-0">
+            <li>Escolha um ticket de incidente (real ou simulado) e registre no campo Observações do CI os IDs de chamados associados (ex.: INC-2024-045 vinculado a CI-003).</li>
+            <li>Ao propor uma mudança (ex.: atualização de versão da aplicação), anote o ID da RFC no CI alvo e nos CIs dependentes (ex.: RFC-2024-012 afeta CI-003 e CI-002).</li>
+            <li>Crie uma coluna “Relacionado a (Tickets/RFCs)” na aba CIs para concentrar esses vínculos.</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Modelo de registro (pseudo-CSV):</strong></p>
+          <pre class="language-csv"><code>ID_CI,Nome,...,Relacionado
+CI-003,APP-ESCOLA,...,"INC-2024-045; RFC-2024-012"</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 5 — Auditoria básica da CMDB</h3>
+          <ol class="mb-0">
+            <li>Na aba Auditoria, crie as colunas: <em>Data, ID_CI, Verificado_por, Atributo, Valor_CMDB, Valor_Observado, Divergência (Sim/Não), Ação</em>.</li>
+            <li>Valide 10 CIs amostrados. Para estações e servidores, confirme IP/Host e Status. Para aplicações/serviços, confirme versão e dependências principais.</li>
+            <li>Registre divergências e plano de ação (ex.: “Atualizar Status para Em uso”).</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Exemplo de linha de auditoria:</strong></p>
+          <pre class="language-csv"><code>2024-09-10,CI-001,aluno(a)-01,IP/Host,10.0.1.10,10.0.1.10,NÃO,OK
+2024-09-10,CI-003,aluno(a)-01,Versão,v1.8.2,v1.9.0,SIM,Atualizar CMDB e planejar mudança</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 6 — Simular falha e realizar análise de impacto</h3>
+          <ol class="mb-0">
+            <li>Escolha um CI crítico (ex.: SRV-DB-01) e simule uma falha. Na aba Relacionamentos, filtre por linhas onde CI_Destino = CI crítico (para “Depende de”) e CI_Origem = CI crítico (para “Hospeda/Conecta-se a”).</li>
+            <li>Liste serviços e aplicações impactados, usuários ou áreas afetadas e estime a prioridade do incidente conforme SLA.</li>
+            <li>Registre o resumo em um documento curto (5–10 linhas) e vincule ao chamado de incidente simulado.</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Exemplo de consulta simples (pseudoconsulta em SQL se a CMDB estivesse em um banco):</strong></p>
+          <pre class="language-sql"><code>-- CIs que dependem do SRV-DB-01 (CI-002)
+SELECT r.CI_Origem AS CI_Afetado, r.Tipo_Relacao
+FROM Relacionamentos r
+WHERE r.CI_Destino = 'CI-002' AND r.Tipo_Relacao = 'Depende de';</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 7 — POP de atualização da CMDB</h3>
+          <ol class="mb-0">
+            <li>Escreva um POP curto com: Objetivo, Escopo, Pré-requisitos, Passos (criar/alterar/desativar CI), Validação e Registro de evidências.</li>
+            <li>Inclua gatilhos obrigatórios: sempre atualizar a CMDB após mudanças aprovadas e ao encerrar incidentes que alterem configuração.</li>
+            <li>Armazene o POP na aba Documentação (ou em um repositório) e crie um CI “Documentação” para vincular este POP aos itens relevantes.</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Modelo de POP (texto):</strong></p>
+          <pre class="language-markup"><code>Título: POP — Atualização da CMDB
+Objetivo: Garantir atualização e qualidade da CMDB após mudanças e incidentes.
+Escopo: Todos os CIs de Produção e Homologação.
+Pré-requisitos: Acesso à planilha CMDB e permissão de edição.
+Passos:
+  1) Identificar CIs afetados no ticket/RFC.
+  2) Atualizar atributos e relacionamentos na CMDB.
+  3) Registrar vínculo com ticket/RFC no campo "Relacionado".
+  4) Salvar evidência (print) e registrar data/autor na aba Auditoria.
+Validação: Conferir preenchimento de atributos obrigatórios e ausência de divergências.
+Responsável: Técnico N2 / SD Supervisor.</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso da CMDB para registrar CIs, manter relacionamentos e executar análise de impacto e auditoria.</p>
+        <div class="card-soft bg-white p-4">
+          <ol class="mb-0">
+            <li>Extensão da CMDB: adicione 10 novos CIs (ex.: novas estações e uma aplicação interna) e 10 novos relacionamentos coerentes.</li>
+            <li>Múltiplas dependências: escolha uma aplicação e mapeie pelo menos 3 dependências (banco, servidor, rede). Documente uma janela de mudança para atualizá-la.</li>
+            <li>Auditoria direcionada: selecione 5 CIs em “Produção” e realize auditoria completa (atributos e dependências). Registre divergências e o plano de correção.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de Avaliação</h3>
+          <ul class="mb-0">
+            <li>Completude e consistência dos atributos e relacionamentos.</li>
+            <li>Aplicação correta de nomenclatura, validações e POPs.</li>
+            <li>Capacidade de executar e registrar auditoria com evidências.</li>
+            <li>Uso da CMDB para justificar análise de impacto e prioridade de incidentes/mudanças.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Leitura: ITIL v4 — prática de Gestão de Configuração de Serviço e exemplos de modelos de dados de CMDB.</li><li>Ferramentas: pesquisa sobre CMDBs open-source (ex.: i-doit, Snipe-IT para ativos + relações, NetBox para rede).</li><li>Boas práticas: padrões de nomenclatura e governança de dados em CMDBs corporativas.</li><li>Integração: como vincular tickets e RFCs a CIs em ferramentas ITSM (ex.: GLPI, OTRS, Zammad).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 10</h2>
+        <ul><li>Planilha “CMDB_SGTI” com abas CIs, Relacionamentos, Auditoria e Dicionário, contendo pelo menos 20 CIs e 25 relacionamentos.</li><li>Documento curto (5–10 linhas) com análise de impacto da falha simulada e vínculos com ticket/RFC.</li><li>POP de atualização da CMDB padronizado e acessível no repositório.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Gestão de Mudanças</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gestão de Ativos e Licenças</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Suporte e Gestão da Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual opção descreve melhor um Item de Configuração (CI)?","alternativas":{"A":"Qualquer componente gerenciado necessário para entregar um serviço de TI.","B":"Apenas hardware físico em produção.","C":"Somente softwares instalados em servidores.","D":"Apenas documentos de POP e manuais.","E":"Somente serviços expostos a usuários finais."},"correta":"A"},{"id":"q2","titulo":"Em uma CMDB, por que os relacionamentos são fundamentais?","alternativas":{"A":"Para aumentar o número de registros.","B":"Para identificar dependências e apoiar a análise de impacto.","C":"Para reduzir o uso de SLAs.","D":"Para substituir o processo de mudanças.","E":"Para evitar auditorias de conformidade."},"correta":"B"},{"id":"q3","titulo":"Qual é uma boa prática ao definir classes e atributos de CIs?","alternativas":{"A":"Criar atributos diferentes para cada CI, sem padrão.","B":"Definir classes com atributos mínimos obrigatórios e nomenclatura consistente.","C":"Guardar apenas o nome e o IP do CI.","D":"Registrar tudo em texto livre sem validação.","E":"Atualizar atributos somente uma vez por ano."},"correta":"B"},{"id":"q4","titulo":"Qual atividade compara o que está na CMDB com o que existe de fato no ambiente?","alternativas":{"A":"Descoberta","B":"Provisionamento","C":"Auditoria","D":"Backup","E":"Change enablement"},"correta":"C"},{"id":"q5","titulo":"Antes de executar uma mudança em servidor crítico, a CMDB ajuda principalmente a:","alternativas":{"A":"Calcular o MTBF do hardware.","B":"Determinar o orçamento anual de TI.","C":"Analisar impacto em serviços e planejar comunicação e rollback.","D":"Aumentar o número de tickets abertos.","E":"Reduzir o consumo de energia do datacenter."},"correta":"C"},{"id":"q6","titulo":"Qual exemplo representa corretamente um relacionamento e sua direção?","alternativas":{"A":"Aplicação é 'Depende de' Servidor, direção: Aplicação -> Servidor.","B":"Servidor é 'Depende de' Aplicação, direção: Servidor -> Aplicação.","C":"Switch é 'Documentado por' POP, direção: POP -> Switch.","D":"Banco de dados é 'Hospeda' Servidor, direção: Banco -> Servidor.","E":"Estação é 'Faz parte de' Switch, direção: Estação -> Switch."},"correta":"A"},{"id":"q7","titulo":"Um indicador de qualidade de dados da CMDB é:","alternativas":{"A":"Quantidade de usuários do service desk.","B":"Percentual de CIs com atributos obrigatórios completos.","C":"Número de mudanças emergenciais no ano.","D":"Tempo de boot dos servidores.","E":"Tamanho do arquivo da planilha."},"correta":"B"},{"id":"q8","titulo":"Ao encerrar um incidente que alterou configuração de um CI, você deve:","alternativas":{"A":"Excluir o CI e recriá-lo do zero.","B":"Ignorar a CMDB se o serviço já voltou.","C":"Atualizar a CMDB conforme POP e registrar o vínculo do ticket.","D":"Aguardar a auditoria anual para atualizar.","E":"Abrir um novo incidente apenas para atualização de dados."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei a planilha CMDB com as abas CIs, Relacionamentos, Auditoria e Dicionário."},{"id":"c2","texto":"Cadastrei pelo menos 20 CIs com atributos mínimos preenchidos e nomenclatura padronizada."},{"id":"c3","texto":"Registrei ao menos 25 relacionamentos com tipos consistentes e direção correta."},{"id":"c4","texto":"Vinculei chamados e/ou RFCs relevantes aos CIs afetados."},{"id":"c5","texto":"Realizei auditoria em 10 CIs e registrei divergências e ações corretivas."},{"id":"c6","texto":"Simulei uma falha e elaborei a análise de impacto baseada na CMDB."},{"id":"c7","texto":"Escrevi um POP simples para criação/atualização/desativação de CIs na CMDB."},{"id":"c8","texto":"Implementei validações de dados (listas) para reduzir erros de preenchimento."}];
+    const CHECKLIST_KEY = 'sgti-cap10-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

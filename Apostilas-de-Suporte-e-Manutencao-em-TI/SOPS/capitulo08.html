@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — DNS no Domínio</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo08.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos de SO para servidores e Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Planejamento, licenciamento e boas práticas</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Laboratório de virtualização com VirtualBox</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Instalação do Windows Server 2025 e pós-instalação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Serviços de Diretório e promoção a DC</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Administração de objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Políticas de Grupo (GPO)</a></li>
+              <li><a class="dropdown-item active" href="capitulo08.html">Capítulo 08 — DNS em ambientes de domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Endereçamento e DHCP</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Impressão e atualização</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Backup e continuidade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento e manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração e projeto final</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 08 — DNS em ambientes de domínio (Windows Server/AD DS)</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório AD DS + DNS com cliente Windows em VirtualBox</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows Server 2025, Active Directory DNS, PowerShell, nslookup/Resolve-DnsName, VirtualBox</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Configurar zonas DNS forward e reverse integradas ao Active Directory.</li><li>Criar e validar registros A, CNAME, MX e compreender registros SRV do AD.</li><li>Configurar encaminhadores, ajustar TTL e interpretar caching recursivo.</li><li>Diagnosticar problemas de resolução usando nslookup, Resolve-DnsName e logs.</li><li>Documentar e aplicar boas práticas de manutenção do serviço DNS no domínio.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Administrar DNS integrado ao AD com foco em disponibilidade e segurança.</li><li>Executar troubleshooting estruturado de resolução de nomes.</li><li>Aplicar automação básica com PowerShell para gerenciamento de DNS.</li><li>Documentar mudanças e validar impactos em clientes e serviços.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Políticas de Grupo (GPO)</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Endereçamento e DHCP</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 08)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Objetivo geral:</strong> Capacitar o aluno a configurar, administrar e diagnosticar DNS integrado ao Active Directory, garantindo resolução de nomes estável para serviços do domínio.</p><p><strong>Pré-requisitos recomendados:</strong> Virtualização básica (VirtualBox), rede TCP/IP (IPv4, máscara, gateway, DNS), instalação e pós-instalação do Windows Server, noções de AD DS e promoção a DC, GPOs básicas.</p><p><strong>Recursos:</strong> 1 VM Windows Server 2025 (Controlador de Domínio com DNS), 1 VM cliente Windows; acesso administrativo; PowerShell; conectividade Host-only.</p><p><strong>Estratégia:</strong> Exposição dialogada com demonstrações, laboratório guiado passo a passo, validações com nslookup/Resolve-DnsName, registro de evidências (prints e scripts), mini-desafios.</p><p><strong>Cronograma sugerido (6h):</strong></p><ul><li>1h — Revisão DNS e papel no AD, tipos de zonas e registros.</li><li>2h — Configuração de zonas forward/reverse e criação de registros (A, CNAME, MX).</li><li>1h — Encaminhadores, TTL/caching e melhores práticas.</li><li>1h — Diagnóstico: nslookup, Resolve-DnsName, logs e eventos.</li><li>1h — Fechamento, atividades práticas e entrega parcial do Projeto Integrador (bimestre).</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h5">1) Papel do DNS no domínio e integração com AD</h3>
+          <p>O DNS é o serviço que traduz nomes em endereços IP. Em ambientes de domínio, o AD DS depende do DNS para localizar controladores de domínio por meio de registros SRV. Sem um DNS saudável, logons, GPOs e serviços não funcionam corretamente.</p>
+          <p>Em Windows Server, é comum instalar o DNS no mesmo servidor controlador de domínio. As zonas podem ser integradas ao AD, o que permite replicação segura via AD e controle de permissões por ACL.</p>
+          <p><em>Onde vou aplicar isso:</em> validar dependências do AD (registros SRV), garantir que clientes apontem para o DNS do domínio para autenticação e políticas.</p>
+
+          <h3 class="h5 mt-4">2) Zonas forward e reverse</h3>
+          <p>A zona forward resolve nomes para IPs (ex.: srv01.empresa.local → 10.0.0.10). A zona reverse faz o caminho inverso (10.0.0.10 → srv01.empresa.local). A existência da zona reverse facilita diagnósticos e algumas ferramentas.</p>
+          <p>Em AD-integrado, a zona forward do domínio é replicada entre os DCs. A zona reverse pode ser integrada ao AD ou primária padrão, conforme necessidade.</p>
+          <p><em>Onde vou aplicar isso:</em> criar zona reverse correspondente ao seu prefixo de rede e testar resolução reversa com nslookup.</p>
+
+          <h3 class="h5 mt-4">3) Registros DNS essenciais: A, CNAME, MX e SRV</h3>
+          <p>Registro A mapeia um nome para um endereço IPv4. CNAME cria um alias (apelido) que aponta para um nome canônico. MX define servidores de e-mail responsáveis por um domínio. SRV define serviços e portas (o AD publica SRVs para LDAP, Kerberos e GC).</p>
+          <p>Em domínios AD, os registros SRV são criados automaticamente. É responsabilidade do administrador manter A e CNAME coerentes com a infraestrutura e, quando aplicável, configurar MX corretamente.</p>
+          <p><em>Onde vou aplicar isso:</em> criar registros A para servidores críticos, um CNAME amigável (ex.: files → fs01) e revisar a árvore _msdcs do domínio.</p>
+
+          <h3 class="h5 mt-4">4) Encaminhadores, recursão, TTL e caching</h3>
+          <p>Encaminhadores direcionam consultas externas a servidores específicos (por exemplo, DNS do provedor). A recursão permite ao servidor resolver nomes fora de suas zonas. O TTL indica por quanto tempo uma resposta pode ser armazenada em cache.</p>
+          <p>Usar encaminhadores confiáveis e ajustar TTLs corretamente melhora desempenho e previsibilidade, principalmente em mudanças frequentes de registros.</p>
+          <p><em>Onde vou aplicar isso:</em> configurar encaminhadores para DNS públicos confiáveis e validar impacto do TTL em testes de cache.</p>
+
+          <h3 class="h5 mt-4">5) Diagnóstico de DNS</h3>
+          <p>Ferramentas como nslookup e Resolve-DnsName ajudam a isolar problemas. Verifique se o cliente aponta para o DNS do domínio, valide registros e use logs/eventos para identificar falhas de atualização dinâmica ou permissões.</p>
+          <p>O diagnóstico deve seguir etapas: checar IP/gateway/DNS, testar nome curto e FQDN, validar forward e reverse, revisar eventos e replicação do AD, se aplicável.</p>
+          <p><em>Onde vou aplicar isso:</em> no passo a passo, rodar consultas específicas, ler eventos do DNS Server e resolver erros comuns.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — DNS integrado ao AD: zonas, registros e diagnóstico</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Configurar zona reverse integrada ao AD, criar registros essenciais (A, CNAME, MX), ajustar encaminhadores/TTL e validar resolução com nslookup e PowerShell.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Pré-lab e conferências</h3>
+          <ol class="mb-0">
+            <li>Garanta que seu servidor é Controlador de Domínio com DNS instalado.</li>
+            <li>Defina IP estático e NTP configurado. Confirme o FQDN do servidor.</li>
+            <li>No cliente Windows, configure o DNS para apontar para o IP do seu DC/DNS.</li>
+          </ol>
+          <p class="mt-3 mb-1"><strong>Comandos úteis (cliente):</strong></p>
+          <pre class="language-bash"><code>ipconfig /all
+ipconfig /flushdns
+ping dc01.empresa.local
+nslookup dc01.empresa.local</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">1) Criar zona reverse integrada ao AD</h3>
+          <p>No DNS Manager (dnsmgmt.msc): clique com o botão direito em Reverse Lookup Zones → New Zone. Selecione “Primary Zone” e “Store the zone in Active Directory”. Escolha “To all DNS servers running on domain controllers in this domain”. Informe o Network ID (ex.: 10.0.0) e conclua.</p>
+          <p>Via PowerShell, é possível automatizar:</p>
+          <pre class="language-powershell"><code># Ajuste os valores ao seu ambiente
+$NetworkId = "10.0.0.0/24"
+$ZoneName  = "0.0.10.in-addr.arpa"
+
+# Cria a zona reverse integrada ao AD (escopo do domínio)
+Add-DnsServerPrimaryZone -NetworkId $NetworkId -ReplicationScope Domain -DynamicUpdate Secure
+
+# Verifica a zona criada
+Get-DnsServerZone | Where-Object {$_.ZoneName -eq $ZoneName} | Format-List *</code></pre>
+          <p><em>Validação:</em> após criar registros PTR (automático se “Update PTR record” estiver marcado nos A), faça um lookup reverso.</p>
+          <pre class="language-bash"><code>nslookup 10.0.0.10
+Resolve-DnsName 10.0.0.10 -Type PTR</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">2) Criar registros A e CNAME</h3>
+          <p>Crie registros A para servidores críticos (ex.: dc01, fs01) e um alias amigável (ex.: files → fs01.empresa.local).</p>
+          <pre class="language-powershell"><code># Zona do domínio
+$DomainZone = "empresa.local"
+
+# Registros A
+Add-DnsServerResourceRecordA -ZoneName $DomainZone -Name "dc01" -IPv4Address "10.0.0.10" -CreatePtr
+Add-DnsServerResourceRecordA -ZoneName $DomainZone -Name "fs01" -IPv4Address "10.0.0.20" -CreatePtr
+
+# CNAME (alias 'files' apontando para fs01)
+Add-DnsServerResourceRecordCName -ZoneName $DomainZone -Name "files" -HostNameAlias "fs01.$DomainZone"</code></pre>
+          <p><em>Validação:</em></p>
+          <pre class="language-bash"><code>nslookup files.empresa.local
+Resolve-DnsName files.empresa.local</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">3) Registro MX (exemplo de laboratório)</h3>
+          <p>Se houver um servidor de e-mail no lab, crie um MX para o domínio apontando para o host de e-mail.</p>
+          <pre class="language-powershell"><code># Exemplo: servidor de e-mail 'mail.empresa.local'
+Add-DnsServerResourceRecord -ZoneName "empresa.local" -MX `
+  -Name "@" -MailExchange "mail.empresa.local" -Preference 10</code></pre>
+          <p><em>Validação:</em></p>
+          <pre class="language-bash"><code>nslookup -type=mx empresa.local
+Resolve-DnsName empresa.local -Type MX</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">4) Registros SRV do AD (somente verificação)</h3>
+          <p>Os SRVs são criados automaticamente. Verifique em Forward Lookup Zones → _msdcs.empresa.local e subpastas do domínio (ex.: _sites, _tcp, _udp).</p>
+          <pre class="language-powershell"><code># Exemplos de consultas a SRV (LDAP/Kerberos)
+Resolve-DnsName "_ldap._tcp.dc._msdcs.empresa.local" -Type SRV
+Resolve-DnsName "_kerberos._tcp.empresa.local" -Type SRV</code></pre>
+          <p>Se estiverem ausentes, revise a saúde do DC (serviços AD/DNS, permissões e logs).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">5) Encaminhadores, recursão e TTL</h3>
+          <p>No DNS Manager: Propriedades do servidor → Forwarders → Add e insira DNS confiáveis (ex.: 1.1.1.1, 8.8.8.8). Em Advanced, revise “Enable recursion”.</p>
+          <pre class="language-powershell"><code># Define encaminhadores
+Add-DnsServerForwarder -IPAddress 1.1.1.1,8.8.8.8
+
+# Verifica encaminhadores
+Get-DnsServerForwarder
+
+# Ajuste de TTL padrão da zona (ex.: 1 hora)
+Set-DnsServerPrimaryZone -Name "empresa.local" -DefaultAgingState $true -SecureSecondaries "NoTransfer"
+# Observação: TTL de registros pode ser ajustado por registro no momento da criação</code></pre>
+          <p><em>Teste recursão/caching:</em> resolva um nome externo duas vezes e observe tempos de resposta.</p>
+          <pre class="language-bash"><code>nslookup www.example.com
+nslookup www.example.com</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">6) Diagnóstico estruturado</h3>
+          <p>Use uma sequência lógica para localizar problemas comuns.</p>
+          <pre class="language-plaintext"><code>[Checklist de Diagnóstico]
+1) Cliente aponta para o DNS do domínio? (ipconfig /all)
+2) Conectividade IP OK? (ping gateway/DC)
+3) Resolução de FQDN funciona? (nslookup nome.dominio)
+4) Reverse lookup responde? (nslookup IP)
+5) SRVs presentes? (Resolve-DnsName _ldap._tcp... -Type SRV)
+6) Eventos no DNS Server? (Event Viewer → DNS Server)
+7) Replicação AD OK? (dcdiag /test:dns, repadmin /replsummary)</code></pre>
+          <p><em>Comandos úteis:</em></p>
+          <pre class="language-bash"><code># No cliente
+ipconfig /flushdns
+nslookup nome.empresa.local
+nslookup -type=ns empresa.local
+
+# No servidor (PowerShell)
+Resolve-DnsName nome.empresa.local -Server 127.0.0.1
+dcdiag /test:dns /v
+repadmin /replsummary</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">7) Boas práticas e documentação</h3>
+          <ul>
+            <li>Padronize nomenclatura de hosts e TTLs para mudanças previsíveis.</li>
+            <li>Evite apontar DNS do DC para servidores externos; prefira encaminhadores.</li>
+            <li>Proteja atualizações dinâmicas como “Secure only” em zonas integradas ao AD.</li>
+            <li>Registre alterações (quem, quando, o quê) e capture evidências.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a administração de DNS do domínio, praticando criação de zonas/recordes, configuração de encaminhadores e diagnóstico.</p>
+        <div class="card-soft bg-white p-4">
+          <ol>
+            <li>Crie uma segunda zona reverse (ex.: 10.0.1.0/24) para simular outro segmento e documente diferenças de replicação/escopo.</li>
+            <li>Implemente aliases CNAME para serviços (ex.: files, app, intranet) apontando para seus hosts e valide por clientes distintos.</li>
+            <li>Simule um incidente: remova temporariamente um registro A usado por um CNAME, tente resolver o alias e registre os sintomas e solução.</li>
+          </ol>
+          <h3 class="h6 mt-4">Critérios de avaliação</h3>
+          <ul>
+            <li>Funcionalidade: resolução forward e reverse operantes, encaminhadores válidos.</li>
+            <li>Qualidade técnica: uso correto de registros (A, CNAME, MX), TTL adequado e segurança de atualização.</li>
+            <li>Diagnóstico: evidências claras de testes (nslookup/Resolve-DnsName) e análise de causa raiz.</li>
+            <li>Documentação: padrões de nome, prints, comandos e resumo das mudanças.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação oficial Microsoft: DNS Server em ambientes AD DS e registros SRV.</li><li>Boas práticas de DNS interno vs. externo e split-brain DNS.</li><li>Comparativo de ferramentas: nslookup, dig (Windows Subsystem), Resolve-DnsName.</li><li>Impacto de TTL e caching em mudanças de DNS (propagação e invalidação).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 08</h2>
+        <ul><li>Relatório técnico com: topologia, zonas configuradas, registros criados (A/CNAME/MX), encaminhadores e justificativas de TTL.</li><li>Evidências de testes: saídas do nslookup/Resolve-DnsName e prints do DNS Manager.</li><li>Checklist de diagnóstico respondido com pelo menos um incidente simulado e sua solução.</li><li>Script PowerShell utilizado (se houver) para criação de zonas/records.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="projeto-integrador">
+        <h2 class="h4 fw-bold">Projeto Integrador — Entrega do Bimestre (Marco do Capítulo 08)</h2>
+        <div class="card-soft bg-white p-4">
+          <p><strong>Descrição:</strong> Consolidar os tópicos do bimestre configurando um núcleo de serviços de diretório com DNS funcional, preparando o ambiente para DHCP e serviços de arquivos no próximo ciclo.</p>
+          <p><strong>Escopo desta entrega:</strong></p>
+          <ul>
+            <li>AD DS operacional com DNS integrado ao AD.</li>
+            <li>Zonas forward e reverse configuradas; registros A/CNAME/MX essenciais; SRV verificados.</li>
+            <li>Encaminhadores definidos e testes de recursão/caching documentados.</li>
+            <li>Relatório de troubleshooting contendo ao menos um teste de falha e sua correção.</li>
+          </ul>
+          <p><strong>Requisitos de evidência:</strong> arquivo .docx/.pdf com prints, comandos utilizados, justificativas técnicas e scripts PowerShell (se aplicável). Organização do repositório/portfólio conforme padrão da disciplina.</p>
+          <p><strong>Critérios de avaliação (rubrica resumida):</strong> disponibilidade do serviço, correção técnica dos registros e zonas, qualidade do diagnóstico e clareza da documentação.</p>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Políticas de Grupo (GPO)</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Endereçamento e DHCP</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a principal função de uma zona reverse no DNS?","alternativas":{"A":"Resolver nomes em endereços IPv4.","B":"Resolver endereços IPv4 em nomes (PTR).","C":"Armazenar aliases de host (CNAME).","D":"Definir servidores de e-mail responsáveis (MX).","E":"Publicar serviços e portas do AD (SRV)."},"correta":"B"},{"id":"q2","titulo":"Em um domínio AD, quais registros permitem que clientes localizem controladores de domínio?","alternativas":{"A":"A","B":"CNAME","C":"MX","D":"SRV","E":"TXT"},"correta":"D"},{"id":"q3","titulo":"Ao criar um alias 'files' para 'fs01.empresa.local', qual tipo de registro usar?","alternativas":{"A":"A","B":"CNAME","C":"MX","D":"PTR","E":"NS"},"correta":"B"},{"id":"q4","titulo":"Para resolver nomes externos com desempenho e controle, a prática recomendada é:","alternativas":{"A":"Apontar o DNS do DC diretamente para 8.8.8.8 como servidor primário.","B":"Habilitar recursão e remover todas as zonas internas.","C":"Configurar encaminhadores (forwarders) para DNS confiáveis.","D":"Desabilitar cache de DNS no servidor.","E":"Criar registros SRV apontando para servidores públicos."},"correta":"C"},{"id":"q5","titulo":"Qual comando PowerShell consulta um registro SRV no Windows?","alternativas":{"A":"Get-DnsServerZone","B":"nslookup -type=srv","C":"Resolve-DnsName -Type SRV","D":"Add-DnsServerResourceRecord -SRV","E":"Test-NetConnection -Type SRV"},"correta":"C"},{"id":"q6","titulo":"Em zonas integradas ao AD, qual configuração aumenta a segurança das atualizações dinâmicas?","alternativas":{"A":"Dynamic update: None","B":"Dynamic update: Nonsecure and secure","C":"Dynamic update: Secure only","D":"Desabilitar replicação de zona","E":"TTL = 0"},"correta":"C"},{"id":"q7","titulo":"Qual sequência é mais adequada para troubleshooting de DNS no cliente?","alternativas":{"A":"Criar SRVs → Reiniciar o DC → Testar ping.","B":"Checar DNS configurado → Testar FQDN → Testar reverse → Ver eventos.","C":"Remover a zona → Recriar tudo → Testar nslookup.","D":"Desabilitar o firewall → Reiniciar a rede → Tentar novamente.","E":"Alterar o domínio do cliente → Testar CNAME."},"correta":"B"},{"id":"q8","titulo":"Qual afirmação sobre TTL é correta?","alternativas":{"A":"TTL controla a prioridade do servidor MX.","B":"TTL define o tempo de cache de uma resposta DNS.","C":"TTL impede atualizações dinâmicas na zona.","D":"TTL é aplicável apenas a registros SRV.","E":"TTL é irrelevante em ambientes AD."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Servidor configurado como DC com DNS instalado e IP estático."},{"id":"c2","texto":"Cliente apontando para o DNS do domínio."},{"id":"c3","texto":"Zona forward do domínio validada (AD-integrada)."},{"id":"c4","texto":"Zona reverse criada e replicação revisada."},{"id":"c5","texto":"Registros A (dc01, fs01) criados com PTR correspondente."},{"id":"c6","texto":"Alias CNAME (ex.: files → fs01) criado e testado."},{"id":"c7","texto":"Registro MX criado/validado (se aplicável ao lab)."},{"id":"c8","texto":"SRVs do AD verificados em _msdcs e _tcp/_udp."},{"id":"c9","texto":"Encaminhadores configurados para DNS confiáveis."},{"id":"c10","texto":"Testes de recursão e caching executados."},{"id":"c11","texto":"Diagnóstico com nslookup/Resolve-DnsName documentado."},{"id":"c12","texto":"Eventos do DNS Server revisados (Event Viewer)."},{"id":"c13","texto":"Boas práticas aplicadas: atualização segura, TTLs coerentes."},{"id":"c14","texto":"Evidências (prints/comandos) salvas no portfólio."},{"id":"c15","texto":"Relatório do Projeto Integrador (bimestre) finalizado."}];
+    const CHECKLIST_KEY = 'SOPS_CAP08_CHECKLIST_V1';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 — Servidor de Arquivos</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo10.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos e Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Planejamento e Licenciamento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Laboratório de Virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Instalação do Windows Server 2025</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Serviços de Diretório e DC</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Administração de Objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Políticas de Grupo (GPO)</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — DNS no Domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Endereçamento e DHCP</a></li>
+              <li><a class="dropdown-item active" href="capitulo10.html">Capítulo 10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Impressão e Atualização</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Backup e Restauração</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento e Manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração e Troubleshooting</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 10 — Servidor de Arquivos: compartilhamentos, permissões e quotas</h1>
+          <p class="mb-2"><strong>Carga:</strong> Definida pela coordenação</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Domínio Active Directory em VMs (VirtualBox) com Windows Server 2025</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows Server 2025, AD DS, FSRM, DFS (visão geral), PowerShell</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Configurar compartilhamentos de rede seguros por departamento.</li><li>Diferenciar e aplicar NTFS vs Share Permissions com herança adequada.</li><li>Implementar quotas e triagem de arquivos usando FSRM.</li><li>Validar acesso a partir de estações clientes e diagnosticar problemas comuns.</li><li>Documentar estrutura, permissões e políticas de armazenamento.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Administração de recursos de arquivo com segurança e disponibilidade.</li><li>Aplicação de boas práticas de permissões e herança no NTFS.</li><li>Gestão de espaço em disco com quotas e políticas de triagem.</li><li>Uso de PowerShell para automação de tarefas de arquivos.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 09 — Endereçamento e DHCP</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 11 — Impressão e Atualização</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 10)</h2>
+        <div class="card-soft bg-white p-4 mt-3">1) Aquecimento (10 min): Revisão rápida de AD DS, grupos, e boas práticas de nomenclatura de OUs e grupos. Relacionar permissões NTFS e necessidade de controle de acesso.<br>2) Teoria guiada (30–40 min): Conceitos de NTFS vs Share, herança, ordem de avaliação, boas práticas; FSRM (quotas, triagem, relatórios) e visão geral de DFS Namespaces/Replicação.<br>3) Demonstração (20 min): Criação de pastas-raiz, compartilhamentos, permissões básicas, teste com contas de laboratório.<br>4) Laboratório (60–90 min): Alunos criam compartilhamentos por departamento, aplicam permissões NTFS/Share e quotas por usuário; validam a partir de um cliente membro do domínio.<br>5) Encerramento (10–15 min): Checklist de verificação, registro no diário de bordo (prints, comandos), e discussão de troubleshooting comum (acesso negado, herança, cache de credenciais).<br><strong>Entregáveis:</strong> estrutura de pastas, prints de permissões e quotas, script ou comandos usados e relatório breve de testes.</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-2">
+  <h3 class="h5 fw-bold">1) NTFS vs Share Permissions</h3>
+  <p>Permissões NTFS controlam o acesso ao sistema de arquivos no volume NTFS do servidor. Já as Share Permissions controlam o acesso quando o recurso é acessado pela rede via SMB. Em geral, as permissões efetivas pela rede são a interseção de NTFS e Share, ou seja, a mais restritiva prevalece.</p>
+  <p>Boas práticas: defina permissões Share mais amplas e deixe o detalhamento no NTFS. Exemplo comum: no compartilhamento, dar Change (Modificar) para o grupo de acesso e Read para outros, enquanto no NTFS você controla quem vê, lê e altera cada pasta.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> na criação dos compartilhamentos “\\SRV\DeptoX” e nas ACLs NTFS por departamento e por grupo de segurança.</p>
+
+  <h3 class="h5 fw-bold mt-4">2) Herança e Estrutura de Pastas (NTFS)</h3>
+  <p>Herança no NTFS significa que subpastas recebem automaticamente as permissões da pasta pai. Isso acelera a configuração, mas pode causar acessos indevidos se a árvore não estiver bem planejada.</p>
+  <p>Estratégia comum: uma pasta-raiz “D:\Compartilhamentos” com subpastas por departamento (RH, FIN, TI, VENDAS). Defina permissões na raiz para Administradores e Serviços (Backup Operators), depois aplique permissões específicas em cada subpasta por grupo (ex.: GG_Depto_RH_Leitura, GG_Depto_RH_Modificar).</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> ao criar as pastas “D:\Shares\RH”, “D:\Shares\FIN” etc. e ao quebrar herança quando necessário para pastas sigilosas.</p>
+
+  <h3 class="h5 fw-bold mt-4">3) Ordem de Avaliação e Efeitos Combinados</h3>
+  <p>Ao avaliar acesso pela rede: primeiro Share, depois NTFS. Entre permissões Allow e Deny, o Deny explícito tem prioridade e costuma bloquear o acesso mesmo se o usuário for membro de grupos com Allow. Minimize o uso de Deny explícito; prefira retirar o usuário/grupo das ACLs.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> ao testar usuários em múltiplos grupos (por exemplo, “GG_Depto_FIN_Modificar” e “GG_Todos_Leitura”).</p>
+
+  <h3 class="h5 fw-bold mt-4">4) FSRM: Quotas e Triagem de Arquivos</h3>
+  <p>O File Server Resource Manager (FSRM) permite aplicar quotas (limites de espaço) por pasta/usuário e regras de triagem (impedir tipos de arquivos, como executáveis ou multimídia, onde não são necessários). Há quotas rígidas (bloqueiam) ou flexíveis (apenas notificam).</p>
+  <p>Você pode criar templates de quotas (ex.: 5 GB por usuário) e aplicá-las em pastas de perfil, home folders ou repositórios departamentais.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> ao instalar FSRM, criar um template e aplicar quotas em “D:\Shares\RH\Usuarios\%username%”.</p>
+
+  <h3 class="h5 fw-bold mt-4">5) DFS Namespaces e Replicação (Visão Geral)</h3>
+  <p>O DFS permite criar um namespace lógico (ex.: \\dominio.local\Arquivos) apontando para múltiplos servidores/targets, facilitando a navegação e a alta disponibilidade. A replicação DFS-R mantém cópias sincronizadas em servidores diferentes.</p>
+  <p>Neste capítulo, focamos em noções; a implementação completa de DFS é útil quando há múltiplos servidores de arquivos ou filiais.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> apenas como planejamento futuro, ao definir a raiz “D:\Shares” pensando em futura migração para DFS.</p>
+
+  <h3 class="h5 fw-bold mt-4">6) Boas Práticas de Nomenclatura e Grupos</h3>
+  <p>Use padrões: prefixos para grupos globais (GG_), grupos de domínio local (GL_), e descreva função e escopo (ex.: GG_Depto_RH_Modificar). Mantenha documentação com quem é dono do conteúdo, caminhos UNC e responsáveis por aprovar acessos.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> ao criar grupos no AD e vincular permissões NTFS.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-pass o">
+        <h2 class="h4 fw-bold">Passo a Passo — Publicar compartilhamentos seguros, permissões e quotas</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Criar compartilhamentos por departamento com permissões NTFS corretas, aplicar quotas por usuário via FSRM, e validar o acesso a partir de um cliente do domínio.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">Pré-requisitos</h3>
+  <ul>
+    <li>Servidor membro do domínio com Windows Server 2025 e volume de dados (ex.: D:\).</li>
+    <li>AD DS funcional; cliente Windows unido ao domínio para testes.</li>
+    <li>Conta administrativa ou delegada com permissões para criar pastas/compartilhamentos e instalar FSRM.</li>
+  </ul>
+
+  <h3 class="h6 fw-bold mt-3">1) Preparar estrutura de pastas</h3>
+  <p>Crie a raiz de compartilhamentos e subpastas por departamento. Exemplo com PowerShell:</p>
+  <pre class="language-powershell"><code># Executar como administrador
+$root = 'D:\Shares'
+$deptos = 'RH','FIN','TI','VENDAS'
+New-Item -Path $root -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+$deptos | ForEach-Object {
+  New-Item -Path (Join-Path $root $_) -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+}</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">2) Criar grupos no AD para controle de acesso</h3>
+  <p>Crie grupos globais por departamento com níveis de acesso. Exemplo (ajuste a OU conforme seu ambiente):</p>
+  <pre class="language-powershell"><code># Módulo ActiveDirectory necessário (RSAT/servidor com AD RS)
+Import-Module ActiveDirectory
+
+$ou = 'OU=Grupos,DC=empresa,DC=local'
+$definicoes = @(
+  @{Name='GG_Depto_RH_Modificar';     Desc='Acesso Modificar ao share RH'},
+  @{Name='GG_Depto_RH_Leitura';       Desc='Acesso Leitura ao share RH'},
+  @{Name='GG_Depto_FIN_Modificar';    Desc='Acesso Modificar ao share FIN'},
+  @{Name='GG_Depto_FIN_Leitura';      Desc='Acesso Leitura ao share FIN'},
+  @{Name='GG_Depto_TI_Modificar';     Desc='Acesso Modificar ao share TI'},
+  @{Name='GG_Depto_TI_Leitura';       Desc='Acesso Leitura ao share TI'},
+  @{Name='GG_Depto_VENDAS_Modificar'; Desc='Acesso Modificar ao share VENDAS'},
+  @{Name='GG_Depto_VENDAS_Leitura';   Desc='Acesso Leitura ao share VENDAS'}
+)
+
+foreach($g in $definicoes){
+  if(-not (Get-ADGroup -LDAPFilter "(cn=$($g.Name))" -ErrorAction SilentlyContinue)){
+    New-ADGroup -Name $g.Name -GroupScope Global -Path $ou -GroupCategory Security -Description $g.Desc
+  }
+}</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">3) Definir permissões NTFS</h3>
+  <p>Recomenda-se manter controle principal no NTFS. Exemplo aplicando Modificar/Leitura por pasta:</p>
+  <pre class="language-powershell"><code># Ajuste os grupos caso use nomes diferentes
+$aclMap = @{
+  'RH'     = @{ Mod='GG_Depto_RH_Modificar';     Read='GG_Depto_RH_Leitura' }
+  'FIN'    = @{ Mod='GG_Depto_FIN_Modificar';    Read='GG_Depto_FIN_Leitura' }
+  'TI'     = @{ Mod='GG_Depto_TI_Modificar';     Read='GG_Depto_TI_Leitura' }
+  'VENDAS' = @{ Mod='GG_Depto_VENDAS_Modificar'; Read='GG_Depto_VENDAS_Leitura' }
+}
+
+function Grant-Ntfs {
+ param([string]$Path,[string]$Identity,[string]$Access) # Access: Modify|ReadAndExecute
+ $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($Identity, $Access, "ContainerInherit,ObjectInherit", "None", "Allow")
+ $acl = Get-Acl $Path
+ $acl.SetAccessRule($rule)
+ Set-Acl -Path $Path -AclObject $acl
+}
+
+foreach($k in $aclMap.Keys){
+  $pasta = Join-Path $root $k
+  # Permissões de Administradores permanecem implícitas; garanta que existam:
+  # Grant-Ntfs -Path $pasta -Identity 'Domain Admins' -Access 'FullControl'  # opcional
+  Grant-Ntfs -Path $pasta -Identity $aclMap[$k].Mod  -Access 'Modify'
+  Grant-Ntfs -Path $pasta -Identity $aclMap[$k].Read -Access 'ReadAndExecute'
+}</code></pre>
+
+  <div class="alert alert-warning mt-3" role="alert">
+    Atenção: Evite usar Deny explícito. Prefira remover grupos/usuários das ACLs para reduzir risco de bloqueios inesperados.
+  </div>
+
+  <h3 class="h6 fw-bold mt-3">4) Criar compartilhamentos (Share)</h3>
+  <p>Crie compartilhamentos com permissões Share de leitura para autenticados e modificação para grupos apropriados; mantenha o detalhamento no NTFS:</p>
+  <pre class="language-powershell"><code># Necessário módulo SMBShare
+Import-Module SmbShare
+
+$shares = @('RH','FIN','TI','VENDAS')
+foreach($s in $shares){
+  $path = Join-Path $root $s
+  $name = $s
+  if(-not (Get-SmbShare -Name $name -ErrorAction SilentlyContinue)){
+    New-SmbShare -Name $name -Path $path -ChangeAccess "GG_Depto_${s}_Modificar" -ReadAccess "Authenticated Users"
+  }
+}</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">5) Instalar e configurar FSRM (Quotas)</h3>
+  <p>Instale o FSRM e crie um template de quota por usuário. Exemplo: 5 GB por pasta de usuário.</p>
+  <pre class="language-powershell"><code># Instalar FSRM
+Install-WindowsFeature FS-Resource-Manager -IncludeManagementTools
+
+# Criar uma pasta de usuários dentro de RH, por exemplo
+$usersPath = Join-Path $root 'RH\Usuarios'
+New-Item -Path $usersPath -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+
+# Exemplo: criar home folders para dois usuários (ajuste aos seus usuários reais do AD)
+$usuarios = 'ana.silva','joao.souza'
+foreach($u in $usuarios){
+  $uPath = Join-Path $usersPath $u
+  New-Item -Path $uPath -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+  # Conceder Modify ao próprio usuário
+  Grant-Ntfs -Path $uPath -Identity $u -Access 'Modify'
+}
+
+# Criar quota de 5 GB rígida (hard)
+# Observação: via GUI é mais simples; via PowerShell, usar dirquota.exe (FSRM legacy CLI)
+$quotaSize = 5GB
+cmd /c "dirquota quota add /Path:$usersPath\* /Limit:$quotaSize /Type:Hard /RemoteAdmin $(hostname)"</code></pre>
+
+  <div class="alert alert-light border mt-3" role="note">
+    Dica: Para políticas mais completas, crie um Template no FSRM (GUI) e aplique-o a múltiplas pastas de uma vez.
+  </div>
+
+  <h3 class="h6 fw-bold mt-3">6) Triagem de arquivos (opcional)</h3>
+  <p>Impeça, por exemplo, armazenamento de executáveis nas pastas de usuários.</p>
+  <pre class="language-powershell"><code># Exemplo com dirquota (File Screens)
+cmd /c "dirquota filescreen add /Path:$usersPath /Template:Bloquear Arquivos Executáveis"</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">7) Testes a partir do cliente</h3>
+  <ol>
+    <li>No cliente membro do domínio, acesse \\&lt;Servidor&gt;\RH (substitua o nome do servidor).</li>
+    <li>Tente criar, editar e excluir arquivos conforme o nível de acesso do usuário.</li>
+    <li>Teste o limite de quota copiando arquivos grandes para a pasta do usuário; verifique a mensagem de bloqueio quando exceder.</li>
+  </ol>
+  <pre class="language-powershell"><code># No cliente (PowerShell): mapear drive para teste
+New-PSDrive -Name R -PSProvider FileSystem -Root "\\SRV-ARQ\RH" -Persist</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">8) Troubleshooting rápido</h3>
+  <ul>
+    <li>Acesso negado: verifique se o usuário está no grupo certo e se a ACL NTFS foi aplicada na pasta correta.</li>
+    <li>Herança: confirme se a pasta que falha herdou permissões indesejadas; ajuste e repropague se necessário.</li>
+    <li>Quota não aplicada: valide se o caminho está correto e se o FSRM está instalado e operacional.</li>
+  </ul>
+
+  <h3 class="h6 fw-bold mt-3">9) Documentação</h3>
+  <p>Registre caminhos UNC, grupos com acesso, quotas aplicadas e evidências (prints) dos testes. Versione scripts em repositório local.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a configuração de servidor de arquivos com segurança, governança de espaço e testes de acesso.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol>
+    <li>Crie um novo compartilhamento “PROJETOS” com subpastas “2024” e “2025”. Defina grupos “GG_Projetos_Modificar” e “GG_Projetos_Leitura” e aplique permissões NTFS adequadas.</li>
+    <li>Implemente uma quota flexível (soft) de 2 GB em “PROJETOS\2024” com notificação (e-mail local ou log) quando atingir 85% do limite.</li>
+    <li>Crie uma regra de triagem que impeça arquivos .iso e .exe em “PROJETOS\2025” e valide a partir de um cliente.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+  <ul class="mb-0">
+    <li>Permissões corretas (leitura/modificação) por grupo e pasta.</li>
+    <li>Quota aplicada e funcional, com evidência de notificação/bloqueio.</li>
+    <li>Triagem efetiva dos tipos de arquivo proibidos.</li>
+    <li>Documentação clara (passos, prints, comandos/scripts usados).</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Boas práticas Microsoft para File Servers e FSRM em ambientes de domínio.</li><li>Estratégias de migração para DFS Namespaces e DFS Replication.</li><li>Modelo AGDLP/AGUDLP para desenho de grupos e delegação de acesso.</li><li>Automação de ACLs e quotas com PowerShell e DSC (conceitos).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 10</h2>
+        <ul><li>Estrutura “D:\Shares” com compartilhamentos RH, FIN, TI e VENDAS.</li><li>Grupos do AD criados e atribuídos às ACLs NTFS de cada pasta.</li><li>FSRM instalado com quotas aplicadas em pastas de usuários.</li><li>Relatório com prints, testes de acesso no cliente e scripts utilizados.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 09 — Endereçamento e DHCP</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 11 — Impressão e Atualização</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual afirmação descreve corretamente a relação entre permissões Share e NTFS?","alternativas":{"A":"As permissões Share substituem as NTFS quando o acesso é local.","B":"As permissões NTFS substituem as Share quando o acesso é pela rede.","C":"As permissões efetivas pela rede resultam da combinação, prevalecendo a mais restritiva.","D":"Permissões Share e NTFS não se aplicam simultaneamente.","E":"As permissões NTFS só valem para pastas, não para arquivos."},"correta":"C"},{"id":"q2","titulo":"Qual é uma boa prática ao projetar permissões em compartilhamentos?","alternativas":{"A":"Conceder Full Control a Everyone no Share e no NTFS.","B":"Controlar o detalhamento no NTFS e manter permissões Share mais amplas.","C":"Usar Deny explícito para todos os usuários que não devem acessar.","D":"Adicionar usuários individualmente nas ACLs, evitando grupos.","E":"Permitir herança em todas as subpastas sem exceção."},"correta":"B"},{"id":"q3","titulo":"No contexto do FSRM, uma quota do tipo Hard (rígida) significa:","alternativas":{"A":"Apenas envia alerta quando atinge o limite, mas não bloqueia.","B":"Bloqueia gravação ao atingir o limite definido.","C":"Apaga automaticamente arquivos mais antigos.","D":"Move arquivos para outro volume automaticamente.","E":"Permite exceder o limite por 24 horas."},"correta":"B"},{"id":"q4","titulo":"Por que o uso de Deny explícito deve ser minimizado?","alternativas":{"A":"Porque Deny só funciona em arquivos, não em pastas.","B":"Porque Deny sempre é ignorado quando há Allow em outro grupo.","C":"Porque Deny tem precedência e pode bloquear acessos legítimos por herança de grupos.","D":"Porque Deny exige reiniciar o servidor para surtir efeito.","E":"Porque Deny não é auditável."},"correta":"C"},{"id":"q5","titulo":"Qual comando cria um compartilhamento SMB no Windows Server via PowerShell?","alternativas":{"A":"New-Share","B":"Add-SmbShare","C":"New-SmbShare","D":"Share-New","E":"Set-SmbShare"},"correta":"C"},{"id":"q6","titulo":"Em um design de grupos (AGDLP), qual benefício principal se busca para permissões de arquivos?","alternativas":{"A":"Atribuir permissões diretamente a contas de usuário.","B":"Facilitar administração usando grupos para consolidar acessos.","C":"Garantir que apenas grupos universais sejam usados.","D":"Impedir herança automaticamente nas subpastas.","E":"Permitir que usuários escolham seu próprio nível de acesso."},"correta":"B"},{"id":"q7","titulo":"Ao testar acesso a um compartilhamento a partir de um cliente, qual caminho é adequado?","alternativas":{"A":"C:\\\\Shares\\\\RH","B":"D:\\\\Shares\\\\RH","C":"\\\\\\\\Servidor\\\\RH","D":"http:\/\/Servidor\/RH","E":"ftp:\/\/Servidor\/RH"},"correta":"C"},{"id":"q8","titulo":"Qual ferramenta/CLI é frequentemente usada com FSRM para quotas e triagem?","alternativas":{"A":"diskpart.exe","B":"dirquota.exe","C":"fsutil.exe","D":"robocopy.exe","E":"sconfig.cmd"},"correta":"B"},{"id":"q9","titulo":"Qual é o principal objetivo da triagem de arquivos (File Screening)?","alternativas":{"A":"Compactar arquivos automaticamente.","B":"Impedir ou alertar sobre tipos de arquivos não permitidos em uma pasta.","C":"Mover arquivos para armazenamento em nuvem.","D":"Criptografar todo o conteúdo do compartilhamento.","E":"Compartilhar pastas com outras florestas."},"correta":"B"},{"id":"q10","titulo":"Sobre DFS Namespaces, a afirmação correta é:","alternativas":{"A":"É obrigatório para criar qualquer compartilhamento SMB.","B":"Cria um namespace lógico que pode apontar para múltiplos servidores/targets.","C":"Substitui completamente o NTFS e suas permissões.","D":"Funciona apenas com Linux e Samba.","E":"É exclusivo de estações Windows 10."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei a estrutura D:\\Shares e subpastas por departamento."},{"id":"c2","texto":"Criei grupos de segurança no AD para cada departamento (Leitura/Modificar)."},{"id":"c3","texto":"Apliquei permissões NTFS corretas por pasta, evitando Deny explícito."},{"id":"c4","texto":"Publiquei os compartilhamentos SMB com permissões Share adequadas."},{"id":"c5","texto":"Instalei e configurei o FSRM (quotas por usuário/pasta)."},{"id":"c6","texto":"Validei triagem de arquivos (opcional) em pastas sensíveis."},{"id":"c7","texto":"Testei acessos a partir de um cliente do domínio e documentei resultados."},{"id":"c8","texto":"Registrei scripts/comandos usados e salvei evidências (prints)."}];
+    const CHECKLIST_KEY = 'chk_sops_cap10';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

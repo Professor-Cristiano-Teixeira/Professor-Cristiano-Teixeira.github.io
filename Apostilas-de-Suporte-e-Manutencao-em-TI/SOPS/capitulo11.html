@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 11 — Impressão e Atualizações</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo11.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos e Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Planejamento e Licenciamento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Laboratório de Virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Instalação do Windows Server</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Serviços de Diretório</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Administração de Objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Políticas de Grupo (GPO)</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — DNS em Domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Endereçamento e DHCP</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item active" href="capitulo11.html">Capítulo 11 — Impressão e Atualizações</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Backup e Continuidade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento e Manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração e Troubleshooting</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 11 — Serviços de impressão e atualização controlada (Print Server e WSUS)</h1>
+          <p class="mb-2"><strong>Carga:</strong> A definir</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório com domínio Active Directory, clientes Windows e serviços de infraestrutura</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> VirtualBox, Windows Server 2025, Windows 10/11, RSAT/MMC, PowerShell</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Instalar e configurar o papel Print Server, filas de impressão e permissões.</li><li>Publicar impressoras no AD e restringir uso por grupos.</li><li>Compreender o WSUS, sua topologia básica e processo de aprovação de atualizações.</li><li>Criar grupos de computadores no WSUS e aplicar políticas de atualização via GPO.</li><li>Avaliar considerações de segurança, disponibilidade e boas práticas para impressão e atualização.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Administração de serviços de impressão e drivers.</li><li>Gestão de filas, permissões e publicação no AD.</li><li>Configuração de WSUS, sincronização e aprovação.</li><li>Aplicação de GPOs para atualização controlada.</li><li>Diagnóstico básico e segurança de serviços.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Servidor de Arquivos</a>
+              <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Backup e Continuidade</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 11)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Resumo:</strong> Nesta aula, você irá configurar um servidor de impressão e um servidor de atualização (WSUS) em um ambiente de domínio. O foco é garantir disponibilidade, segurança e controle de mudanças.</p><ul><li><strong>Etapa 1</strong> (expositivo): Conceitos de Print Server, filas, drivers, permissões, publicação no AD; conceitos de WSUS, catálogos, aprovações, grupos de destino e GPO.</li><li><strong>Etapa 2</strong> (mão na massa): Instalar o papel Print Server; criar fila; instalar driver; definir permissões; publicar e testar impressão de um cliente do domínio.</li><li><strong>Etapa 3</strong> (mão na massa): Instalar a função WSUS; configurar armazenamento; sincronizar com a Microsoft; criar grupos e aprovar atualizações; vincular GPO para apontar os clientes ao WSUS.</li><li><strong>Encerramento</strong>: Checklist de validação, registro de evidências (prints e scripts), e discussão de boas práticas de segurança e disponibilidade.</li></ul><p><strong>Recursos:</strong> 1 VM Windows Server 2025 membro/Controlador de Domínio, 1 VM Windows 10/11 Pro unida ao domínio; ISO/instalação do Windows Server; RSAT; acesso à Internet para WSUS (ou servidor offline para prática teórica).</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Print Server: filas, drivers e publicação</h3>
+          <p>Um Print Server centraliza o gerenciamento de dispositivos de impressão. Em vez de cada estação instalar drivers e imprimir diretamente, os clientes enviam trabalhos para filas hospedadas no servidor. Isso padroniza drivers, aplica permissões e facilita auditoria e suporte.</p>
+          <p><strong>Drivers</strong> são essenciais para traduzir o trabalho de impressão para o idioma da impressora. No servidor, instale drivers assinados e compatíveis com o sistema. Evite drivers antigos ou não assinados, pois podem afetar segurança e estabilidade.</p>
+          <p><strong>Publicação no AD</strong> torna a impressora pesquisável para usuários do domínio. Com isso, clientes podem localizar e instalar automaticamente a fila de impressão, reduzindo erros e tempo de suporte.</p>
+          <div class="alert alert-light border mt-2"><strong>Onde vou aplicar isso no passo a passo?</strong> Você instalará o papel Print Server, criará uma fila de impressão, instalará drivers e publicará a impressora no AD para que clientes possam usá-la.</div>
+          <hr>
+          <h3 class="h6 fw-bold">2) Permissões e segurança de impressão</h3>
+          <p>As permissões definem quem pode imprimir, gerenciar a fila ou gerenciar a impressora. As principais são: <em>Print</em> (Imprimir), <em>Manage Documents</em> (Gerenciar documentos na fila) e <em>Manage Printer</em> (Gerenciar configurações da impressora). O princípio do mínimo privilégio deve ser aplicado: somente grupos necessários devem ter acesso.</p>
+          <p>Combine permissões de <em>share</em> e NTFS do caminho do driver/portas (se aplicável). Em ambientes grandes, padronize grupos de segurança (por exemplo, GRP-Impressao-Financeiro-Imprimir) para facilitar a delegação e auditoria.</p>
+          <div class="alert alert-light border mt-2"><strong>Onde vou aplicar isso no passo a passo?</strong> Você criará um grupo de segurança no AD, dará permissão de impressão e testará o bloqueio para usuários não autorizados.</div>
+          <hr>
+          <h3 class="h6 fw-bold">3) WSUS: conceito, topologia e ciclo de aprovação</h3>
+          <p>O Windows Server Update Services (WSUS) permite que uma organização baixe, aprove e distribua atualizações de forma centralizada. Em vez de cada cliente buscar atualizações diretamente na Internet, eles consultam o WSUS, reduzindo banda e dando controle sobre quais atualizações são implantadas.</p>
+          <p>Topologias comuns: <em>Single Server</em> (um único WSUS), <em>Upstream/Downstream</em> (um WSUS upstream sincroniza com a Microsoft e downstreams replicam), e cenários com <em>Autonomous</em> (aprovação própria) e <em>Replica</em> (herda aprovações). Para laboratório, usa-se um único servidor.</p>
+          <p>O ciclo típico inclui: sincronizar catálogos; classificar atualizações por produtos e classificações (Security Updates, Critical Updates etc.); testar em grupo piloto; aprovar para produção; limpar atualizações substituídas e declinar o que não se aplica.</p>
+          <div class="alert alert-light border mt-2"><strong>Onde vou aplicar isso no passo a passo?</strong> Você instalará o WSUS, fará a configuração pós-instalação, executará uma sincronização, criará grupos (Piloto e Produção) e aprovará atualizações para cada grupo.</div>
+          <hr>
+          <h3 class="h6 fw-bold">4) GPOs para direcionar clientes ao WSUS</h3>
+          <p>Os clientes precisam saber onde está o WSUS e como se comportar. Isso é feito via Políticas de Grupo (GPO), configurando chaves como “Specify intranet Microsoft update service location”, “Automatic Updates detection frequency” e prazos de instalação.</p>
+          <p>A vinculação correta da GPO às OUs e a verificação com <code>gpresult</code> garantem que os clientes estejam obedecendo às políticas. Em ambientes segmentados, use OUs específicas para Piloto e Produção.</p>
+          <div class="alert alert-light border mt-2"><strong>Onde vou aplicar isso no passo a passo?</strong> Você criará GPOs que configuram o WSUS para clientes piloto e de produção, validando a aplicação.</div>
+          <hr>
+          <h3 class="h6 fw-bold">5) Disponibilidade, desempenho e boas práticas</h3>
+          <p>Para impressão: monitore filas, use drivers estáveis (preferir “Type 4” quando possível), mantenha firmware atualizado e configure logs para auditoria. Para WSUS: planeje armazenamento (conteúdo pode crescer), agende sincronizações fora do horário de pico e faça limpeza periódica.</p>
+          <p>Segurança: restrinja quem pode gerenciar impressoras e aprovar atualizações; mantenha o servidor atualizado; aplique backups e testes regulares de restauração para a base do WSUS e configurações.</p>
+          <div class="alert alert-light border mt-2"><strong>Onde vou aplicar isso no passo a passo?</strong> Você executará tarefas de manutenção, como limpeza do WSUS, criação de grupos de segurança e testes de impressão e de relatórios do WSUS.</div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-pass o">
+        <h2 class="h4 fw-bold">Passo a Passo — Print Server e WSUS no Windows Server 2025</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Publicar uma impressora no domínio com controle por grupo e configurar um WSUS básico com grupos Piloto/Produção e GPOs direcionando os clientes.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Pré-requisitos</h3>
+          <ul>
+            <li>Servidor Windows Server 2025 membro do domínio (ou Controlador de Domínio) com IP fixo e DNS funcional.</li>
+            <li>Cliente Windows 10/11 Pro unido ao domínio.</li>
+            <li>Conta com privilégios administrativos de domínio.</li>
+            <li>Acesso à Internet para sincronização do WSUS (ou simulação limitada sem sync completo).</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Parte A — Configurando o Print Server</h3>
+          <ol class="mb-0">
+            <li><strong>Instalar o papel Print and Document Services</strong>
+              <p>Via Server Manager ou PowerShell:</p>
+              <pre class="language-powershell"><code># Executar em PowerShell elevado
+Install-WindowsFeature Print-Server -IncludeManagementTools
+Get-WindowsFeature Print-Server</code></pre>
+            </li>
+            <li><strong>Criar grupo de segurança para acesso à impressora</strong>
+              <p>Organize o acesso via grupos do AD:</p>
+              <pre class="language-powershell"><code># Exemplo: grupo para o setor Financeiro
+New-ADGroup -Name "GRP-Impressao-Financeiro-Imprimir" -GroupScope Global -GroupCategory Security -Path "OU=Grupos,DC=contoso,DC=local"</code></pre>
+            </li>
+            <li><strong>Adicionar a impressora no servidor</strong>
+              <p>Se a impressora for de rede (IP direto), crie uma porta TCP e associe o driver correto.</p>
+              <pre class="language-powershell"><code># Criar porta TCP/IP para a impressora (ajuste o IP)
+$caminhoDriver = "C:\Drivers\Impressoras\HP\hpcu123.inf"  # exemplo
+Add-PrinterPort -Name "IP_192.168.10.50" -PrinterHostAddress "192.168.10.50"
+
+# Instalar driver (via INF) - pode exigir utilitário do fabricante
+pnputil /add-driver "$caminhoDriver" /install
+
+# Listar drivers disponíveis
+Get-PrinterDriver
+
+# Criar a impressora vinculando à porta e ao driver
+Add-Printer -Name "IMP-Financeiro-HP" -DriverName "HP Universal Printing PCL 6" -PortName "IP_192.168.10.50"</code></pre>
+              <div class="alert alert-warning mt-2"><strong>Nota:</strong> Drivers variam por fabricante/modelo. Prefira drivers assinados e versões atuais.</div>
+            </li>
+            <li><strong>Publicar a impressora no AD e definir localização</strong>
+              <pre class="language-powershell"><code># Publicar no AD
+Set-Printer -Name "IMP-Financeiro-HP" -Published:$true -Location "ANDAR 3 - FINANCEIRO"</code></pre>
+            </li>
+            <li><strong>Definir permissões de impressão</strong>
+              <p>Conceda “Print” ao grupo e remova permissões a quem não deve imprimir:</p>
+              <pre class="language-powershell"><code># Dar permissão de impressão ao grupo
+$grp = "CONTOSO\GRP-Impressao-Financeiro-Imprimir"
+$printer = "IMP-Financeiro-HP"
+# Permissões de impressora via PowerShell podem exigir ferramentas adicionais;
+# no GUI: Printer Properties &gt; Security. Alternativa com PrintManagement.msc:
+# printmanagement.msc -&gt; Impressoras -&gt; Propriedades -&gt; Segurança.
+# Como registro, adicione o grupo na guia Segurança e conceda "Print".</code></pre>
+            </li>
+            <li><strong>Instalar a impressora no cliente (teste)</strong>
+              <p>No cliente do domínio, localize a impressora publicada:</p>
+              <pre class="language-powershell"><code># No cliente
+Start-Process control printers:
+# Ou via Explorer: \\SERVIDOR\  e clique duas vezes na impressora publicada
+# Teste de impressão: imprimir página de teste</code></pre>
+              <p>Verifique se um usuário fora do grupo não consegue imprimir.</p>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Parte B — Configurando o WSUS</h3>
+          <ol class="mb-0">
+            <li><strong>Instalar a função WSUS</strong>
+              <pre class="language-powershell"><code># Instala WSUS com ferramentas de gerenciamento
+Install-WindowsFeature -Name UpdateServices,UpdateServices-UI -IncludeManagementTools
+
+# Criar pasta de conteúdo (ajuste o caminho conforme disco com espaço)
+New-Item -Path "D:\WSUS" -ItemType Directory -Force
+
+# Pós-instalação
+& "C:\Program Files\Update Services\Tools\wsusutil.exe" postinstall CONTENT_DIR=D:\WSUS SQL_INSTANCE_NAME="\\.\pipe\Microsoft##WID\tsql\query"</code></pre>
+              <div class="alert alert-info mt-2"><strong>Dica:</strong> Em laboratório, o WID (Windows Internal Database) é suficiente. Em produção, avalie usar SQL Server dedicado.</div>
+            </li>
+            <li><strong>Executar o assistente de configuração do WSUS</strong>
+              <p>Abra o <em>Windows Server Update Services</em> (MMC) e:</p>
+              <ul>
+                <li>Selecione idioma e produtos (ex.: Windows 10/11, Windows Server 2025).</li>
+                <li>Selecione classificações (Critical, Security, Definition Updates).</li>
+                <li>Configure sincronização automática e execute a primeira sincronização.</li>
+              </ul>
+            </li>
+            <li><strong>Criar grupos de computadores no WSUS</strong>
+              <p>Estruture “Piloto” e “Producao”.</p>
+              <pre class="language-powershell"><code># Usando o módulo UpdateServices (em PowerShell do WSUS)
+[reflection.assembly]::LoadWithPartialName("Microsoft.UpdateServices.Administration") | Out-Null
+$wsus = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer()
+$wsus.CreateComputerTargetGroup("Piloto") | Out-Null
+$wsus.CreateComputerTargetGroup("Producao") | Out-Null</code></pre>
+            </li>
+            <li><strong>Configurar GPO para apontar clientes ao WSUS</strong>
+              <p>Crie duas GPOs: GPO-WSUS-Piloto (vincular à OU de piloto) e GPO-WSUS-Producao (vincular à OU de produção).</p>
+              <p>Em cada GPO: Computer Configuration > Policies > Administrative Templates > Windows Components > Windows Update > Configure Automatic Updates; Specify intranet Microsoft update service location.</p>
+              <pre class="language-powershell"><code># Exemplo usando PowerShell (Set-GPRegistryValue)
+# Ajuste o FQDN do servidor WSUS
+$wsusUrl = "http://wsus.contoso.local"
+New-GPO -Name "GPO-WSUS-Piloto" | Out-Null
+New-GPO -Name "GPO-WSUS-Producao" | Out-Null
+
+# Define a URL do serviço e estatísticas para detecção
+Set-GPRegistryValue -Name "GPO-WSUS-Piloto" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "WUServer" -Type String -Value $wsusUrl
+Set-GPRegistryValue -Name "GPO-WSUS-Piloto" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "WUStatusServer" -Type String -Value $wsusUrl
+Set-GPRegistryValue -Name "GPO-WSUS-Piloto" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "UseWUServer" -Type DWord -Value 1
+Set-GPRegistryValue -Name "GPO-WSUS-Piloto" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "AUOptions" -Type DWord -Value 3  # Download automático e notificar instalação
+
+# Repita para Produção (ex.: instalação automática agendada)
+Set-GPRegistryValue -Name "GPO-WSUS-Producao" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "WUServer" -Type String -Value $wsusUrl
+Set-GPRegistryValue -Name "GPO-WSUS-Producao" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "WUStatusServer" -Type String -Value $wsusUrl
+Set-GPRegistryValue -Name "GPO-WSUS-Producao" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "UseWUServer" -Type DWord -Value 1
+Set-GPRegistryValue -Name "GPO-WSUS-Producao" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "AUOptions" -Type DWord -Value 4  # Download e agendar instalação</code></pre>
+              <div class="alert alert-light border mt-2">Vincule cada GPO às OUs correspondentes. Valide com <code>gpresult /r</code> no cliente.</div>
+            </li>
+            <li><strong>Associar computadores aos grupos do WSUS</strong>
+              <p>No WSUS, defina “Server-side targeting” ou “Client-side targeting”. Para client-side, configure via GPO:</p>
+              <pre class="language-powershell"><code># Client-side targeting: define o nome do grupo no registro de política
+Set-GPRegistryValue -Name "GPO-WSUS-Piloto" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "TargetGroup" -Type String -Value "Piloto"
+Set-GPRegistryValue -Name "GPO-WSUS-Producao" -Key "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "TargetGroup" -Type String -Value "Producao"</code></pre>
+            </li>
+            <li><strong>Aprovar atualizações e forçar detecção do cliente</strong>
+              <p>Após a sincronização, aprove uma atualização para “Piloto”. Em seguida, no cliente:</p>
+              <pre class="language-powershell"><code># Forçar atualização de política e detecção do Windows Update
+gpupdate /force
+wuauclt /detectnow
+usoclient StartScan
+# Em versões recentes, use: UsoClient.exe StartScan ou via Settings &gt; Windows Update</code></pre>
+              <p>Monitore no WSUS os relatórios de status dos computadores.</p>
+            </li>
+            <li><strong>Manutenção do WSUS</strong>
+              <p>Execute limpezas periódicas para remover atualizações substituídas e otimizar o banco:</p>
+              <pre class="language-powershell"><code># WSUS Cleanup Wizard (GUI) ou via script/PowerShell de terceiros.
+# Em laboratório, utilize o assistente no console do WSUS:
+# Options -&gt; Server Cleanup Wizard -&gt; selecionar todas as opções e executar.</code></pre>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Validação e Evidências</h3>
+          <ul>
+            <li>Cliente Piloto instalando atualizações aprovadas e reportando ao WSUS.</li>
+            <li>Cliente Produção sem receber atualizações não aprovadas.</li>
+            <li>Impressão bem-sucedida por usuário do grupo autorizado e bloqueio para não autorizados.</li>
+            <li>Capturas de tela: console Print Management, WSUS (grupos/aprovações), e comandos de validação (<code>gpresult</code>, <code>Get-Printer</code>).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar os conhecimentos aplicando variações de cenário e boas práticas de segurança e manutenção.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol>
+            <li><strong>Mapeamento de Impressoras por GPO (Item-level targeting):</strong> Crie uma GPP (Preferences) que conecta automaticamente a fila “IMP-Financeiro-HP” apenas para membros do grupo Financeiro.</li>
+            <li><strong>WSUS Piloto Expandido:</strong> Crie um grupo “Homologação” separado de “Piloto” e simule um anel adicional de testes com janelas de instalação diferentes.</li>
+            <li><strong>Relatórios de Conformidade:</strong> Gere um relatório no WSUS mostrando porcentagem de máquinas compatíveis e liste 3 ações para melhorar a taxa de conformidade.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de Avaliação</h3>
+          <ul class="mb-0">
+            <li>Correta configuração e publicação da impressora com controle de acesso.</li>
+            <li>WSUS funcional com grupos e políticas aplicadas aos clientes.</li>
+            <li>Clareza das evidências (prints, comandos utilizados, explicação das escolhas).</li>
+            <li>Atenção às boas práticas de segurança e manutenção.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Comparação entre drivers Type 3 e Type 4 e impacto em ambientes de 64 bits.</li><li>Estratégias de anéis de atualização (Piloto, Broad, LTS) para reduzir riscos.</li><li>Server-side vs Client-side targeting no WSUS: vantagens e desvantagens.</li><li>Práticas de hardening para serviços de impressão em servidores Windows.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 11</h2>
+        <ul><li>Relatório técnico com passos executados, prints e justificativas.</li><li>Export dos GPOs criados (Backup de GPO) ou documentação das chaves configuradas.</li><li>Lista de grupos do WSUS e política de aprovação adotada para Piloto e Produção.</li><li>Comprovantes de teste: impressão autorizada e bloqueada; cliente reportando ao WSUS.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color:var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Servidor de Arquivos</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Backup e Continuidade</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual vantagem principal de publicar impressoras no Active Directory?","alternativas":{"A":"Permitir que usuários instalem impressoras sem precisar de drivers","B":"Facilitar a descoberta e instalação das filas pelos clientes do domínio","C":"Aumentar a velocidade de impressão ao dobrar a largura de banda","D":"Bloquear impressão para todos os usuários por padrão","E":"Instalar firmware automaticamente nas impressoras"},"correta":"B"},{"id":"q2","titulo":"No WSUS, qual configuração direciona os clientes para o servidor de atualização interno?","alternativas":{"A":"AUOptions","B":"WUServer/WUStatusServer","C":"NoAutoUpdate","D":"DeferFeatureUpdates","E":"NoGPO"},"correta":"B"},{"id":"q3","titulo":"Qual combinação representa boas práticas de permissões em impressão?","alternativas":{"A":"Conceder Manage Printer a Todos","B":"Conceder Print a grupos específicos e aplicar mínimo privilégio","C":"Usar somente permissões NTFS, ignorando permissões da impressora","D":"Permitir que todos gerenciem documentos","E":"Remover todos os grupos e deixar sem segurança"},"correta":"B"},{"id":"q4","titulo":"Em um cenário de anéis de atualização no WSUS, qual sequência é mais segura?","alternativas":{"A":"Produção → Piloto","B":"Piloto → Produção","C":"Direto em Produção","D":"Homologação → Piloto → Produção → Dev","E":"Dev → Produção (sem piloto)"},"correta":"B"},{"id":"q5","titulo":"Qual tarefa de manutenção ajuda a manter o WSUS eficiente ao longo do tempo?","alternativas":{"A":"Desabilitar sincronizações","B":"Excluir o conteúdo inteiro regularmente","C":"Executar o Server Cleanup Wizard e declinar atualizações substituídas","D":"Aprovar todas as atualizações automaticamente","E":"Remover grupos de computadores"},"correta":"C"},{"id":"q6","titulo":"Para mapear automaticamente uma impressora por GPO para um conjunto de usuários, qual recurso é indicado?","alternativas":{"A":"WMI Filters em GPO de Computador","B":"Group Policy Preferences (GPP) com Item-level Targeting","C":"GPO de Firewall","D":"GPO de Scripts de Logon apenas","E":"Somente logon scripts em lote (bat)"},"correta":"B"},{"id":"q7","titulo":"Qual é o objetivo de criar grupos distintos (Piloto/Produção) no WSUS?","alternativas":{"A":"Aumentar o uso de banda","B":"Melhorar o tempo de boot","C":"Controlar o risco testando atualizações antes de liberar amplamente","D":"Impedir que clientes recebam qualquer atualização","E":"Eliminar a necessidade de GPO"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Instalei o papel Print Server e confirmei no Server Manager/PowerShell."},{"id":"c2","texto":"Criei um grupo de segurança no AD para autorização de impressão."},{"id":"c3","texto":"Adicionei a impressora (porta TCP/IP) e publiquei no AD."},{"id":"c4","texto":"Configurei permissões de impressão com mínimo privilégio."},{"id":"c5","texto":"Testei impressão com usuário autorizado e bloqueio para não autorizado."},{"id":"c6","texto":"Instalei e pós-configurei o WSUS (pasta de conteúdo e primeira sincronização)."},{"id":"c7","texto":"Criei grupos no WSUS (Piloto e Produção)."},{"id":"c8","texto":"Configurei GPOs para apontar clientes ao WSUS e validei com gpresult."},{"id":"c9","texto":"Aprovei atualizações para Piloto e verifiquei relatórios de status."},{"id":"c10","texto":"Executei limpeza/manutenção no WSUS e registrei evidências."}];
+    const CHECKLIST_KEY = 'chk_sops_cap11';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

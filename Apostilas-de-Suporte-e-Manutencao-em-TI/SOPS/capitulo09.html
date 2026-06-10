@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 09 — Endereçamento e DHCP</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo09.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">01 — Fundamentos de SO para servidores e modelo Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">02 — Planejamento, licenciamento e boas práticas</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">03 — Laboratório de virtualização com VirtualBox</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">04 — Instalação do Windows Server 2025 e pós-instalação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">05 — Serviços de Diretório: promoção a Controlador de Domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">06 — Administração de objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">07 — Políticas de Grupo (GPO)</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">08 — DNS em ambientes de domínio</a></li>
+              <li><a class="dropdown-item active" href="capitulo09.html">09 — Endereçamento e DHCP para servidores</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">11 — Serviços de impressão e atualização</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">12 — Backup, restauração e continuidade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">13 — Monitoramento, logs e manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">16 — Integração, troubleshooting e projeto final</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 09 — Endereçamento e DHCP para servidores</h1>
+          <p class="mb-2"><strong>Carga:</strong> não definida no plano</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório em VMs no VirtualBox com um Controlador de Domínio Windows Server 2025 e um cliente Windows</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows Server 2025, RSAT, VirtualBox, PowerShell</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Planejar sub-redes IPv4 para uma rede de laboratório com exclusões e reservas.</li><li>Instalar, autorizar e configurar o serviço DHCP no Windows Server 2025.</li><li>Configurar escopos, opções (3, 6, 15), reservas e políticas de concessão.</li><li>Validar concessões em clientes e diagnosticar problemas comuns de DHCP.</li><li>Configurar alta disponibilidade de DHCP (Failover) e aplicar medidas básicas de segurança.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Implementar e gerenciar serviços de rede essenciais (DHCP) com foco em disponibilidade.</li><li>Aplicar boas práticas de endereçamento e documentação de rede.</li><li>Automatizar e validar configurações com PowerShell.</li><li>Realizar troubleshooting com ferramentas de linha de comando e logs.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: DNS em ambientes de domínio</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Servidor de Arquivos</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 09)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li>Contextualização: papel do DHCP em redes cliente-servidor, relação com DNS e AD DS.</li><li>Teoria: endereçamento IPv4, sub-redes e VLANs, conceitos de DHCP, opções e reservas, políticas, segurança e failover.</li><li>Laboratório guiado: instalação e autorização do DHCP, criação de escopo, exclusões, opções, reservas e validação em cliente.</li><li>Extensão: configuração de failover do DHCP (alta disponibilidade) e testes.</li><li>Consolidação: atividades práticas derivadas, checklist e questionário.</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">1) Endereçamento IPv4: blocos, máscaras e gateways</h3>
+            <p>O endereçamento IPv4 define como dispositivos identificam-se e comunicam-se em uma rede. Cada host recebe um endereço único dentro de uma sub-rede, determinado por uma máscara (por exemplo, 255.255.255.0 ou /24). O gateway padrão é o roteador que encaminha tráfego fora da sub-rede local.</p>
+            <p>As faixas privadas mais comuns são 10.0.0.0/8, 172.16.0.0/12 e 192.168.0.0/16. Em laboratórios, é frequente utilizar 192.168.0.0/24 ou 192.168.56.0/24 (Host-only do VirtualBox). A combinação IP + máscara define o intervalo de endereços disponíveis e o broadcast.</p>
+            <p><strong>Onde vou aplicar isso:</strong> no planejamento do escopo DHCP (intervalo de concessão) e na configuração das opções como gateway (opção 3) e DNS (opção 6).</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">2) Sub-redes e VLANs: segmentação lógica</h3>
+            <p>Sub-redes dividem uma rede maior em blocos menores para melhorar desempenho, segurança e organização. VLANs (em switches) estendem essa segmentação ao nível 2, separando o domínio de broadcast. Cada VLAN geralmente possui sua própria sub-rede e gateway.</p>
+            <p>Em ambientes com múltiplas VLANs, o DHCP pode atender todas elas por meio de DHCP Relay (IP Helper) configurado nos roteadores ou L3 switches. O servidor passa a responder concessões para sub-redes remotas encaminhadas pelo relay.</p>
+            <p><strong>Onde vou aplicar isso:</strong> ao criar múltiplos escopos por VLAN e, se houver roteamento, preparar o ambiente para DHCP Relay.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">3) Conceitos de DHCP: concessão dinâmica e ciclo de vida</h3>
+            <p>O DHCP automatiza a entrega de configurações de rede: endereço IP, máscara, gateway (opção 3), DNS (opção 6), sufixo de pesquisa (opção 15), entre outras. O ciclo DORA (Discover, Offer, Request, Acknowledge) descreve a negociação entre cliente e servidor.</p>
+            <p>Concessões possuem tempo de validade (lease). Antes de expirar, o cliente tenta renovar o endereço. O servidor mantém um banco de concessões para evitar conflitos e registrar histórico.</p>
+            <p><strong>Onde vou aplicar isso:</strong> ao definir tempo de concessão, criar escopos e observar o estado das leases no console e via PowerShell.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">4) Escopos, exclusões, reservas e políticas</h3>
+            <p>Escopo é o intervalo de endereços que o servidor pode conceder (por exemplo, 192.168.56.100–192.168.56.200). Exclusões removem endereços do intervalo para evitar uso dinâmico (por exemplo, 192.168.56.100–110 reservados a administração manual).</p>
+            <p>Reservas associam um MAC address a um IP específico, garantindo que um host sempre receba o mesmo endereço. Políticas permitem aplicar opções diferenciadas por condições (por exemplo, por Vendor Class, User Class ou prefixo MAC).</p>
+            <p><strong>Onde vou aplicar isso:</strong> na criação do escopo, configuração de exclusões/ reservas e definição de políticas específicas por tipo de dispositivo.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">5) Opções DHCP essenciais (3, 6 e 15)</h3>
+            <p>Opção 3: Gateway padrão. Indica ao cliente qual IP utilizar para sair da sub-rede. Opção 6: Servidores DNS que o cliente usará para resolver nomes. Opção 15: Sufixo de domínio de pesquisa (por exemplo, empresa.local), facilitando a resolução de nomes curtos.</p>
+            <p>Essas opções podem ser definidas no nível do servidor, do escopo ou de reservas/políticas, permitindo granularidade.</p>
+            <p><strong>Onde vou aplicar isso:</strong> ao configurar as opções do escopo para que clientes recebam gateway, DNS e sufixo de domínio corretos.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">6) Segurança e autorização do servidor DHCP</h3>
+            <p>Em ambientes com AD, o servidor DHCP deve ser autorizado no Active Directory para evitar servidores “rogue” (não autorizados). O serviço registra eventos no Event Viewer. Em switches, funcionalidades como DHCP Snooping ajudam a mitigar ataques ou respostas indevidas.</p>
+            <p>Boas práticas incluem restringir quem administra o DHCP, documentar reservas e auditar mudanças.</h3>
+            <p><strong>Onde vou aplicar isso:</strong> ao autorizar o servidor DHCP no AD e revisar logs de segurança e de serviço.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">7) Alta disponibilidade (Failover) do DHCP</h3>
+            <p>O DHCP Failover no Windows Server permite dois servidores compartilharem a responsabilidade pelos mesmos escopos. Existem dois modos principais: Load Balance (balanceamento de carga) e Hot Standby (um ativo e outro em espera).</p>
+            <p>A configuração exige que ambos os servidores tenham o papel DHCP instalado e que haja conectividade confiável. O failover mantém o serviço disponível em caso de falhas.</p>
+            <p><strong>Onde vou aplicar isso:</strong> ao configurar o parceiro de failover para o escopo principal do laboratório, testando continuidade do serviço.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Implantação de DHCP com escopo, opções, reservas e failover</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Instalar e autorizar o DHCP, criar um escopo com exclusões, configurar opções (3, 6, 15), criar reservas, validar concessões em um cliente e, opcionalmente, configurar failover.</p>
+<br>
+
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 1 — Preparação do ambiente</h3>
+            <ol class="mb-3">
+              <li>Garanta que você tem um Windows Server 2025 membro do domínio (de preferência DC do capítulo anterior) com IP estático, DNS apontando para si ou para o DC e horário sincronizado (NTP).</li>
+              <li>Tenha uma VM cliente Windows ligada à mesma rede virtual (Host-only/Bridge), configurada para obter IP automaticamente (DHCP).</li>
+              <li>Defina a sub-rede do laboratório. Exemplo: 192.168.56.0/24, gateway 192.168.56.1, DNS 192.168.56.10 (seu servidor), domínio empresa.local.</li>
+            </ol>
+            <div class="alert alert-light border mb-0" role="note">
+              Dica: documente a sub-rede, a faixa do escopo e as reservas previstas antes de criar o escopo.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 2 — Instalar o papel DHCP (GUI e PowerShell)</h3>
+            <p>Via Server Manager, adicione o papel DHCP Server. Alternativamente, utilize PowerShell:</p>
+            <pre class="language-powershell"><code># Executar no Windows Server 2025 com privilégios administrativos
+Install-WindowsFeature -Name DHCP -IncludeManagementTools
+
+# Autorizar no AD (substitua pelo FQDN do servidor)
+Add-DhcpServerInDC -DnsName "dc01.empresa.local" -IpAddress 192.168.56.10
+
+# Verificar instalação
+Get-WindowsFeature DHCP, RSAT-DHCP
+Get-DhcpServerInDC</code></pre>
+            <p>Após instalar via GUI, finalize o pós-instalação do DHCP no assistente autorizando o servidor no AD.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 3 — Criar escopo com exclusões e tempo de concessão</h3>
+            <p>Exemplo de escopo: 192.168.56.100–192.168.56.200, com exclusão 192.168.56.100–192.168.56.110 para IPs administrados manualmente.</p>
+            <pre class="language-powershell"><code># Criar escopo
+Add-DhcpServerv4Scope -Name "Escopo-Lab" -StartRange 192.168.56.100 -EndRange 192.168.56.200 -SubnetMask 255.255.255.0 -State Active
+
+# Adicionar exclusões
+Add-DhcpServerv4ExclusionRange -ScopeId 192.168.56.0 -StartRange 192.168.56.100 -EndRange 192.168.56.110
+
+# Ajustar tempo de concessão (ex.: 8 horas)
+Set-DhcpServerv4Scope -ScopeId 192.168.56.0 -LeaseDuration 08:00:00</code></pre>
+            <div class="alert alert-light border mb-0" role="note">
+              Onde aplicar: você planejou a faixa e exclusões na teoria e agora implementa no escopo real.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 4 — Configurar opções DHCP (3, 6 e 15)</h3>
+            <p>Defina gateway, DNS e sufixo de domínio no nível do escopo (podem ser herdadas do servidor, se configuradas).</p>
+            <pre class="language-powershell"><code># Gateway (Opção 3)
+Set-DhcpServerv4OptionValue -ScopeId 192.168.56.0 -OptionId 3 -Value 192.168.56.1
+
+# DNS (Opção 6) - pode definir mais de um DNS
+Set-DhcpServerv4OptionValue -ScopeId 192.168.56.0 -OptionId 6 -Value 192.168.56.10
+
+# Sufixo de domínio (Opção 15)
+Set-DhcpServerv4OptionValue -ScopeId 192.168.56.0 -OptionId 15 -Value "empresa.local"
+
+# Conferir
+Get-DhcpServerv4OptionValue -ScopeId 192.168.56.0</code></pre>
+            <p>Valide se as opções aparecem no console DHCP (MMC) em IPv4 → seu escopo → Scope Options.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 5 — Criar reservas por MAC address</h3>
+            <p>Identifique o MAC da placa do cliente (ipconfig /all). Crie a reserva para garantir IP estável a uma máquina específica.</p>
+            <pre class="language-powershell"><code># Exemplo de reserva para o cliente com MAC 08-00-27-AB-CD-EF
+# Use a máscara ":" ou "-" (PowerShell aceita notação sem separadores também)
+Add-DhcpServerv4Reservation -ScopeId 192.168.56.0 -IPAddress 192.168.56.120 -ClientId "08-00-27-AB-CD-EF" -Description "Cliente-Lab-01"</code></pre>
+            <div class="alert alert-light border mb-0" role="note">
+              Onde aplicar: o conceito de reservas da teoria é usado aqui para garantir IP previsível a clientes críticos.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 6 — (Opcional) Políticas de DHCP por tipo de dispositivo</h3>
+            <p>Você pode aplicar políticas para conceder configurações específicas para certos dispositivos (por exemplo, por Vendor Class).</p>
+            <pre class="language-powershell"><code># Exemplo: política simples por intervalo de MAC (prefixo 08-00-27 para VMs VirtualBox)
+Add-DhcpServerv4Policy -Name "VMs-VirtualBox" -ScopeId 192.168.56.0 -Condition OR `
+    -VendorClass EQ "MSFT 5.0"  # Exemplo; ajuste conforme necessidade
+
+# Dentro da política, definir opções diferentes (se desejado):
+Set-DhcpServerv4PolicyOptionValue -ScopeId 192.168.56.0 -PolicyName "VMs-VirtualBox" -OptionId 15 -Value "lab.empresa.local"</code></pre>
+            <p>Políticas avançadas exigem identificar corretamente as classes de cliente; utilize a GUI para explorar opções.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 7 — Testar concessões no cliente</h3>
+            <p>No cliente Windows, abra o Prompt de Comando e force renovação do IP:</p>
+            <pre class="language-bash"><code>ipconfig /release
+ipconfig /renew
+ipconfig /all</code></pre>
+            <p>Valide se o IP recebido está dentro do escopo, se o gateway e DNS correspondem às opções definidas e se o sufixo de DNS está correto.</p>
+            <pre class="language-bash"><code>ping 192.168.56.1
+nslookup dc01.empresa.local 192.168.56.10</code></pre>
+            <div class="alert alert-light border mb-0" role="note">
+              Onde aplicar: você verifica o ciclo DORA e as opções configuradas, relacionando teoria e prática.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 8 — Monitorar leases e logs</h3>
+            <p>No servidor, liste concessões e verifique o Event Viewer (Aplicativo e Serviços → Microsoft → Windows → DHCP-Server):</p>
+            <pre class="language-powershell"><code># Listar concessões do escopo
+Get-DhcpServerv4Lease -ScopeId 192.168.56.0 | Select-Object IPAddress, ClientId, HostName, LeaseExpiryTime
+
+# Verificar estatísticas
+Get-DhcpServerv4ScopeStatistics -ScopeId 192.168.56.0</code></pre>
+            <p>Erros comuns: servidor não autorizado, conflito de IP, opções incorretas (gateway/DNS), firewall bloqueando.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 9 — (Opcional) Configurar Failover do DHCP</h3>
+            <p>Requisitos: segundo servidor Windows com papel DHCP instalado e autorizado. Escolha modo Load Balance (ex.: 50/50) ou Hot Standby.</p>
+            <pre class="language-powershell"><code># Criar relação de failover para o escopo 192.168.56.0
+# Ajuste PartnerServer, SharedSecret e modo conforme seu ambiente
+Add-DhcpServerv4Failover -ComputerName "dc01.empresa.local" -Name "FO-Lab" `
+  -PartnerServer "dc02.empresa.local" -ScopeId 192.168.56.0 `
+  -LoadBalancePercent 50 -SharedSecret "SegredoForte!2024"
+
+# Conferir configuração de failover
+Get-DhcpServerv4Failover</code></pre>
+            <p>Teste desligando o servidor primário e verificando se novos clientes ainda recebem IP. Observe alarmes/estados no console DHCP.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o domínio sobre planejamento de endereçamento e operação do DHCP com diferentes cenários.</p>
+        <div class="vstack gap-3 mt-3">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 1 — Dois escopos e reservas por função</h3>
+            <p>Crie dois escopos em sub-redes distintas (simuladas) e defina pelo menos 3 reservas: uma para DC, uma para servidor de arquivos e uma para uma estação crítica. Documente MAC, IP e descrição.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 2 — Políticas por tipo de cliente</h3>
+            <p>Implemente uma política que altere o sufixo de domínio (opção 15) para notebooks (definidos por classe de usuário ou outra condição) e mostre evidências de que a política foi aplicada.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 3 — Diagnóstico de falhas</h3>
+            <p>Simule um problema (por exemplo, servidor DHCP não autorizado) e registre passo a passo como detectou e corrigiu, incluindo comandos e prints de logs relevantes.</p>
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (evidências mínimas)</h3>
+          <ul class="mb-0">
+            <li>Planejamento do endereçamento e justificativas documentadas.</li>
+            <li>Configuração correta de escopos, opções e reservas.</li>
+            <li>Validações no cliente (ipconfig, nslookup) e consultas a leases/logs.</li>
+            <li>Clareza e organização do relatório/diário de bordo.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>DHCP Snooping em switches de acesso: conceito e configuração básica.</li><li>Comparativo: Load Balance vs Hot Standby no DHCP Failover do Windows Server.</li><li>DHCP Relay (IP Helper) em roteadores e L3 switches.</li><li>Opções DHCP avançadas (66/67 para PXE) e cenários de implantação.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 09</h2>
+        <ul><li>Relatório com o plano de endereçamento, escopo(s), exclusões, opções, reservas e, se feito, failover.</li><li>Capturas de tela e/ou outputs de comandos de validação (ipconfig, Get-DhcpServerv4Lease, logs).</li><li>Scripts PowerShell utilizados (se houver) e comentários explicativos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: DNS em ambientes de domínio</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Servidor de Arquivos</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a função principal do DHCP em uma rede?","alternativas":{"A":"Prover resolução de nomes para hosts","B":"Distribuir automaticamente endereços IP e parâmetros de rede","C":"Filtrar pacotes na borda da rede","D":"Sincronizar o horário entre clientes e servidores","E":"Realizar NAT para acesso à Internet"},"correta":"B"},{"id":"q2","titulo":"Em um escopo 192.168.10.0/24, qual opção DHCP define o gateway padrão para os clientes?","alternativas":{"A":"Opção 6","B":"Opção 15","C":"Opção 3","D":"Opção 44","E":"Opção 51"},"correta":"C"},{"id":"q3","titulo":"O que é uma reserva no DHCP?","alternativas":{"A":"Um intervalo removido do escopo para evitar concessão dinâmica","B":"Uma configuração para dividir carga entre dois servidores","C":"Uma associação de um MAC a um IP específico para sempre conceder o mesmo endereço","D":"Um tempo de concessão reduzido para convidados","E":"Uma política aplicada a um grupo de GPOs"},"correta":"C"},{"id":"q4","titulo":"Qual ferramenta/ação é necessária em ambientes com AD para evitar servidores DHCP não autorizados?","alternativas":{"A":"Criar uma GPO de DHCP","B":"Autorizar o servidor DHCP no Active Directory","C":"Ativar o DHCP Snooping no servidor","D":"Habilitar RADIUS no DHCP","E":"Criar reservas para todos os clientes"},"correta":"B"},{"id":"q5","titulo":"Em cenário com múltiplas VLANs, qual componente permite que um único servidor DHCP atenda sub-redes remotas?","alternativas":{"A":"NAT","B":"DHCP Relay (IP Helper) no roteador/L3","C":"Proxy ARP","D":"QoS","E":"STP"},"correta":"B"},{"id":"q6","titulo":"No DHCP Failover do Windows Server, qual modo mantém os dois servidores respondendo simultaneamente?","alternativas":{"A":"Hot Standby","B":"Manual Standby","C":"Load Balance","D":"Active/Passive com RADIUS","E":"Split DNS"},"correta":"C"},{"id":"q7","titulo":"Qual comando PowerShell cria um escopo DHCP IPv4?","alternativas":{"A":"New-DhcpScopeV4","B":"Add-DhcpServerv4Scope","C":"Set-DhcpServerv4OptionValue","D":"Install-WindowsFeature DHCP","E":"Add-DhcpServerInDC"},"correta":"B"},{"id":"q8","titulo":"Qual conjunto de opções corresponde, respectivamente, a DNS e sufixo de pesquisa de domínio?","alternativas":{"A":"3 e 6","B":"6 e 15","C":"15 e 3","D":"44 e 46","E":"51 e 58"},"correta":"B"},{"id":"q9","titulo":"Qual comando no cliente Windows força a renovação do endereço IP?","alternativas":{"A":"ipconfig /flushdns","B":"ipconfig /registerdns","C":"ipconfig /renew","D":"nbtstat -RR","E":"netsh int ip reset"},"correta":"C"},{"id":"q10","titulo":"O que as exclusões (exclusion ranges) fazem em um escopo DHCP?","alternativas":{"A":"Definem o tempo mínimo de concessão","B":"Removem endereços de um escopo para não serem atribuídos dinamicamente","C":"Reservam IPs por MAC address","D":"Redirecionam requisições para outro servidor","E":"Aplicam opções por classe de usuário"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Defini e documentei a sub-rede do laboratório (rede, máscara, gateway)."},{"id":"c2","texto":"Instalei e autorizei o papel DHCP no Windows Server."},{"id":"c3","texto":"Criei o escopo com faixa correta e exclusões planejadas."},{"id":"c4","texto":"Configurei as opções 3 (gateway), 6 (DNS) e 15 (sufixo)."},{"id":"c5","texto":"Implementei pelo menos uma reserva por MAC e testei no cliente."},{"id":"c6","texto":"Validei concessões com ipconfig e Get-DhcpServerv4Lease."},{"id":"c7","texto":"Revisei Event Viewer para checar alertas do DHCP."},{"id":"c8","texto":"(Opcional) Configurei Failover e testei continuidade."},{"id":"c9","texto":"Registrei evidências (prints, comandos) e atualizei o diário de bordo."}];
+    const CHECKLIST_KEY = 'chk_sops_cap09';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

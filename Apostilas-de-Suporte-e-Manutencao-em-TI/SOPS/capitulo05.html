@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 05 — AD DS e Promoção a Controlador de Domínio</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo05.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SOPS</span>
+        <span style="color: var(--cor-principal);">Sistemas Operacionais para Servidores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos e Cliente-Servidor</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Planejamento e Licenciamento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Laboratório de Virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Instalação do Windows Server</a></li>
+              <li><a class="dropdown-item active" href="capitulo05.html">Capítulo 05 — AD DS e DC</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Administração de Objetos no AD</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Políticas de Grupo</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — DNS no Domínio</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — DHCP</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Servidor de Arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Impressão e Atualização</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Backup e Restauração</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Monitoramento e Manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Introdução a Linux/FreeBSD</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração e Troubleshooting</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 05 — Serviços de Diretório: conceitos e promoção a Controlador de Domínio</h1>
+          <p class="mb-2"><strong>Carga:</strong> Não especificada no plano</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Domínio único contoso.local em laboratório VirtualBox</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows Server 2025, AD DS, DNS integrado ao AD, PowerShell, VirtualBox</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar conceitos de AD DS: floresta, domínio, árvore, catálogo global e funções FSMO.</li><li>Planejar o nome do domínio e parâmetros essenciais de DNS integrados ao AD.</li><li>Promover um servidor Windows Server 2025 a Controlador de Domínio (DC) de uma nova floresta.</li><li>Validar a saúde do domínio com ferramentas como dcdiag, repadmin e cmdlets do ActiveDirectory.</li><li>Registrar evidências técnicas do processo, garantindo reprodutibilidade e padronização.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Configurar e administrar serviços de diretório com foco em disponibilidade e segurança.</li><li>Integrar e operar DNS em ambientes de domínio.</li><li>Executar procedimentos padronizados de instalação, checagem e documentação.</li><li>Empregar scripts PowerShell para instalação e diagnóstico.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 04</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 06</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 05)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul><li>Exposição dialogada: visão geral de AD DS, DNS integrado, estrutura lógica (30 min).</li><li>Demonstração: promoção a DC via Server Manager e via PowerShell (30 min).</li><li>Laboratório guiado: preparar hostname, IP fixo, DNS, instalar role AD DS, criar nova floresta contoso.local (90 min).</li><li>Validação e diagnóstico: dcdiag, repadmin, Event Viewer, cmdlets do módulo ActiveDirectory (40 min).</li><li>Registro de evidências: diário de bordo, capturas de tela e export de comandos usados (20 min).</li><li>Fechamento: checklist de boas práticas, riscos comuns e lições aprendidas (10 min).</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div>
+            <h3 class="h6 fw-bold">1) O que é o Active Directory Domain Services (AD DS)</h3>
+            <p>O AD DS é o serviço de diretório da Microsoft que centraliza autenticação, autorização e gerenciamento de identidades, computadores e recursos em uma rede. Ele armazena objetos (usuários, grupos, computadores, OUs) e suas relações, fornecendo serviços como logon único (SSO) e políticas de segurança.</p>
+            <p>Ao implantar o AD DS, sua rede passa a ter um “repositório” confiável para identidade e políticas. O DC (Controlador de Domínio) é o servidor que hospeda o AD DS e processa logons, valida credenciais e replica dados entre outros DCs.</p>
+            <p><em>Onde vou aplicar isso:</em> você usará o AD DS para padronizar contas, controlar permissões em arquivos, aplicar GPOs e integrar serviços como DNS e DHCP em capítulos posteriores.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">2) Florestas, domínios e árvores</h3>
+            <p>A <strong>floresta</strong> é a fronteira lógica máxima do AD DS: um conjunto de uma ou mais árvores de domínios que compartilham o mesmo esquema e catálogo global. O <strong>domínio</strong> é a unidade básica de administração e replicação, com seu próprio espaço de nomes DNS (por exemplo, contoso.local). Uma <strong>árvore</strong> é um conjunto de domínios que compartilham um namespace contíguo (ex.: contoso.local e filiais.contoso.local).</p>
+            <p>Domínios criam uma barreira administrativa. Em ambientes pequenos e de laboratório, um único domínio em uma única floresta é o suficiente, simplificando a gestão.</p>
+            <p><em>Onde vou aplicar isso:</em> você criará uma nova floresta com um único domínio (contoso.local) e promoverá o primeiro DC.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">3) Catálogo Global (GC) e partições do AD</h3>
+            <p>O <strong>Catálogo Global</strong> armazena um subconjunto pesquisável dos atributos de todos os objetos na floresta, permitindo encontrar recursos rapidamente, inclusive fora do domínio local. Em ambientes com um único DC, é comum que ele também seja GC.</p>
+            <p>O AD é dividido em <strong>partições</strong> (Schema, Configuration, Domain e, quando aplicável, Application). Elas determinam como e onde os dados são replicados. O entendimento dessas partições ajuda no diagnóstico de replicação.</p>
+            <p><em>Onde vou aplicar isso:</em> ao validar saúde e replicação, você confirmará se o DC está como GC e se as partições estão consistentes.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">4) Funções FSMO (Operations Master)</h3>
+            <p>Algumas funções no AD são de <strong>mestre único</strong> e não podem ser simultâneas em múltiplos DCs: Schema Master e Domain Naming Master (nível de floresta), e RID Master, PDC Emulator e Infrastructure Master (nível de domínio). Em ambientes pequenos, o primeiro DC geralmente hospeda todas as FSMO.</p>
+            <p>O <strong>PDC Emulator</strong> é crítico para sincronização de tempo, políticas de senha e compatibilidade. O <strong>RID Master</strong> aloca blocos de IDs para criação de objetos. O <strong>Infrastructure Master</strong> cuida de referências cruzadas de objetos. Na floresta, o <strong>Schema Master</strong> controla mudanças no esquema, e o <strong>Domain Naming Master</strong> gerencia adição/remoção de domínios e partições.</p>
+            <p><em>Onde vou aplicar isso:</em> após a promoção, você verificará onde estão as FSMO e registrará essa informação nas evidências.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">5) DNS integrado ao AD e considerações de design</h3>
+            <p>O AD depende fortemente de <strong>DNS</strong>. Registros SRV, A e CNAME permitem localizar DCs e serviços. O <strong>DNS integrado ao AD</strong> replica junto com o AD, oferecendo segurança e consistência. Escolha um nome de domínio interno estável (como contoso.local) e configure o DC para usar a si mesmo como DNS principal.</p>
+            <p>Evite conflitos de nome com domínios públicos e mantenha um <strong>IP estático</strong> no DC. Planeje a zona reversa para diagnósticos e registros adequados.</p>
+            <p><em>Onde vou aplicar isso:</em> você instalará a função DNS junto com o AD DS e confirmará a criação de registros SRV e zonas integradas.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">6) Níveis funcionais e compatibilidade</h3>
+            <p>Os <strong>níveis funcionais</strong> do domínio e da floresta determinam recursos disponíveis e compatibilidade com versões de DCs. Em laboratório atual, utilizar Windows Server 2025 como primeiro DC define níveis compatíveis com seus recursos. A elevação de nível requer que todos os DCs atendam ao nível alvo.</p>
+            <p><em>Onde vou aplicar isso:</em> durante a promoção você escolherá o nível funcional apropriado (padrão recomendado para a versão instalada).</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">7) Verificação de saúde: dcdiag, repadmin e logs</h3>
+            <p>Após a promoção, valide o ambiente. <code>dcdiag</code> verifica a saúde do DC e do DNS. <code>repadmin</code> analisa replicação (útil quando houver mais de um DC). O <strong>Event Viewer</strong> mostra avisos/erros durante a instalação e serviços.</p>
+            <p><em>Onde vou aplicar isso:</em> você executará dcdiag e consultas com PowerShell para comprovar que o domínio está funcional e documentará os resultados.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Promover o primeiro DC e validar o domínio</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Instalar AD DS, criar a floresta contoso.local, integrar DNS e validar a saúde do ambiente com ferramentas de diagnóstico e cmdlets.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 0 — Pré-requisitos e cenário</h3>
+            <ul class="mb-2">
+              <li>VM Windows Server 2025 instalada (capítulo 04), com Desktop Experience ou Core.</li>
+              <li>Hostname padronizado (ex.: SRV-DC01) e IP estático (ex.: 10.0.0.10/24); DNS primário apontando para 127.0.0.1 (após a promoção ficará para o próprio DC).</li>
+              <li>Relógio sincronizado com NTP confiável.</li>
+              <li>Conta Administrador local com senha conhecida.</li>
+            </ul>
+            <div class="alert alert-warning mb-0"><strong>Atenção:</strong> Não promova um servidor com IP dinâmico. Garanta conectividade estável antes de iniciar.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 1 — Configurar hostname e IP fixo</h3>
+            <p>Confirme e ajuste o nome do computador e o IP. Se necessário, reinicie após alterar o hostname.</p>
+            <p class="mb-1"><strong>PowerShell (eleve como Administrador)</strong></p>
+            <pre class="language-powershell"><code># Verificar nome atual
+$env:COMPUTERNAME
+
+# Definir novo hostname (se preciso) e reiniciar
+Rename-Computer -NewName "SRV-DC01" -Restart
+
+# Após reiniciar, defina IP estático (ajuste interface e rede)
+New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 10.0.0.10 -PrefixLength 24 -DefaultGateway 10.0.0.1
+
+# Definir DNS preferencial (temporariamente para o próprio servidor)
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 127.0.0.1, 10.0.0.1
+
+# Validar
+ipconfig /all</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 2 — Instalar a role AD DS e ferramentas</h3>
+            <p>Instale a função AD DS. A função DNS será integrada durante a promoção (ou instalada junto).</p>
+            <p class="mb-1"><strong>Via Server Manager</strong></p>
+            <ol class="mb-3">
+              <li>Manage &gt; Add Roles and Features.</li>
+              <li>Role-based or feature-based installation.</li>
+              <li>Selecione o servidor local.</li>
+              <li>Marque Active Directory Domain Services. Aceite as features sugeridas.</li>
+              <li>Next até Install. Aguarde a conclusão.</li>
+            </ol>
+            <p class="mb-1"><strong>Via PowerShell</strong></p>
+            <pre class="language-powershell"><code># Instalar AD DS e ferramentas de administração
+Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+
+# (Opcional) Instalar DNS Server já nesta etapa
+Install-WindowsFeature DNS -IncludeManagementTools</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 3 — Criar a nova floresta e promover a DC</h3>
+            <p>Você criará a floresta contoso.local e promoverá o servidor como primeiro Controlador de Domínio (também Catálogo Global).</p>
+            <p class="mb-1"><strong>Via Server Manager</strong></p>
+            <ol class="mb-3">
+              <li>Notificações &gt; Promote this server to a domain controller.</li>
+              <li>Add a new forest: Root domain name = <strong>contoso.local</strong>.</li>
+              <li>Defina DSRM password (senha do modo de restauração). Guarde em local seguro.</li>
+              <li>Mantenha a opção DNS selecionada; verifique NetBIOS (CONTOSO).</li>
+              <li>Revise paths padrão de banco de dados, logs e SYSVOL; instale e reinicie.</li>
+            </ol>
+            <p class="mb-1"><strong>Via PowerShell</strong></p>
+            <pre class="language-powershell"><code>Import-Module ADDSDeployment
+
+# Solicitar senha DSRM de forma segura
+$sec = Read-Host "Defina a senha DSRM" -AsSecureString
+
+# Criar a floresta contoso.local e promover
+Install-ADDSForest `
+  -DomainName "contoso.local" `
+  -DomainNetbiosName "CONTOSO" `
+  -InstallDns `
+  -CreateDnsDelegation:$false `
+  -ForestMode "WinThreshold" `
+  -DomainMode "WinThreshold" `
+  -SafeModeAdministratorPassword $sec `
+  -Force</code></pre>
+            <div class="alert alert-light border mt-3 mb-0"><strong>Nota:</strong> Os valores de ForestMode/DomainMode usam o nível recomendado pela versão. Após a instalação, o servidor reiniciará automaticamente.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 4 — Pós-instalação e validação básica</h3>
+            <p>Após reiniciar, faça logon como CONTOSO\Administrator. Valide serviços e resolução de nomes.</p>
+            <pre class="language-powershell"><code># Confirmar serviços principais
+Get-Service NTDS, DNS, KDC | Select-Object Name, Status
+
+# Verificar domínio e DC
+Get-ADDomain
+Get-ADForest
+Get-ADDomainController -Discover -Service ADWS
+
+# Conferir zona DNS e registros SRV (visual, via DNS Manager, ou via PowerShell)
+Resolve-DnsName -Type SRV _ldap._tcp.dc._msdcs.contoso.local
+
+# Checagem geral
+dcdiag /v | Out-Host
+
+# Se criar zona reversa (opcional neste capítulo), valide também PTRs</code></pre>
+            <pre class="language-powershell"><code># Conferir FSMO
+Get-ADForest | Select-Object SchemaMaster, DomainNamingMaster
+Get-ADDomain | Select-Object RIDMaster, PDCEmulator, InfrastructureMaster</code></pre>
+            <pre class="language-powershell"><code># Repadmin é mais útil com múltiplos DCs, mas já pode listar metadados
+repadmin /replsummary
+repadmin /showrepl</code></pre>
+            <div class="alert alert-success mt-3 mb-0"><strong>Resultado esperado:</strong> dcdiag sem erros críticos; resolução de <code>_ldap._tcp</code> retorna SRVs; serviços AD DS e DNS em Running; FSMO concentradas no SRV-DC01.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 5 — Documentação e evidências</h3>
+            <p>Registre no diário de bordo: hostname, IP, versão do Windows, nome do domínio, FSMO, telas de Server Manager, saída resumida de dcdiag e comandos executados.</p>
+            <pre class="language-powershell"><code># Exportar informações úteis
+(Get-ADDomain) | Out-File C:\Evidencias\addomain.txt
+(Get-ADForest) | Out-File C:\Evidencias\adforest.txt
+dcdiag /c /e /v &gt; C:\Evidencias\dcdiag.txt
+repadmin /replsummary &gt; C:\Evidencias\repadmin.txt
+ipconfig /all &gt; C:\Evidencias\ipconfig.txt</code></pre>
+            <div class="alert alert-info mt-3 mb-0"><strong>Dica:</strong> Versione esses arquivos em um repositório local de laboratório e inclua capturas de tela relevantes.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Passo 6 — Troubleshooting comum</h3>
+            <ul class="mb-2">
+              <li><strong>Falha no DNS:</strong> verifique se o DC aponta para si mesmo como DNS e se a zona contoso.local existe.</li>
+              <li><strong>Erros no dcdiag:</strong> leia a descrição e corrija pré-requisitos (tempo/NTP, firewall, rede).</li>
+              <li><strong>Problemas de logon:</strong> confirme hora correta (sincronização) e serviço KDC.</li>
+            </ul>
+            <pre class="language-powershell"><code># Ajustar NTP (exemplo simples)
+w32tm /config /manualpeerlist:"time.windows.com,0x8" /syncfromflags:manual /reliable:yes /update
+w32tm /resync
+w32tm /query /status</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a promoção do DC e a verificação de saúde do domínio, registrando evidências e explorando diagnósticos.</p>
+        <div class="vstack gap-3 mt-3">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 1 — Evidências de implantação</h3>
+            <p>Gere um pacote de evidências com:</p>
+            <ul>
+              <li>Capturas: Server Manager após promoção; DNS Manager mostrando zona contoso.local; saída do Resolve-DnsName para SRV.</li>
+              <li>Arquivos: addomain.txt, adforest.txt, dcdiag.txt, ipconfig.txt.</li>
+              <li>Resumo textual: hostname, IP, FSMO, versão do SO.</li>
+            </ul>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 2 — Script básico de validação</h3>
+            <p>Escreva um script PowerShell que execute as checagens principais e gere um relatório em C:\Evidencias\relatorio.html (use ConvertTo-Html).</p>
+            <pre class="language-powershell"><code>$dom = Get-ADDomain
+$for = Get-ADForest
+$svc = Get-Service NTDS, DNS, KDC | Select Name, Status
+$dns = Resolve-DnsName -Type SRV _ldap._tcp.dc._msdcs.$($dom.DNSRoot) -ErrorAction SilentlyContinue
+
+[PSCustomObject]@{
+  Domain            = $dom.DNSRoot
+  PDCEmulator       = $dom.PDCEmulator
+  RIDMaster         = $dom.RIDMaster
+  Infrastructure    = $dom.InfrastructureMaster
+  SchemaMaster      = $for.SchemaMaster
+  DomainNamingMaster= $for.DomainNamingMaster
+} | ConvertTo-Html -Fragment -PreContent "&lt;h3&gt;FSMO&lt;/h3&gt;" &gt; C:\Evidencias\relatorio.html
+
+$svc | ConvertTo-Html -Fragment -PreContent "&lt;h3&gt;Serviços&lt;/h3&gt;" &gt;&gt; C:\Evidencias\relatorio.html
+$dns | ConvertTo-Html -Fragment -PreContent "&lt;h3&gt;SRV DNS&lt;/h3&gt;" &gt;&gt; C:\Evidencias\relatorio.html</code></pre>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 3 — Zona reversa (opcional)</h3>
+            <p>Crie manualmente uma zona reversa para a sub-rede do laboratório e valide resolução reversa de SRV-DC01.</p>
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (indicativos)</h3>
+          <ul class="mb-0">
+            <li>Conformidade técnica: DC funcional, DNS resolvendo registros AD.</li>
+            <li>Completude das evidências: arquivos e capturas solicitadas presentes e legíveis.</li>
+            <li>Qualidade do script: legibilidade, execução sem erros e relatório gerado.</li>
+            <li>Organização e padronização: nomenclaturas, caminhos e comentários adequados.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Diferenças entre níveis funcionais do AD em versões recentes do Windows Server.</li><li>Boas práticas de nomenclatura de domínio interno e impactos em serviços externos.</li><li>Detalhes dos registros SRV do AD e sua função na localização de serviços.</li><li>Estratégias de distribuição de FSMO e quando transferir/fazer seize das funções.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 05</h2>
+        <ul><li>Diário de bordo com passos executados, decisões e problemas encontrados.</li><li>Pacote de evidências (arquivos de saída e capturas) comprovando o domínio funcional.</li><li>(Opcional) Script de validação e relatório HTML gerado.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 04</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 06</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Sistemas Operacionais para Servidores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a função principal do AD DS em um ambiente de rede?","correta":"C","alternativas":{"A":"Servir páginas web para clientes externos","B":"Gerenciar apenas impressão e filas","C":"Centralizar identidades, autenticação e autorização","D":"Atuar exclusivamente como servidor de arquivos","E":"Substituir o DNS em todas as funções"}},{"id":"q2","titulo":"Em uma nova implantação simples de laboratório, qual escolha de design é mais apropriada?","correta":"B","alternativas":{"A":"Criar múltiplos domínios e múltiplas florestas","B":"Uma única floresta com um único domínio","C":"Nenhuma floresta, apenas grupos locais","D":"Floresta sem DNS integrado","E":"Dois domínios com nomes idênticos"}},{"id":"q3","titulo":"Qual afirmação sobre DNS e AD é correta?","correta":"A","alternativas":{"A":"O AD depende de DNS e registra SRVs para localizar serviços","B":"O AD não utiliza DNS e funciona apenas com NetBIOS","C":"DNS e AD são serviços incompatíveis","D":"O AD substitui o DNS, que se torna desnecessário","E":"DNS só é necessário para internet pública, não para AD"}},{"id":"q4","titulo":"Quais funções FSMO operam no escopo da floresta?","correta":"D","alternativas":{"A":"RID Master e PDC Emulator","B":"PDC Emulator e Infrastructure Master","C":"RID Master e Infrastructure Master","D":"Schema Master e Domain Naming Master","E":"PDC Emulator e Global Catalog"}},{"id":"q5","titulo":"Após promover o primeiro DC, qual validação é mais adequada?","correta":"E","alternativas":{"A":"Executar somente ping no gateway","B":"Criar usuários locais no servidor","C":"Desabilitar o serviço DNS para reduzir carga","D":"Apagar a zona DNS padrão e recriá-la manualmente","E":"Rodar dcdiag e verificar registros SRV do AD via DNS"}},{"id":"q6","titulo":"Para o primeiro DC em um ambiente pequeno, é comum:","correta":"B","alternativas":{"A":"Distribuir FSMO por vários servidores desde o início","B":"Todas as FSMO estarem nele e ele ser também Catálogo Global","C":"Desabilitar o KDC para aumentar a segurança","D":"Usar IP dinâmico e DNS externo primário","E":"Desvincular o DNS do AD para facilitar troubleshooting"}},{"id":"q7","titulo":"Qual comando PowerShell cria uma nova floresta e promove o DC?","correta":"C","alternativas":{"A":"Install-WindowsFeature Web-Server","B":"New-ADUser -Name 'contoso'","C":"Install-ADDSForest -DomainName 'contoso.local' -InstallDns","D":"Add-Computer -DomainName contoso.local","E":"New-ADForest -Name contoso.local"}},{"id":"q8","titulo":"Qual é um sintoma típico de problemas de tempo (NTP) em domínios AD?","correta":"A","alternativas":{"A":"Falhas de logon e Kerberos por diferença de horário","B":"Impressoras não aparecem no painel de controle","C":"Arquivos não abrem em compartilhamentos","D":"O serviço DNS sempre para automaticamente","E":"O Windows Update não baixa patches"}},{"id":"q9","titulo":"Qual melhor prática de IP/DNS para o DC?","correta":"D","alternativas":{"A":"Usar DHCP para IP do DC","B":"Apontar DNS primário para um serviço externo","C":"Usar apenas IPv6 sem configuração adicional","D":"Definir IP estático e apontar o DNS para si mesmo","E":"Ativar ICS para compartilhar internet do DC"}},{"id":"q10","titulo":"Qual ferramenta é indicada para verificar replicação entre DCs?","correta":"B","alternativas":{"A":"gpupdate /force","B":"repadmin","C":"nbtstat","D":"diskpart","E":"mstsc"}}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Hostname e IP estático configurados conforme o padrão do laboratório."},{"id":"c2","texto":"Role AD DS instalada com ferramentas de gerenciamento."},{"id":"c3","texto":"Floresta e domínio criados (contoso.local) e DC promovido com sucesso."},{"id":"c4","texto":"DNS integrado ao AD validado (registros SRV presentes)."},{"id":"c5","texto":"dcdiag executado sem erros críticos; serviços AD e DNS em execução."},{"id":"c6","texto":"FSMO conferidas e registradas no diário de bordo."},{"id":"c7","texto":"Relatório/evidências salvos em C:\\Evidencias (arquivos e capturas)."},{"id":"c8","texto":"Script de validação (opcional) criado e testado."},{"id":"c9","texto":"Checklist de troubleshooting consultado e pendências resolvidas."}];
+    const CHECKLIST_KEY = 'chk_sops_cap05';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

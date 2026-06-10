@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 — SLAs, OLAs e Métricas</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo07.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SGTI</span>
+        <span style="color: var(--cor-principal);">Suporte e Gestão da Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos de Suporte Técnico e ITSM</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Comunicação e Relacionamento no Atendimento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — ITIL v4 e Sistema de Valor do Serviço</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Gestão de Incidentes</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Gestão de Problemas</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Ferramentas de Chamados e Níveis de Suporte</a></li>
+              <li><a class="dropdown-item active" href="capitulo07.html">Capítulo 07 — SLAs, OLAs e Métricas de Desempenho</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Documentação Técnica e POPs</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Gestão de Mudanças</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Gestão de Configuração e CMDB</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Gestão de Ativos e Licenças</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Monitoramento, Disponibilidade e Continuidade</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Segurança no Atendimento e Rastreabilidade</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Controle de Estoque e Logística de TI</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Automação e IA aplicadas ao Suporte</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Simulação Integrada</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 07 — SLAs, OLAs e Métricas de Desempenho</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (2 a 3 aulas)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Service Desk escolar simulado com ferramenta de chamados</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ferramenta ITSM (ou planilha), planilha/BI, opcional Python/SQL para análise</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Diferenciar SLA, OLA e metas internas e explicar seu papel no ITSM.</li><li>Calcular métricas essenciais: MTTA, MTTR, FCR, taxa de cumprimento de SLA e backlog.</li><li>Construir um relatório mensal com 5 métricas-chave e gerar insights práticos.</li><li>Identificar armadilhas de métricas e propor indicadores equilibrados.</li><li>Coletar e interpretar feedback do usuário (NPS/CES) e conectar a ações de melhoria.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Aplicar práticas ITIL v4 de medição e melhoria contínua.</li><li>Operar relatórios e painéis em ferramenta ITSM/planilha.</li><li>Comunicar resultados com clareza para tomada de decisão.</li><li>Definir metas viáveis alinhadas a SLAs e OLAs.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 06 — Ferramentas de Chamados</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 08 — Documentação e POPs</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 07)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0">
+  <li><strong>Abertura (10 min):</strong> revisão rápida de chamados, categorias e SLAs da ferramenta (Cap. 06) e objetivo do capítulo.</li>
+  <li><strong>Exposição dialogada (30–40 min):</strong> conceitos de SLA/OLA, metas, métricas (MTTA, MTTR, FCR, backlog, cumprimento de SLA), painéis, armadilhas e feedback (NPS/CES).</li>
+  <li><strong>Laboratório guiado (60–70 min):</strong> exportar dados de tickets, calcular métricas em planilha e/ou script, montar relatório mensal e redigir 2 ações corretivas.</li>
+  <li><strong>Compartilhamento (20 min):</strong> apresentação breve dos resultados e discussão de insights.</li>
+  <li><strong>Atividade individual (para casa):</strong> propostas de atividades e questionário deste capítulo.</li>
+</ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">1) SLA, OLA e metas</h3>
+  <p>O Acordo de Nível de Serviço (SLA) é um compromisso formal entre provedor de TI e cliente que define níveis esperados de serviço, como tempo de resposta e de resolução. OLA (Operating Level Agreement) é um acordo interno entre equipes da mesma organização para suportar o cumprimento do SLA. Metas transformam esses acordos em valores mensuráveis e prazos.</p>
+  <p>SLAs precisam ser claros, alcançáveis e alinhados ao valor percebido pelos usuários. OLAs garantem que “o backstage” (ex.: redes, sistemas, segurança) sustente o front do atendimento.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> você configurará metas no relatório e analisará o cumprimento dos SLAs por prioridade.</p>
+
+  <h3 class="h6 fw-bold mt-4">2) Métricas essenciais (MTTA, MTTR, FCR, cumprimento de SLA, backlog)</h3>
+  <p><strong>MTTA</strong> (Mean Time To Ack): tempo médio até o primeiro atendimento (reação). <strong>MTTR</strong> (Mean Time To Resolve/Repair): tempo médio para resolver. <strong>FCR</strong> (First Contact Resolution): taxa de resolução no primeiro contato. <strong>Cumprimento de SLA:</strong> percentual de tickets atendidos dentro do prazo. <strong>Backlog:</strong> volume de tickets em aberto, podendo ser segmentado por idade (ex.: > 7 dias).</p>
+  <p>Essas métricas, quando acompanhadas por categoria/prioridade/canal, indicam onde estão gargalos e oportunidades de automação ou melhoria de processo.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> você calculará essas métricas a partir de uma exportação de tickets.</p>
+
+  <h3 class="h6 fw-bold mt-4">3) Painéis e relatórios</h3>
+  <p>Relatórios consolidados mensais e painéis (dashboards) tornam visíveis tendências e alertas. Um bom painel destaca poucas métricas-chave, metas e variação vs. período anterior, evitando excesso de gráficos que não geram ação.</p>
+  <p>Use segmentações (por prioridade, categoria, origem) e destaque outliers. O objetivo é facilitar decisões: priorização, treinamento, revisão de OLAs ou automações.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> você montará um “Resumo Executivo” com 5 métricas-chave e insights.</p>
+
+  <h3 class="h6 fw-bold mt-4">4) Armadilhas de métricas</h3>
+  <p><strong>Média que esconde extremos:</strong> a média pode mascarar casos críticos; considere mediana e percentis. <strong>Gamefication indesejada:</strong> metas mal desenhadas geram comportamento de “burlar” indicadores. <strong>Volume vs. qualidade:</strong> resolver rápido não significa resolver bem; verifique retrabalho e satisfação.</p>
+  <p>Evite medir tudo; escolha métricas que influenciem decisões e resultados para o usuário.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> você revisará seu relatório para evitar vieses e incluirá pelo menos um percentil.</p>
+
+  <h3 class="h6 fw-bold mt-4">5) Feedback do usuário: NPS e CES</h3>
+  <p><strong>NPS</strong> (Net Promoter Score): mede a probabilidade do usuário recomendar o serviço (0 a 10). <strong>CES</strong> (Customer Effort Score): mede o esforço percebido para resolver a demanda (1 a 7, por exemplo). Complementam as métricas operacionais, trazendo a voz do usuário.</p>
+  <p>Coletar amostras logo após o encerramento do ticket e analisar comentários livres ajuda a identificar pontos de atrito.</p>
+  <p><em>Onde vou aplicar isso no passo a passo:</em> você calculará NPS/CES básicos com dados de pesquisa simples e os conectará a ações corretivas.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Construção de um Relatório Mensal de Suporte com 5 Métricas-Chave</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Exportar dados de tickets, calcular MTTA, MTTR, FCR, cumprimento de SLA e backlog; montar um resumo executivo com insights e 2 ações corretivas.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-1-circle me-2" style="color:var(--cor-principal)"></i>Preparação do conjunto de dados</h3>
+  <p>Você pode usar sua ferramenta de chamados (exportar CSV) ou o conjunto de dados simulado abaixo. Garanta colunas: id, prioridade, categoria, canal, criado_em, primeiro_atendimento_em, resolvido_em, encerrado_em, sla_prazo, fechou_no_primerio_contato, satisfacao_nps, satisfacao_ces.</p>
+  <p class="mb-1"><strong>Exemplo de CSV (simulado)</strong></p>
+  <pre class="language-none"><code>id,prioridade,categoria,canal,criado_em,primeiro_atendimento_em,resolvido_em,encerrado_em,sla_prazo,fechou_primeiro_contato,satisfacao_nps,satisfacao_ces
+1001,Alta,Rede,Portal,2024-05-02 08:10,2024-05-02 08:18,2024-05-02 09:40,2024-05-02 10:00,2024-05-02 12:00,true,9,2
+1002,Média,Software,E-mail,2024-05-03 13:00,2024-05-03 15:30,2024-05-05 10:05,2024-05-05 11:00,2024-05-04 18:00,false,6,4
+1003,Baixa,Hardware,Telefone,2024-05-04 09:20,2024-05-04 10:00,2024-05-10 16:30,2024-05-10 17:00,2024-05-12 18:00,false,7,3
+1004,Alta,Software,Portal,2024-05-06 07:55,2024-05-06 08:05,2024-05-06 08:40,2024-05-06 09:00,2024-05-06 10:00,true,10,1
+1005,Média,Conta,Auricular,2024-05-06 14:10,2024-05-06 16:50,2024-05-07 09:10,2024-05-07 09:15,2024-05-07 18:00,false,5,5</code></pre>
+  <div class="alert alert-light border mt-3 mb-0" role="note">
+    <strong>Dica:</strong> Se sua exportação tiver outros nomes de coluna, ajuste os cabeçalhos na planilha/script para corresponder aos esperados.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-2-circle me-2" style="color:var(--cor-principal)"></i>Cálculo em planilha (sem programação)</h3>
+  <p>Abra o CSV em uma planilha. Adicione colunas derivadas em horas:</p>
+  <ul>
+    <li><strong>TT_Ack_h (MTTA por ticket):</strong> = (primeiro_atendimento_em - criado_em) em horas.</li>
+    <li><strong>TT_Resolve_h (TTR por ticket):</strong> = (resolvido_em - criado_em) em horas.</li>
+    <li><strong>Dentro_SLA:</strong> = SE(encerrado_em ≤ sla_prazo; VERDADEIRO; FALSO).</li>
+  </ul>
+  <p class="mb-1"><strong>Exemplos de fórmulas (Excel/LibreOffice, assumindo datas em colunas E, F, G, H, I):</strong></p>
+  <pre class="language-none"><code>// Converter diferença de data/hora para horas:
+= (F2 - E2) * 24            // TT_Ack_h
+= (G2 - E2) * 24            // TT_Resolve_h
+
+// Cumprimento de SLA:
+= SE(H2 &lt;= I2; VERDADEIRO; FALSO)
+
+// Métricas agregadas (ex.: média TT_Ack_h):
+= MÉDIA(Tabela[TT_Ack_h])
+
+// FCR (fechou no primeiro contato):
+= MÉDIASE(Tabela[fechou_primeiro_contato];VERDADEIRO)
+
+// Cumprimento de SLA (%):
+= MÉDIASE(Tabela[Dentro_SLA];VERDADEIRO)</code></pre>
+  <div class="alert alert-light border mt-3 mb-0" role="note">
+    <strong>Validação:</strong> filtre por prioridade e verifique se a média de Alta não mascara extremos; calcule também a mediana usando =MEDiana(Tabela[TT_Resolve_h]).
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-3-circle me-2" style="color:var(--cor-principal)"></i>Cálculo por script (Python opcional)</h3>
+  <p>Se preferir automatizar, use Python com pandas para calcular as métricas e salvar um resumo.</p>
+  <p class="mb-1"><strong>Instalação de dependências</strong></p>
+  <pre class="language-bash"><code>python -m venv .venv
+. .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install pandas pyjanitor</code></pre>
+  <p class="mb-1"><strong>Script Python</strong></p>
+  <pre class="language-python"><code>import pandas as pd
+
+df = pd.read_csv('tickets.csv', parse_dates=[
+    'criado_em', 'primeiro_atendimento_em', 'resolvido_em', 'encerrado_em', 'sla_prazo'
+])
+
+# Derivadas em horas
+df['TT_Ack_h'] = (df['primeiro_atendimento_em'] - df['criado_em']).dt.total_seconds() / 3600
+df['TT_Resolve_h'] = (df['resolvido_em'] - df['criado_em']).dt.total_seconds() / 3600
+df['Dentro_SLA'] = df['encerrado_em'] <= df['sla_prazo']
+
+# FCR (booleano)
+df['FCR'] = df['fechou_primeiro_contato'].astype(bool)
+
+# Agregados
+resumo = {
+    'MTTA_h_media': round(df['TT_Ack_h'].mean(), 2),
+    'MTTA_h_mediana': round(df['TT_Ack_h'].median(), 2),
+    'MTTR_h_media': round(df['TT_Resolve_h'].mean(), 2),
+    'MTTR_h_mediana': round(df['TT_Resolve_h'].median(), 2),
+    'FCR_%': round(100 * df['FCR'].mean(), 1),
+    'Cumprimento_SLA_%': round(100 * df['Dentro_SLA'].mean(), 1),
+    'Backlog_qtd': int((df['encerrado_em'].isna()).sum())  # se houver tickets em aberto
+}
+
+# Segmentação por prioridade
+por_prioridade = df.groupby('prioridade').agg(
+    MTTA_h_media=('TT_Ack_h', 'mean'),
+    MTTR_h_media=('TT_Resolve_h', 'mean'),
+    FCR_pct=('FCR', lambda s: 100*s.mean()),
+    SLA_pct=('Dentro_SLA', lambda s: 100*s.mean())
+).round(2)
+
+print('Resumo geral:')
+print(pd.Series(resumo))
+print('\nPor prioridade:')
+print(por_prioridade)
+
+# NPS/CES
+nps = df['satisfacao_nps'].dropna()
+promotores = (nps >= 9).sum()
+detratores = (nps <= 6).sum()
+n = len(nps)
+nps_score = ((promotores - detratores) / n * 100) if n else None
+
+ces = df['satisfacao_ces'].dropna()
+ces_medio = ces.mean() if len(ces) else None
+
+print(f'\nNPS: {nps_score:.1f}' if nps_score is not None else 'NPS: s/dados')
+print(f'CES médio: {ces_medio:.2f}' if ces_medio is not None else 'CES: s/dados')</code></pre>
+  <div class="alert alert-light border mt-3 mb-0" role="note">
+    <strong>Dica:</strong> Exporte os resultados para CSV/HTML para montar seu relatório e anexar ao dossiê do capítulo.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-4-circle me-2" style="color:var(--cor-principal)"></i>Consultas SQL (se o ITSM usa banco relacional)</h3>
+  <p>Adapte nomes de tabelas/colunas conforme seu ambiente. As consultas abaixo partem de uma tabela tickets com campos chave.</p>
+  <pre class="language-sql"><code>-- MTTA e MTTR médios (em horas)
+SELECT
+  AVG(EXTRACT(EPOCH FROM (primeiro_atendimento_em - criado_em))/3600) AS mtta_h,
+  AVG(EXTRACT(EPOCH FROM (resolvido_em - criado_em))/3600) AS mttr_h
+FROM tickets
+WHERE criado_em &gt;= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
+  AND criado_em &lt; DATE_TRUNC('month', CURRENT_DATE);
+
+-- FCR e Cumprimento de SLA
+SELECT
+  100.0 * AVG(CASE WHEN fechou_primeiro_contato THEN 1 ELSE 0 END) AS fcr_pct,
+  100.0 * AVG(CASE WHEN encerrado_em &lt;= sla_prazo THEN 1 ELSE 0 END) AS sla_pct
+FROM tickets
+WHERE criado_em BETWEEN '2024-05-01' AND '2024-05-31';
+
+-- Segmentação por prioridade
+SELECT prioridade,
+  ROUND(AVG(EXTRACT(EPOCH FROM (primeiro_atendimento_em - criado_em))/3600),2) AS mtta_h,
+  ROUND(AVG(EXTRACT(EPOCH FROM (resolvido_em - criado_em))/3600),2) AS mttr_h,
+  ROUND(100.0 * AVG(CASE WHEN fechou_primeiro_contato THEN 1 ELSE 0 END),1) AS fcr_pct,
+  ROUND(100.0 * AVG(CASE WHEN encerrado_em &lt;= sla_prazo THEN 1 ELSE 0 END),1) AS sla_pct
+FROM tickets
+GROUP BY prioridade
+ORDER BY FIELD(prioridade,'Alta','Média','Baixa');</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-5-circle me-2" style="color:var(--cor-principal)"></i>Montagem do Relatório e Insights</h3>
+  <p>Crie um “Resumo Executivo” (1 página) com: MTTA, MTTR, FCR, Cumprimento de SLA e Backlog. Inclua comparativo com mês anterior e segmentação por prioridade.</p>
+  <ul>
+    <li><strong>Visual:</strong> um card por métrica, meta-alvo e variação (%).</li>
+    <li><strong>Texto:</strong> 3–5 bullet points com achados e causas prováveis.</li>
+    <li><strong>Ações corretivas:</strong> defina 2 ações SMART (clara, mensurável, responsável, prazo).</li>
+  </ul>
+  <p class="mb-1"><strong>Modelo de texto</strong></p>
+  <pre class="language-none"><code>Resumo Executivo — Maio/2024
+- MTTA 0,4h (meta 0,5h) — OK; MTTR 10,2h (meta 12h) — OK.
+- FCR 62% (meta 60%) — acima da meta, principalmente em "Conta".
+- SLA 88% (meta 90%) — abaixo da meta em "Software" (82%).
+- Backlog: 7 tickets &gt; 7 dias — concentrados em prioridade Média.
+
+Ações:
+1) Revisar OLA entre N1 e N2 para categoria "Software" (responsável: Coord. Aplicações, prazo: 10 dias).
+2) Criar macro/FAQ para reset de senha no portal (responsável: N1, prazo: 7 dias) — expectativa de +10 p.p. em FCR de "Conta".</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-6-circle me-2" style="color:var(--cor-principal)"></i>Incorporação de NPS/CES</h3>
+  <p>Consolide NPS e CES do período. Mostre NPS total e por categoria, e CES médio. Conecte comentários a tickets amostrais e proponha uma melhoria de experiência (redução de esforço).</p>
+  <p class="mb-1"><strong>Exemplo de cálculo NPS (planilha):</strong></p>
+  <pre class="language-none"><code>// Contagens:
+Promotores = CONT.SE(nps; ">=9")
+Detratores = CONT.SE(nps; "<=6")
+Total = CONT.VALORES(nps)
+
+NPS = (Promotores - Detratores) / Total * 100</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-7-circle me-2" style="color:var(--cor-principal)"></i>Checklist de validação do relatório</h3>
+  <ul class="mb-0">
+    <li>Datas e fusos verificados; sem campos vazios críticos.</li>
+    <li>Incluiu mediana ou percentil p90 para MTTR.</li>
+    <li>Segmentou por prioridade e categoria principal.</li>
+    <li>Incluiu 2 ações corretivas SMART vinculadas às métricas.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a análise de desempenho e propor melhorias sustentadas por dados.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol class="mb-0">
+    <li><strong>Derivação 1 — Meta por prioridade:</strong> Defina metas distintas de MTTA/MTTR para Alta, Média e Baixa e simule o impacto no cumprimento de SLA do mês seguinte.</li>
+    <li><strong>Derivação 2 — Painel simples:</strong> Construa um painel na planilha (ou BI gratuito) com 5 cartões e um gráfico de tendência de MTTR nos últimos 3 meses.</li>
+    <li><strong>Derivação 3 — Qualidade do primeiro contato:</strong> Analise 10 tickets com FCR=false e proponha uma melhoria de base de conhecimento (título, tags, 5 passos).</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+  <ul class="mb-0">
+    <li>Correção dos cálculos (amostragem verificada).</li>
+    <li>Clareza e organização do relatório/painel.</li>
+    <li>Aderência a metas realistas e conexão com OLAs.</li>
+    <li>Qualidade das ações corretivas (SMART) e impacto esperado.</li>
+    <li>Uso adequado de segmentações e tratamento de outliers.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Leitura: ITIL v4 — práticas de Medição e Relato e Melhoria Contínua.</li><li>Artigos sobre métricas de Service Desk: MTTA/MTTR vs. satisfação do usuário.</li><li>Boas práticas de construção de dashboards (ex.: princípios de design de dados).</li><li>Comparação de NPS, CSAT e CES em operações de suporte.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 07</h2>
+        <ul><li>Relatório mensal com 5 métricas-chave e segmentações.</li><li>Resumo executivo com 3–5 insights e 2 ações corretivas SMART.</li><li>Planilha/script utilizado para os cálculos (com comentários/fórmulas visíveis).</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 06 — Ferramentas de Chamados</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 08 — Documentação e POPs</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Suporte e Gestão da Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"O que melhor descreve um SLA em um contexto de suporte de TI?","alternativas":{"A":"Acordo interno entre equipes de TI para dividir tarefas.","B":"Contrato de hardware para reposição de peças em garantia.","C":"Compromisso formal de níveis de serviço entre TI e cliente.","D":"Checklist operacional de rotina do service desk.","E":"Relatório mensal de desempenho e métricas."},"correta":"C"},{"id":"q2","titulo":"Qual métrica mede o tempo médio até o primeiro atendimento (reação) após a abertura do ticket?","alternativas":{"A":"MTTR","B":"FCR","C":"Backlog","D":"MTTA","E":"NPS"},"correta":"D"},{"id":"q3","titulo":"Sobre FCR (First Contact Resolution), assinale a alternativa correta:","alternativas":{"A":"É o tempo total para reparar um incidente crítico.","B":"Mede a taxa de resolução no primeiro contato com o usuário.","C":"É a soma do tempo de espera em fila e de trabalho ativo.","D":"É a porcentagem de tickets fora do SLA.","E":"É o índice de satisfação geral do usuário."},"correta":"B"},{"id":"q4","titulo":"Qual é uma armadilha comum ao usar apenas médias em relatórios de MTTR?","alternativas":{"A":"As médias destacam outliers e casos extremos.","B":"A média sempre representa a maioria dos casos.","C":"A média pode esconder outliers; usar mediana/percentis ajuda.","D":"A média impede o cálculo de SLA.","E":"A média é obrigatória pelo ITIL v4."},"correta":"C"},{"id":"q5","titulo":"Qual combinação é mais adequada para avaliar qualidade percebida pelo usuário?","alternativas":{"A":"MTTA e MTTR apenas.","B":"Backlog e taxa de escalonamento.","C":"Cumprimento de SLA e idade do ticket.","D":"NPS/CES e análise de comentários.","E":"Quantidade de tickets por agente."},"correta":"D"},{"id":"q6","titulo":"OLAs existem principalmente para:","alternativas":{"A":"Registrar satisfação do usuário.","B":"Alinhar acordos internos e suportar o cumprimento dos SLAs.","C":"Calcular custos de licenças.","D":"Definir severidade de incidentes críticos.","E":"Substituir os SLAs com clientes."},"correta":"B"},{"id":"q7","titulo":"Ao observar SLA abaixo da meta na categoria “Software”, a ação mais coerente é:","alternativas":{"A":"Aumentar indiscriminadamente a prioridade de todos os tickets.","B":"Reduzir a janela de manutenção sem análise de risco.","C":"Revisar OLAs/fluxos entre N1 e N2 e reforçar base de conhecimento.","D":"Encerrar tickets antigos para melhorar estatísticas.","E":"Ignorar o desvio e aguardar o próximo mês."},"correta":"C"},{"id":"q8","titulo":"O backlog é melhor descrito como:","alternativas":{"A":"Tempo médio entre aberturas consecutivas de tickets.","B":"Quantidade de tickets em aberto (ex.: por idade e prioridade).","C":"Taxa de tickets resolvidos no primeiro contato.","D":"Proporção de tickets fora do SLA.","E":"Soma de MTTA e MTTR."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Exportei os dados dos tickets com as colunas necessárias."},{"id":"c2","texto":"Calculei MTTA e MTTR por ticket e os agregados (média e mediana)."},{"id":"c3","texto":"Calculei FCR e Cumprimento de SLA (%)."},{"id":"c4","texto":"Analisei backlog por idade e prioridade."},{"id":"c5","texto":"Montei um resumo executivo com 5 métricas-chave."},{"id":"c6","texto":"Incluí 2 ações corretivas SMART relacionadas aos achados."},{"id":"c7","texto":"Verifiquei armadilhas de métricas e incluí mediana/percentil."},{"id":"c8","texto":"Calculei NPS/CES e conectei feedback a melhorias."}];
+    const CHECKLIST_KEY = 'SGTI_CAP07_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

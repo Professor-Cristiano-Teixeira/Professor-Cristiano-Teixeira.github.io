@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 — Gestão de Incidentes</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo04.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SGTI</span>
+        <span style="color: var(--cor-principal);">Suporte e Gestão da Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">01 — Fundamentos de Suporte Técnico e ITSM</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">02 — Comunicação e Relacionamento no Atendimento</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">03 — ITIL v4 e Sistema de Valor do Serviço</a></li>
+              <li><a class="dropdown-item active" href="capitulo04.html">04 — Gestão de Incidentes</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">05 — Gestão de Problemas</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">06 — Ferramentas de Chamados e Níveis de Suporte</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">07 — SLAs, OLAs e Métricas de Desempenho</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">08 — Documentação Técnica e POPs</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 04 — Gestão de Incidentes</h1>
+          <p class="mb-2"><strong>Carga:</strong> Não especificado</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Atendimento e operação de Service Desk (simulado)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ferramenta ITSM (simulada ou livre), planilha e editor de texto</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Definir incidente e diferenciar de requisição e problema.</li><li>Classificar incidentes por categoria, impacto e urgência para calcular prioridade.</li><li>Aplicar um fluxo completo: registro, triagem, workaround, resolução e encerramento.</li><li>Realizar escalonamento funcional e hierárquico conforme critérios predefinidos.</li><li>Medir tempos (primeira resposta, resolução) e verificar aderência a SLAs básicos.</li><li>Documentar evidências e atualização do chamado de forma clara e objetiva.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Classificar e priorizar demandas de suporte com base em impacto/urgência.</li><li>Executar diagnóstico sistemático, aplicar workaround e validar solução.</li><li>Comunicar-se de forma clara no registro/atualizações do chamado.</li><li>Escalonar corretamente conforme critérios técnicos e de negócio.</li><li>Monitorar métricas essenciais (MTTA, MTTR) e cumprir SLAs.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 03</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 05</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 04)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul><li>Aquecimento (10 min): revisão rápida de conceitos ITIL v4, diferença entre incidente, requisição e problema.</li><li>Exposição (25 min): impacto, urgência e matriz de prioridade; fluxo de triagem e workaround; critérios de escalonamento.</li><li>Demonstração (20 min): registro e tratamento de um incidente em ferramenta ITSM simulada, destacando campos essenciais e atualizações.</li><li>Prática em bancada (50–70 min): dupla ou trio registra, classifica e resolve 2 incidentes propostos; cronometra tempos (primeira resposta e resolução).</li><li>Debrief (15 min): comparar métricas, identificar gargalos e oportunidades de melhoria contínua.</li><li>Tarefa (extra): documentar aprendizagens e criar mini guia de triagem para a equipe.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-2">
+          <h3 class="h6 fw-bold">1) O que é um incidente?</h3>
+          <p>Incidente é uma interrupção não planejada ou redução da qualidade de um serviço de TI. Exemplos: sem acesso à internet, impressora não imprime, sistema lento ou erro ao abrir um aplicativo essencial.</p>
+          <p>Não confunda com requisição de serviço (pedido padrão, como criar um usuário ou instalar um software) e problema (causa raiz de um ou mais incidentes). Aqui o foco é restaurar o serviço o mais rápido possível.</p>
+          <p>Onde vou aplicar isso: no registro correto do chamado e na definição do fluxo de atendimento, garantindo foco em restaurar a operação.</p>
+
+          <hr>
+          <h3 class="h6 fw-bold">2) Categorias, impacto, urgência e prioridade</h3>
+          <p>Categorizar é rotular o incidente conforme o tipo (ex.: rede, hardware, software, acesso). Isso ajuda no roteamento para a fila correta e em relatórios.</p>
+          <p>Impacto mede quão amplo e grave é o efeito (quantos usuários/serviços, criticidade do negócio). Urgência mede quanto tempo podemos esperar até impactos severos. A prioridade resulta da combinação de impacto e urgência.</p>
+          <p>Uma matriz de prioridade padroniza a classificação e orienta prazos (SLA). Exemplo: impacto alto + urgência alta → prioridade P1 (crítica); impacto baixo + urgência baixa → P4 (baixa).</p>
+          <p>Onde vou aplicar isso: no passo de triagem para definir prioridade e prazos do SLA.</p>
+
+          <div class="alert alert-light border mt-2">
+            <strong>Exemplo de matriz (JSON para consulta rápida):</strong>
+            <pre class="language-json"><code>{
+  "impacto": ["Alto", "Médio", "Baixo"],
+  "urgencia": ["Alta", "Média", "Baixa"],
+  "prioridade": {
+    "Alto":   {"Alta":"P1","Média":"P2","Baixa":"P3"},
+    "Médio":  {"Alta":"P2","Média":"P3","Baixa":"P4"},
+    "Baixo":  {"Alta":"P3","Média":"P4","Baixa":"P4"}
+  }
+}</code></pre>
+          </div>
+
+          <hr>
+          <h3 class="h6 fw-bold">3) Fluxo de triagem, workaround e resolução</h3>
+          <p>Triagem é a análise inicial para confirmar se é incidente, coletar sintomas, reproduzir, verificar escopo, categoria e prioridade. Um bom registro evita retrabalho.</p>
+          <p>Workaround (solução de contorno) restaura o serviço temporariamente, mesmo sem corrigir a causa raiz. Ex.: reiniciar um serviço, usar rota alternativa de rede, trocar um dispositivo por outro.</p>
+          <p>Resolução é a correção que resolve o incidente. Pode exigir diagnóstico mais profundo, consulta à base de conhecimento ou escalonamento para N2/N3.</p>
+          <p>Onde vou aplicar isso: nos passos de atendimento, garantindo primeiro a continuidade (workaround) e depois a resolução definitiva.</p>
+
+          <hr>
+          <h3 class="h6 fw-bold">4) Critérios de escalonamento</h3>
+          <p>Escalonamento funcional: encaminhar para uma equipe com maior especialização (ex.: rede, banco de dados) quando a solução ultrapassa a competência/nivel de acesso atual.</p>
+          <p>Escalonamento hierárquico: acionar liderança/gestão quando há risco de violar SLA crítico, impacto amplo ou necessidade de tomada de decisão (comunicação ampla, janela de mudança emergencial).</p>
+          <p>Defina gatilhos objetivos: “sem solução em 30 min para P1” ou “atingiu 80% do SLA de P2”.</p>
+          <p>Onde vou aplicar isso: na decisão de transferir o chamado para outra fila ou acionar gestores.</p>
+
+          <hr>
+          <h3 class="h6 fw-bold">5) SLAs, tempos e qualidade do registro</h3>
+          <p>SLA (Acordo de Nível de Serviço) define metas como tempo de primeira resposta (MTTA) e de resolução (MTTR). Para cumprir, é essencial registrar cada ação e manter o usuário informado.</p>
+          <p>Um bom registro contém: resumo claro, descrição com passos para reproduzir, impacto, urgência, evidências (prints/logs), tentativas realizadas, solução/validação e comunicação de encerramento.</p>
+          <p>Onde vou aplicar isso: em cada atualização do ticket e na comunicação final com o usuário.</p>
+
+          <hr>
+          <h3 class="h6 fw-bold">6) Boas práticas de comunicação no incidente</h3>
+          <p>Seja objetivo, educado e transparente. Use linguagem técnica com explicações curtas quando necessário. Indique prazos e próximos passos.</p>
+          <p>Evite jargões sem contexto e promessas de tempo sem base. Registre todo contato relevante no ticket.</p>
+          <p>Onde vou aplicar isso: nos campos de atualização do chamado e e-mails automáticos de status.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Operação completa de um incidente (da abertura ao encerramento)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Registrar, classificar, priorizar, tratar (workaround/solução), escalonar quando necessário, validar e encerrar um incidente cumprindo SLAs básicos e boas práticas de documentação.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-2">
+          <h3 class="h6 fw-bold">Preparação do ambiente</h3>
+          <ol>
+            <li>Abra sua ferramenta ITSM (simulada ou livre) e garanta acesso a uma fila de “Incidentes”.</li>
+            <li>Tenha uma planilha simples para medir tempos e anotar aprendizados.</li>
+            <li>Defina a matriz de prioridade (impacto x urgência) conforme o exemplo da teoria.</li>
+          </ol>
+          <div class="mt-2">
+            <p class="mb-1"><strong>Modelo de matriz (YAML) para colar na wiki:</strong></p>
+            <pre class="language-yaml"><code>prioridade:
+  Alto:
+    Alta: P1
+    Média: P2
+    Baixa: P3
+  Médio:
+    Alta: P2
+    Média: P3
+    Baixa: P4
+  Baixo:
+    Alta: P3
+    Média: P4
+    Baixa: P4</code></pre>
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Registro do incidente</h3>
+          <p>Crie um novo ticket com os campos essenciais. Use o modelo abaixo.</p>
+          <pre class="language-json"><code>{
+  "tipo": "Incidente",
+  "solicitante": "usuario@escola.edu",
+  "resumo": "Sem acesso à internet no laboratório 2",
+  "descricao": "Usuários do Lab2 relatam perda total de conexão desde 08:15. Testes: ping para gateway falha; outros labs OK.",
+  "categoria": "Rede &gt; Conectividade",
+  "impacto": "Alto",
+  "urgencia": "Alta",
+  "prioridade": "P1",
+  "anexos": ["print_ping_gateway.png"],
+  "sla": {"primeira_resposta": "15min", "resolucao": "2h"}
+}</code></pre>
+          <p>Valide com o usuário a descrição. Se necessário, edite o ticket para melhorar clareza e adicionar evidências.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">2) Triagem e primeira resposta</h3>
+          <ol>
+            <li>Confirme se é incidente (e não requisição). Reproduza o sintoma quando possível.</li>
+            <li>Revise categoria, impacto e urgência; aplique a matriz para confirmar a prioridade.</li>
+            <li>Envie a primeira resposta informando que está em tratamento e o próximo passo.</li>
+          </ol>
+          <p class="mb-1"><strong>Modelo de primeira resposta (e-mail/nota no ticket):</strong></p>
+          <pre class="language-text"><code>Olá, {{NOME}}.
+Recebemos seu incidente ({{ID}}) e iniciamos o atendimento.
+Prioridade: {{PRIORIDADE}}. Próximo passo: testes de conectividade no Lab2.
+Nova atualização em até 15 minutos.
+Atenciosamente, Service Desk.</code></pre>
+          <p class="mb-1"><strong>Registrar tempo de primeira resposta (bash com data/hora):</strong></p>
+          <pre class="language-bash"><code># exemplo simples de captura de timestamps
+ABERTURA="2024-04-10 08:15:00"
+PRIMEIRA_RESPOSTA="2024-04-10 08:20:00"
+python3 - &lt;&lt;'PY'
+from datetime import datetime
+a = datetime.strptime("2024-04-10 08:15:00","%Y-%m-%d %H:%M:%S")
+b = datetime.strptime("2024-04-10 08:20:00","%Y-%m-%d %H:%M:%S")
+print("MTTA (min):", int((b-a).total_seconds()/60))
+PY</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">3) Workaround e testes</h3>
+          <p>Tente restaurar o serviço rapidamente.</p>
+          <ul>
+            <li>Se rede: testar cabo/switch, reiniciar porta, verificar DHCP e gateway.</li>
+            <li>Se software: reiniciar serviço, limpar cache, usuário alternativo.</li>
+            <li>Se hardware: substituição temporária por item de estoque.</li>
+          </ul>
+          <p class="mb-1"><strong>Exemplo de nota técnica no ticket:</strong></p>
+          <pre class="language-text"><code>08:28 - Verificado switch SW-LAB2 porta 10 down. Reativada porta 10.
+08:31 - Conectividade restabelecida. Usuário confirmou navegação.</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">4) Escalonamento (quando necessário)</h3>
+          <p>Use critérios objetivos. Se P1 sem progresso em 30 min, escalonar para equipe de Rede (N2) e notificar coordenação.</p>
+          <pre class="language-text"><code>Gatilho de escalonamento P1:
+- Sem workaround em 30 min → encaminhar N2 (Rede) e notificar gestor de TI.
+- Impacto ampliado (novo laboratório afetado) → escalonamento hierárquico imediato.</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">5) Resolução definitiva e validação</h3>
+          <ol>
+            <li>Identifique a causa (quando possível) e aplique correção.</li>
+            <li>Valide com o usuário: “O serviço está normal?”</li>
+            <li>Registre solução detalhada e marcadores para base de conhecimento.</li>
+          </ol>
+          <pre class="language-text"><code>08:45 - Causa: porta do switch desabilitada após pico de energia.
+Ação: reconfigurada porta (enable + auto-negociação) e aplicada atualização de firmware programada.
+Validação: 3 máquinas testadas com sucesso. Usuário confirma normalização.</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">6) Encerramento e comunicação</h3>
+          <p>Ao encerrar, inclua resumo, solução e tempos. Ofereça reabertura caso o problema retorne.</p>
+          <pre class="language-text"><code>Incidente {{ID}} encerrado.
+Resumo: Internet indisponível no Lab2 devido a porta desabilitada no SW-LAB2.
+Workaround: reativação de porta.
+Solução: reconfiguração e atualização de firmware.
+MTTA: 5 min | MTTR: 30 min.
+Se reaparecer, responda a este e-mail ou reabra o ticket.</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">7) Métricas básicas (planilha ou script)</h3>
+          <p>Registre tempos de abertura, primeira resposta e resolução para cada ticket.</p>
+          <pre class="language-csv"><code>ID,Prioridade,Abertura,PrimeiraResposta,Resolucao
+INC-1024,P1,2024-04-10 08:15,2024-04-10 08:20,2024-04-10 08:45
+INC-1025,P3,2024-04-10 09:10,2024-04-10 09:30,2024-04-10 11:00</code></pre>
+          <p class="mb-1"><strong>Cálculo simples de MTTR (Python opcional):</strong></p>
+          <pre class="language-python"><code>from datetime import datetime
+def mins(a,b): 
+    a=datetime.strptime(a,"%Y-%m-%d %H:%M")
+    b=datetime.strptime(b,"%Y-%m-%d %H:%M")
+    return int((b-a).total_seconds()/60)
+print("INC-1024 MTTR (min):", mins("2024-04-10 08:15","2024-04-10 08:45"))</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o fluxo de gestão de incidentes e a medição de tempos com registros claros e escalonamento correto.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol>
+            <li>Simulação 1 (Rede): em dupla, reproduza “Sem acesso à internet em 1 sala”. Registre, classifique (impacto/urgência), aplique workaround e resolva. Meça MTTA e MTTR.</li>
+            <li>Simulação 2 (Aplicativo): “Erro ao abrir o editor de texto em 3 máquinas”. Registrar, pesquisar em base de conhecimento, aplicar correção e validar.</li>
+            <li>Escalonamento: crie um cenário em que um P2 atinge 80% do SLA sem solução. Faça escalonamento funcional e registre a notificação hierárquica.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold mb-2">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Registro claro: resumo, descrição, evidências e categorização corretas.</li>
+            <li>Aplicação adequada da matriz de prioridade e cumprimento de SLAs simulados.</li>
+            <li>Execução de workaround seguro e validação com usuário.</li>
+            <li>Escalonamento conforme gatilhos definidos e comunicação apropriada.</li>
+            <li>Apresentação de métricas (MTTA/MTTR) e lições aprendidas.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>ITIL v4 — práticas de “Incident Management”: leia o resumo e compare com seu fluxo.</li><li>Métricas de Service Desk: MTTA, MTTR e “First Contact Resolution” (FCR) — quando cada uma é mais útil.</li><li>Modelos de comunicação com usuários em incidentes críticos: tom, frequência e transparência.</li><li>Kanban aplicado ao suporte: como visualizar filas e limitar trabalho em progresso.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 04</h2>
+        <ul><li>2 tickets de incidente completos (com evidências, prioridade, solução e validação).</li><li>Matriz de prioridade documentada (wiki/planilha) usada na prática.</li><li>Planilha simples com tempos de abertura, primeira resposta e resolução (MTTA/MTTR) e breve análise.</li><li>Checklist de triagem pessoal preenchido.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 03</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 05</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — CC0 1.0 Universal &nbsp; Suporte e Gestão da Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual opção define corretamente um incidente segundo boas práticas de ITSM?","alternativas":{"A":"Pedido padrão de um usuário por um novo serviço.","B":"Interrupção não planejada ou redução de qualidade de um serviço de TI.","C":"Documento que descreve passos de instalação.","D":"Mudança aprovada para um sistema em produção.","E":"Causa raiz de múltiplos erros em produção."},"correta":"B"},{"id":"q2","titulo":"Sobre impacto, urgência e prioridade, assinale a correta:","alternativas":{"A":"A prioridade é definida apenas pela experiência do técnico.","B":"Impacto e urgência são iguais; não há diferença prática.","C":"A prioridade resulta da combinação de impacto e urgência segundo uma matriz padronizada.","D":"Urgência mede quantos usuários são afetados; impacto mede o tempo disponível.","E":"A matriz de prioridade não se relaciona com SLAs."},"correta":"C"},{"id":"q3","titulo":"O que é um workaround no contexto de incidentes?","alternativas":{"A":"Análise de causa raiz definitiva.","B":"Criação de um novo serviço para o usuário.","C":"Solução temporária para restaurar o serviço sem corrigir a causa raiz.","D":"Aprovação de uma mudança emergencial pelo CAB.","E":"Encerramento automático de tickets inativos."},"correta":"C"},{"id":"q4","titulo":"Qual gatilho é adequado para escalonamento hierárquico?","alternativas":{"A":"Quando o técnico deseja treinar outra equipe.","B":"Quando há risco de violar SLA crítico e comunicação ampla é necessária.","C":"Sempre que o ticket é P3.","D":"Quando o usuário pede para falar com o gestor por qualquer motivo.","E":"Quando o incidente foi resolvido no primeiro contato."},"correta":"B"},{"id":"q5","titulo":"Qual campo NÃO é essencial no registro inicial de um incidente?","alternativas":{"A":"Resumo claro e objetivo.","B":"Descrição com passos para reproduzir.","C":"Categoria e prioridade.","D":"Evidências (quando disponíveis).","E":"Plano de projeto de 6 meses para melhorias."},"correta":"E"},{"id":"q6","titulo":"MTTA e MTTR significam, respectivamente:","alternativas":{"A":"Tempo médio até atendimento e tempo médio total de registro.","B":"Tempo médio até primeira resposta e tempo médio de resolução.","C":"Tempo máximo de resposta e tempo mínimo de reparo.","D":"Taxa média de falhas e taxa média de retorno.","E":"Tempo médio de aprovação e tempo médio de teste."},"correta":"B"},{"id":"q7","titulo":"Ao encerrar um incidente, qual prática é recomendada?","alternativas":{"A":"Encerrar sem consultar o usuário para ganhar tempo.","B":"Excluir evidências para reduzir o tamanho do ticket.","C":"Registrar solução, tempos e validar com o usuário se o serviço foi restaurado.","D":"Alterar a prioridade para P4 para melhorar as métricas.","E":"Marcar como problema automaticamente."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Classifiquei o ticket corretamente como incidente (e não requisição/problema)."},{"id":"c2","texto":"Defini categoria, impacto e urgência com base nas evidências."},{"id":"c3","texto":"Apliquei a matriz e atribuí a prioridade correta (P1–P4)."},{"id":"c4","texto":"Enviei a primeira resposta dentro do SLA e registrei o horário (MTTA)."},{"id":"c5","texto":"Apliquei workaround seguro quando necessário e documentei os passos."},{"id":"c6","texto":"Escalonei funcional/hierarquicamente quando atingidos os gatilhos."},{"id":"c7","texto":"Registrei a solução, validei com o usuário e encerrei o ticket."},{"id":"c8","texto":"Atualizei a planilha/relatório com MTTA e MTTR do atendimento."}];
+    const CHECKLIST_KEY = 'chk_sgti_cap04_v1';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>
