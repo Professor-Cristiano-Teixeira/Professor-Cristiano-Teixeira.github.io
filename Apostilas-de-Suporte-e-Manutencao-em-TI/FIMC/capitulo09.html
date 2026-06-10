@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 09 — Unidades de armazenamento e sistemas de arquivos</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo09.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">FIMC</span>
+        <span style="color: var(--cor-principal);">Fundamentos de Informática para Manutenção de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Panorama de TI</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Bit, Byte e unidades</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Sistemas numéricos</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Álgebra Booleana</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Evolução dos computadores</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Evolução dos SO</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Arquitetura do computador</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Periféricos e interfaces</a></li>
+              <li><a class="dropdown-item active" href="capitulo09.html">Cap. 09 — Armazenamento e sistemas de arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — BIOS/UEFI e boot</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Tipos de SO</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Estrutura interna do SO</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Licenciamento de software</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Máquina de camadas</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Classificação de softwares</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Serviços e ferramentas</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 09 — Unidades de armazenamento e sistemas de arquivos</h1>
+          <p class="mb-2"><strong>Carga:</strong> —</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> —</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> —</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Diferenciar HDD, SSD, memórias flash e mídias removíveis, reconhecendo vantagens, limitações e usos típicos.</li><li>Explicar conceitos básicos de setores, clusters/blocos, partições (MBR/GPT) e como isso impacta desempenho e organização.</li><li>Identificar características gerais de sistemas de arquivos (FAT32, exFAT, NTFS, EXT4) e indicar quando usar cada um.</li><li>Interpretar especificações técnicas (capacidade, interface, RPM, TBW, IOPS) para selecionar o dispositivo adequado a um cenário.</li><li>Aplicar procedimentos seguros de identificação, formatação e verificação de unidades em ambientes Windows e Linux.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>MSI01 — base conceitual para montagem/diagnóstico (armazenamento e sistema de arquivos).</li><li>MSI19 — uso de sistemas informatizados: identificação de partições e SO.</li><li>MSI1801/MSI1802 — compreensão de fundamentos e serviços de TI relacionados ao armazenamento.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 08 — Periféricos e interfaces</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 10 — Processo de inicialização: BIOS/UEFI e boot</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 09)</h2>
+        <div class="card-soft bg-white p-4 mt-3">1) Abertura (5 min): contextualização do papel do armazenamento no desempenho e confiabilidade do PC. 2) Exposição dialogada (25–30 min): HDD x SSD; memórias flash; partições e sistemas de arquivos; impacto prático no uso cotidiano. 3) Demonstração guiada (15–20 min): leitura de especificações técnicas (folhas de dados e lojas), identificação de métricas-chave e comparação. 4) Atividade orientada (25–30 min): seleção de 3 dispositivos para 3 cenários com justificativa. 5) Revisão (10 min): síntese dos critérios de escolha, riscos e boas práticas (backup, formatação, verificação). 6) Questionário formativo (10–15 min) e registro de aprendizados no checklist.</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">1) Visão geral de unidades de armazenamento</h3>
+            <p>Armazenamento é o componente que guarda dados de forma persistente, mesmo quando o computador é desligado. Os principais tipos são HDD (disco rígido), SSD (unidade em estado sólido) e mídias baseadas em memória flash (pendrives, cartões SD), além de mídias removíveis como DVDs.</p>
+            <p>Ao escolher um dispositivo, considere capacidade, desempenho, confiabilidade e compatibilidade (interface física e sistema de arquivos). Essas características impactam diretamente tempo de inicialização, carregamento de aplicativos e longevidade.</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> você usará estes critérios no passo a passo de seleção para três cenários diferentes (desktop de escritório, notebook para estudos e armazenamento externo).</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">2) HDD (Hard Disk Drive)</h3>
+            <p>HDD é composto por pratos magnéticos que giram (medidos em RPM) e um conjunto de cabeças de leitura/gravação. Vantagens: alto custo/benefício por gigabyte e grandes capacidades. Desvantagens: menor velocidade de acesso aleatório, ruído, vibração e maior sensibilidade a impactos.</p>
+            <p>Métricas comuns: capacidade (ex.: 2 TB), RPM (5400/7200), cache (ex.: 64 MB), interface (SATA), taxa sequencial aproximada (ex.: 150 MB/s) e MTBF/AFR para confiabilidade. Em desktops, HDDs costumam ser utilizados como “armazenamento secundário” para volumes de dados.</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> na comparação de fichas técnicas, você avaliará RPM e uso recomendado (armazenamento massivo vs sistema).</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">3) SSD (Solid State Drive)</h3>
+            <p>SSDs usam memória flash NAND (sem partes móveis). Entregam latências muito menores e altas taxas de I/O aleatório. Existem SSDs SATA (limite prático ~550 MB/s) e NVMe (M.2/PCIe), que podem ultrapassar vários GB/s em leitura/escrita sequencial.</p>
+            <p>Conceitos importantes: tipos de NAND (SLC, MLC, TLC, QLC), DRAM cache (ou HMB em alguns modelos), overprovisioning e endurance (TBW — Terabytes Written). Para sistemas operacionais e aplicativos, SSD é fortemente recomendado.</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> ao selecionar SSD para notebook de estudos, você usará TBW, interface (SATA/NVMe) e capacidade como critérios.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">4) Memórias flash e mídias removíveis</h3>
+            <p>Pendrives e cartões SD também usam NAND, porém costumam ter controladores mais simples e menor endurance que SSDs internos. São úteis para transporte de arquivos, câmeras, boot de instalação e backups rápidos, mas não substituem SSD interno em desempenho e durabilidade.</p>
+            <p>Ao escolher, observe: padrão e velocidade (USB 2.0/3.x; SDHC/SDXC; classes U1/U3/V30), capacidade e uso pretendido (transferir arquivos grandes vs muitos arquivos pequenos).</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> na formatação e rotulagem de um pendrive para uso multiplataforma, escolhendo o sistema de arquivos adequado.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">5) Organização física e lógica: setores, clusters/blocos e partições (MBR/GPT)</h3>
+            <p>Fisicamente, dados são gravados em setores (comuns: 512 bytes ou 4096 bytes “4K”). Logicamente, sistemas de arquivos agrupam setores em unidades de alocação: clusters (Windows) ou blocos (Linux). Tamanhos maiores reduzem fragmentação de metadados, mas podem desperdiçar espaço com muitos arquivos pequenos.</p>
+            <p>Partições dividem o disco em áreas independentes. MBR é o esquema antigo (até 2 TB por disco e até 4 partições primárias). GPT é o padrão moderno, suporta grandes capacidades e mais partições. BIOS/UEFI e modo de boot influenciam a escolha (ver capítulo 10).</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> ao interpretar a tabela de partições no Windows (Gerenciamento de Disco) e Linux (lsblk/fdisk) e ao justificar GPT para discos modernos.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">6) Sistemas de arquivos: FAT32, exFAT, NTFS, EXT4 (visão geral)</h3>
+            <p>FAT32: amplamente compatível (Windows, Linux, câmeras, consoles), porém limita arquivos a 4 GB e partições até 2 TB. exFAT: sucessor para mídias removíveis, sem limite de 4 GB e alta compatibilidade com sistemas modernos.</p>
+            <p>NTFS: padrão do Windows para discos internos, inclui permissões, compressão, journaling e recursos avançados. EXT4: muito usado em distribuições Linux, confiável e com journaling. A escolha depende do cenário: interoperabilidade, recursos e tipo de dispositivo.</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> na decisão de formatação do pendrive (exFAT para arquivos grandes entre Windows e Linux) e ao avaliar requisitos de um disco de dados no Windows (NTFS).</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">7) Desempenho, fragmentação e integridade</h3>
+            <p>Em HDD, a fragmentação pode degradar o desempenho; desfragmentar periodicamente ajuda (o Windows gerencia isso automaticamente). Em SSD, não se desfragmenta; em vez disso, TRIM e gerenciamento interno (wear leveling) preservam desempenho e vida útil.</p>
+            <p>Integridade: sistemas com journaling (NTFS/EXT4) reduzem risco de corrupção em quedas de energia. Ferramentas como chkdsk (Windows) e fsck (Linux) verificam e corrigem inconsistências.</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> na execução de verificações seguras (somente leitura) e na interpretação de relatórios básicos de integridade.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">8) Métricas de especificação e critérios de escolha</h3>
+            <p>Ao comparar dispositivos, observe: capacidade útil, interface (SATA, NVMe/PCIe, USB), desempenho (sequencial e IOPS), consumo e aquecimento, endurance (TBW em SSD), confiabilidade (SMART, MTBF), garantia e custo por GB.</p>
+            <p>Critérios por cenário: sistema operacional e apps pedem SSD; armazenamento massivo e custo baixo indicam HDD; transporte de arquivos e compatibilidade sugerem exFAT em pendrive; para Linux, EXT4 é padrão confiável em discos internos.</p>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Onde vou aplicar isso:</strong> na atividade de seleção de 3 dispositivos para 3 cenários com justificativa técnica.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Seleção e preparação de unidades e sistemas de arquivos</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Guiar você a: (1) analisar fichas técnicas e escolher dispositivos para três cenários; (2) identificar partições e sistemas de arquivos em Windows e Linux; (3) formatar com segurança uma mídia removível conforme o uso; (4) verificar integridade básica.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 1 — Definir os cenários</h3>
+            <ol class="mb-0">
+              <li>Desktop de escritório: prioridade em custo/GB para armazenar documentos e fotos; SO já em SSD pequeno.</li>
+              <li>Notebook para estudos: prioridade em responsividade, inicialização rápida e mobilidade.</li>
+              <li>Pendrive para transporte entre Windows e Linux com arquivos maiores que 4 GB (vídeos, VMs).</li>
+            </ol>
+            <div class="alert alert-info mt-3 mb-0"><strong>Dica:</strong> mantenha uma tabela simples com requisitos, métricas e modelos candidatos. Foque em interface, desempenho, endurance (quando aplicável) e compatibilidade do sistema de arquivos.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 2 — Coletar especificações técnicas</h3>
+            <p>Visite 2 a 3 lojas e/ou datasheets de fabricantes para coletar, para cada candidato:</p>
+            <ul>
+              <li>Capacidade, interface (SATA/NVMe/USB), dimensões/slot (2,5", M.2 2280 etc.)</li>
+              <li>Desempenho (leituras/escritas sequenciais e IOPS, quando houver)</li>
+              <li>Endurance (TBW para SSD), RPM/cache para HDD</li>
+              <li>Garantia e preço por GB</li>
+            </ul>
+            <pre class="language-text"><code>Exemplo de registro:
+- Modelo: SSD NVMe X
+- Capacidade: 500 GB
+- Interface: PCIe 3.0 x4 (M.2 2280)
+- Seq. Read/Write: 3.300 / 2.800 MB/s
+- IOPS: 300k/250k
+- TBW: 300 TBW
+- Garantia: 5 anos
+- Preço: R$ 350 (R$ 0,70/GB)</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 3 — Selecionar por cenário com justificativa</h3>
+            <p>Use os critérios aprendidos:</p>
+            <ul>
+              <li>Desktop de escritório: HDD 2–4 TB 7200 RPM como dados; manter SO em SSD. Justifique custo/GB e perfil de uso.</li>
+              <li>Notebook de estudos: SSD (preferência NVMe, se compatível) 500 GB ou 1 TB. Justifique responsividade e TBW adequado.</li>
+              <li>Pendrive: 64–128 GB USB 3.x, formatação exFAT. Justifique compatibilidade cross-plataforma e arquivos >4 GB.</li>
+            </ul>
+            <pre class="language-text"><code>Modelo escolhido (exemplo):
+- Cenário notebook: SSD NVMe 1 TB, TBW 600, PCIe 3.0 x4, 5 anos de garantia.
+Justificativa: melhor responsividade geral, boa endurance para estudos e multitarefa.</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <h3 class="h6 fw-bold mb-0"><i class="bi bi-windows me-2" style="color:var(--cor-principal)"></i>Etapa 4 — Identificar partições e sistemas de arquivos (Windows)</h3>
+              <span class="badge badge-outline-red">Somente leitura (seguro)</span>
+            </div>
+            <ol>
+              <li>Abrir Gerenciamento de Disco: Win+X → Gerenciamento de Disco.</li>
+              <li>Localizar cada disco e anotar: esquema de partição (MBR/GPT), unidades e sistemas de arquivos (NTFS, FAT32, exFAT).</li>
+              <li>Opcional via PowerShell CMDlets:</li>
+            </ol>
+            <pre class="language-powershell"><code># Listar discos, partições e volumes
+Get-Disk | Format-Table Number, FriendlyName, PartitionStyle, Size
+Get-Partition | Format-Table DiskNumber, PartitionNumber, DriveLetter, GptType
+Get-Volume | Format-Table DriveLetter, FileSystem, FileSystemLabel, Size, SizeRemaining</code></pre>
+            <div class="alert alert-warning mt-2 mb-0"><strong>Cuidado:</strong> não exclua/encolha partições do sistema. Esta etapa é apenas para reconhecimento.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <h3 class="h6 fw-bold mb-0"><i class="bi bi-ubuntu me-2" style="color:var(--cor-principal)"></i>Etapa 5 — Identificar partições e sistemas de arquivos (Linux)</h3>
+              <span class="badge badge-outline-red">Somente leitura (seguro)</span>
+            </div>
+            <p>No terminal, execute:</p>
+            <pre class="language-bash"><code># Discos e partições
+lsblk -f
+
+# Informações detalhadas do disco (substitua por /dev/sda, /dev/nvme0n1 etc.)
+sudo fdisk -l /dev/sda
+
+# Sistemas de arquivos montados
+mount | grep "^/dev"</code></pre>
+            <div class="alert alert-info mt-2 mb-0"><strong>Dica:</strong> observe o campo FSTYPE no lsblk para ver EXT4, NTFS, exFAT etc.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 6 — Formatar com segurança um pendrive para uso cross-plataforma</h3>
+            <p>Objetivo: preparar pendrive em exFAT para arquivos maiores que 4 GB usados em Windows e Linux.</p>
+            <p>No Windows (utilitário gráfico):</p>
+            <ol>
+              <li>Conectar o pendrive → Explorador → clique direito na unidade → Formatar.</li>
+              <li>Sistema de arquivos: exFAT; Tamanho de alocação: Padrão; Rótulo de volume: PENDRIVE_ESTUDOS.</li>
+              <li>Desmarcar “Formatação Rápida” se desejar varredura mais demorada; clicar Iniciar.</li>
+            </ol>
+            <p>No Windows (PowerShell):</p>
+            <pre class="language-powershell"><code># ATENÇÃO: verifique a letra correta (Ex.: E:)
+Get-Volume
+Format-Volume -DriveLetter E -FileSystem exFAT -NewFileSystemLabel "PENDRIVE_ESTUDOS" -Confirm:$false</code></pre>
+            <p>No Linux (linha de comando):</p>
+            <pre class="language-bash"><code># Identifique o dispositivo (ex.: /dev/sdb1)
+lsblk -f
+
+# Desmontar se estiver montado
+sudo umount /dev/sdb1
+
+# Formatar em exFAT (pode ser necessário instalar exfatprogs)
+sudo mkfs.exfat -n PENDRIVE_ESTUDOS /dev/sdb1
+
+# Montar novamente (exemplo)
+sudo mkdir -p /mnt/pendrive
+sudo mount /dev/sdb1 /mnt/pendrive</code></pre>
+            <div class="alert alert-danger mt-2 mb-0"><strong>Aviso:</strong> formatar APAGA todos os dados. Tenha certeza do dispositivo correto e faça backup antes.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 7 — Verificação básica de integridade</h3>
+            <p>Windows (chkdsk em modo somente leitura):</p>
+            <pre class="language-batch"><code>chkdsk E:</code></pre>
+            <p>Linux (fsck deve ser executado com o sistema de arquivos desmontado):</p>
+            <pre class="language-bash"><code># Substitua /dev/sdb1 pela partição correta
+sudo umount /dev/sdb1
+sudo fsck -n /dev/sdb1   # -n evita escrever mudanças (somente leitura)</code></pre>
+            <div class="alert alert-light border mt-2 mb-0"><strong>Boas práticas:</strong> sempre desmontar antes de verificar/formatar em Linux; remover hardware com segurança no Windows.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 8 — Registrar a justificativa final</h3>
+            <p>Monte um pequeno relatório com:</p>
+            <ul>
+              <li>Lista dos candidatos e métricas coletadas;</li>
+              <li>Dispositivo escolhido por cenário com critérios objetivos;</li>
+              <li>Riscos e mitigação (ex.: backup, aquecimento, garantia);</li>
+              <li>Procedimentos aplicados (formatação/checagem) e resultados.</li>
+            </ul>
+            <pre class="language-markdown"><code># Relatório — Cap. 09 (Armazenamento e Sistemas de Arquivos)
+- Cenário: Notebook para estudos
+- Escolha: SSD NVMe 1 TB (PCIe 3.0 x4), TBW 600, 5 anos
+- Critérios: desempenho, endurance, custo/GB, compatibilidade M.2 2280
+- Procedimentos: identificação de partições, verificação, planejamento de migração</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a capacidade de analisar, escolher e preparar unidades e sistemas de arquivos em diferentes cenários.</p>
+        <div class="vstack gap-3 mt-3">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 1 — Simular atualização de armazenamento de um notebook</h3>
+            <p>Pesquise três opções de SSD (SATA 2,5" e NVMe M.2), verifique compatibilidade com um modelo hipotético (M.2 2280 PCIe 3.0) e justifique a melhor escolha considerando preço/GB, TBW e garantia.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 2 — Preparo de pendrive para instalação de SO</h3>
+            <p>Prepare um pendrive em FAT32 ou exFAT conforme o tamanho do arquivo ISO/instalador e explique sua escolha. Registre o procedimento e comandos utilizados (sem gravar ISO real se não for necessário).</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 3 — Mapa de decisão de sistemas de arquivos</h3>
+            <p>Crie um fluxograma simples que ajude a decidir entre FAT32, exFAT, NTFS e EXT4 baseado em: tamanho de arquivo, interoperabilidade, necessidade de permissões e uso (interno/removível).</p>
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correção técnica das justificativas (conceitos aplicados corretamente).</li>
+            <li>Clareza do registro de procedimentos (passo a passo reproduzível).</li>
+            <li>Escolhas coerentes com o cenário e métricas coletadas.</li>
+            <li>Cuidados de segurança (backup, evitar perda de dados, desmontar/unmount quando aplicável).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Comparativo entre MBR e GPT: limites, compatibilidade e cenários de uso.</li><li>Como funcionam TRIM e wear leveling em SSDs e seus efeitos na vida útil.</li><li>Journaling em NTFS e EXT4: o que é, como ajuda a recuperar após falhas.</li><li>Leitura de atributos S.M.A.R.T.: interpretação básica e sinais de alerta.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 09</h2>
+        <ul><li>Tabela com especificações coletadas de pelo menos 3 dispositivos e seleção para 3 cenários com justificativas.</li><li>Registro do reconhecimento de partições e sistemas de arquivos no seu ambiente (capturas ou listagens).</li><li>Relatório breve do preparo e verificação de uma mídia removível (comandos e cuidados).</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 08 — Periféricos e interfaces</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 10 — Processo de inicialização: BIOS/UEFI e boot</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Fundamentos de Informática para Manutenção de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual a principal limitação do FAT32 que motiva o uso do exFAT em mídias removíveis modernas?","alternativas":{"A":"Não é compatível com Windows modernos","B":"Não possui journaling","C":"Limite de tamanho de arquivo de 4 GB","D":"Não suporta nomes longos de arquivos","E":"Exige partições GPT"},"correta":"C"},{"id":"q2","titulo":"Ao escolher um SSD para sistema operacional em notebook, qual métrica é MAIS relevante entre as opções abaixo?","alternativas":{"A":"RPM","B":"TBW (endurance)","C":"Tamanho do setor físico (512B vs 4K)","D":"Velocidade de rotação do ventilador","E":"Capacidade da fonte de alimentação"},"correta":"B"},{"id":"q3","titulo":"Sobre esquemas de partição, assinale a alternativa correta:","alternativas":{"A":"MBR suporta discos acima de 10 TB sem restrições","B":"GPT é limitado a 2 TB por disco","C":"MBR permite número ilimitado de partições primárias","D":"GPT é o padrão moderno, suporta mais partições e grandes capacidades","E":"GPT só funciona em Linux"},"correta":"D"},{"id":"q4","titulo":"Em qual situação NTFS é geralmente a melhor escolha?","alternativas":{"A":"Pendrive para câmeras e consoles antigos","B":"Disco interno de dados no Windows com necessidade de permissões e quotas","C":"Cartão SD de câmera DSLR que gravará vídeos 4K","D":"Unidade externa para uso alternado entre macOS e Linux apenas","E":"Partição raiz padrão do Linux"},"correta":"B"},{"id":"q5","titulo":"Qual afirmação descreve corretamente diferenças entre HDD e SSD?","alternativas":{"A":"HDD é mais rápido em acesso aleatório que SSD","B":"SSD possui partes móveis e vibra mais","C":"HDD tem melhor resistência a impactos que SSD","D":"SSD oferece latências menores e maior IOPS, sem partes móveis","E":"HDD consome menos energia em todos os cenários"},"correta":"D"},{"id":"q6","titulo":"No Linux, qual comando lista sistemas de arquivos e rótulos de forma resumida?","alternativas":{"A":"top -f","B":"lsblk -f","C":"fdisk /mbr","D":"ip a","E":"whoami -l"},"correta":"B"},{"id":"q7","titulo":"Para um pendrive que transportará vídeos de 10 GB entre Windows e Linux, o sistema de arquivos mais adequado é:","alternativas":{"A":"FAT32","B":"NTFS obrigatoriamente","C":"EXT4","D":"exFAT","E":"ReFS"},"correta":"D"},{"id":"q8","titulo":"Qual prática é correta ao verificar um sistema de arquivos no Linux com fsck?","alternativas":{"A":"Executar fsck com a partição montada em modo leitura-escrita","B":"Sempre usar a opção que corrige automaticamente sem backup","C":"Desmontar a partição e usar -n para checagem sem alterações quando em dúvida","D":"Rodar fsck no disco inteiro NVMe independente de partições","E":"Evitar o uso do comando mount"},"correta":"C"},{"id":"q9","titulo":"Em Windows, qual conjunto de comandos/CMdlets ajuda a identificar partições e sistemas de arquivos?","alternativas":{"A":"Get-Disk, Get-Partition, Get-Volume","B":"ipconfig, ping, tracert","C":"Get-Service, Stop-Process","D":"format c: /q /y","E":"route print, arp -a"},"correta":"A"},{"id":"q10","titulo":"Ao escolher HDD para armazenamento massivo, qual motivo técnico sustenta a escolha em vez de SSD?","alternativas":{"A":"Menor custo por GB em grandes capacidades","B":"Maior IOPS e latência menor","C":"Menor sensibilidade a impactos","D":"Melhor compatibilidade com Linux","E":"Necessidade de TRIM"},"correta":"A"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Expliquei, com minhas palavras, diferenças entre HDD, SSD e pendrive (vantagens e limitações)."},{"id":"c2","texto":"Identifiquei partições e sistemas de arquivos no meu ambiente (Windows ou Linux)."},{"id":"c3","texto":"Sei quando escolher FAT32, exFAT, NTFS e EXT4 de acordo com o cenário."},{"id":"c4","texto":"Preparei um pendrive com o sistema de arquivos correto e rótulo adequado."},{"id":"c5","texto":"Registrei procedimentos e cuidados (backup, desmontar, remoção segura)."},{"id":"c6","texto":"Consigo ler especificações (TBW, IOPS, RPM, interface) e selecionar um dispositivo coerente com o uso."}];
+    const CHECKLIST_KEY = 'chk_FIMC_09';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

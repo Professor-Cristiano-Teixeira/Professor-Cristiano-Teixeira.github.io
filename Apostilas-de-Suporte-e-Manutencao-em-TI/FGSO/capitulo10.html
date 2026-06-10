@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 — Manutenção preventiva e otimização</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo10.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">FGSO</span>
+        <span style="color: var(--cor-principal);">Ferramentas de Gerenciamento de Sistemas Operacionais</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo1.html">Cap. 01 — Introdução e funções de um SO</a></li>
+              <li><a class="dropdown-item" href="capitulo2.html">Cap. 02 — Fundamentos de virtualização de sistemas</a></li>
+              <li><a class="dropdown-item" href="capitulo3.html">Cap. 03 — Windows: histórico, edições e ciclo de vida</a></li>
+              <li><a class="dropdown-item" href="capitulo4.html">Cap. 04 — Preparação e planejamento de instalação</a></li>
+              <li><a class="dropdown-item" href="capitulo5.html">Cap. 05 — Instalação do Windows 11</a></li>
+              <li><a class="dropdown-item" href="capitulo6.html">Cap. 06 — Particionamento, formatação e discos</a></li>
+              <li><a class="dropdown-item" href="capitulo7.html">Cap. 07 — Sistemas de arquivos no Windows</a></li>
+              <li><a class="dropdown-item" href="capitulo8.html">Cap. 08 — Painel de Controle e Configurações</a></li>
+              <li><a class="dropdown-item" href="capitulo9.html">Cap. 09 — Ferramentas administrativas essenciais</a></li>
+              <li><a class="dropdown-item active" href="capitulo10.html">Cap. 10 — Manutenção preventiva e otimização</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Gerenciamento de usuários, grupos e perfis</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Linha de comando e PowerShell: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Segurança: Criptografia e BitLocker</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Backup, recuperação e restauração</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Implantação e provisionamento: Sysprep e DISM</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 10 — Manutenção preventiva e otimização no Windows 11</h1>
+          <p class="mb-2"><strong>Carga:</strong> —</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório em VM Windows 11 com snapshots e diário de bordo</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows 11, PowerShell, VirtualBox, Ferramentas nativas do Windows</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Planejar e executar rotinas de manutenção preventiva física e lógica em ambientes Windows 11.</li><li>Aplicar limpeza lógica, atualização de sistema e drivers, e verificação de integridade do sistema.</li><li>Definir política de patches, calendário de manutenção e critérios de uso de ferramentas.</li><li>Mensurar desempenho com métricas antes/depois e registrar evidências em diário de bordo.</li><li>Automatizar partes do runbook usando PowerShell de forma segura.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Administração de sistemas Windows com foco em estabilidade e performance.</li><li>Diagnóstico e resolução proativa de problemas recorrentes.</li><li>Aplicação de boas práticas de atualização, registro e documentação técnica.</li><li>Uso responsável de ferramentas nativas e de terceiros, com critérios técnicos claros.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo9.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Ferramentas administrativas essenciais</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gerenciamento de usuários, grupos e perfis</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 10)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul><li>Exposição dialogada: visão geral de manutenção preventiva e critérios de otimização.</li><li>Demonstração ao vivo (VM Windows 11): limpeza lógica, atualizações, verificação de integridade e coleta de métricas.</li><li>Prática guiada: execução de runbook completo com registros antes/depois (tempo de boot, uso de CPU/RAM, espaço em disco).</li><li>Desafio: propor calendário de manutenção e política de patches para um cenário fictício.</li><li>Documentação: diário de bordo com evidências (capturas, comandos, logs) e análise comparativa dos resultados.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div>
+            <h3 class="h5 fw-bold">1) Manutenção preventiva vs. corretiva</h3>
+            <p>A manutenção preventiva é um conjunto de ações periódicas que visam manter o sistema estável, seguro e com bom desempenho. Ela contrasta com a manutenção corretiva, realizada após falhas. Em ambientes profissionais, a preventiva reduz tempo de inatividade e custos, e melhora a experiência do usuário.</p>
+            <p>No Windows 11, isso inclui aplicar atualizações (sistema e drivers), monitorar integridade (SFC/DISM), gerir espaço em disco, revisar inicialização e serviços, e acompanhar métricas de desempenho. A periodicidade depende do perfil de uso e da criticidade do equipamento.</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> Na construção do runbook, definindo a ordem das tarefas e a frequência no calendário.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">2) Limpeza lógica e gestão de armazenamento</h3>
+            <p>A limpeza lógica remove arquivos temporários, caches e itens obsoletos que ocupam espaço e podem degradar o desempenho. Ferramentas nativas como Sensor de Armazenamento (Storage Sense) e limpeza de disco ajudam a automatizar a tarefa, reduzindo intervenção manual.</p>
+            <p>É importante identificar pastas “pesadas” (Downloads, Temp, cache de navegadores) e avaliar impacto antes de excluir. Em ambientes corporativos, políticas podem definir retenção e exceções (ex.: não apagar Downloads sem consentimento).</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> Na etapa de “Limpeza e armazenamento”, configurando Storage Sense e limpando arquivos temporários com segurança.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">3) Atualizações: sistema, drivers e firmware</h3>
+            <p>Manter o Windows atualizado é crucial para segurança e compatibilidade. Além de updates de qualidade e de segurança, drivers e firmware/BIOS atualizados garantem estabilidade e desempenho do hardware. Canais e janelas de manutenção devem equilibrar risco de regressão com exposição a vulnerabilidades.</p>
+            <p>No Windows 11, use Windows Update, Gerenciador de Dispositivos, Windows Update for Business (em ambientes gerenciados) e, quando pertinente, utilitários do fabricante (Dell/HP/Lenovo) para firmware.</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> Nas etapas de atualização via Windows Update, verificação de drivers e firmware.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">4) Integridade do sistema: SFC e DISM</h3>
+            <p>Arquivos de sistema podem corromper-se por quedas de energia, falhas de disco ou software defeituoso. O SFC (System File Checker) verifica e repara arquivos protegidos. O DISM, com a opção /RestoreHealth, repara a imagem do Windows usada pelo SFC. A prática recomendada é executar DISM antes do SFC em casos de erros persistentes.</p>
+            <p>Esses comandos devem ser executados em console elevado (Administrador) e os resultados registrados no diário de bordo para auditoria.</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> Na etapa “Verificação e reparo de integridade”.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">5) Inicialização, serviços e programas em segundo plano</h3>
+            <p>Aplicativos iniciando com o sistema e serviços desnecessários aumentam o tempo de boot e consomem recursos. O Gerenciador de Tarefas (aba Inicializar) permite desabilitar apps não essenciais. Serviços devem ser ajustados com cautela, priorizando recomendações do fabricante e documentação oficial.</p>
+            <p>O objetivo é reduzir o footprint sem comprometer funcionalidades essenciais ou segurança.</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> Na etapa “Otimização de inicialização e serviços”.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">6) Política de patches e calendário de manutenção</h3>
+            <p>Uma política de patches define o que, quando e como atualizar: janelas de manutenção, ambientes de teste (piloto), critérios de rollback e comunicação aos usuários. O calendário prevê periodicidade (semanal/mensal), responsáveis e evidências (logs, relatórios).</p>
+            <p>Em laboratório, simule um ciclo: testar em VM piloto, validar, aplicar ao “ambiente de produção” (sua VM principal) e registrar os resultados e eventuais incidentes.</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> Na definição do calendário e checklist final.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">7) Ferramentas: nativas vs. terceiros (critérios de uso)</h3>
+            <p>Ferramentas nativas (Configurações, PowerShell, Gerenciador de Tarefas, Monitor de Desempenho, Event Viewer, DISM/SFC) são seguras e suportadas. Ferramentas de terceiros podem trazer recursos extras, mas exigem critérios: reputação do fornecedor, documentação, assinaturas digitais, logs exportáveis e reversibilidade.</p>
+            <p>Evite “otimizadores milagrosos” que prometem ganhos extremos sem transparência. Priorize soluções auditáveis e com controle granular.</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> Na seleção das ferramentas para cada etapa do runbook.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">8) Métricas antes/depois e evidências</h3>
+            <p>Para comprovar eficácia, registre métricas quantitativas (espaço livre, tempo de boot, uso médio de CPU/RAM, contadores de disco) e qualitativas (responsividade percebida). Ferramentas: PerfMon, Task Manager, PowerShell (Get-Process/Get-Counter), e capturas de tela.</p>
+            <p>Padronize a coleta (mesmos cenários, mesma carga) para comparações justas.</p>
+            <p><em>Onde vou aplicar isso no passo a passo?</em> No início (linha de base) e no final (validação) do runbook.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Runbook de manutenção preventiva no Windows 11</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Executar um ciclo completo de manutenção preventiva em uma VM Windows 11, coletando métricas antes/depois, aplicando limpeza, atualizações, verificação de integridade e otimizações seguras, com registro no diário de bordo.</p>
+<br>
+
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-flag me-2" style="color:var(--cor-principal)"></i>Preparação do ambiente e snapshot</h3>
+            <ol class="mb-0">
+              <li>Abrir o VirtualBox e criar um snapshot da VM: “Antes_Manutencao_Cap10”.</li>
+              <li>Efetuar login como usuário com privilégios administrativos.</li>
+              <li>Abrir o diário de bordo e registrar data/hora, versão do Windows (winver) e objetivo do ciclo.</li>
+            </ol>
+            <pre class="language-powershell mt-3"><code># Registrar versão e build do Windows
+Get-ComputerInfo | Select-Object OsName, OsVersion, OsBuildNumber | Format-List
+
+# Tempo de boot (método simples: eventos de Kernel-Boot)
+wevtutil qe Microsoft-Windows-Diagnostics-Performance/Operational /q:"*[System[(EventID=100)]]" /c:1 /f:text
+
+# Linha de base de recursos (CPU/RAM top 5 processos)
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 ProcessName, CPU, PM | Format-Table</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-hdd-network me-2" style="color:var(--cor-principal)"></i>Coleta de linha de base (antes)</h3>
+            <p>Meça espaço livre, principais processos e contadores de disco.</p>
+            <pre class="language-powershell"><code># Espaço em disco por volume
+Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free
+
+# Contadores de desempenho (disco e memória) por 15 segundos
+Get-Counter -Counter '\LogicalDisk(_Total)\% Free Space','\PhysicalDisk(_Total)\Avg. Disk Queue Length','\Memory\Available MBytes' -SampleInterval 3 -MaxSamples 5
+
+# Itens de inicialização
+Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, Location</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-trash3 me-2" style="color:var(--cor-principal)"></i>Limpeza e armazenamento</h3>
+            <ol>
+              <li>Configurar Sensor de Armazenamento: Configurações → Sistema → Armazenamento → Sensor de Armazenamento (ativar e revisar opções).</li>
+              <li>Limpar Arquivos Temporários: Configurações → Sistema → Armazenamento → Arquivos temporários (selecionar com cautela).</li>
+              <li>Inspecionar pastas pesadas (Downloads, Vídeos) e decidir manualmente o que remover ou arquivar.</li>
+            </ol>
+            <pre class="language-powershell"><code># Limpeza de arquivos temporários do usuário (segura)
+$Temp = "$env:TEMP"
+Get-ChildItem $Temp -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+
+# Limpeza do cache de Windows Update (quando necessário)
+net stop wuauserv
+net stop bits
+Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Force -Recurse -ErrorAction SilentlyContinue
+net start bits
+net start wuauserv</code></pre>
+            <div class="alert alert-light border mt-3 mb-0" role="note"><strong>Nota:</strong> Revise o conteúdo de Downloads antes de apagar. Em ambiente corporativo, siga a política de retenção.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-arrow-repeat me-2" style="color:var(--cor-principal)"></i>Atualizações do Windows e drivers</h3>
+            <ol>
+              <li>Executar Windows Update e aplicar atualizações pendentes.</li>
+              <li>Reiniciar se solicitado, e repetir até não haver pendências.</li>
+              <li>Verificar drivers no Gerenciador de Dispositivos; opcionalmente, usar Windows Update para drivers.</li>
+            </ol>
+            <pre class="language-powershell"><code># Consultar atualizações via PowerShell (Windows Update)
+Install-Module PSWindowsUpdate -Scope CurrentUser -Force
+Import-Module PSWindowsUpdate
+Get-WindowsUpdate
+Install-WindowsUpdate -AcceptAll -AutoReboot
+
+# Listar drivers instalados
+pnputil /enum-drivers</code></pre>
+            <div class="alert alert-light border mt-3 mb-0" role="note"><strong>Dica:</strong> Firmware/BIOS devem ser atualizados com ferramentas do fabricante e fonte confiável.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-shield-check me-2" style="color:var(--cor-principal)"></i>Verificação e reparo de integridade (DISM e SFC)</h3>
+            <p>Execute em console elevado (Administrador):</p>
+            <pre class="language-powershell"><code># Reparar a imagem do Windows
+DISM /Online /Cleanup-Image /RestoreHealth
+
+# Verificar e reparar arquivos de sistema
+sfc /scannow
+
+# Registrar logs relevantes
+Get-Content $env:windir\Logs\DISM\dism.log -Tail 50
+Get-Content $env:windir\Logs\CBS\CBS.log -Tail 50</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-rocket-takeoff me-2" style="color:var(--cor-principal)"></i>Otimização de inicialização e serviços</h3>
+            <ol>
+              <li>Abrir Gerenciador de Tarefas → Inicializar e desabilitar apps não essenciais (ex.: iniciadores de chat/jogos em ambientes corporativos).</li>
+              <li>Revisar serviços com services.msc. Evitar desativar serviços do sistema sem embasamento.</li>
+            </ol>
+            <pre class="language-powershell"><code># Listar aplicativos de inicialização (via registro)
+Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, Location
+
+# Exemplo: desabilitar inicialização de aplicativo específico (substitua pelo nome)
+# Atenção: valide o impacto antes de desabilitar
+$startup = Get-CimInstance Win32_StartupCommand | Where-Object {$_.Name -like "*OneDrive*"}
+$startup</code></pre>
+            <div class="alert alert-warning mt-3 mb-0" role="alert"><strong>Cuidado:</strong> Não desabilite serviços críticos (Windows Update, Defender, Criptografia, etc.).</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-clipboard2-data me-2" style="color:var(--cor-principal)"></i>Coleta de métricas (depois) e comparação</h3>
+            <p>Repita as medições da linha de base e compare.</p>
+            <pre class="language-powershell"><code># Espaço em disco
+Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free
+
+# Processos mais consumidores
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 ProcessName, CPU, PM | Format-Table
+
+# Eventos de boot mais recente (ID 100)
+wevtutil qe Microsoft-Windows-Diagnostics-Performance/Operational /q:"*[System[(EventID=100)]]" /c:1 /f:text</code></pre>
+            <p class="mb-0">Registre os valores no diário de bordo e descreva o impacto percebido.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2"><i class="bi bi-calendar3 me-2" style="color:var(--cor-principal)"></i>Calendário de manutenção e checklist</h3>
+            <ul class="mb-2">
+              <li>Semanal: limpeza de temporários, verificação de espaço em disco.</li>
+              <li>Mensal: Windows Update (após teste em piloto), revisão de inicialização.</li>
+              <li>Trimestral: verificação de integridade (DISM/SFC), drivers e firmware.</li>
+            </ul>
+            <pre class="language-powershell"><code># Modelo simples de checklist em CSV
+$items = @(
+  [pscustomobject]@{Tarefa='Limpeza temporários'; Frequencia='Semanal'; Status='Pendente'},
+  [pscustomobject]@{Tarefa='Aplicar Windows Update'; Frequencia='Mensal'; Status='Pendente'},
+  [pscustomobject]@{Tarefa='DISM/SFC'; Frequencia='Trimestral'; Status='Pendente'}
+)
+$items | Export-Csv "$env:USERPROFILE\Desktop\checklist_cap10.csv" -NoTypeInformation -Encoding UTF8</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o runbook, explorar automação básica e propor política de manutenção aplicável.</p>
+        <div class="vstack gap-3 mt-3">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 1 — Script de limpeza segura</h3>
+            <p>Crie um script PowerShell que: (a) registra linha de base, (b) limpa temporários do usuário, (c) exporta relatório de espaço em disco antes/depois em CSV, e (d) salva logs no Desktop.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 2 — Política de patches e calendário</h3>
+            <p>Escreva uma política breve para um laboratório escolar definindo janelas, validação em piloto, critérios de rollback e evidências mínimas exigidas.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 3 — Otimização de inicialização</h3>
+            <p>Liste os itens de inicialização da sua VM, classifique em Essencial/Condicional/Não essencial e proponha ajustes, justificando os impactos esperados.</p>
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correção técnica e segurança dos procedimentos.</li>
+            <li>Clareza e completude da documentação (antes/depois, evidências).</li>
+            <li>Racionalidade do calendário e política de patches.</li>
+            <li>Automação funcional e comentada quando aplicável.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação Microsoft: manutenção e desempenho no Windows 11, DISM e SFC.</li><li>Boas práticas de Windows Update for Business e gerenciamento de drivers.</li><li>Monitor de Desempenho (PerfMon): criação de Data Collector Sets.</li><li>Ferramentas de fabricantes para atualização de firmware (Dell/HP/Lenovo).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 10</h2>
+        <ul><li>Diário de bordo com runbook executado, métricas e evidências (capturas/logs).</li><li>Relatório comparativo antes/depois (espaço, tempo de boot, recursos).</li><li>Proposta de calendário de manutenção e política de patches.</li><li>(Opcional) Script PowerShell de limpeza e coleta de métricas.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo9.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Ferramentas administrativas essenciais</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Gerenciamento de usuários, grupos e perfis</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Ferramentas de Gerenciamento de Sistemas Operacionais — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual a principal vantagem da manutenção preventiva em relação à corretiva?","alternativas":{"A":"Menor necessidade de documentação","B":"Reduzir tempo de inatividade e evitar falhas","C":"Eliminar totalmente atualizações futuras","D":"Permitir desativar serviços críticos","E":"Aumentar temporariamente o desempenho com riscos"},"correta":"B"},{"id":"q2","titulo":"Em caso de corrupção de arquivos de sistema, qual sequência é recomendada?","alternativas":{"A":"SFC antes de DISM","B":"DISM /RestoreHealth e depois SFC /scannow","C":"Somente reiniciar o computador","D":"Limpar cache do navegador","E":"Desabilitar Windows Update"},"correta":"B"},{"id":"q3","titulo":"Qual ferramenta nativa do Windows ajuda a automatizar a remoção de arquivos temporários?","alternativas":{"A":"Gerenciador de Dispositivos","B":"Event Viewer","C":"Sensor de Armazenamento (Storage Sense)","D":"Editor do Registro","E":"BitLocker"},"correta":"C"},{"id":"q4","titulo":"Ao otimizar a inicialização, qual prática é mais segura?","alternativas":{"A":"Desativar qualquer serviço desconhecido","B":"Desativar o Windows Defender para ganhar desempenho","C":"Desabilitar apenas aplicativos não essenciais via Gerenciador de Tarefas","D":"Excluir pastas do sistema para liberar espaço","E":"Editar o registro sem backup"},"correta":"C"},{"id":"q5","titulo":"Sobre política de patches, qual alternativa descreve uma boa prática?","alternativas":{"A":"Aplicar todas as atualizações diretamente em produção","B":"Atualizar apenas firmware e ignorar o sistema","C":"Testar em ambiente piloto, definir janela de manutenção e plano de rollback","D":"Nunca reiniciar após updates","E":"Desativar Windows Update permanentemente"},"correta":"C"},{"id":"q6","titulo":"Qual comando lista informações de drivers instalados?","alternativas":{"A":"sfc /scannow","B":"DISM /Online /Cleanup-Image /RestoreHealth","C":"pnputil /enum-drivers","D":"ipconfig /all","E":"chkdsk /scan"},"correta":"C"},{"id":"q7","titulo":"Para medir desempenho de disco e memória rapidamente via PowerShell, qual cmdlet pode ser usado?","alternativas":{"A":"Get-Content","B":"Get-Counter","C":"Get-Date","D":"Get-Service","E":"Get-LocalUser"},"correta":"B"},{"id":"q8","titulo":"Qual é um risco comum do uso de “otimizadores milagrosos” de terceiros?","alternativas":{"A":"Aumentar a auditabilidade do sistema","B":"Melhorar a documentação oficial","C":"Falta de transparência e possibilidade de causar instabilidade","D":"Permitir rollback seguro garantido","E":"Reduzir a segurança com logs detalhados"},"correta":"C"},{"id":"q9","titulo":"Que tipo de evidências deve acompanhar um runbook de manutenção?","alternativas":{"A":"Apenas opinião do usuário","B":"Somente capturas de tela","C":"Métricas antes/depois, logs e capturas, com comentários","D":"Nenhuma, apenas resultado final","E":"Vídeos longos sem dados"},"correta":"C"},{"id":"q10","titulo":"Qual tarefa é adequada para a rotina trimestral?","alternativas":{"A":"Esvaziar a Lixeira diariamente","B":"Executar DISM/SFC e revisar drivers/firmware","C":"Limpar cookies toda hora","D":"Desativar firewall temporariamente","E":"Excluir a pasta Windows.old sem avaliação"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei snapshot da VM antes da manutenção."},{"id":"c2","texto":"Registrei linha de base (espaço, tempo de boot, processos)."},{"id":"c3","texto":"Configurei e executei a limpeza com segurança (Storage Sense/temporários)."},{"id":"c4","texto":"Apliquei Windows Update e reiniciei quando solicitado."},{"id":"c5","texto":"Verifiquei drivers e, se necessário, atualizei com critério."},{"id":"c6","texto":"Executei DISM /RestoreHealth e SFC /scannow sem erros pendentes."},{"id":"c7","texto":"Otimizei a inicialização desabilitando apenas itens não essenciais."},{"id":"c8","texto":"Coletei métricas depois e comparei com a linha de base."},{"id":"c9","texto":"Atualizei o diário de bordo com evidências e conclusões."},{"id":"c10","texto":"Propus um calendário de manutenção e política de patches."}];
+    const CHECKLIST_KEY = 'fgso_cap10_checklist_v1';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

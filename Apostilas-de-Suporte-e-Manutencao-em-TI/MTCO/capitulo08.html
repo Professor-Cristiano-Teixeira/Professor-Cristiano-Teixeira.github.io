@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — Armazenamento: HD, SSD e NVMe</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo08.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">MTCO</span>
+        <span style="color: var(--cor-principal);">Montagem e Configuração de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução à disciplina e visão geral do hardware</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Segurança, ESD e organização da bancada</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Ferramentas, normas técnicas e documentação</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Fontes de alimentação (PSU)</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Placas-mãe e chipsets</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Processadores e refrigeração</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Memórias: RAM, ROM e cache</a></li>
+              <li><a class="dropdown-item active" href="capitulo08.html">Capítulo 08 — Armazenamento: HD, SSD e NVMe</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Placas de expansão: vídeo, som, rede e captura</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Periféricos, cabos e conectores</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Montagem física: passo a passo</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — BIOS/UEFI: configuração e atualização</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Instalação de SO e drivers; mídia de boot</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Manutenção preventiva e limpeza</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Diagnóstico de falhas de hardware e software</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Manutenção corretiva, substituições, descarte e comunicação técnica</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 08 — Armazenamento: HD, SSD e NVMe</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> PC de bancada para instalação de SO com múltiplos dispositivos de armazenamento</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Hardware PC (SATA/NVMe), UEFI/BIOS, Windows/Linux para validação</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Diferenciar tecnologias e interfaces de armazenamento (SATA x NVMe; 2,5"/3,5"; M.2 B/M/M+B).</li><li>Selecionar e instalar fisicamente HDs e SSDs (SATA e NVMe) com segurança e boas práticas.</li><li>Configurar UEFI/BIOS para reconhecimento de unidades e modos de operação adequados.</li><li>Validar saúde e parâmetros S.M.A.R.T., entender TBW/endurance e alinhamento de partições.</li><li>Documentar o procedimento com checklist e capturas, seguindo normas de bancada e ESD.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Identificar padrões físicos e lógicos de armazenamento e seus conectores.</li><li>Aplicar métodos corretos de instalação, roteamento de cabos e fixação.</li><li>Usar ferramentas de diagnóstico (S.M.A.R.T., benchmarks leves) com segurança.</li><li>Comunicar tecnicamente especificações e resultados de testes.</li><li>Seguir normas de ESD, organização e descarte responsável.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 07</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 09</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 08)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul><li>Expositivo dialogado (20 min): visão geral de tecnologias de armazenamento, conectores e formatos.</li><li>Demostração (20 min): identificação de porta SATA, baia 2,5"/3,5", slot M.2 e parafusos/standoffs M.2.</li><li>Prática guiada (90 min): instalação de 1x SSD SATA 2,5" e 1x SSD NVMe M.2; configuração UEFI/BIOS; verificação S.M.A.R.T.</li><li>Registro técnico (20 min): checklist e capturas de tela do reconhecimento em UEFI e no SO.</li><li>Debrief (10 min): discussão de problemas comuns (parafuso M.2, thermal throttling, cabos SATA e portas), lições aprendidas.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Tecnologias e interfaces: SATA x NVMe</h3>
+          <p>SATA é uma interface de armazenamento mais antiga e amplamente compatível. SSDs SATA e HDs 2,5"/3,5" usam cabos de dados SATA e cabos de energia SATA da fonte. O desempenho típico de SSDs SATA fica próximo de 500–600 MB/s por limitação do protocolo.</p>
+          <p>NVMe usa a interface PCIe, oferecendo paralelismo e latência muito menores. SSDs NVMe em formato M.2 podem atingir milhares de MB/s, dependendo da geração PCIe (ex.: PCIe 3.0 x4 ~ 3,5 GB/s; PCIe 4.0 x4 ~ 7 GB/s). É essencial verificar quantas lanes e qual geração sua placa-mãe oferece.</p>
+          <p><em>Onde vou aplicar isso:</em> na seleção do dispositivo para o PC de bancada e na configuração da ordem de boot e modos de armazenamento no UEFI/BIOS durante o passo a passo.</p>
+
+          <h3 class="h6 fw-bold mt-3">2) Formatos físicos: 2,5", 3,5" e M.2 (B/M/M+B)</h3>
+          <p>HDs de desktop usam, em geral, 3,5". SSDs SATA de 2,5" são compactos e leves, e exigem montagem em baia 2,5" (ou adaptador). Já os SSDs M.2 são placas finas, fixadas diretamente na placa-mãe com um parafuso.</p>
+          <p>Chaves M.2: B-key, M-key e B+M. Em regra, SSDs NVMe usam M-key; alguns SSDs SATA M.2 usam B-key ou B+M. A compatibilidade do slot M.2 pode ser exclusiva para NVMe, exclusiva para SATA ou híbrida — consulte o manual da placa-mãe.</p>
+          <p><em>Onde vou aplicar isso:</em> ao identificar o slot M.2 correto, escolher o parafuso/standoff e definir a baia adequada para SSD/HD durante a instalação.</p>
+
+          <h3 class="h6 fw-bold mt-3">3) Endurance e saúde: TBW e S.M.A.R.T.</h3>
+          <p>TBW (Terabytes Written) indica a durabilidade estimada do SSD. Valores maiores significam maior resistência a gravações ao longo do tempo. Não é um “limite duro”, mas um parâmetro para estimar vida útil.</p>
+          <p>S.M.A.R.T. é um conjunto de atributos internos (para HDs e SSDs) que indica saúde, erros re-alocados, temperatura e outros. Ferramentas como CrystalDiskInfo (Windows) e smartctl (Linux) exibem esses dados.</p>
+          <p><em>Onde vou aplicar isso:</em> na validação pós-instalação, registrando a condição “Good/Warning” e temperatura para compor o relatório.</p>
+
+          <h3 class="h6 fw-bold mt-3">4) Alinhamento de partições e modos UEFI</h3>
+          <p>O alinhamento de partições garante melhor desempenho e longevidade, especialmente em SSDs. Ferramentas modernas (instaladores de SO, Disk Management, parted) já criam partições alinhadas.</p>
+          <p>Em UEFI, recomenda-se usar modo AHCI para SATA (salvo casos de RAID) e instalar o SO em modo UEFI, criando a partição EFI. Secure Boot pode ser mantido ativo para sistemas compatíveis.</p>
+          <p><em>Onde vou aplicar isso:</em> ao verificar o modo AHCI/RAID no UEFI/BIOS e ao criar/formatar as partições no teste prático.</p>
+
+          <h3 class="h6 fw-bold mt-3">5) Dissipação e thermal throttling em NVMe</h3>
+          <p>SSDs NVMe podem aquecer e reduzir performance automaticamente (thermal throttling). Muitos slots M.2 trazem heatsinks. Em gabinetes com pouco fluxo de ar, um dissipador simples já ajuda muito.</p>
+          <p><em>Onde vou aplicar isso:</em> ao instalar o SSD NVMe com o dissipador fornecido pela placa-mãe (se houver), garantindo contato com o thermal pad e parafuso na pressão correta.</p>
+
+          <h3 class="h6 fw-bold mt-3">6) Cabos, portas e prioridades</h3>
+          <p>Para SATA, você precisará de: cabo de dados SATA (placa-mãe ⇄ drive) e conector de energia SATA (fonte ⇄ drive). Algumas placas desativam portas SATA quando certos slots M.2 estão ocupados — confirme no manual.</p>
+          <p><em>Onde vou aplicar isso:</em> ao planejar quais portas usar e ao checar, no UEFI, se o drive aparece na lista de dispositivos conectados.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Instalação e Validação de HD/SSD SATA e SSD NVMe</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Instalar fisicamente um SSD SATA 2,5" e um SSD NVMe M.2, configurar o UEFI/BIOS adequadamente, e validar o reconhecimento e a saúde (S.M.A.R.T.) no sistema operacional.</p>
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Etapa 0 — Preparação e segurança (5–10 min)</h3>
+          <ol class="mb-0">
+            <li>Desligue o equipamento, remova o cabo de energia e pressione o botão power por 5 segundos para descarregar.</li>
+            <li>Use pulseira ESD e organize a bancada. Separe: SSD SATA 2,5", cabo SATA de dados, cabo/ramal de energia SATA da fonte, SSD NVMe M.2, parafuso/standoff M.2, chave Phillips.</li>
+            <li>Abra o gabinete e identifique: portas SATA, baias 2,5", slot M.2, dissipador M.2 (se houver).</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 1 — Instalação do SSD SATA 2,5" (15–20 min)</h3>
+          <ol>
+            <li>Fixe o SSD na baia 2,5" com parafusos apropriados. Evite apertos excessivos.</li>
+            <li>Conecte o cabo de dados SATA em uma porta SATA livre da placa-mãe (ex.: SATA_1).</li>
+            <li>Conecte o cabo de energia SATA vindo da fonte ao SSD.</li>
+            <li>Roteie os cabos para não obstruir ventoinhas e mantenha o raio de curvatura seguro.</li>
+          </ol>
+          <div class="alert alert-light border mb-0">Boas práticas: registre quais portas SATA foram usadas; fotografe a montagem para o relatório.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 2 — Instalação do SSD NVMe M.2 (15–20 min)</h3>
+          <ol>
+            <li>Localize o slot M.2 apropriado (ex.: M2_1 PCIe 4.0 x4). Confirme no manual se é NVMe.</li>
+            <li>Se houver dissipador, remova-o e destaque o thermal pad protetor.</li>
+            <li>Insira o SSD M.2 no slot em ângulo (~30°), empurre suavemente para assentar e abaixe até o suporte do parafuso.</li>
+            <li>Parafuse com leve firmeza. Recoloque o dissipador, alinhando e garantindo contato com o thermal pad.</li>
+          </ol>
+          <div class="alert alert-light border mb-0">Atenção: algumas placas desativam certas portas SATA ao ocupar slots M.2. Revise o manual e ajuste seu plano de portas se necessário.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 3 — UEFI/BIOS: verificação e ajustes (10–15 min)</h3>
+          <ol>
+            <li>Ligue o PC e acesse o UEFI/BIOS (geralmente DEL/F2). Verifique:
+              <ul>
+                <li>Modo SATA: AHCI (salvo cenários de RAID).</li>
+                <li>Lista de dispositivos de armazenamento: confirme presença do SSD SATA e do NVMe.</li>
+                <li>Ordem de boot: ajuste conforme sua mídia de instalação/diagnóstico.</li>
+              </ul>
+            </li>
+            <li>Salve e saia, mantendo capturas de tela das telas principais para o relatório.</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 4 — Validação no sistema (Windows)</h3>
+          <p class="mb-2">No Windows, valide S.M.A.R.T. e inicialização de disco.</p>
+          <p class="mb-1"><strong>PowerShell (executar como administrador)</strong></p>
+          <pre class="language-powershell"><code># listar discos
+Get-Disk
+
+# inicializar disco (exemplo: disco 1 em GPT)
+Initialize-Disk -Number 1 -PartitionStyle GPT
+
+# criar partição e formatar (NTFS) com rótulo
+New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter |
+  Format-Volume -FileSystem NTFS -NewFileSystemLabel "SSD_SATA" -Confirm:$false
+
+# verificar S.M.A.R.T. básico via WMI (informativo)
+Get-WmiObject -Namespace root\wmi -Class MSStorageDriver_FailurePredictStatus</code></pre>
+          <div class="alert alert-light border mb-0">Alternativa gráfica: “Gerenciamento de Disco” para inicializar, particionar e formatar; CrystalDiskInfo para S.M.A.R.T.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 5 — Validação no sistema (Linux)</h3>
+          <p class="mb-1"><strong>Listar discos e checar S.M.A.R.T.</strong></p>
+          <pre class="language-bash"><code># listar dispositivos
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
+
+# instalar smartmontools (ex.: Debian/Ubuntu)
+sudo apt-get update &amp;&amp; sudo apt-get install -y smartmontools
+
+# checar saúde (exemplos: /dev/sda = SATA, /dev/nvme0n1 = NVMe)
+sudo smartctl -H /dev/sda
+sudo smartctl -H /dev/nvme0n1
+
+# detalhes dos atributos
+sudo smartctl -a /dev/sda
+sudo smartctl -a /dev/nvme0n1</code></pre>
+          <p class="mb-1"><strong>Criar partição e formatar (exemplo GPT + ext4)</strong></p>
+          <pre class="language-bash"><code># exemplo usando parted (disco /dev/sda)
+sudo parted /dev/sda --script mklabel gpt
+sudo parted /dev/sda --script mkpart primary ext4 1MiB 100%
+sudo mkfs.ext4 -L SSD_SATA /dev/sda1
+
+# montar e validar
+sudo mkdir -p /mnt/ssd_sata
+sudo mount /dev/sda1 /mnt/ssd_sata
+df -h | grep ssd_sata</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 6 — Registro e documentação</h3>
+          <ul class="mb-0">
+            <li>Fotos da instalação (SATA e M.2), telas do UEFI mostrando os dispositivos.</li>
+            <li>Saídas de comandos (ou screenshot) comprovando reconhecimento e saúde S.M.A.R.T.</li>
+            <li>Anotações de portas/slots usados, observações de temperatura do NVMe e presença de dissipador.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Problemas comuns e soluções</h3>
+          <ul>
+            <li>SSD NVMe não aparece: verificar se o slot M.2 é NVMe e se não está desativado por configuração.</li>
+            <li>Porta SATA sumiu: checar no manual conflito com M.2 ocupado; troque a porta SATA utilizada.</li>
+            <li>Unidade não aparece no SO: inicialize o disco (GPT), crie partição e formate.</li>
+            <li>Temperatura alta no NVMe: instale dissipador, melhore airflow, evite obstruções de cabos.</li>
+          </ul>
+          <div class="alert alert-light border mb-0">Sempre desligue o PC e descarregue energia antes de manipular hardware. Use pulseira ESD.</div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a instalação e a análise de discos, praticando variações e documentação técnica.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Benchmark leve comparativo: execute um teste simples de leitura/gravação sequencial no SSD SATA e no NVMe; registre resultados e temperaturas.</li>
+            <li>Particionamento avançado: crie duas partições no SSD SATA (ex.: 60% + 40%), formate com sistemas de arquivos distintos (NTFS/ext4) e monte/atribua letras.</li>
+            <li>Relatório técnico curto: 1–2 páginas com fotos, telas do UEFI, saúde S.M.A.R.T., resultados do benchmark e conclusões sobre custo-benefício (SATA vs NVMe) no seu caso.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (sugestão)</h3>
+          <ul class="mb-0">
+            <li>Corretude técnica (instalação, cabos, UEFI) — 40%</li>
+            <li>Qualidade da validação (S.M.A.R.T., partições, benchmark) — 40%</li>
+            <li>Documentação e organização (fotos, clareza, checklist) — 20%</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação oficial da sua placa-mãe: compatibilidade de slots M.2 e desativação de portas SATA.</li><li>Guias de boas práticas ESD: IPC-A-610/JEDEC e whitepapers de fabricantes.</li><li>Ferramentas S.M.A.R.T. e diagnóstico: sites oficiais do CrystalDiskInfo, smartmontools, HWInfo.</li><li>Distribuições Linux (Ubuntu/Fedora): documentação de particionamento UEFI/GPT.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 08</h2>
+        <ul><li>Checklist preenchido da instalação de SSD SATA e NVMe (com anotações de portas/slots).</li><li>Capturas do UEFI/BIOS mostrando reconhecimento das unidades.</li><li>Comprovantes de S.M.A.R.T. e partições criadas no SO.</li><li>Relatório técnico curto com comentários sobre desempenho e temperaturas.</li><li>Projeto Integrador — Bimestre 2 (entrega incremental): armazenamento configurado e documentado no PC de bancada (foco em SATA/NVMe, UEFI e validação).</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 07</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 09</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Montagem e Configuração de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual afirmação descreve corretamente a principal diferença entre SATA e NVMe?","alternativas":{"A":"SATA é sempre mais rápido que NVMe.","B":"NVMe usa PCIe e tem menor latência que SATA.","C":"SATA e NVMe usam os mesmos cabos.","D":"NVMe é um formato físico, não um protocolo.","E":"SATA só funciona com HDs, não com SSDs."},"correta":"B"},{"id":"q2","titulo":"Sobre chaves M.2, qual opção está correta?","alternativas":{"A":"Todo SSD M.2 é NVMe por padrão.","B":"B-key e M-key são irrelevantes para compatibilidade.","C":"Muitos SSDs NVMe usam M-key; alguns SSDs SATA M.2 usam B/B+M.","D":"B+M significa incompatibilidade com todas as placas-mãe.","E":"M.2 sempre desativa todas as portas SATA."},"correta":"C"},{"id":"q3","titulo":"O que é TBW em um SSD?","alternativas":{"A":"Taxa de banda wireless do SSD.","B":"Temperatura base de trabalho.","C":"Terabytes gravados estimados suportados ao longo da vida útil.","D":"Tamanho do buffer de escrita do SSD.","E":"Tempo de boot em Windows."},"correta":"C"},{"id":"q4","titulo":"Em uma configuração recomendada para SSD SATA, qual modo deve estar ativo no UEFI/BIOS (sem RAID)?","alternativas":{"A":"IDE","B":"RAID","C":"AHCI","D":"Legacy Only","E":"CSM Only"},"correta":"C"},{"id":"q5","titulo":"Qual boa prática ao instalar um SSD NVMe M.2?","alternativas":{"A":"Dispensar o parafuso, pois o encaixe é por pressão.","B":"Evitar dissipador para reduzir peso.","C":"Inserir em ângulo, parafusar com leve firmeza e usar dissipador se disponível.","D":"Passar cabo de energia SATA nele.","E":"Aplicar pasta térmica na face do NAND."},"correta":"C"},{"id":"q6","titulo":"Qual ferramenta/comando pode exibir S.M.A.R.T. no Linux?","alternativas":{"A":"ipconfig","B":"lsusb","C":"smartctl","D":"top","E":"chmod"},"correta":"C"},{"id":"q7","titulo":"Particionamento moderno para instalação em UEFI costuma utilizar:","alternativas":{"A":"MBR e partição ativa.","B":"GPT e partição EFI.","C":"FAT12 em todo o disco.","D":"Ext2 sem EFI.","E":"NTFS para a partição EFI."},"correta":"B"},{"id":"q8","titulo":"Um sintoma de thermal throttling em NVMe é:","alternativas":{"A":"Aumento permanente de TBW.","B":"Queda de desempenho sob carga devido a alta temperatura.","C":"Desaparecimento do SSD do UEFI.","D":"Falha do cabo SATA.","E":"Aumento do ruído mecânico."},"correta":"B"},{"id":"q9","titulo":"Ao instalar um SSD SATA 2,5\", você precisa, tipicamente:","alternativas":{"A":"Apenas encaixá-lo no slot M.2.","B":"Um cabo de dados SATA e um de energia SATA.","C":"Um cabo PCIe de 8 pinos.","D":"Apenas um cabo de energia SATA.","E":"Apenas um cabo de dados SATA."},"correta":"B"},{"id":"q10","titulo":"Se o SSD NVMe não aparece no sistema, uma verificação inicial sensata é:","alternativas":{"A":"Trocar a fonte imediatamente.","B":"Formatar o disco às cegas.","C":"Confirmar se o slot M.2 aceita NVMe e se está habilitado no UEFI.","D":"Lixar os contatos para melhorar o encaixe.","E":"Conectar um cabo SATA adicional nele."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Usei pulseira ESD e organizei a bancada antes da montagem."},{"id":"c2","texto":"Instalei corretamente o SSD SATA 2,5\" (fixação, cabo de dados e de energia)."},{"id":"c3","texto":"Instalei corretamente o SSD NVMe M.2 (parafuso, dissipador/thermal pad, slot correto)."},{"id":"c4","texto":"Verifiquei no UEFI/BIOS: modo AHCI, dispositivos detectados e ordem de boot."},{"id":"c5","texto":"Inicializei os discos no SO, criei partições e formatei conforme o objetivo."},{"id":"c6","texto":"Chequei S.M.A.R.T. (Windows/Linux) e registrei a condição e temperaturas."},{"id":"c7","texto":"Organizei e prendi os cabos para não obstruir airflow."},{"id":"c8","texto":"Registrei fotos e capturas de telas para o relatório técnico."}];
+    const CHECKLIST_KEY = 'MTCO_CAP08_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 — Álgebra booleana e portas lógicas</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo04.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">FIMC</span>
+        <span style="color: var(--cor-principal);">Fundamentos de Informática para Manutenção de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Panorama de TI</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Bit, Byte e unidades</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Sistemas numéricos</a></li>
+              <li><a class="dropdown-item active" href="capitulo04.html">Capítulo 04 — Álgebra booleana</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Evolução dos computadores</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Evolução dos SO</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Arquitetura do computador</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Periféricos e interfaces</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Armazenamento e FS</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Boot (BIOS/UEFI)</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Tipos de SO</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Estrutura de SO</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Licenciamento de software</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Máquina de camadas</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Classificação de softwares</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Serviços e modelos em TI</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 04 — Noções de álgebra booleana e portas lógicas</h1>
+          <p class="mb-2"><strong>Carga:</strong> 2h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Exercícios de tabelas-verdade e simulação de portas lógicas</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Papel e lápis; simulador online de lógica digital (ex.: logic.ly, Tinkercad Circuits ou equivalente)</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar os conceitos fundamentais da álgebra booleana (variáveis lógicas e operadores AND, OR, NOT).</li><li>Construir e interpretar tabelas-verdade para expressões lógicas simples.</li><li>Relacionar expressões booleanas com o funcionamento básico de portas lógicas em circuitos digitais.</li><li>Simplificar expressões simples usando propriedades básicas (comutativa, associativa, distributiva, identidade e complemento).</li><li>Aplicar o método passo a passo para criar e verificar expressões lógicas de cenários práticos.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>MSI18: fundamentos de TI — reconhecer e aplicar princípios lógicos básicos.</li><li>MSI01: base conceitual para montagem/diagnóstico — interpretar sinais lógicos e portas.</li><li>MSI19: uso de sistemas informatizados — compreender lógica por trás de decisões computacionais.</li><li>Habilidades: MSI1801, MSI1802, MSI1803, MSI1809, MSI0101, MSI1904 (conforme plano).</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 03 — Sistemas numéricos</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 05 — Evolução dos computadores</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 04)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p class="mb-2"><strong>Tema:</strong> Noções de álgebra booleana e portas lógicas.</p><p class="mb-2"><strong>Objetivos:</strong> Introduzir operadores lógicos básicos; construir tabelas-verdade; relacionar expressões booleanas com portas lógicas; preparar o aluno para leitura de circuitos digitais simples.</p><p class="mb-2"><strong>Materiais:</strong> Quadro, projetor (opcional), folhas e canetas; acesso a simulador online de lógica digital (opcional).</p><p class="mb-2"><strong>Estratégia:</strong> Exposição dialogada sobre variáveis lógicas e operadores; demonstração de tabelas-verdade; exemplos aplicados; atividade guiada de construção de 5 tabelas-verdade; verificação com simulador.</p><p class="mb-2"><strong>Avaliação formativa:</strong> Correção comentada das tabelas-verdade e discussão de erros comuns; checklist de autoverificação ao final.</p><p class="mb-0"><strong>Tempo estimado:</strong> 30 min teoria; 40–60 min prática; 10 min revisão e checklist.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Variáveis lógicas e valores booleanos</h3>
+          <p>Na álgebra booleana, trabalhamos com variáveis que assumem apenas dois valores: 0 ou 1. Em lógica digital, interpretamos 0 como “falso” e 1 como “verdadeiro”. Em circuitos, 0 e 1 também representam níveis elétricos baixo e alto, respectivamente. Essa simplificação binária é a base do funcionamento dos computadores.</p>
+          <p>Ao modelar problemas com variáveis booleanas, nomeamos entradas como A, B, C etc. A combinação de seus valores define o resultado de uma expressão lógica, que pode ser vista como uma “regra de decisão”.</p>
+          <p><strong>Onde vou aplicar isso:</strong> Você usará variáveis booleanas ao montar tabelas-verdade e ao conectar entradas de portas lógicas em simuladores.</p>
+          <hr>
+          <h3 class="h6 fw-bold">2) Operadores básicos: AND, OR e NOT</h3>
+          <p>Os operadores fundamentais são: AND (E), OR (OU) e NOT (NÃO). O AND só resulta em 1 quando todas as entradas são 1. O OR resulta em 1 quando pelo menos uma entrada é 1. O NOT inverte o valor da variável: NOT(1)=0 e NOT(0)=1.</p>
+          <p>Esses operadores descrevem tanto regras de decisão quanto o comportamento de portas lógicas físicas (portas AND, OR e NOT). Combinações deles permitem construir funções mais complexas.</p>
+          <p><strong>Onde vou aplicar isso:</strong> Você calculará resultados com esses operadores nas tabelas-verdade e criará circuitos equivalentes no simulador.</p>
+          <hr>
+          <h3 class="h6 fw-bold">3) Tabelas-verdade</h3>
+          <p>A tabela-verdade lista todas as combinações possíveis das entradas e o resultado correspondente da expressão. Para duas entradas A e B, existem 4 combinações (00, 01, 10, 11); para três entradas, 8 combinações, e assim por diante (2^n combinações).</p>
+          <p>Construir a tabela-verdade é um método seguro para entender e validar o comportamento de uma expressão ou circuito, pois explicita o resultado para cada caso possível.</p>
+          <p><strong>Onde vou aplicar isso:</strong> No passo a passo, você produzirá tabelas-verdade para expressões fornecidas e verificará com o simulador.</p>
+          <hr>
+          <h3 class="h6 fw-bold">4) Portas lógicas e equivalência com expressões</h3>
+          <p>Portas lógicas são componentes digitais que implementam operadores booleanos. Uma porta AND com duas entradas cria a operação A·B; uma OR cria A+B; uma NOT cria ¬A (ou A’). Ao combinar portas, implementamos expressões mais complexas, como (A·B)+¬C.</p>
+          <p>Saber transformar uma expressão em um circuito (e vice-versa) ajuda na leitura de esquemas e no diagnóstico básico de lógica digital.</p>
+          <p><strong>Onde vou aplicar isso:</strong> Ao final do passo a passo, você montará circuitos equivalentes para expressões e conferirá a saída.</p>
+          <hr>
+          <h3 class="h6 fw-bold">5) Propriedades básicas e simplificação</h3>
+          <p>Algumas propriedades úteis: comutativa (A·B = B·A; A+B = B+A), associativa ((A·B)·C = A·(B·C)), distributiva (A·(B+C) = A·B + A·C), identidade (A·1=A; A+0=A), nulo (A·0=0; A+1=1), idempotência (A·A=A; A+A=A) e complemento (A·¬A=0; A+¬A=1). Elas permitem reescrever expressões de forma equivalente, possivelmente com menos portas.</p>
+          <p>A simplificação é valiosa para reduzir custo e complexidade de circuitos e para entender decisões lógicas em sistemas.</p>
+          <p><strong>Onde vou aplicar isso:</strong> Você tentará reduzir expressões antes de montar a tabela-verdade e o circuito, economizando elementos.</p>
+          <hr>
+          <h3 class="h6 fw-bold">6) Operadores derivados: NAND, NOR, XOR</h3>
+          <p>NAND e NOR são, respectivamente, as negações de AND e OR. O NAND é muito usado porque é “funcionalmente completo”: qualquer circuito pode ser implementado apenas com NAND. O XOR (OU exclusivo) resulta em 1 quando as entradas são diferentes e 0 quando são iguais; é útil para detectar diferenças e em somadores binários.</p>
+          <p>Embora o foco sejam AND, OR e NOT, conhecer NAND, NOR e XOR ajuda a entender componentes reais e suas abreviações em catálogos.</p>
+          <p><strong>Onde vou aplicar isso:</strong> Em atividades, você estenderá uma expressão com XOR e verificará seu comportamento.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Do enunciado à tabela-verdade e ao circuito</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Guiar você na criação de tabelas-verdade e na montagem de circuitos equivalentes em simulador para expressões lógicas simples, validando os resultados.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Passo 1 — Interpretar a expressão</h3>
+          <p>Considere a expressão: F = (A · B) + ¬C. Leia como “F é 1 se A E B forem 1, OU se C for 0”. Identifique operadores: “·” é AND, “+” é OR e “¬” é NOT.</p>
+          <p>Dica: desenhe parênteses para deixar claro a ordem de avaliação. Primeiro AND/NOT, depois OR, conforme a expressão.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Passo 2 — Planejar a tabela-verdade</h3>
+          <p>Como temos três variáveis (A, B, C), haverá 2^3 = 8 linhas. Organize as combinações em ordem binária crescente (000 a 111).</p>
+          <pre class="language-text"><code>A B C | ¬C | A·B | (A·B)+¬C
+0 0 0 |  1 |  0  |    1
+0 0 1 |  0 |  0  |    0
+0 1 0 |  1 |  0  |    1
+0 1 1 |  0 |  0  |    0
+1 0 0 |  1 |  0  |    1
+1 0 1 |  0 |  0  |    0
+1 1 0 |  1 |  1  |    1
+1 1 1 |  0 |  1  |    1</code></pre>
+          <p>Preencha colunas auxiliares (¬C e A·B) antes do resultado final. Isso reduz erros.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Passo 3 — Simplificar (quando possível)</h3>
+          <p>Tente aplicar propriedades. Para F = (A·B)+¬C, não há simplificação evidente que reduza portas sem alterar variáveis. Em outras expressões, a distributiva ou idempotência podem ajudar.</p>
+          <pre class="language-text"><code>Exemplo de distributiva:
+F = A·B + A·C = A·(B + C)</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Passo 4 — Montar o circuito equivalente</h3>
+          <p>No simulador, conecte entradas A e B a uma porta AND. Em paralelo, passe C por uma porta NOT. Em seguida, conecte as saídas da AND e da NOT nas entradas de uma porta OR. A saída da OR é F.</p>
+          <pre class="language-text"><code>Entradas: A, B, C
+Blocos:
+- Porta AND (2 entradas) → saída X = A·B
+- Porta NOT para C → saída Y = ¬C
+- Porta OR (2 entradas) com X e Y → F = X + Y</code></pre>
+          <p>Teste as 8 combinações de A, B e C e compare com a tabela-verdade do Passo 2.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Passo 5 — Validar com um script (opcional)</h3>
+          <p>Você pode validar as combinações automaticamente com um pequeno script local (qualquer linguagem). Abaixo, um exemplo em Python:</p>
+          <pre class="language-python"><code>from itertools import product
+
+def F(a, b, c):
+    # F = (A·B) + ¬C
+    return (a and b) or (not c)
+
+print("A B C | F")
+for a, b, c in product([0,1],[0,1],[0,1]):
+    res = int(F(a, b, c))
+    print(a, b, c, "|", res)</code></pre>
+          <p>Compare a saída com sua tabela-verdade. Divergências indicam erro de cálculo ou de montagem.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Passo 6 — Exercício guiado (5 expressões)</h3>
+          <p>Para cada expressão, construa a tabela-verdade e, se tiver acesso ao simulador, monte e teste o circuito:</p>
+          <pre class="language-text"><code>1) G = A + B
+2) H = A · (B + C)
+3) J = (A + B) · ¬C
+4) K = ¬A · ¬B
+5) L = A ⊕ B   (XOR: 1 se A ≠ B; 0 se A = B)</code></pre>
+          <p>Dica: para o XOR, se o simulador não tiver a porta pronta, implemente com operações básicas:
+          L = (A·¬B) + (¬A·B).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Passo 7 — Erros comuns e conferência</h3>
+          <ul>
+            <li>Esquecer combinações na tabela-verdade (verifique 2^n linhas).</li>
+            <li>Inverter a precedência: calcule NOT e AND antes do OR, respeitando parênteses.</li>
+            <li>Errar conexões no simulador (etiquete fios e verifique entradas/saídas).</li>
+            <li>Confundir XOR com OR comum: XOR só é 1 quando as entradas são diferentes.</li>
+          </ul>
+          <p>Ao final, revise sua tabela com base nos sinais observados no simulador.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o domínio de operadores lógicos, tabelas-verdade e montagem de circuitos equivalentes.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li><strong>Banco de tabelas:</strong> Crie tabelas-verdade completas para as expressões do Passo 6. Entregue em PDF ou foto legível.</li>
+            <li><strong>Simulação rápida:</strong> No simulador, implemente J = (A + B) · ¬C. Faça capturas de tela com pelo menos 4 combinações de entradas destacando a saída.</li>
+            <li><strong>Explorando XOR:</strong> Implemente L = (A·¬B) + (¬A·B) usando apenas AND, OR e NOT. Compare com uma porta XOR nativa (se disponível) e registre se o comportamento é idêntico.</li>
+            <li><strong>Projeto Integrador — Etapa 1 (fechamento do 1º bimestre):</strong> Proponha um circuito de decisão simples para um “sinal de alerta de temperatura” com três entradas booleanas:
+              <br>- S (sensor 1), T (sensor 2), M (modo manutenção).
+              <br>Requisito: o alerta A deve acender se (S AND T) estiverem ativos OU se o modo manutenção estiver desligado e pelo menos um sensor estiver ativo.
+              <br>a) Defina a expressão para A em termos de S, T e M.
+              <br>b) Monte a tabela-verdade e simplifique se possível.
+              <br>c) Implemente no simulador e entregue capturas com casos de teste.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (rubrica)</h3>
+          <ul class="mb-0">
+            <li>Correção das tabelas-verdade (completude e resultados) — 40%.</li>
+            <li>Montagem fiel dos circuitos e evidências (prints/capturas) — 30%.</li>
+            <li>Clareza na justificativa/simplificação aplicada — 20%.</li>
+            <li>Organização e apresentação (legibilidade, nomenclatura) — 10%.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>História de George Boole e a origem da lógica booleana.</li><li>Portas NAND e NOR como bases universais: por que são tão usadas?</li><li>Implementação do XOR e uso em somadores binários (meio somador e somador completo).</li><li>Como tabelas-verdade se conectam a expressões em linguagens de programação (operadores lógicos).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 04</h2>
+        <ul><li>Tabelas-verdade completas das 5 expressões do Passo 6.</li><li>Capturas de tela do simulador para pelo menos duas expressões (J e L) com combinações de teste.</li><li>Relatório curto da simplificação (se aplicada), com indicação das propriedades usadas.</li><li>Projeto Integrador — 1º Bimestre (Etapa 1): especificação da expressão, tabela-verdade, simplificação (se houver) e evidências de simulação do “sinal de alerta de temperatura”.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 03 — Sistemas numéricos</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 05 — Evolução dos computadores</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Fundamentos de Informática para Manutenção de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual alternativa descreve corretamente a operação AND (A · B)?","alternativas":{"A":"O resultado é 1 quando pelo menos uma entrada é 1.","B":"O resultado é 1 apenas quando A e B são 1.","C":"O resultado é sempre o inverso de A.","D":"O resultado é 0 apenas quando A=0 e B=0.","E":"O resultado é 1 quando A e B são diferentes."},"correta":"B"},{"id":"q2","titulo":"Qual é a tabela-verdade correta para o operador NOT (¬A)?","alternativas":{"A":"Se A=0 então ¬A=0; se A=1 então ¬A=1.","B":"Se A=0 então ¬A=1; se A=1 então ¬A=0.","C":"Se A=0 então ¬A=1; se A=1 então ¬A=1.","D":"Se A=0 então ¬A=0; se A=1 então ¬A=0.","E":"Depende do valor de B."},"correta":"B"},{"id":"q3","titulo":"Para três variáveis (A, B, C), quantas linhas uma tabela-verdade deve ter?","alternativas":{"A":"3","B":"6","C":"7","D":"8","E":"9"},"correta":"D"},{"id":"q4","titulo":"Qual expressão é equivalente a L = A ⊕ B (XOR)?","alternativas":{"A":"L = A + B","B":"L = A · B","C":"L = (A · ¬B) + (¬A · B)","D":"L = ¬(A + B)","E":"L = ¬A + ¬B"},"correta":"C"},{"id":"q5","titulo":"Qual propriedade permite transformar A·B + A·C em A·(B + C)?","alternativas":{"A":"Comutativa","B":"Associativa","C":"Distributiva","D":"Idempotência","E":"Complemento"},"correta":"C"},{"id":"q6","titulo":"O que representa a expressão F = (A · B) + ¬C?","alternativas":{"A":"F é 1 somente quando A=1, B=1 e C=1.","B":"F é 1 quando A e B são 1, ou quando C é 0.","C":"F é 1 quando pelo menos duas entradas são 1.","D":"F é 1 somente quando C=1.","E":"F é sempre 0."},"correta":"B"},{"id":"q7","titulo":"Sobre XOR, assinale a correta:","alternativas":{"A":"XOR é 1 quando as entradas são iguais.","B":"XOR é 1 quando ao menos uma entrada é 1.","C":"XOR é 0 quando as entradas são diferentes.","D":"XOR é 1 quando as entradas são diferentes.","E":"XOR é a negação de AND."},"correta":"D"},{"id":"q8","titulo":"Qual par de portas é chamado de base universal (pode implementar qualquer função lógica)?","alternativas":{"A":"AND e OR","B":"OR e XOR","C":"NAND e NOR","D":"NOT e XOR","E":"AND e XOR"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Entendi o significado dos valores booleanos (0/1) e variáveis lógicas."},{"id":"c2","texto":"Sei aplicar AND, OR e NOT e calcular resultados simples."},{"id":"c3","texto":"Consigo construir tabelas-verdade completas (2^n linhas)."},{"id":"c4","texto":"Relacionei expressões com portas lógicas equivalentes no simulador."},{"id":"c5","texto":"Apliquei propriedades (distributiva, comutativa etc.) para simplificar uma expressão simples."},{"id":"c6","texto":"Implementei e testei pelo menos duas expressões (incluindo XOR) no simulador."},{"id":"c7","texto":"Concluí os entregáveis do capítulo e a Etapa 1 do Projeto Integrador do 1º bimestre."}];
+    const CHECKLIST_KEY = 'chk_fimc_cap04';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

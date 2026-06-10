@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 — Processo de inicialização (BIOS/UEFI e boot)</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo10.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">FIMC</span>
+        <span style="color: var(--cor-principal);">Fundamentos de Informática para Manutenção de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Panorama de TI</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Bit, Byte e unidades</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Sistemas numéricos</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Álgebra booleana</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Evolução dos computadores</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Evolução dos SO</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Arquitetura do computador</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Periféricos e interfaces</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Armazenamento e sistemas de arquivos</a></li>
+              <li><a class="dropdown-item active" href="capitulo10.html">Capítulo 10 — Boot: BIOS/UEFI</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Tipos de SO</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Estrutura interna do SO</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Licenciamento de software</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Máquina de camadas</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Classificação de softwares</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Serviços e modelos em TI</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 10 — Processo de inicialização: BIOS/UEFI e boot</h1>
+          <p class="mb-2"><strong>Carga:</strong> 2–4 horas (teoria e prática guiada)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Análise e ajuste seguro das opções de boot em um computador de laboratório</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ambiente de configuração de firmware (BIOS/UEFI) + ferramentas nativas do SO</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar as etapas do POST e do processo de boot, distinguindo BIOS e UEFI.</li><li>Identificar e ajustar a ordem de boot e opções essenciais no Setup (firmware) com segurança.</li><li>Reconhecer o papel do bootloader em alto nível e suas interações com o sistema de arquivos/particionamento.</li><li>Aplicar boas práticas e cuidados ao alterar configurações de boot para diagnóstico e manutenção.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>MSI01 — base conceitual para montagem/diagnóstico</li><li>MSI19 — uso de sistemas informatizados (boot e configuração)</li><li>Habilidades: MSI0101, MSI1904</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 09 — Unidades de armazenamento e sistemas de arquivos</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 11 — Tipos de sistemas operacionais</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 10)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>1) Abertura (10 min)</strong></p><ul><li>Motivação: por que o computador liga? Quando ele não liga, o que checar primeiro?</li><li>Objetivos do capítulo e regras de segurança ao acessar o Setup.</li></ul><p><strong>2) Exposição dialogada (30–40 min)</strong></p><ul><li>POST, BIOS vs UEFI, ordem de boot, modos Legacy/UEFI, Secure Boot.</li><li>Bootloader em alto nível e relação com partições (MBR/GPT).</li></ul><p><strong>3) Demonstração guiada (20–30 min)</strong></p><ul><li>Navegação segura no Setup e leitura de opções de boot.</li><li>Exemplos de mensagens de POST e telas de seleção de dispositivo.</li></ul><p><strong>4) Prática orientada (30–40 min)</strong></p><ul><li>Sequência passo a passo para identificar e ajustar a ordem de boot (sem alterar permanentemente quando em ambiente real).</li><li>Registro das observações em ficha técnica do equipamento.</li></ul><p><strong>5) Fechamento (10 min)</strong></p><ul><li>Resumo dos riscos e boas práticas.</li><li>Apresentação das atividades complementares e checklist.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) POST (Power-On Self Test)</h3>
+          <p>O POST é a primeira etapa após energizar o computador. O firmware da placa-mãe realiza testes básicos de hardware: memória RAM, processador, vídeo, teclado e dispositivos essenciais. Se algo falhar, sinais sonoros (beeps) ou códigos no display/LED informam o tipo de erro. Em máquinas modernas, mensagens na tela podem indicar o componente com problema.</p>
+          <p>O POST garante que o mínimo necessário está operante antes de buscar um dispositivo de boot. Sem passar pelo POST, o sistema operacional não será carregado.</p>
+          <p><em>Onde vou aplicar isso no passo a passo:</em> interpretar mensagens/sons de erro para priorizar o diagnóstico antes de alterar configurações de boot.</p>
+
+          <h3 class="h6 fw-bold mt-4">2) BIOS e UEFI: diferenças práticas</h3>
+          <p>BIOS (Basic Input/Output System) é o firmware tradicional, com interface simples, modo texto e suporte a MBR. UEFI (Unified Extensible Firmware Interface) é a evolução: interface gráfica (em muitos casos), suporte a mouse, drivers modulares, inicialização mais rápida e suporte nativo a GPT, partições maiores e recursos como Secure Boot.</p>
+          <p>Na prática, muitas placas oferecem compatibilidade “Legacy/CSM” para inicializar sistemas antigos. Em equipamentos atuais, recomenda-se utilizar UEFI com GPT para melhor compatibilidade e segurança.</p>
+          <p><em>Onde vou aplicar isso no passo a passo:</em> identificar se o equipamento está em modo UEFI ou Legacy para escolher corretamente o dispositivo de boot e entender o comportamento do bootloader.</p>
+
+          <h3 class="h6 fw-bold mt-4">3) Ordem de boot e seleção temporária</h3>
+          <p>A ordem de boot define a sequência de dispositivos que o firmware tentará inicializar: por exemplo, SSD interno, depois USB, depois rede. Ajustar essa ordem é comum ao instalar um SO a partir de um pendrive. Alternativamente, muitas placas oferecem um menu temporário (“Boot Menu”) acessado por uma tecla (F8, F10, F11, F12, Esc, varia por fabricante) para escolher um dispositivo apenas naquela inicialização.</p>
+          <p>Alterações permanentes exigem cuidado: uma ordem incorreta pode fazer o PC tentar inicializar sempre por um dispositivo vazio, resultando em erro.</p>
+          <p><em>Onde vou aplicar isso no passo a passo:</em> usar o Boot Menu para testes pontuais e registrar a ordem padrão antes de qualquer modificação.</p>
+
+          <h3 class="h6 fw-bold mt-4">4) Bootloader (visão de alto nível)</h3>
+          <p>O bootloader é o componente que, após a etapa do firmware, localiza e carrega o kernel do sistema operacional. Exemplos incluem o Windows Boot Manager e o GRUB. Em UEFI, o firmware localiza arquivos .EFI em partições do sistema (ESP). Em BIOS/Legacy, o código inicial fica no MBR e setores subsequentes do disco.</p>
+          <p>Para manutenção, é útil saber que múltiplos sistemas podem coexistir, e o bootloader pode apresentar um menu de escolhas. Problemas de bootloader frequentemente surgem após reinstalações ou mudanças de disco.</p>
+          <p><em>Onde vou aplicar isso no passo a passo:</em> reconhecer itens de boot no menu do firmware e verificar se a partição/entrada do bootloader correto está presente.</p>
+
+          <h3 class="h6 fw-bold mt-4">5) MBR vs GPT e partição de sistema EFI</h3>
+          <p>MBR é o esquema de partição tradicional, com limitações (até 2 TB por disco e até 4 partições primárias). GPT é o padrão moderno, com suporte a discos maiores e tabela de partições redundante. Em UEFI, é comum existir uma partição de sistema EFI (ESP), formatada geralmente em FAT32, que armazena arquivos .EFI do bootloader.</p>
+          <p>Conhecer essa diferença evita confusão ao instalar ou reparar um SO. Misturar UEFI com MBR pode impedir a inicialização, a menos que haja suporte a Legacy/CSM.</p>
+          <p><em>Onde vou aplicar isso no passo a passo:</em> confirmar se o disco do SO usa GPT quando em UEFI e identificar a ESP para diagnósticos.</p>
+
+          <h3 class="h6 fw-bold mt-4">6) Secure Boot e outras opções relevantes</h3>
+          <p>Secure Boot é um recurso que permite inicializar apenas software assinado, reduzindo risco de rootkits. Ao instalar certos sistemas ou ferramentas, pode ser necessário desativá-lo temporariamente. Outras opções incluem Fast Boot (reduz testes no POST), PXE/Network Boot (inicialização por rede) e ativação/desativação de controladores.</p>
+          <p>Qualquer alteração deve ser registrada e revertida quando não for mais necessária, evitando impactos de segurança ou compatibilidade.</p>
+          <p><em>Onde vou aplicar isso no passo a passo:</em> checar o estado do Secure Boot, decidir se é necessário desativar e garantir a restauração do padrão.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Diagnóstico e ajuste seguro do boot (BIOS/UEFI)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Seguir uma sequência didática para identificar o modo de boot (BIOS/UEFI), verificar a ordem de boot, usar o menu de boot temporário e registrar evidências, mantendo a segurança e preservando as configurações originais.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <ol class="mb-0">
+            <li class="mb-3">
+              <strong>Preparação e segurança</strong>
+              <ul>
+                <li>Desligue completamente o computador. Remova mídias externas que não serão usadas no teste.</li>
+                <li>Tenha à mão um pendrive de boot conhecido (ex.: instalador ou ferramenta de diagnóstico) se for necessário testar.</li>
+                <li>Planeje registrar toda alteração feita para posterior reversão.</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Acessar o Setup (firmware)</strong>
+              <ul>
+                <li>Ao ligar o equipamento, pressione a tecla indicada na tela para “Setup” (varia por fabricante: Del, F2, Esc, etc.).</li>
+                <li>Identifique na tela principal se o firmware é BIOS Legacy ou UEFI (procure menções a UEFI, Secure Boot, GPT, interface gráfica).</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Identificar o modo de boot e recursos</strong>
+              <ul>
+                <li>Procure pelas opções: “Boot Mode” (UEFI, Legacy/CSM), “Secure Boot”, “Fast Boot”.</li>
+                <li>Registre os valores atuais sem alterar nada neste momento.</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Verificar a ordem de boot</strong>
+              <ul>
+                <li>Navegue até “Boot” e observe a sequência configurada (ex.: Windows Boot Manager, UEFI:USB, UEFI:DVD, HDD/SSD).</li>
+                <li>Anote a ordem exata e tire uma foto se possível (para documentação).</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Usar o menu de boot temporário</strong>
+              <ul>
+                <li>Saia do Setup sem salvar (Save & Exit → “Discard Changes”) e reinicie.</li>
+                <li>Acesse o “Boot Menu” temporário (F8, F10, F11, F12 ou Esc conforme fabricante) e liste os dispositivos disponíveis.</li>
+                <li>Escolha um dispositivo apenas para este teste (ex.: pendrive de diagnóstico) para verificar se o boot funciona.</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Ajustar a ordem de boot (quando necessário)</strong>
+              <ul>
+                <li>Se precisar que o equipamento priorize o SSD interno, volte ao Setup → “Boot” e mova a entrada correspondente para o topo.</li>
+                <li>Confirme se entradas UEFI mostram o nome do bootloader (ex.: “Windows Boot Manager”). Evite selecionar dispositivos “genéricos” se houver opção específica UEFI.</li>
+                <li>Salve e saia (Save Changes and Exit). Teste a inicialização normal.</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Checagens pelo sistema operacional (somente leitura/inspeção)</strong>
+              <p class="mb-1">No Windows, é possível inspecionar informações de boot e firmware:</p>
+              <pre class="language-bash"><code>systeminfo | findstr /i "BIOS"
+bcdedit /enum
+wmic bios get smbiosbiosversion, manufacturer, version</code></pre>
+              <p class="mb-1">Em distribuições Linux, para UEFI:</p>
+              <pre class="language-bash"><code>lsblk -f | grep EFI
+sudo efibootmgr -v
+sudo dmesg | grep -i efi</code></pre>
+              <p>Registre a saída dos comandos que confirmem o modo de boot (UEFI/Legacy) e quais entradas de boot estão cadastradas.</p>
+            </li>
+            <li class="mb-3">
+              <strong>Boas práticas e reversão</strong>
+              <ul>
+                <li>Restaure o Secure Boot se tiver desativado para um teste específico.</li>
+                <li>Retorne a ordem de boot ao padrão da máquina do laboratório, se alterado.</li>
+                <li>Atualize sua ficha técnica com: data, equipamento, modo de boot, ordem configurada e resultados dos testes.</li>
+              </ul>
+            </li>
+            <li class="mb-3">
+              <strong>Registro final (modelo de ficha)</strong>
+              <pre class="language-ini"><code>[Identificação]
+Equipamento = PC-LAB-10
+Data = 2026-05-27
+Técnico = (seu nome)
+
+[Modo de Boot]
+Firmware = UEFI
+SecureBoot = Enabled
+FastBoot = Disabled
+
+[Ordem de Boot]
+1 = Windows Boot Manager (SSD)
+2 = UEFI: USB
+3 = UEFI: DVD
+
+[Testes]
+BootMenu = Funcionou (F12)
+Pendrive Diagnóstico = Reconhecido e inicializou
+
+[Observações]
+Sem alterações permanentes.</code></pre>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a leitura de telas de firmware, distinguir BIOS/UEFI, interpretar a ordem de boot e aplicar ajustes seguros documentados.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li class="mb-2"><strong>Atividade 1 — Mapa de opções de boot do seu equipamento:</strong> fotografe/tire print das telas de “Boot”, identifique cada opção e produza um quadro explicando a função e quando alterar.</li>
+            <li class="mb-2"><strong>Atividade 2 — Relato técnico de diagnóstico de boot:</strong> simule um cenário de “PC não inicia do SSD” e descreva o procedimento de verificação (POST, Boot Menu, ordem de boot, recuperação), incluindo riscos e mitigação.</li>
+            <li class="mb-2"><strong>Atividade 3 — Comparativo Legacy x UEFI:</strong> elabore uma tabela com prós/limitações de cada modo e indique as implicações práticas para instalação de SO e discos MBR/GPT.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (rubrica sintética)</h3>
+          <ul class="mb-0">
+            <li>Clareza técnica e correção conceitual.</li>
+            <li>Registro e organização das evidências (prints/fotos e anotações).</li>
+            <li>Adoção de boas práticas e cuidado com segurança.</li>
+            <li>Capacidade de propor soluções e reversões sem danos.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Diferenças práticas entre MBR e GPT e quando utilizar cada um.</li><li>Como o Secure Boot funciona e seu impacto em instalações de sistemas.</li><li>Estrutura da partição de sistema EFI (ESP) e local dos arquivos .EFI.</li><li>Leitura de códigos de beep de fabricantes comuns (AMI, Award, Phoenix).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 10</h2>
+        <ul><li>Ficha técnica preenchida com modo/ordem de boot e evidências de teste.</li><li>Mapa comentado das opções de boot do firmware do equipamento analisado.</li><li>Relato técnico do cenário de diagnóstico de boot com passos e justificativas.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 09 — Unidades de armazenamento e sistemas de arquivos</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 11 — Tipos de sistemas operacionais</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Fundamentos de Informática para Manutenção de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a função principal do POST na inicialização do computador?","alternativas":{"A":"Carregar o kernel do sistema operacional","B":"Testar componentes básicos de hardware antes do boot","C":"Selecionar o dispositivo de maior capacidade","D":"Montar o sistema de arquivos raiz","E":"Atualizar automaticamente o firmware"},"correta":"B"},{"id":"q2","titulo":"Em qual cenário é mais adequado utilizar o Boot Menu temporário em vez de alterar a ordem permanente de boot?","alternativas":{"A":"Quando for instalar um SO definitivamente no disco","B":"Quando precisar iniciar por USB apenas uma vez para diagnóstico","C":"Quando o SSD interno está com defeito permanente","D":"Quando deseja ativar o Secure Boot","E":"Quando deseja mudar de MBR para GPT"},"correta":"B"},{"id":"q3","titulo":"Qual alternativa descreve corretamente uma vantagem do UEFI em relação à BIOS tradicional?","alternativas":{"A":"Suporte exclusivo a MBR","B":"Limite de 2 TB por disco","C":"Interface e drivers modulares, suporte nativo a GPT e Secure Boot","D":"Inicialização apenas por dispositivos IDE","E":"Impossibilidade de multiboot"},"correta":"C"},{"id":"q4","titulo":"O que é a partição de sistema EFI (ESP) em ambientes UEFI?","alternativas":{"A":"Uma partição NTFS que guarda os perfis de usuário","B":"Uma partição FAT32 que armazena executáveis .EFI do bootloader","C":"Uma partição swap utilizada para hibernação","D":"Uma partição de recuperação exclusiva do fabricante","E":"Uma partição ext4 que contém o kernel do Linux"},"correta":"B"},{"id":"q5","titulo":"Sobre Secure Boot, assinale a opção correta:","alternativas":{"A":"Sempre deve ser desativado em qualquer instalação de SO","B":"Impede o uso de qualquer dispositivo USB","C":"Permite inicializar apenas software assinado, aumentando a segurança","D":"É um recurso exclusivo de BIOS Legacy","E":"Formata automaticamente a partição do sistema"},"correta":"C"},{"id":"q6","titulo":"Qual é o risco de alterar a ordem de boot sem planejamento?","alternativas":{"A":"O sistema operar com mais desempenho do que o previsto","B":"O computador iniciar sempre por um dispositivo vazio e não carregar o SO","C":"Desgaste imediato do SSD","D":"Desativação permanente do teclado","E":"Impossibilidade de acessar o Setup futuramente"},"correta":"B"},{"id":"q7","titulo":"Em ambientes BIOS/Legacy, onde está o primeiro código executado para inicializar o SO no disco?","alternativas":{"A":"Na ESP (EFI System Partition)","B":"No MBR (Master Boot Record)","C":"No diretório /boot/efi","D":"No arquivo BCD do Windows","E":"No CMOS"},"correta":"B"},{"id":"q8","titulo":"Qual comando em Linux lista as entradas de boot UEFI cadastradas?","alternativas":{"A":"bcdedit /enum","B":"lsblk -o NAME","C":"efibootmgr -v","D":"update-grub","E":"systemctl boot"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Expliquei, com minhas palavras, as etapas do POST e sua finalidade."},{"id":"c2","texto":"Identifiquei se o equipamento usa BIOS Legacy ou UEFI e registrei evidências."},{"id":"c3","texto":"Localizei e anotei a ordem de boot atual no Setup do equipamento."},{"id":"c4","texto":"Utilizei o Boot Menu temporário sem alterar a ordem permanente."},{"id":"c5","texto":"Verifiquei o estado do Secure Boot e registrei a configuração."},{"id":"c6","texto":"Consegui distinguir MBR x GPT e identificar a ESP em UEFI."},{"id":"c7","texto":"Registrei todas as ações e restaurei configurações, quando necessário."}];
+    const CHECKLIST_KEY = 'fimc_cap10_checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

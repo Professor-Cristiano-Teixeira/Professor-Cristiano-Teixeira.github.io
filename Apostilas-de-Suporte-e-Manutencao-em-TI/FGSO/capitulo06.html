@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 06 — Particionamento, formatação e discos</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo06.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">FGSO</span>
+        <span style="color: var(--cor-principal);">Ferramentas de Gerenciamento de Sistemas Operacionais</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução e funções de um Sistema Operacional</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Fundamentos de virtualização de sistemas</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Windows: histórico, edições e ciclo de vida</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Preparação e planejamento de instalação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Instalação do Windows 11</a></li>
+              <li><a class="dropdown-item active" href="capitulo06.html">Capítulo 06 — Particionamento, formatação e discos</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Sistemas de arquivos no Windows</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Painel de Controle e Configurações</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Ferramentas administrativas essenciais</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Manutenção preventiva e otimização</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Gerenciamento de usuários, grupos e perfis</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Linha de comando e PowerShell: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Segurança: Criptografia e BitLocker</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Backup, recuperação e restauração</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Implantação e provisionamento: Sysprep e DISM</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 06 — Particionamento, formatação e discos</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4 horas</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório de Windows 11 em VM com gerenciamento de discos seguro</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows 11, Disk Management (diskmgmt.msc), DiskPart, PowerShell, VirtualBox</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Identificar diferenças e usos de MBR e GPT, volumes simples e estendidos.</li><li>Planejar e aplicar um esquema de particionamento adequado para um cenário de uso.</li><li>Executar criação, redimensionamento e formatação de volumes no Windows com segurança.</li><li>Utilizar Disk Management, DiskPart e cmdlets do PowerShell para administração de discos.</li><li>Aplicar boas práticas de recuperação e proteção contra perda de dados durante mudanças em disco.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Analisar requisitos e escolher o esquema de particionamento adequado.</li><li>Operar ferramentas gráficas e de CLI para gerenciar discos e volumes.</li><li>Documentar alterações e justificar decisões técnicas.</li><li>Mitigar riscos realizando backups, snapshots e pontos de restauração.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Instalação do Windows 11</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Sistemas de arquivos no Windows</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 06)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul><li>Aquecimento (10 min): revisão rápida de conceitos do Cap. 05 e objetivos do dia.</li><li>Exposição dialogada (35 min): GPT vs. MBR; volumes; ferramentas (Disk Management, DiskPart, PowerShell); boas práticas e recuperação.</li><li>Demostração (15 min): identificação de discos e layout em VM; exemplo de criação de volume de dados.</li><li>Prática guiada (60 min): passo a passo para criar, redimensionar e formatar volumes; documentação do processo.</li><li>Debrief (10 min): discussão de decisões de particionamento e riscos mitigados.</li><li>Desafio/atividades (20 min): variações e cenários de aplicação.</li><li>Avaliação formativa (10 min): quiz interativo + checklist.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Esquemas de Particionamento: MBR vs. GPT</h3>
+          <p>MBR (Master Boot Record) é um esquema clássico com suporte amplo, porém limitado a discos até 2 TB e até 4 partições primárias. Já GPT (GUID Partition Table) é mais moderno, suporta discos muito maiores, oferece redundância de metadados e permite muitas partições. Em sistemas UEFI, o padrão recomendado é GPT.</p>
+          <p>Para Windows 11, GPT é o padrão em instalações UEFI, normalmente criando partições de sistema como EFI, MSR e a partição do Windows. Em cenários legados com BIOS, MBR pode existir, mas é menos indicado para novas implantações.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao planejar e justificar o esquema adotado no Passo a Passo, escolhendo GPT para a VM e explicando por quê.</p>
+
+          <h3 class="h6 fw-bold mt-4">2) Tipos de volumes e layouts</h3>
+          <p>No Windows, um volume é a unidade lógica de armazenamento formatada com um sistema de arquivos. Em discos básicos, trabalhamos com volumes simples (mapeados a partições). Em discos dinâmicos (menos comuns hoje), é possível criar volumes estendidos: distribuídos, espelhados e RAID-5. Em ambientes atuais, recomenda-se manter discos básicos salvo necessidades específicas de tolerância a falhas via hardware/Storage Spaces.</p>
+          <p>Volumes simples são suficientes para a maioria dos cenários do laboratório e evitam complexidade. O redimensionamento depende do espaço livre contíguo (GUI) ou do uso de ferramentas/estratégias específicas.</p>
+          <p><strong>Onde vou aplicar isso:</strong> na criação de um volume de dados D: e no redimensionamento do C: quando necessário.</p>
+
+          <h3 class="h6 fw-bold mt-4">3) Ferramentas de gerenciamento: GUI, DiskPart e PowerShell</h3>
+          <p>O Gerenciamento de Disco (diskmgmt.msc) oferece interface gráfica para criar, estender, reduzir e formatar volumes. É didático e reduz o risco de erros, ideal para iniciantes.</p>
+          <p>O DiskPart é uma ferramenta de linha de comando poderosa para tarefas avançadas e automação pontual. Comandos como list disk, select disk, create partition e format são essenciais. Exige atenção redobrada, pois erros são imediatos.</p>
+          <p>O PowerShell oferece cmdlets modernos, como Get-Disk, Get-Partition, New-Partition e Resize-Partition, que facilitam scripts reprodutíveis e documentação. É a via recomendada para automação no curso.</p>
+          <p><strong>Onde vou aplicar isso:</strong> no Passo a Passo, você usará as três abordagens para comparar resultados e consolidar o conhecimento.</p>
+
+          <h3 class="h6 fw-bold mt-4">4) Formatação e sistemas de arquivos</h3>
+          <p>Formatar prepara o volume para armazenar dados, definindo sistema de arquivos (NTFS, exFAT) e rótulo. Para Windows, NTFS é padrão para volumes internos por oferecer permissões, compressão, EFS, cotas e outros recursos.</p>
+          <p>Formatação apaga dados existentes. Em ambiente de produção sempre valide backup antes de formatar. Em laboratório, use snapshots para poder reverter alterações.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao formatar o novo volume de dados (NTFS) e ao ajustar a letra/unidade.</p>
+
+          <h3 class="h6 fw-bold mt-4">5) Boas práticas de particionamento e recuperação</h3>
+          <p>Planeje antes de executar: defina objetivos, capacidade atual e crescimento, políticas de backup e recuperação. Em VMs, prefira criar snapshots antes de alterações em disco. Em desktops reais, faça backup dos dados e crie ponto de restauração quando aplicável.</p>
+          <p>Evite alterar partições do sistema em produção sem janela de manutenção. Registre as mudanças (antes/depois), incluindo capturas de tela e comandos usados. Mantenha consistência de letras de unidade para aplicativos e scripts.</p>
+          <p><strong>Onde vou aplicar isso:</strong> no início do Passo a Passo, ao criar snapshot e no final, ao documentar a justificativa do layout escolhido.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Gerenciar discos, partições e volumes no Windows 11 (VM)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Aplicar, de forma segura e documentada, criação, redimensionamento e formatação de volumes usando Disk Management, DiskPart e PowerShell em uma VM Windows 11.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Etapa 0 — Preparação e segurança</h3>
+          <ol class="mb-0">
+            <li>Abra o VirtualBox e desligue a VM caso esteja ligada. Faça um snapshot chamado “Cap06-inicial”.</li>
+            <li>Inicialize a VM e entre com a conta administrativa.</li>
+            <li>Verifique se há backup dos arquivos de teste (pasta C:\LabDados\ caso exista). Se não houver, crie-a e copie alguns arquivos de exemplo.</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 1 — Inspecionar discos e layout atual</h3>
+          <p>Use GUI e PowerShell para entender a situação atual antes de alterar.</p>
+          <ul>
+            <li>GUI: pressione Windows+X e abra “Gerenciamento de Disco”. Observe Disco 0, partições EFI/MSR/Windows e espaço livre (se houver).</li>
+            <li>PowerShell (Admin): liste discos, partições e volumes.</li>
+          </ul>
+          <pre class="language-powershell"><code># Execute no PowerShell como Administrador
+Get-Disk
+Get-Partition -DiskNumber 0 | Format-Table DiskNumber,PartitionNumber,DriveLetter,Size,Type
+Get-Volume | Sort-Object DriveLetter | Format-Table DriveLetter,FileSystem,SizeRemaining,Size,HealthStatus</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 2 — Criar volume de dados (GUI)</h3>
+          <ol>
+            <li>No Gerenciamento de Disco, identifique espaço não alocado. Caso não haja, pule para a Etapa 3 para redimensionar.</li>
+            <li>Clique com o botão direito no espaço não alocado e selecione “Novo Volume Simples”.</li>
+            <li>Defina o tamanho (ex.: 10 GB), atribua letra (D:) e formate em NTFS, rótulo “Dados”.</li>
+            <li>Conclua e verifique se a unidade D: aparece no Explorador.</li>
+          </ol>
+          <div class="alert alert-light border mb-0"><strong>Dica:</strong> Caso a letra D: esteja ocupada, escolha a próxima disponível e ajuste depois se necessário.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 3 — Reduzir e estender volumes (GUI)</h3>
+          <p>Para criar espaço, é possível reduzir o C: se houver espaço livre.</p>
+          <ol>
+            <li>No Gerenciamento de Disco, clique com o botão direito no C: e escolha “Diminuir Volume…”. Informe, por exemplo, 8192 MB (8 GB).</li>
+            <li>Confirme e verifique a criação de espaço não alocado.</li>
+            <li>Crie um novo volume simples neste espaço (como na Etapa 2) ou estenda outro volume, conforme seu planejamento.</li>
+          </ol>
+          <div class="alert alert-warning mb-0"><strong>Atenção:</strong> A redução pode ser limitada por arquivos “imutáveis” no fim do volume (shadow copies, hiberfile, pagefile). Desative/otimize temporariamente se necessário e reinicie.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 4 — Criar e formatar usando DiskPart (CLI)</h3>
+          <p>Exercite comandos para consolidar entendimento e automação pontual.</p>
+          <pre class="language-powershell"><code># Abra o Prompt de Comando (Admin) ou PowerShell e digite: diskpart
+# Abaixo, exemplo genérico: selecione o disco 0 e crie uma partição de 2 GB
+list disk
+select disk 0
+list partition
+create partition primary size=2048
+format fs=ntfs label="DadosCLI" quick
+assign letter=E
+exit</code></pre>
+          <div class="alert alert-light border mb-0"><strong>Boas práticas:</strong> Confirme o disco e tamanhos antes de criar/formatar. Um erro em “select disk” pode causar perda de dados.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 5 — PowerShell: criação, redimensionamento e rótulos</h3>
+          <p>PowerShell facilita scripts repetíveis e documentação do estado desejado.</p>
+          <pre class="language-powershell"><code># Identificar disco e espaço livre
+$disk = Get-Disk | Where-Object PartitionStyle -ne 'RAW' | Select-Object -First 1
+$disk | Get-Partition
+$free = $disk | Get-PartitionSupportedSize -PartitionNumber 3  # ajuste o número da partição do C: conforme seu ambiente
+
+# Exemplo: reduzir a partição 3 (C:) em 2 GB e criar nova partição com o espaço liberado
+Resize-Partition -DiskNumber $disk.Number -PartitionNumber 3 -Size ($free.SizeMin + 2GB)
+
+# Criar nova partição no espaço livre e formatar
+$newPart = New-Partition -DiskNumber $disk.Number -UseMaximumSize -DriveLetter 'F'
+Format-Volume -DriveLetter $newPart.DriveLetter -FileSystem NTFS -NewFileSystemLabel 'DadosPS' -Confirm:$false
+
+# Ajustar rótulo e letra (se necessário)
+Set-Volume -DriveLetter 'F' -NewFileSystemLabel 'Projetos'
+# Para alterar letra (ex.: para D), a letra D deve estar livre:
+# Set-Partition -DriveLetter 'F' -NewDriveLetter 'D'</code></pre>
+          <div class="alert alert-info mb-0"><strong>Dica:</strong> Use Get-Partition para confirmar o número correto da partição antes do Resize-Partition.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Etapa 6 — Validação e documentação</h3>
+          <ul>
+            <li>Execute Get-Volume e capture o estado final (letras, rótulos, tamanhos).</li>
+            <li>Anote as decisões: por que GPT? por que separar dados do sistema? qual crescimento estimado?</li>
+            <li>Tire capturas do Gerenciamento de Disco e anexe ao seu diário de bordo.</li>
+            <li>Crie um snapshot “Cap06-final” para preservar o estado.</li>
+          </ul>
+          <pre class="language-powershell"><code># Relatório simples
+Get-Volume | Sort-Object DriveLetter | Format-Table DriveLetter,FileSystemLabel,FileSystem,Size,SizeRemaining,HealthStatus</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o domínio de criação, redimensionamento e formatação de volumes, com justificativa técnica e registro.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Cenário “Usuário Criativo”: Crie um volume D: de 8 GB para “Mídia” e um volume E: de 4 GB para “Projetos”. Formate em NTFS e defina rótulos apropriados.</li>
+            <li>Cenário “Crescimento Controlado”: Reduza C: em 6 GB e estenda o volume D: criado anteriormente, documentando limitações encontradas.</li>
+            <li>Cenário “Automação”: Replique seu layout usando somente PowerShell (script único), garantindo idempotência quando possível.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (autoavaliação)</h3>
+          <ul class="mb-0">
+            <li>Correta identificação do esquema GPT/MBR e do layout existente.</li>
+            <li>Execução sem erros críticos, com snapshots/backup prévios.</li>
+            <li>Justificativa clara do particionamento e escolhas de letras/rótulos.</li>
+            <li>Uso competente de Disk Management, DiskPart e PowerShell.</li>
+            <li>Registro do procedimento com capturas e comandos utilizados.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação Microsoft: comandos DiskPart e cmdlets de armazenamento no PowerShell (Get-Disk, New-Partition, Resize-Partition, Format-Volume).</li><li>Boas práticas de particionamento para Windows 11 em ambientes UEFI/GPT.</li><li>Storage Spaces vs. Discos Dinâmicos: quando utilizar e prós/cons.</li><li>Estratégias de recuperação: pontos de restauração, imagens do sistema e snapshots de VM.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 06</h2>
+        <ul><li>Relatório “Cap06” com: layout antes/depois, justificativa do particionamento, comandos utilizados e capturas de tela.</li><li>Script PowerShell opcional reproduzindo a criação/formatação de volumes.</li><li>Snapshot “Cap06-final” da VM.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Instalação do Windows 11</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Sistemas de arquivos no Windows</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Ferramentas de Gerenciamento de Sistemas Operacionais — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual afirmação descreve corretamente GPT em comparação a MBR?","alternativas":{"A":"GPT suporta no máximo 4 partições primárias por disco.","B":"GPT é limitado a discos de até 2 TB.","C":"GPT oferece metadados redundantes e suporta mais partições.","D":"GPT só funciona em computadores com BIOS legado.","E":"GPT é exclusivo de servidores e não funciona no Windows 11."},"correta":"C"},{"id":"q2","titulo":"Em um cenário padrão de Windows 11 com UEFI, qual combinação é mais adequada?","alternativas":{"A":"BIOS + MBR","B":"UEFI + MBR","C":"UEFI + GPT","D":"BIOS + GPT","E":"Qualquer uma, pois não há diferença prática."},"correta":"C"},{"id":"q3","titulo":"Qual ferramenta NÃO é de linha de comando para gerenciar discos no Windows?","alternativas":{"A":"Disk Management (diskmgmt.msc)","B":"DiskPart","C":"PowerShell (Get-Disk, New-Partition)","D":"cmdlets Storage do PowerShell","E":"Nenhuma das anteriores"},"correta":"A"},{"id":"q4","titulo":"Ao reduzir o volume C: na GUI, o que pode limitar o tamanho de redução?","alternativas":{"A":"A existência de um disco dinâmico","B":"Arquivos imovíveis próximos ao final do volume","C":"Tipo de sistema de arquivos do volume (NTFS/exFAT)","D":"Letra de unidade já atribuída","E":"Rótulo do volume muito longo"},"correta":"B"},{"id":"q5","titulo":"Qual é o sistema de arquivos recomendado para volumes internos de dados no Windows?","alternativas":{"A":"FAT32","B":"exFAT","C":"ReFS (em todas as edições)","D":"NTFS","E":"EXT4"},"correta":"D"},{"id":"q6","titulo":"Qual sequência com DiskPart cria uma partição e formata rapidamente em NTFS?","alternativas":{"A":"select disk 0; create partition primary; quick format ntfs","B":"select disk 0; create primary; format fs=ntfs quick","C":"select disk 0; create partition primary; format fs=ntfs label=Dados quick; assign","D":"list partition; create partition primary ntfs quick; assign","E":"select volume 0; create ntfs quick"},"correta":"C"},{"id":"q7","titulo":"No PowerShell, qual cmdlet cria uma nova partição usando todo o espaço livre disponível?","alternativas":{"A":"Format-Volume","B":"Resize-Partition","C":"Get-Partition","D":"New-Partition -UseMaximumSize","E":"Set-Partition -UseMaximumSize"},"correta":"D"},{"id":"q8","titulo":"Uma boa prática antes de alterar partições em uma VM é:","alternativas":{"A":"Desativar todos os serviços do Windows","B":"Desligar a VM e remover o disco virtual","C":"Criar um snapshot da VM","D":"Desinstalar drivers de armazenamento","E":"Desativar o Windows Update"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei snapshot “Cap06-inicial” antes de modificar discos."},{"id":"c2","texto":"Identifiquei o esquema de particionamento (GPT/MBR) e layout atual."},{"id":"c3","texto":"Planejei o tamanho e as letras de unidade para os volumes de dados."},{"id":"c4","texto":"Criei/ajustei volumes usando Disk Management com sucesso."},{"id":"c5","texto":"Repeti etapas com DiskPart e validei o resultado."},{"id":"c6","texto":"Automatizei a criação/formatação com PowerShell (quando possível)."},{"id":"c7","texto":"Formatei volumes internos em NTFS e defini rótulos adequados."},{"id":"c8","texto":"Registrei comandos, capturas e justificativas no relatório."},{"id":"c9","texto":"Criei snapshot “Cap06-final” preservando o estado configurado."}];
+    const CHECKLIST_KEY = 'FGSO_CAP06_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

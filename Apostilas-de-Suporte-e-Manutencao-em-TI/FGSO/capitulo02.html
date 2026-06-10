@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 02 — Virtualização de sistemas</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo02.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">FGSO</span>
+        <span style="color: var(--cor-principal);">Ferramentas de Gerenciamento de Sistemas Operacionais</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução e funções de um Sistema Operacional</a></li>
+              <li><a class="dropdown-item active" href="capitulo02.html">Capítulo 02 — Fundamentos de virtualização de sistemas</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Windows: histórico, edições e ciclo de vida</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Preparação e planejamento de instalação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Instalação do Windows 11</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Particionamento, formatação e discos</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Sistemas de arquivos no Windows</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Painel de Controle e Configurações</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Ferramentas administrativas essenciais</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Manutenção preventiva e otimização</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Gerenciamento de usuários, grupos e perfis</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Linha de comando e PowerShell: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Segurança: Criptografia e BitLocker</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Backup, recuperação e restauração</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Implantação e provisionamento: Sysprep e DISM</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 02 — Fundamentos de virtualização de sistemas</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4–6 horas</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Montagem de laboratório seguro com VirtualBox e Windows 11 em VM</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows 11, Oracle VirtualBox, PowerShell</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar o que é virtualização, diferenciar hipervisores tipo 1 e tipo 2 e identificar pré-requisitos de hardware (VT-x/AMD-V).</li><li>Instalar e configurar o VirtualBox para criar, armazenar e executar máquinas virtuais de forma segura.</li><li>Configurar modos de rede (NAT, Bridged e Host-Only) e compreender seus impactos.</li><li>Gerenciar snapshots para versionar estados da VM e criar um ponto “Base Limpa”.</li><li>Aplicar boas práticas de laboratório: isolamento, snapshots por etapa, documentação e backup.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Configurar ambientes de virtualização com segurança e eficiência.</li><li>Operar redes virtuais no VirtualBox, ajustando conectividade conforme cenário.</li><li>Executar registros de laboratório e usar snapshots para recuperação rápida.</li><li>Diagnosticar falhas comuns de virtualização (VT desabilitada, drivers, conflito de apps).</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo01.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 01</a>
+              <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 03</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 02)</h2>
+        <div class="card-soft bg-white p-4 mt-3">- Abertura (10 min): objetivos, segurança do laboratório, visão geral de virtualização.<br>- Exposição dialogada (30–40 min): hipervisores, requisitos, rede e armazenamento de VMs, snapshots e boas práticas.<br>- Demonstração guiada (30 min): instalação do VirtualBox, criação de VM Windows 11, configuração de rede NAT e snapshot “Base Limpa”.<br>- Prática supervisionada (50–70 min): cada aluno cria sua VM, valida conexão de rede e gera snapshot; registro no diário de bordo.<br>- Fechamento (10 min): lições aprendidas, dúvidas, próximos passos.</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h5 fw-bold">1) Conceito de virtualização e hipervisores (Tipo 1 vs. Tipo 2)</h3>
+          <p>A virtualização permite executar múltiplos sistemas operacionais isolados (máquinas virtuais) sobre um mesmo hardware físico. O software que gerencia as VMs é o hipervisor. No tipo 1 (bare-metal), o hipervisor roda diretamente sobre o hardware (ex.: Microsoft Hyper-V bare metal, VMware ESXi). No tipo 2, o hipervisor roda como aplicativo sobre um SO hospedeiro (ex.: VirtualBox, VMware Workstation).</p>
+          <p>O tipo 1 é ideal para datacenters e alta disponibilidade; o tipo 2 é prático para laboratórios e estudo, pois é mais simples de instalar e usar no computador pessoal. Em ambos os casos, a CPU auxilia a virtualização via extensões como Intel VT-x/VT-d e AMD-V.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você usará um hipervisor tipo 2 (VirtualBox) para montar seu laboratório, criar e executar uma VM com Windows 11 de forma segura.</p>
+          <hr>
+          <h3 class="h5 fw-bold">2) Pré-requisitos de hardware: VT-x/AMD-V, memória e armazenamento</h3>
+          <p>Para que a virtualização tenha bom desempenho, verifique se o processador suporta VT-x (Intel) ou AMD-V (AMD) e se a opção está habilitada no firmware (BIOS/UEFI). Além disso, garanta memória RAM suficiente para o hospedeiro e a VM simultaneamente e espaço em disco para o arquivo de disco virtual (VDI/VMDK).</p>
+          <p>Em laboratórios com Windows 11 em VM, reserve normalmente 4–6 GB de RAM para a VM (em hosts com 8–16 GB) e de 40–64 GB de espaço para o disco virtual, dependendo dos softwares que serão instalados.</p>
+          <p><strong>Onde vou aplicar isso:</strong> antes de criar a VM, você verificará a presença de VT-x/AMD-V e planejará RAM/armazenamento adequados no passo a passo.</p>
+          <hr>
+          <h3 class="h5 fw-bold">3) Arquitetura de rede no VirtualBox: NAT, Bridged, Host-Only</h3>
+          <p>No modo NAT, a VM tem internet via tradução de endereços do host; é simples e seguro para laboratórios, pois a VM não fica diretamente acessível na rede local. O modo Bridged conecta a VM como se fosse outro dispositivo na mesma rede física, obtendo IP do roteador; útil para testes de serviços. O modo Host-Only cria uma rede isolada entre host e VMs, sem internet (a menos que combinada com NAT).</p>
+          <p>Escolher o modo correto depende do objetivo: para primeiras instalações e atualizações, NAT é prático; para validar serviços acessíveis na LAN, use Bridged; para isolamento total, Host-Only.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você configurará a VM inicialmente com NAT para instalar o Windows e atualizar o sistema, e conhecerá como alternar para Bridged/Host-Only quando necessário.</p>
+          <hr>
+          <h3 class="h5 fw-bold">4) Armazenamento de VMs: discos virtuais, dinâmico vs. fixo e ISOs</h3>
+          <p>O disco virtual (ex.: VDI) guarda os dados da VM. Discos dinâmicos crescem conforme o uso, economizando espaço inicial; discos de tamanho fixo alocam tudo no momento da criação e oferecem, em geral, desempenho ligeiramente melhor. A mídia de instalação do SO costuma ser um arquivo ISO montado como “Unidade Óptica” da VM.</p>
+          <p>Manter ISOs organizadas e verificar sua integridade (hash) evita problemas de instalação. Separar pastas por VMs e snapshots ajuda na manutenção.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você criará um disco VDI dinâmico adequado, montará a ISO do Windows 11 e organizará as pastas do seu laboratório.</p>
+          <hr>
+          <h3 class="h5 fw-bold">5) Snapshots: versionamento e recuperação</h3>
+          <p>Snapshots registram o estado completo da VM em um ponto no tempo (disco, memória opcional e configuração). Permitem “voltar atrás” após testes, instalações malsucedidas ou falhas. A boa prática é criar snapshots com rótulos claros antes de mudanças importantes.</p>
+          <p>Evite manter cadeias enormes de snapshots por muito tempo, pois ocupam espaço e podem impactar desempenho. Consolide quando estabilizar uma etapa.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você criará o snapshot “Base Limpa” após instalar e atualizar o Windows, garantindo um ponto seguro para futuras práticas.</p>
+          <hr>
+          <h3 class="h5 fw-bold">6) Boas práticas de laboratório</h3>
+          <p>Trabalhe com VMs em vez do sistema principal, use snapshots por etapa, documente cada ação no diário de bordo e mantenha ISOs e discos organizados. Faça backup dos arquivos críticos do laboratório e evite instalar softwares desnecessários no host.</p>
+          <p>Desative temporariamente softwares que conflitam com hipervisores (outros hipervisores/hyper-v) e mantenha o VirtualBox e suas Extensões atualizados.</p>
+          <p><strong>Onde vou aplicar isso:</strong> ao montar a pasta “Lab-FGSO”, configurar a VM, criar snapshots, e registrar cada etapa e captura de tela conforme o roteiro.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Montagem do laboratório de virtualização com VirtualBox</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Instalar o VirtualBox, verificar suporte de virtualização, criar uma VM Windows 11 com rede NAT, organizar armazenamento e gerar o snapshot “Base Limpa”.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Preparação do ambiente e verificação de requisitos</h3>
+          <ol class="mb-0">
+            <li>Crie uma pasta no seu computador para o laboratório: por exemplo, C:\Lab-FGSO\VMs e C:\Lab-FGSO\ISOs.</li>
+            <li>Verifique se o processador suporta virtualização e se está habilitada no firmware (BIOS/UEFI).</li>
+          </ol>
+          <p class="mt-2 mb-1"><strong>Verificar suporte via PowerShell (Windows):</strong></p>
+          <pre class="language-powershell"><code># Verificar informações de virtualização na máquina
+Get-ComputerInfo | Select-Object CsManufacturer, CsModel, OsName, HyperVRequirement* | Format-List
+
+# Alternativa (systeminfo): procure por 'Requisitos do Hyper-V' (Windows em PT-BR)
+systeminfo | findstr /i "Hyper-V virtualização"</code></pre>
+          <div class="alert alert-warning mt-3 mb-0" role="alert">
+            Se VT-x/AMD-V estiver desabilitado, reinicie o computador, acesse BIOS/UEFI e habilite “Intel Virtualization Technology” ou “SVM Mode” (AMD).
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">2) Instalação do VirtualBox</h3>
+          <ol>
+            <li>Baixe o instalador no site oficial do VirtualBox.</li>
+            <li>Execute o instalador e aceite os componentes padrão. Reinicie se for solicitado.</li>
+            <li>(Opcional) Instale o “Extension Pack” correspondente à versão do VirtualBox.</li>
+          </ol>
+          <p class="mb-1"><strong>Organização de mídia (opcional): verificar hash da ISO do Windows</strong></p>
+          <pre class="language-powershell"><code># Calcular SHA-256 da ISO para verificar integridade
+Get-FileHash "C:\Lab-FGSO\ISOs\Win11.iso" -Algorithm SHA256</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">3) Criação da VM Windows 11</h3>
+          <ol>
+            <li>Abra o VirtualBox e clique em “Novo”.</li>
+            <li>Nome: Win11-Lab; Pasta da máquina: C:\Lab-FGSO\VMs; Tipo: Microsoft Windows; Versão: Windows 11 (64-bit).</li>
+            <li>Memória RAM: 4096–6144 MB (ajuste conforme RAM do host).</li>
+            <li>Processadores: 2 CPUs (se o host tiver 4 ou mais).</li>
+            <li>Disco rígido: “Criar um disco rígido virtual agora” (VDI), “Dinamicamente alocado”, tamanho 50–64 GB.</li>
+          </ol>
+          <p class="mb-1"><strong>Montar a ISO:</strong> Propriedades da VM → Armazenamento → Controlador SATA → Unidade Óptica → Escolher arquivo → selecione C:\Lab-FGSO\ISOs\Win11.iso.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">4) Configuração de rede (NAT) e adicionais</h3>
+          <ol>
+            <li>Com a VM selecionada, vá em Configurações → Rede → Adaptador 1: habilitado, Modo de Conexão: NAT.</li>
+            <li>(Opcional) Criar Adaptador 2 “Host-Only” para comunicação isolada host↔VM quando necessário.</li>
+            <li>Inicie a VM. Siga o instalador do Windows 11 normalmente (idioma, teclado, edição, partição padrão).</li>
+          </ol>
+          <div class="alert alert-info mt-2" role="note">
+            Após a instalação, instale os “Guest Additions” (Dispositivos → Inserir imagem do CD dos Adicionais de Convidado) para melhor integração, vídeo e apontadores.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">5) Validação de conectividade e atualização</h3>
+          <ol>
+            <li>Dentro da VM, confirme acesso à internet (NAT) abrindo um navegador e acessando um site confiável.</li>
+            <li>Abra Configurações → Windows Update e aplique atualizações disponíveis.</li>
+          </ol>
+          <p class="mb-1"><strong>Testar conectividade (CMD dentro da VM):</strong></p>
+          <pre class="language-batch"><code>:: Teste de DNS e conectividade
+ping 8.8.8.8
+nslookup www.microsoft.com
+ipconfig /all</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">6) Criação do snapshot “Base Limpa”</h3>
+          <ol>
+            <li>Desligue a VM corretamente.</li>
+            <li>No VirtualBox, selecione a VM → Guia “Snapshots” → “Tirar” → Nome: Base Limpa; Descrição: “Windows 11 instalado + updates + Guest Additions”.</li>
+          </ol>
+          <div class="alert alert-success mt-2 mb-0" role="status">
+            Agora você pode experimentar configurações com segurança. Se algo der errado, restaure o snapshot “Base Limpa”.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">7) Alternando modos de rede quando necessário</h3>
+          <p>Para expor serviços da VM na rede local, mude o Adaptador 1 para “Placa em modo Bridge”. Para isolamento total host↔VM, use “Só-Anfitrião (Host-Only)”.</p>
+          <p class="mb-1"><strong>Checklist rápido:</strong></p>
+          <ul class="mb-0">
+            <li>NAT para internet simples e segura em laboratório.</li>
+            <li>Bridge para teste de serviços na LAN.</li>
+            <li>Host-Only para rede privada com o host.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">8) Registro no diário de bordo</h3>
+          <p>Registre: datas, versões, configurações (RAM/CPU/disco/rede), hashes de ISOs, snapshots criados e capturas de tela principais.</p>
+          <p class="mb-1"><strong>Exemplo de estrutura de anotações (Markdown):</strong></p>
+          <pre class="language-markdown"><code># Diário de Bordo — Cap. 02
+## Ambiente
+- Host: CPU/RAM/GPU
+- VirtualBox: versão
+- Pasta do lab: C:\Lab-FGSO
+## VM Win11-Lab
+- RAM: 6 GB | CPU: 2 | Disco: 60 GB VDI dinâmico
+- Rede: NAT
+- ISO: Win11.iso (SHA256: &lt;hash&gt;)
+## Snapshots
+- 2024-xx-xx — Base Limpa
+## Observações
+- Atualizações aplicadas, Guest Additions instalado.
+- Prints: &lt;links/arquivos&gt;</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o domínio do VirtualBox, redes virtuais e snapshots em cenários reais de laboratório.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Crie uma segunda VM leve (ex.: uma distro Linux mínima) usando Host-Only + NAT combinado (Adaptador 1 NAT, Adaptador 2 Host-Only). Teste ping entre host↔VM (Host-Only) e acesso à internet (NAT).</li>
+            <li>Altere o modo de rede da VM Windows de NAT para Bridge. Descubra o IP recebido na LAN e valide acesso remoto (ex.: resposta a ping da rede local, se permitido pelo firewall).</li>
+            <li>Crie dois snapshots adicionais: “Pré-Softwares” e “Softwares Instalados”. Documente impacto em espaço e desempenho e pratique restauração rápida entre eles.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (autoavaliação)</h3>
+          <ul class="mb-0">
+            <li>Correta configuração de VM, rede e armazenamento.</li>
+            <li>Aplicação adequada de snapshots e registro claro no diário de bordo.</li>
+            <li>Capacidade de diagnosticar e corrigir problemas comuns (sem internet, ISO incorreta, VT desabilitada).</li>
+            <li>Organização das pastas do laboratório e integridade das ISOs.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação do VirtualBox: modos de rede e guia de usuário.</li><li>Comparação entre hipervisores (VirtualBox, VMware Workstation, Hyper-V) para laboratório.</li><li>Impacto de snapshots em desempenho e boas práticas de consolidação.</li><li>Requisitos de Windows 11 em ambientes virtualizados (TPM virtual, Secure Boot em soluções diversas).</li><li>Conceitos de virtualização assistida por hardware: VT-x, AMD-V e virtualização aninhada.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 02</h2>
+        <ul><li>Pasta do laboratório organizada (VM e ISO) em C:\Lab-FGSO.</li><li>VM Windows 11 funcional em NAT, atualizada e com Guest Additions.</li><li>Snapshot “Base Limpa” criado e testado.</li><li>Diário de bordo com configurações, prints e decisões técnicas.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo01.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 01</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 03</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; FGSO — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual alternativa melhor descreve a diferença entre hipervisores tipo 1 e tipo 2?","alternativas":{"A":"Tipo 1 roda como aplicativo no SO hospedeiro; Tipo 2 roda direto no hardware.","B":"Tipo 1 roda diretamente no hardware; Tipo 2 roda sobre um SO hospedeiro.","C":"Ambos rodam diretamente no hardware.","D":"Tipo 2 é exclusivo de servidores; Tipo 1 é apenas para desktops.","E":"Tipo 1 não suporta múltiplas VMs; Tipo 2 suporta apenas uma VM."},"correta":"B"},{"id":"q2","titulo":"Para um laboratório com VirtualBox em um notebook com 16 GB de RAM, qual configuração inicial é razoável para uma VM Windows 11?","alternativas":{"A":"512 MB de RAM e 5 GB de disco dinâmico.","B":"1 GB de RAM e 10 GB de disco fixo.","C":"4–6 GB de RAM e 50–64 GB de disco dinâmico VDI.","D":"12 GB de RAM e 200 GB de disco para qualquer cenário.","E":"8 GB de RAM obrigatoriamente e 20 GB de disco dinâmico."},"correta":"C"},{"id":"q3","titulo":"Em qual cenário o modo de rede NAT do VirtualBox é mais indicado?","alternativas":{"A":"Quando a VM precisa de um IP direto da LAN para oferecer serviços.","B":"Quando é necessário isolar a VM sem qualquer acesso à internet.","C":"Para acesso simples à internet em laboratório, mantendo a VM não exposta na LAN.","D":"Para comunicação apenas entre VMs e o host, sem internet.","E":"Para roteamento avançado entre múltiplas sub-redes físicas."},"correta":"C"},{"id":"q4","titulo":"Sobre discos virtuais dinâmicos vs. de tamanho fixo, assinale a correta:","alternativas":{"A":"Dinâmicos ocupam o tamanho máximo desde a criação.","B":"Fixos crescem conforme o uso e economizam espaço inicial.","C":"Dinâmicos crescem conforme o uso; fixos alocam todo o espaço na criação.","D":"Não há diferença prática entre eles.","E":"Apenas discos fixos funcionam com snapshots."},"correta":"C"},{"id":"q5","titulo":"Qual afirmação sobre snapshots é correta?","alternativas":{"A":"Snapshots substituem backups externos de forma definitiva.","B":"Snapshots registram um estado da VM, permitindo voltar a um ponto anterior.","C":"Snapshots aceleram a VM independentemente do número criado.","D":"É recomendado manter cadeias infinitas de snapshots.","E":"Snapshots impedem qualquer atualização do sistema."},"correta":"B"},{"id":"q6","titulo":"Se o comando systeminfo indicar que a virtualização por hardware está desabilitada, o que fazer?","alternativas":{"A":"Desinstalar o VirtualBox e reinstalar o Windows.","B":"Habilitar VT-x/AMD-V no BIOS/UEFI do computador e reiniciar.","C":"Aumentar a RAM da VM para compensar.","D":"Mudar o modo de rede para Bridge.","E":"Criar um disco fixo em vez de dinâmico."},"correta":"B"},{"id":"q7","titulo":"Qual combinação de modos de rede permite comunicação host↔VM e acesso à internet simultaneamente?","alternativas":{"A":"Somente Host-Only.","B":"Somente Bridged.","C":"Dois adaptadores: NAT + Host-Only.","D":"Dois adaptadores: Bridged + Host-Only, sem internet.","E":"Nenhuma combinação oferece isso."},"correta":"C"},{"id":"q8","titulo":"Por que verificar o hash (ex.: SHA-256) da ISO do Windows antes da instalação?","alternativas":{"A":"Aumenta a velocidade da instalação.","B":"Garante integridade e reduz risco de mídia corrompida ou alterada.","C":"Permite que a ISO funcione sem licença.","D":"Evita a necessidade de snapshots.","E":"Obriga o VirtualBox a usar disco fixo."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Verifiquei que VT-x/AMD-V está disponível e habilitada no BIOS/UEFI."},{"id":"c2","texto":"Instalei o VirtualBox (e Extension Pack, se aplicável)."},{"id":"c3","texto":"Organizei as pastas do laboratório (VMs e ISOs)."},{"id":"c4","texto":"Criei a VM Windows 11 com RAM/CPU/Disco adequados."},{"id":"c5","texto":"Configurei a rede da VM em NAT e validei acesso à internet."},{"id":"c6","texto":"Instalei Windows Updates e Guest Additions na VM."},{"id":"c7","texto":"Criei o snapshot “Base Limpa” e testei restauração."},{"id":"c8","texto":"Registrei configurações e evidências no diário de bordo."}];
+    const CHECKLIST_KEY = 'chk_fgso_cap02';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 12 — CLI e PowerShell: Fundamentos</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo12.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">FGSO</span>
+        <span style="color: var(--cor-principal);">Ferramentas de Gerenciamento de Sistemas Operacionais</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Introdução e funções de um SO</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Fundamentos de virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Windows: histórico e ciclo de vida</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Planejamento de instalação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Instalação do Windows 11</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Particionamento e discos</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Sistemas de arquivos</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Painel de Controle e Configurações</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Ferramentas administrativas</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Manutenção preventiva</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Usuários, grupos e perfis</a></li>
+              <li><a class="dropdown-item active" href="capitulo12.html">Cap. 12 — CLI e PowerShell: Fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Automação com PowerShell</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Segurança: Criptografia e BitLocker</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Backup e recuperação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Implantação: Sysprep e DISM</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 12 — Linha de comando e PowerShell: fundamentos</h1>
+          <p class="mb-2"><strong>Carga:</strong> Não especificada</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Inventário básico do sistema via PowerShell com exportação em CSV</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows 11, PowerShell 5.1/7.x, Console do Windows/Terminal, VirtualBox</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Comparar CMD e PowerShell, reconhecendo suas diferenças de arquitetura e uso.</li><li>Navegar pelo sistema de arquivos e outros providers do PowerShell usando cmdlets apropriados.</li><li>Utilizar o pipeline e cmdlets de consulta/filtragem/seleção para compor comandos reutilizáveis.</li><li>Usar o sistema de ajuda integrado (Get-Help, Get-Command) para autoaprendizagem.</li><li>Aplicar políticas de execução de scripts de forma segura (ExecutionPolicy) em ambiente de laboratório.</li><li>Gerar um inventário básico do sistema e exportar resultados em CSV.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Operar ferramentas de linha de comando com segurança e precisão.</li><li>Interpretar mensagens de erro e documentação oficial.</li><li>Compor comandos com pipeline para automatizar consultas administrativas.</li><li>Gerar relatórios práticos (CSV) a partir de cmdlets.</li><li>Aplicar boas práticas de laboratório com VMs e snapshots.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 11 — Gerenciamento de usuários, grupos e perfis</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 13 — Automação com PowerShell</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 12)</h2>
+        <div class="card-soft bg-white p-4 mt-3">- Aquecimento: abrir Terminal do Windows (ou PowerShell) e executar comandos simples de navegação.<br>- Exposição dialogada: diferenças entre CMD e PowerShell; objetos, cmdlets, providers e pipeline.<br>- Demonstração: Get-Help, Get-Command, Get-Member, execução segura de scripts e perfis.<br>- Prática guiada: criar um inventário básico do sistema e exportar para CSV (hardware, OS, rede, processos).<br>- Desafio: personalizar filtros e colunas, e incluir data/hora no relatório.<br>- Fechamento: revisão dos conceitos e checklist de domínio.</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h5 fw-bold">1) CMD vs. PowerShell: conceitos e diferenças</h3>
+          <p>O CMD (Prompt de Comando) é um interpretador tradicional de comandos no Windows que trabalha essencialmente com texto. Já o PowerShell é uma plataforma de automação baseada em .NET que trabalha com objetos. Isso significa que, no PowerShell, os resultados dos comandos são objetos ricos com propriedades e métodos, facilitando filtragem, seleção e exportação sem “quebrar” texto.</p>
+          <p>Cmdlets são comandos do PowerShell padronizados no formato Verbo-Substantivo (ex.: Get-Process). Eles retornam objetos que podem ser encadeados via pipeline (|), permitindo composições poderosas e reutilizáveis. Apesar de o PowerShell executar muitos comandos legados do CMD, seu uso ideal é com cmdlets.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você usará cmdlets nativos em vez de comandos de texto para coletar dados de sistema e gerar relatórios com confiabilidade.</p>
+
+          <h3 class="h5 fw-bold mt-4">2) Navegação e Providers</h3>
+          <p>O PowerShell utiliza “providers”, que expõem diferentes repositórios como se fossem sistemas de arquivos. O provider FileSystem permite navegar em diretórios e arquivos com cd, dir (alias de Get-ChildItem), etc. Outros providers comuns: Registry (HKLM:, HKCU:), Environment (Env:), Cert:, entre outros.</p>
+          <p>Isso viabiliza navegar e operar de forma consistente: listar chaves de registro ou variáveis de ambiente torna-se similar a listar arquivos.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você navegará no FileSystem e consultará informações em providers como Env: para enriquecer o relatório.</p>
+
+          <h3 class="h5 fw-bold mt-4">3) Pipeline e composição de cmdlets</h3>
+          <p>O pipeline (|) conecta a saída de um cmdlet à entrada de outro. Como os dados são objetos, operações como Where-Object (filtrar), Select-Object (selecionar colunas), Sort-Object (ordenar) e Export-Csv (exportar) funcionam de forma previsível.</p>
+          <p>Exemplo: Get-Process | Where-Object CPU -gt 1 | Select-Object Name, CPU | Sort-Object CPU -Descending exporta facilmente processos que usam CPU acima de um limiar.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você usará pipeline para compor um inventário e refinar exatamente os campos que irão para o CSV.</p>
+
+          <h3 class="h5 fw-bold mt-4">4) Sistema de ajuda: Get-Help e Get-Command</h3>
+          <p>O PowerShell tem ajuda integrada. Get-Help mostra documentação de cmdlets, inclusive exemplos. Get-Command ajuda a descobrir comandos e parâmetros por nome ou por verbo. Get-Member revela propriedades e métodos de objetos retornados por um cmdlet.</p>
+          <p>Uso sugerido: Get-Help Get-Process -Examples e Get-Command -Verb Get para explorar.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você consultará a ajuda para entender parâmetros de Export-Csv, Select-Object e Where-Object durante o passo a passo.</p>
+
+          <h3 class="h5 fw-bold mt-4">5) Execução segura de scripts (ExecutionPolicy)</h3>
+          <p>A ExecutionPolicy controla como scripts são carregados. Perfis comuns: Restricted (não permite scripts), RemoteSigned (scripts locais rodam; remotos precisam de assinatura) e Bypass (sem bloqueios). Em laboratório, usamos configurações seguras e temporárias por escopo (Process, CurrentUser).</p>
+          <p>Nunca altere políticas globalmente sem necessidade. Em VM, prefira escopo CurrentUser ou Process para evitar riscos.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você definirá uma política segura (RemoteSigned em CurrentUser) para testar scripts do inventário.</p>
+
+          <h3 class="h5 fw-bold mt-4">6) Exportação e formatos (CSV)</h3>
+          <p>CSV é prático para relatórios e pode ser aberto em planilhas. Export-Csv cria o arquivo com cabeçalhos de colunas baseados nas propriedades dos objetos. O parâmetro -NoTypeInformation omite metadados de tipo no topo do arquivo.</p>
+          <p>Também é possível converter para JSON (ConvertTo-Json) quando necessário para integrações.</p>
+          <p><strong>Onde vou aplicar isso:</strong> você exportará o inventário para CSV, garantindo colunas claras e padronizadas.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Inventário do sistema via PowerShell com exportação em CSV</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Coletar informações do sistema (SO, hardware, rede e processos), manipular com pipeline e exportar para um arquivo CSV legível.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Pré-requisitos e preparação</h3>
+          <ol class="mb-0">
+            <li>Abrir sua VM Windows 11 (VirtualBox) e garantir snapshot “antes do capítulo”.</li>
+            <li>Abrir PowerShell com privilégios de usuário padrão (sem necessidade de admin para este roteiro).</li>
+            <li>Verificar versão do PowerShell:
+              <pre class="language-powershell"><code>$PSVersionTable</code></pre>
+            </li>
+            <li>Checar ajuda e atualizar conteúdo de ajuda (opcional):
+              <pre class="language-powershell"><code>Get-Help Get-Process -Examples
+# Atualizar ajuda (requer internet; execute como Admin se necessário)
+# Update-Help</code></pre>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">1) Navegação e exploração com providers</h3>
+          <p>Liste itens do diretório atual e navegue entre pastas.</p>
+          <pre class="language-powershell"><code># listar conteúdo
+Get-ChildItem
+# mudar de pasta (ex.: Documentos do usuário)
+Set-Location "$HOME\Documents"
+# explorar variáveis de ambiente
+Get-ChildItem Env:</code></pre>
+          <div class="alert alert-light border mt-3 mb-0">
+            Dica: Use Tab para autocompletar caminhos e nomes de comandos.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">2) Diferença entre CMD e PowerShell (prática rápida)</h3>
+          <p>Compare um comando clássico no CMD e o equivalente em PowerShell.</p>
+          <pre class="language-batch"><code>:: CMD - lista de processos em texto
+tasklist</code></pre>
+          <pre class="language-powershell"><code># PowerShell - objetos de processo
+Get-Process | Select-Object Name, Id, CPU | Sort-Object CPU -Descending</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">3) Coletar informações do sistema</h3>
+          <p>Use cmdlets nativos e WMI/CIM para obter dados estruturados.</p>
+          <pre class="language-powershell"><code># Sistema operacional
+$os = Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, BuildNumber, OSArchitecture
+
+# CPU e memória
+$cpu = Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed
+$mem = Get-CimInstance Win32_ComputerSystem | Select-Object Manufacturer, Model, TotalPhysicalMemory
+
+# Adaptadores de rede (ativos)
+$net = Get-NetIPConfiguration | Where-Object { $_.IPv4Address -ne $null } |
+       Select-Object InterfaceAlias, IPv4Address, IPv4DefaultGateway, DNSServer
+
+# Top 5 processos por uso de CPU
+$topProc = Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 Name, Id, CPU</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">4) Montar objeto consolidado e exportar CSV</h3>
+          <p>Crie um objeto com colunas padronizadas e exporte. Para listas (ex.: DNS), junte em uma string.</p>
+          <pre class="language-powershell"><code># Preparar campos
+$dnsAll = ($net.DNSServer.ServerAddresses | Where-Object { $_ } | Select-Object -Unique) -join '; '
+$ipv4    = ($net.IPv4Address.IPAddressToString | Where-Object { $_ }) -join '; '
+$gw      = ($net.IPv4DefaultGateway.NextHop | Where-Object { $_ }) -join '; '
+
+# Converter memória total para GB (aprox.)
+$memGB = [math]::Round(($mem.TotalPhysicalMemory/1GB), 2)
+
+$report = [PSCustomObject]@{
+  Hostname      = $env:COMPUTERNAME
+  SO            = $os.Caption
+  Versao        = $os.Version
+  Build         = $os.BuildNumber
+  Arquitetura   = $os.OSArchitecture
+  CPU           = $cpu.Name
+  Cores         = $cpu.NumberOfCores
+  Logicos       = $cpu.NumberOfLogicalProcessors
+  MemoriaGB     = $memGB
+  IPv4          = $ipv4
+  Gateway       = $gw
+  DNS           = $dnsAll
+  DataColeta    = (Get-Date).ToString('yyyy-MM-dd HH:mm')
+}
+
+# Exportar relatório (pasta Documentos)
+$outDir = Join-Path $HOME 'Documents'
+$outCsv = Join-Path $outDir ('inventario_' + $env:COMPUTERNAME + '.csv')
+
+$report | Export-Csv -Path $outCsv -NoTypeInformation -Encoding UTF8
+
+# Exportar top 5 processos em CSV separado
+$outProc = Join-Path $outDir ('processos_top5_' + $env:COMPUTERNAME + '.csv')
+$topProc | Export-Csv -Path $outProc -NoTypeInformation -Encoding UTF8
+
+"Relatórios gerados:"; $outCsv; $outProc</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">5) Uso de Get-Help e documentação</h3>
+          <p>Explore ajuda e exemplos para refinar seus comandos e parâmetros.</p>
+          <pre class="language-powershell"><code>Get-Help Export-Csv -Online
+Get-Help Select-Object -Examples
+Get-Command *Process*</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">6) ExecutionPolicy em laboratório (seguro)</h3>
+          <p>Defina política por usuário (CurrentUser) para permitir scripts locais. Crie e execute um script simples.</p>
+          <pre class="language-powershell"><code># Ver política atual
+Get-ExecutionPolicy -List
+
+# Definir segurança razoável para laboratório:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+
+# Criar script de teste
+$script = @'
+Write-Host "Inventário rápido:" -ForegroundColor Cyan
+Get-Process | Select-Object -First 3 Name, Id, CPU
+'@
+$path = Join-Path $HOME 'Documents\teste.ps1'
+$script | Set-Content -Path $path -Encoding UTF8
+
+# Executar script (observe a política aplicada)
+& $path</code></pre>
+          <div class="alert alert-warning mt-3 mb-0" role="alert">
+            Em ambientes de produção, altere políticas somente com aprovação e políticas institucionais claras.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">7) Validação do CSV</h3>
+          <p>Abra o CSV no Excel/LibreOffice ou visualize no PowerShell.</p>
+          <pre class="language-powershell"><code>Import-Csv $outCsv | Format-Table -AutoSize
+Import-Csv $outProc | Sort-Object CPU -Descending | Format-Table -AutoSize</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de cmdlets, pipeline e exportação de dados produzindo variações úteis do inventário.</p>
+        <ul class="mt-3">
+          <li>Atividade A: Adicionar ao relatório informações de disco (modelo, tamanho total e espaço livre) usando Get-CimInstance Win32_LogicalDisk (somente drives do tipo 3 – local) e incluir as colunas no CSV.</li>
+          <li>Atividade B: Criar um CSV com serviços automáticos que estão parados, contendo ServiceName, Status e StartType. Ordene por nome.</li>
+          <li>Atividade C: Gerar um relatório JSON contendo Hostname, DataColeta e lista de adaptadores com IPv4 e DNS, usando ConvertTo-Json e salvar em Documents.</li>
+        </ul>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (autoavaliação)</h3>
+          <ul class="mb-0">
+            <li>Correção técnica dos cmdlets e filtragens (Where-Object, Select-Object).</li>
+            <li>Organização e legibilidade do CSV/JSON (nomes de colunas, encoding, consistência).</li>
+            <li>Uso adequado do Get-Help/Documentação para resolver dúvidas.</li>
+            <li>Boas práticas de laboratório (execução segura, snapshots, não alterar configurações globais sem necessidade).</li>
+            <li>Registro das evidências no diário de bordo (comandos executados e resultados).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação oficial do PowerShell: https://learn.microsoft.com/powershell/</li><li>Guia de cmdlets básicos e providers: Get-Help about_Providers; Get-Help about_Pipelines</li><li>Artigo “Working with objects” no PowerShell: Get-Help about_Objects</li><li>VirtualBox Snapshots e boas práticas: https://www.virtualbox.org/</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 12</h2>
+        <ul><li>inventario_NOMEDAMAQUINA.csv com dados de SO, CPU, memória e rede.</li><li>processos_top5_NOMEDAMAQUINA.csv com top 5 processos por CPU.</li><li>Registro no diário de bordo com os comandos principais e capturas de tela dos resultados.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 11 — Gerenciamento de usuários, grupos e perfis</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 13 — Automação com PowerShell</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Ferramentas de Gerenciamento de Sistemas Operacionais — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual a principal diferença entre CMD e PowerShell no Windows?","alternativas":{"A":"CMD trabalha com texto; PowerShell trabalha com objetos.","B":"CMD é multiplataforma e PowerShell não.","C":"PowerShell não possui pipeline.","D":"CMD suporta cmdlets nativamente como Verbo-Substantivo.","E":"Não há diferenças significativas."},"correta":"A"},{"id":"q2","titulo":"O que o cmdlet Get-Help faz no PowerShell?","alternativas":{"A":"Lista processos em execução.","B":"Atualiza automaticamente o Windows.","C":"Mostra documentação e exemplos de comandos.","D":"Exibe somente erros da sessão atual.","E":"Gera relatórios CSV."},"correta":"C"},{"id":"q3","titulo":"Qual comando ordena processos por CPU de forma decrescente e seleciona as três primeiras linhas?","alternativas":{"A":"tasklist | sort /R | head -n 3","B":"Get-Process | Sort-Object CPU | Select-Object -First 3","C":"Get-Process | Sort-Object CPU -Descending | Select-Object -First 3","D":"Get-Process | Select-Object -Top 3 | Sort-Object CPU -Descending","E":"Sort-Object Get-Process -CPU -Descending | First-3"},"correta":"C"},{"id":"q4","titulo":"Sobre ExecutionPolicy, qual afirmação está correta para laboratório?","alternativas":{"A":"Sempre definir Bypass no escopo MachinePolicy.","B":"RemoteSigned em CurrentUser é uma opção razoável para scripts locais.","C":"Restricted é a única que permite scripts assinados.","D":"Unrestricted bloqueia todos os scripts.","E":"ExecutionPolicy não afeta a execução de scripts."},"correta":"B"},{"id":"q5","titulo":"Para exportar dados em CSV sem a linha de tipo no topo do arquivo, qual parâmetro usar?","alternativas":{"A":"-PlainText","B":"-Append","C":"-NoTypeInformation","D":"-NoHeader","E":"-Encoding UTF8BOM"},"correta":"C"},{"id":"q6","titulo":"Qual cmdlet descobre comandos disponíveis e seus módulos?","alternativas":{"A":"Get-Member","B":"Get-Command","C":"Find-Object","D":"Select-Help","E":"Show-Module"},"correta":"B"},{"id":"q7","titulo":"Qual provider permite explorar o Registro do Windows via PowerShell?","alternativas":{"A":"FileSystem:","B":"Env:","C":"HKLM:/HKCU: (Registry)","D":"Cert: apenas","E":"WSMan: somente"},"correta":"C"},{"id":"q8","titulo":"Para filtrar objetos no pipeline, qual cmdlet é indicado?","alternativas":{"A":"Where-Object","B":"Compare-Object","C":"Start-Process","D":"Out-Host","E":"Group-Object"},"correta":"A"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Abri o PowerShell na VM e confirmei a versão com $PSVersionTable."},{"id":"c2","texto":"Usei Get-Help e Get-Command para explorar cmdlets."},{"id":"c3","texto":"Naveguei por FileSystem e Env: usando providers."},{"id":"c4","texto":"Coletei dados de SO, CPU, memória, rede e processos com cmdlets."},{"id":"c5","texto":"Montei um objeto com propriedades claras e exportei CSV com Export-Csv."},{"id":"c6","texto":"Ajustei a ExecutionPolicy em CurrentUser para RemoteSigned (laboratório)."},{"id":"c7","texto":"Validei o conteúdo do CSV com Import-Csv e organizei as colunas."},{"id":"c8","texto":"Registrei no diário de bordo comandos usados e resultados obtidos."}];
+    const CHECKLIST_KEY = 'chk_fgso_cap12';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

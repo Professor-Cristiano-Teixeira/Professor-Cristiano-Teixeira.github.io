@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 13 — Redes e Cabeamento Básico</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo13.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">MDTI</span>
+        <span style="color: var(--cor-principal);">Manutenção de Dispositivos de Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Segurança, ESD e organização de bancada</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Ferramentas e instrumentação para manutenção</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Revisão de hardware de PC e padrões</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Técnicas de desmontagem e montagem segura</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Soldagem básica e reparos simples</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Fontes de alimentação: teste e diagnóstico</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Systemboard (placa-mãe) e POST</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Memória, CPU e armazenamento: testes e análise</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Manutenção preventiva: limpeza e ventilação</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Sistemas operacionais: instalação e drivers</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — BIOS/UEFI: configuração e atualização responsável</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Periféricos e impressoras: instalação e suporte</a></li>
+              <li><a class="dropdown-item active" href="capitulo13.html">Cap. 13 — Redes para manutenção e cabeamento básico</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Metodologia de troubleshooting e documentação</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Laptops e dispositivos móveis</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Upgrade, reaproveitamento e descarte ambiental</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 13 — Redes para manutenção e cabeamento básico</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h (teoria 2h, prática 4h)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Suporte de estações em rede local (LAN) com cabeamento estruturado básico</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows 10/11, Ubuntu Desktop, ferramentas de rede (ping, ipconfig/ifconfig, net use), testador RJ-45, certificador básico, alicate de crimpagem</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Confeccionar e testar cabos de rede UTP com conectores RJ-45 (padrões T568A/T568B).</li><li>Realizar configuração IP básica (DHCP/estático) em estações Windows e Linux.</li><li>Diagnosticar conectividade com ping, ipconfig/ifconfig e interpretar resultados.</li><li>Instalar/atualizar drivers de placa de rede (NIC) e validar funcionamento.</li><li>Configurar compartilhamento simples e mapear unidades de rede de forma segura.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Selecionar e aplicar padrões de cabeamento UTP para montagem de cabos patch.</li><li>Configurar e validar parâmetros de rede IPv4 em estações de trabalho.</li><li>Utilizar comandos e ferramentas de diagnóstico de conectividade.</li><li>Prestar suporte a compartilhamentos de arquivos e impressoras em rede local.</li><li>Registrar procedimentos e evidências (prints, laudos e checklists).</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Periféricos e impressoras</a>
+              <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Troubleshooting e documentação</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 13)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p class="mb-2"><strong>Tema:</strong> Redes para manutenção e cabeamento básico.</p><p class="mb-2"><strong>Objetivos específicos:</strong> confeccionar cabos patch, configurar IP, testar conectividade, instalar drivers de NIC e mapear unidades.</p><p class="mb-2"><strong>Estratégia:</strong> exposição dialogada (teoria 2h) com demonstração em bancada e prática guiada (4h) seguindo checklist técnico.</p><p class="mb-2"><strong>Materiais:</strong> bobina UTP Cat5e/Cat6, conectores RJ-45, alicate de crimpagem, decapador, testador/certificador de cabos, switches SOHO, PCs/VMs com Windows e Ubuntu, acesso a roteador DHCP.</p><p class="mb-0"><strong>Avaliação:</strong> realização correta do cabo (passa em teste), validação de conectividade e entrega de mini-relatório com prints e evidências.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">1) Cabeamento UTP e padrões T568A/T568B</h3>
+            <p>O cabo UTP (Unshielded Twisted Pair) é o padrão mais comum em redes Ethernet de escritórios e residências. As categorias Cat5e e Cat6 suportam até 1 Gbps em 100 metros quando corretamente confeccionadas e testadas. Cada cabo contém 4 pares trançados que reduzem interferências eletromagnéticas.</p>
+            <p>Os padrões T568A e T568B definem a ordem das cores dos pares no conector RJ-45. Em cabos patch, utiliza-se normalmente o padrão T568B em ambas as pontas (cabo direto). Para ligações específicas entre dispositivos sem auto MDI-X, o cabo cruzado (A em uma ponta e B na outra) era necessário; hoje a maioria dos equipamentos negocia automaticamente.</p>
+            <p><strong>Onde vou aplicar isso no passo a passo:</strong> você vai montar um cabo patch T568B completo, crimpar ambas as pontas e validar a pinagem com testador.</p>
+            <div class="row g-3 mt-2">
+              <div class="col-12 col-lg-6">
+                <div class="alert alert-light border mb-0">
+                  <strong>Padrão T568B (ordem dos condutores, pino 1 → 8):</strong><br>
+                  1) Branco/laranja, 2) Laranja, 3) Branco/verde, 4) Azul, 5) Branco/azul, 6) Verde, 7) Branco/marrom, 8) Marrom.
+                </div>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="alert alert-light border mb-0">
+                  <strong>Padrão T568A (ordem dos condutores, pino 1 → 8):</strong><br>
+                  1) Branco/verde, 2) Verde, 3) Branco/laranja, 4) Azul, 5) Branco/azul, 6) Laranja, 7) Branco/marrom, 8) Marrom.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">2) Conectores RJ-45, crimpagem e testes</h3>
+            <p>O conector RJ-45 é o término do cabo UTP que encaixa nas portas Ethernet. A crimpagem consiste em posicionar corretamente os fios conforme o padrão escolhido, inserir no conector e pressionar com o alicate para fixar os contatos. O corte e o alinhamento da capa são essenciais para garantir fixação mecânica e desempenho elétrico.</p>
+            <p>Após crimpado, o cabo deve ser testado. Um testador simples verifica continuidade e pinagem; um certificador básico pode verificar também parâmetros como comprimento aproximado e pares invertidos. Erros comuns: pares trocados (split pair), falta de contato, inversão de pinos 1-2 ou 3-6 e excesso de destrançamento dos pares.</p>
+            <p><strong>Onde vou aplicar isso no passo a passo:</strong> você vai crimpar e usar testador/certificador para garantir pinagem 1↔1, 2↔2, ..., 8↔8 e registrar o resultado.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">3) Configuração IP básica: DHCP e IP estático</h3>
+            <p>O protocolo IPv4 identifica cada dispositivo na rede por um endereço único. Em ambientes comuns, o roteador atua como servidor DHCP, entregando IP, máscara, gateway e DNS automaticamente. Em situações de manutenção, é útil saber configurar IP estático quando necessário (por exemplo, para testar um switch isolado ou acessar um dispositivo com IP fixo).</p>
+            <p>Parâmetros principais: endereço IP (ex.: 192.168.1.10), máscara de sub-rede (ex.: 255.255.255.0), gateway padrão (ex.: 192.168.1.1) e servidores DNS (ex.: 1.1.1.1 e 8.8.8.8). Consistência e ausência de conflito são fundamentais.</p>
+            <p><strong>Onde vou aplicar isso no passo a passo:</strong> você vai validar DHCP, e caso necessário, ajustar IP estático no Windows e no Ubuntu para testes de conectividade.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">4) Ferramentas de diagnóstico: ping, ipconfig/ifconfig, drivers de NIC</h3>
+            <p>O comando ping verifica a conectividade entre sua estação e um destino (IP ou nome). A sequência de testes recomendada: ping 127.0.0.1 (loopback), ping próprio IP, ping gateway e ping internet/DNS público. Já ipconfig (Windows) e ifconfig/ip (Linux) exibem as configurações de rede.</p>
+            <p>Drivers da placa de rede (NIC) devem estar instalados e atualizados. Sem o driver correto, a interface pode aparecer com alerta no Gerenciador de Dispositivos (Windows) e não operar plenamente.</p>
+            <p><strong>Onde vou aplicar isso no passo a passo:</strong> você vai rodar ping e ipconfig/ifconfig para confirmar endereçamento, status do link e caminho até o gateway/internet. Também verificará drivers da NIC.</p>
+            <p class="mb-1"><strong>Exemplos de comandos</strong></p>
+            <pre class="language-bash"><code># Windows (PowerShell ou Prompt)
+ipconfig /all
+ping 127.0.0.1
+ping 192.168.1.1
+ping 8.8.8.8
+
+# Linux (Ubuntu)
+ip a
+ip r
+ping -c 4 192.168.1.1
+ping -c 4 1.1.1.1</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">5) Compartilhamento e mapeamento de unidades</h3>
+            <p>Compartilhamentos permitem acessar arquivos em rede como pastas remotas. No Windows, recursos podem ser acessados via caminho UNC (ex.: \\SERVIDOR\Compartilhamento) e mapeados para uma letra de unidade.</p>
+            <p>Para ambientes simples, utilize um usuário com senha, permissões adequadas e evite compartilhar toda a unidade. Em manutenção, valide firewall, descoberta de rede e serviços necessários (como “Publicação de Recursos” no Windows).</p>
+            <p><strong>Onde vou aplicar isso no passo a passo:</strong> você vai mapear uma unidade de rede com credenciais e validar acesso de leitura/escrita.</p>
+            <pre class="language-bash"><code># Windows - mapear unidade Z:
+net use Z: \\SERVIDOR\Compartilhamento /user:DOMINIO\usuario MinhaSenha
+
+# Desconectar mapeamento
+net use Z: /delete</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Montagem de cabo, configuração IP e validação de conectividade</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Confeccionar um cabo patch T568B funcional, testar com certificador básico e validar conectividade de uma estação via configuração IP, diagnóstico com ping/ipconfig e mapeamento de unidade.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 1 — Preparar materiais e EPI</h3>
+            <ol class="mb-0">
+              <li>Separe: cabo UTP Cat5e ou Cat6, 2 conectores RJ-45, alicate de crimpagem, decapador, tesoura e testador/certificador de cabos.</li>
+              <li>Use EPI adequado e mantenha a bancada organizada, conforme boas práticas dos capítulos iniciais.</li>
+              <li>Defina o padrão de pinagem a utilizar (T568B nas duas pontas para cabo direto).</li>
+            </ol>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 2 — Crimpagem correta (T568B em ambas as pontas)</h3>
+            <ol class="mb-3">
+              <li>Corte o cabo no comprimento desejado e decape cerca de 2–3 cm da capa externa, preservando os pares trançados.</li>
+              <li>Destrance apenas o necessário (até ~1,3 cm) para alinhar os fios na ordem T568B: Branco/laranja, Laranja, Branco/verde, Azul, Branco/azul, Verde, Branco/marrom, Marrom.</li>
+              <li>Apare as pontas para ficarem niveladas. Insira os fios no conector RJ-45 verificando que cada fio alcançou o fim do conector e a capa entrou sob a lingueta.</li>
+              <li>Crimpe com o alicate. Repita o processo na outra ponta, mantendo T568B.</li>
+            </ol>
+            <div class="alert alert-warning mb-0">
+              <strong>Erros comuns:</strong> pares trocados (split pair), fio curto que não encosta no contato, excesso de destrançamento e falta de alívio na capa. Se o teste falhar, recorte e refaça.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 3 — Teste com testador/certificador</h3>
+            <ol class="mb-3">
+              <li>Conecte cada ponta do cabo no testador. Inicie o teste de continuidade e pinagem.</li>
+              <li>Valide a sequência 1↔1, 2↔2, 3↔3, 4↔4, 5↔5, 6↔6, 7↔7, 8↔8. Se houver par invertido, identifique a ponta problemática e refaça.</li>
+              <li>Se disponível, registre o relatório do certificador (foto da tela ou exportação) para anexar ao relatório final.</li>
+            </ol>
+            <pre class="language-bash"><code># Registro de laudo (modelo de anotação)
+Cabo: UTP Cat6 (2,0 m)
+Padrão: T568B em ambas as pontas
+Resultado: Aprovado (continuidade OK; sem split pair)
+Anexos: foto_teste_YYYYMMDD.jpg</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 4 — Conectar a estação e verificar IP (DHCP)</h3>
+            <ol class="mb-3">
+              <li>Conecte o cabo da estação ao switch/roteador. Aguarde alguns segundos para a negociação de link.</li>
+              <li>No Windows, abra Prompt/PowerShell e rode:
+                <pre class="language-bash"><code>ipconfig /all
+ipconfig /release
+ipconfig /renew</code></pre>
+              </li>
+              <li>Confirme se a placa obteve IP do DHCP (faixa do roteador), gateway e DNS. No Ubuntu, verifique em Configurações de Rede ou via terminal:
+                <pre class="language-bash"><code>ip a
+nmcli device show | grep -E "IP4|DNS|GATEWAY"</code></pre>
+              </li>
+            </ol>
+            <div class="alert alert-light border mb-0">
+              Se a estação obtiver um endereço 169.254.x.x, o DHCP pode não estar acessível. Prossiga para configuração estática para testes ou verifique o roteador.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 5 — Configurar IP estático (se necessário)</h3>
+            <div class="row g-3">
+              <div class="col-12 col-lg-6">
+                <p class="mb-1"><strong>Windows (GUI)</strong></p>
+                <ol class="mb-3">
+                  <li>Rede e Internet > Alterar opções de adaptador > Propriedades do Ethernet.</li>
+                  <li>Propriedades do “Protocolo IP Versão 4 (TCP/IPv4)”.</li>
+                  <li>Defina IP, máscara, gateway e DNS. Salve.</li>
+                </ol>
+                <p class="mb-1"><strong>Windows (linha de comando)</strong></p>
+                <pre class="language-bash"><code># Execute como administrador (ajuste o nome do adaptador)
+netsh interface ip set address "Ethernet" static 192.168.1.50 255.255.255.0 192.168.1.1
+netsh interface ip set dns "Ethernet" static 1.1.1.1
+netsh interface ip add dns "Ethernet" 8.8.8.8 index=2</code></pre>
+              </div>
+              <div class="col-12 col-lg-6">
+                <p class="mb-1"><strong>Ubuntu (GUI)</strong></p>
+                <ol class="mb-3">
+                  <li>Configurações > Rede > Ethernet > Ícone de engrenagem.</li>
+                  <li>IPv4: Manual. Informe IP, máscara (ex.: 24), gateway e DNS. Aplicar.</li>
+                </ol>
+                <p class="mb-1"><strong>Ubuntu (linha de comando — temporário)</strong></p>
+                <pre class="language-bash"><code># Substitua enp3s0 pelo seu adaptador
+sudo ip addr add 192.168.1.60/24 dev enp3s0
+sudo ip route add default via 192.168.1.1
+# DNS temporário
+sudo bash -c 'echo "nameserver 1.1.1.1" &gt; /etc/resolv.conf'</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 6 — Diagnóstico com ping e rotas</h3>
+            <ol class="mb-3">
+              <li>Teste loopback/local:
+                <pre class="language-bash"><code>ping 127.0.0.1
+ping SEU_IP_LOCAL</code></pre>
+              </li>
+              <li>Teste gateway e DNS público:
+                <pre class="language-bash"><code>ping 192.168.1.1
+ping 1.1.1.1
+ping 8.8.8.8</code></pre>
+              </li>
+              <li>Teste nome de domínio (valida DNS):
+                <pre class="language-bash"><code>ping www.example.com</code></pre>
+              </li>
+              <li>Se falhar, verifique rota e firewall:
+                <pre class="language-bash"><code># Windows
+route print
+
+# Linux
+ip r</code></pre>
+              </li>
+            </ol>
+            <div class="alert alert-info mb-0">
+              Interprete o primeiro ponto de falha. Se loopback falha, a pilha TCP/IP local está com problema. Se gateway falha, investigue cabo, switch/roteador ou IP. Se DNS falha, ajuste servidores DNS.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 7 — Verificar driver da NIC e link</h3>
+            <ol class="mb-3">
+              <li>No Windows, abra Gerenciador de Dispositivos e confirme se a placa de rede está sem alertas. Atualize driver se necessário (site do fabricante).</li>
+              <li>No Ubuntu, confira o módulo carregado e status do link:
+                <pre class="language-bash"><code>sudo lshw -C network
+ethtool enp3s0 | grep -E "Link detected|Speed|Duplex"</code></pre>
+              </li>
+            </ol>
+            <div class="alert alert-light border mb-0">
+              Se o link não é detectado, teste outra porta do switch, outro cabo, ou ajuste auto-negociação/velocidade/duplex.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 8 — Compartilhamento e mapeamento de unidade</h3>
+            <ol class="mb-3">
+              <li>Em um PC servidor, compartilhe uma pasta com permissões para um usuário e defina senha.</li>
+              <li>No PC cliente (Windows), mapeie a unidade:
+                <pre class="language-bash"><code>net use Z: \\SERVIDOR\Compartilhamento /user:PCSERVIDOR\usuario SenhaForte!</code></pre>
+              </li>
+              <li>Valide leitura/escrita criando um arquivo de teste. Desconecte ao final:
+                <pre class="language-bash"><code>net use Z: /delete</code></pre>
+              </li>
+            </ol>
+            <div class="alert alert-warning mb-0">
+              Evite credenciais em texto claro em scripts permanentes. Use contas específicas e políticas de senha.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Etapa 9 — Registro e evidências</h3>
+            <ol class="mb-0">
+              <li>Preencha o checklist técnico com: fotos do cabo, laudo do testador, prints do ipconfig/ifconfig, resultados de ping e evidência do mapeamento.</li>
+              <li>Guarde os arquivos em uma pasta datada e gere um PDF com o mini-relatório.</li>
+            </ol>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar habilidades de cabeamento, configuração IP e suporte básico a recursos de rede.</p>
+        <div class="vstack gap-3 mt-3">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">Atividade 1 — Kit de cabos</h3>
+            <p>Monte dois cabos: um patch T568B (2–3 m) e um crossover (T568A x T568B, 1 m). Teste e anexe fotos/relatórios ao seu portfólio.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">Atividade 2 — Laboratório DHCP vs. estático</h3>
+            <p>Crie um cenário com um roteador doméstico (DHCP ativo) e duas estações. Configure uma com DHCP e outra com IP estático não conflitante. Documente o ping entre elas e o acesso à internet.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">Atividade 3 — Compartilhamento controlado</h3>
+            <p>No Windows, habilite um compartilhamento para um usuário específico. Em outra máquina, mapeie a unidade, teste leitura/escrita e registre as permissões aplicadas.</p>
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold mb-2">Critérios de avaliação (sugestão)</h3>
+          <ul class="mb-0">
+            <li>Corretude técnica dos cabos (passam no teste e sem erros de pinagem).</li>
+            <li>Configuração IP funcional e evidências de conectividade (ping/prints).</li>
+            <li>Mapeamento de unidade com credenciais e permissões adequadas.</li>
+            <li>Organização, clareza do relatório e cumprimento dos procedimentos de segurança.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Normas de cabeamento estruturado (TIA/EIA-568) e boas práticas de destrançamento/raio de curvatura.</li><li>Auto MDI-X: como os switches modernos negociam cabos diretos e cruzados.</li><li>Endereçamento IPv4 privado (RFC 1918) e comparação com IPv6 para suporte futuro.</li><li>Serviços de resolução de nomes: DNS, mDNS/Bonjour e implicações em redes locais.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 13</h2>
+        <ul><li>1 cabo patch T568B aprovado em teste (com evidência).</li><li>Relatório curto com prints de ipconfig/ifconfig, rota e pings (loopback, gateway, DNS público e domínio).</li><li>Evidência de mapeamento de unidade em rede (print e arquivo de teste criado).</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Periféricos e impressoras</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Troubleshooting e documentação</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Manutenção de Dispositivos de Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a ordem correta de cores no padrão T568B (pinos 1 → 8)?","alternativas":{"A":"Branco/verde, Verde, Branco/laranja, Azul, Branco/azul, Laranja, Branco/marrom, Marrom","B":"Branco/laranja, Laranja, Branco/verde, Azul, Branco/azul, Verde, Branco/marrom, Marrom","C":"Branco/azul, Azul, Branco/verde, Verde, Branco/laranja, Laranja, Branco/marrom, Marrom","D":"Branco/marrom, Marrom, Branco/azul, Azul, Branco/verde, Verde, Branco/laranja, Laranja","E":"Branco/laranja, Laranja, Branco/azul, Azul, Branco/verde, Verde, Branco/marrom, Marrom"},"correta":"B"},{"id":"q2","titulo":"Ao confeccionar um cabo UTP Cat6, qual prática é recomendada para manter o desempenho?","alternativas":{"A":"Destrançar completamente os pares para facilitar o alinhamento","B":"Cortar os fios de comprimentos diferentes para facilitar a inserção","C":"Manter o destrançamento mínimo (≈1,3 cm) e garantir alívio da capa no conector","D":"Nunca usar capa sob a lingueta do conector RJ-45","E":"Pressionar os fios com ferramenta metálica para perfurar mais o cobre"},"correta":"C"},{"id":"q3","titulo":"Um IP 169.254.x.x indica, em geral:","alternativas":{"A":"Configuração estática bem-sucedida","B":"Conflito de IP detectado pelo roteador","C":"Falha em obter endereço do DHCP (APIPA)","D":"Gateway fora da sub-rede","E":"DNS com erro de resolução"},"correta":"C"},{"id":"q4","titulo":"Sequência recomendada de testes com ping ao diagnosticar conectividade é:","alternativas":{"A":"Ping DNS público → ping loopback → ping gateway → ping IP local","B":"Ping loopback → ping IP local → ping gateway → ping DNS público","C":"Ping gateway → ping loopback → ping DNS público → ping IP local","D":"Ping IP local → ping DNS público → ping loopback → ping gateway","E":"Ping domínio → ping loopback → ping gateway → ping IP local"},"correta":"B"},{"id":"q5","titulo":"No Windows, qual comando define IPv4 estático, máscara e gateway em um adaptador chamado \"Ethernet\"?","alternativas":{"A":"ipconfig /set 192.168.1.50 255.255.255.0 192.168.1.1","B":"route add 192.168.1.50 mask 255.255.255.0 192.168.1.1","C":"netsh interface ip set address \"Ethernet\" static 192.168.1.50 255.255.255.0 192.168.1.1","D":"net use Ethernet 192.168.1.50 /mask 255.255.255.0 /gw 192.168.1.1","E":"ip a add 192.168.1.50/24 dev Ethernet"},"correta":"C"},{"id":"q6","titulo":"Qual afirmação sobre cabos direto x crossover é correta nos equipamentos atuais?","alternativas":{"A":"Sempre é obrigatório usar crossover entre PC e switch","B":"Crossover foi substituído por fibra e não é mais usado","C":"Graças ao auto MDI-X, muitos dispositivos aceitam cabo direto ou crossover indistintamente","D":"Cabo direto não funciona entre dois switches","E":"Crossover é exigido para internet funcionar"},"correta":"C"},{"id":"q7","titulo":"Ao mapear uma unidade de rede no Windows com o comando net use, o parâmetro correto para especificar o usuário é:","alternativas":{"A":"/account:","B":"/user:","C":"/login:","D":"/auth:","E":"/cred:"},"correta":"B"},{"id":"q8","titulo":"Qual problema é típico de crimpagem incorreta que pode afetar NEXT (diafonia) e desempenho?","alternativas":{"A":"Capa do cabo muito longa","B":"Excesso de destrançamento dos pares","C":"Uso de conector transparente","D":"Pressão de crimpagem baixa demais apenas no pino 8","E":"Uso de alicate sem catraca"},"correta":"B"},{"id":"q9","titulo":"Para verificar o status do link (velocidade/duplex) no Linux, uma ferramenta útil é:","alternativas":{"A":"route","B":"nslookup","C":"ethtool","D":"nmap","E":"dig"},"correta":"C"},{"id":"q10","titulo":"No diagnóstico, ping ao gateway falha, mas loopback e IP local funcionam. Qual hipótese inicial faz mais sentido?","alternativas":{"A":"Falha na pilha TCP/IP local","B":"Driver da placa de som ausente","C":"Problema físico no cabo/porta ou IP fora da sub-rede","D":"DNS configurado incorretamente","E":"Conflito no endereço MAC do teclado"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Separei materiais: UTP, RJ-45, alicate, decapador, testador e EPI."},{"id":"c2","texto":"Defini o padrão de pinagem (T568B) e organizei os fios corretamente."},{"id":"c3","texto":"Crimpei as duas pontas com destrançamento mínimo e capa sob a lingueta."},{"id":"c4","texto":"Testei continuidade/pinagem e corrigi eventuais erros (sem split pair)."},{"id":"c5","texto":"Conectei a estação ao switch/roteador e verifiquei DHCP (ipconfig/ip a)."},{"id":"c6","texto":"Configurei IP estático para teste quando necessário (Windows/Linux)."},{"id":"c7","texto":"Realizei pings: loopback, IP local, gateway e DNS público/nome."},{"id":"c8","texto":"Verifiquei driver/NIC e status de link (Gerenciador de Dispositivos/ethtool)."},{"id":"c9","texto":"Mapeei uma unidade de rede com credenciais e validei leitura/escrita."},{"id":"c10","texto":"Registrei evidências (fotos, prints, relatório curto) e arquivei."}];
+    const CHECKLIST_KEY = 'MDTI-CAP13-CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

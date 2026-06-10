@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 — Memórias: RAM, ROM e cache</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo07.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">MTCO</span>
+        <span style="color: var(--cor-principal);">Montagem e Configuração de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução à disciplina e visão geral do hardware</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Segurança, ESD e organização da bancada</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Ferramentas, normas técnicas e documentação</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Fontes de alimentação (PSU)</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Placas-mãe e chipsets</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Processadores e refrigeração</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Memórias: RAM, ROM e cache</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Armazenamento: HD, SSD e NVMe</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Placas de expansão: vídeo, som, rede e captura</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Periféricos, cabos e conectores</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Montagem física: passo a passo</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — BIOS/UEFI: configuração e atualização</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Instalação de SO e drivers; mídia de boot</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Manutenção preventiva e limpeza</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Diagnóstico de falhas de hardware e software</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Manutenção corretiva, substituições, descarte e comunicação técnica</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 07 — Memórias: RAM, ROM e cache</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (teoria 1h30 + prática 2h30)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Bancada de PC didático com verificação de POST e configuração de perfil de memória no UEFI</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Motherboard com slots DDR4/DDR5, kits de RAM, UEFI com XMP/EXPO, CPU-Z ou HWInfo, MemTest86</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Identificar padrões de RAM (DDR3/DDR4/DDR5) e suas especificações (frequência, latências, tensão).</li><li>Selecionar e instalar corretamente módulos de memória seguindo populações recomendadas (dual/quad channel).</li><li>Configurar perfis de memória (XMP/EXPO) com segurança no UEFI e validar o POST.</li><li>Distinguir RAM, ROM/firmware e níveis de cache da CPU, compreendendo seu papel no desempenho.</li><li>Executar testes básicos de estabilidade de memória e registrar evidências técnicas.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Interpretação técnica de especificações de memória e compatibilidade com placa-mãe/CPU.</li><li>Aplicação de boas práticas ESD na instalação de RAM.</li><li>Configuração básica de UEFI voltada a memória e validação de POST.</li><li>Diagnóstico inicial de problemas de memória com ferramentas adequadas.</li><li>Documentação objetiva de procedimentos e resultados de testes.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Processadores e refrigeração</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Armazenamento: HD, SSD e NVMe</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 07)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Abertura (10 min):</strong> Revisão rápida dos capítulos anteriores (CPU/placa-mãe) e relação com memória.</p><p><strong>Exposição teórica (40 min):</strong> Conceitos de RAM (DDR3/DDR4/DDR5), frequência versus latência (CL/tRCD/tRP/tRAS), perfis XMP/EXPO, canais de memória, populações de slots, ROM/UEFI e cache L1/L2/L3.</p><p><strong>Demonstração guiada (20 min):</strong> Leitura do manual da placa-mãe para identificar slots recomendados; instalação correta de dois módulos; acesso ao UEFI e ativação de XMP/EXPO.</p><p><strong>Prática em dupla (70 min):</strong> Instalação física de RAM, validação de POST, configuração de perfil de memória, boot em mídia de testes e execução de verificação básica (MemTest86 ou alternativa), coleta de evidências com CPU-Z/HWInfo.</p><p><strong>Fechamento (10 min):</strong> Discussão de resultados, dificuldades e preenchimento do checklist.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Conceitos de RAM: DDR3, DDR4 e DDR5</h3>
+          <p>A RAM (Random Access Memory) é a memória volátil principal do sistema, responsável por armazenar temporariamente dados e instruções em uso. Os padrões DDR evoluíram em taxa de transferência, eficiência e organização interna. DDR3 opera tipicamente entre 1066–1866 MT/s, DDR4 entre 2133–3600+ MT/s e DDR5 começa em 4800 MT/s, com maiores densidades e recursos internos como PMIC on-dIMM e on-die ECC (para confiabilidade do chip, não substitui ECC de sistema).</p>
+          <p>Além da taxa, cada geração usa chaves mecânicas diferentes no conector, impedindo instalação cruzada. A tensão padrão também muda (DDR3 ~1,5 V; DDR4 ~1,2 V; DDR5 ~1,1 V), e as placas-mãe/CPUs suportam apenas certos padrões conforme o soquete e o chipset.</p>
+          <p><em>Onde vou aplicar isso:</em> na escolha de kits compatíveis com sua placa-mãe/CPU e ao evitar tentativas de instalação física incorreta.</p>
+          <hr>
+          <h3 class="h6 fw-bold">2) Frequência, latência e desempenho</h3>
+          <p>O desempenho da RAM depende do balanceamento entre frequência (MT/s) e latências (CL, tRCD, tRP, tRAS). Frequências maiores aumentam a largura de banda, enquanto latências menores reduzem o tempo de resposta. Kits costumam ser especificados como, por exemplo, DDR4-3200 CL16. Comparar kits exige observar ambos os parâmetros e a plataforma (nem todas atingem frequências XMP/EXPO máximas de forma estável).</p>
+          <p>A tensão também influencia a estabilidade. Kits “de fábrica” com XMP/EXPO definem perfil com frequência/latências/tensão testadas. Em ambientes de produção e acadêmicos, priorize estabilidade antes de “apertar” latências.</p>
+          <p><em>Onde vou aplicar isso:</em> ao ativar o perfil de memória no UEFI e validar estabilidade com testes, ajustando caso necessário.</p>
+          <hr>
+          <h3 class="h6 fw-bold">3) Canais de memória: single, dual e quad</h3>
+          <p>Plataformas de desktop mainstream operam, em geral, em dual-channel; HEDT/servidores podem oferecer quad-channel ou mais. O ganho de desempenho vem do aumento de largura de banda quando dois módulos idênticos operam em paralelo. Para ativar dual-channel, instale pares idênticos nos slots indicados pelo manual (geralmente A2 e B2, mas verifique o modelo).</p>
+          <p>Usar módulos com capacidades/frequências diferentes pode forçar downclock ou operar em single-channel, afetando desempenho. Sempre planeje a população de slots para a topologia ideal da placa.</p>
+          <p><em>Onde vou aplicar isso:</em> ao escolher e instalar fisicamente dois módulos iguais nos slots corretos para habilitar dual-channel.</p>
+          <hr>
+          <h3 class="h6 fw-bold">4) População de slots e compatibilidade</h3>
+          <p>Os slots são rotulados (A1, A2, B1, B2...). O manual informa a ordem de preferência ao usar 2, 3 ou 4 módulos, e as limitações de frequência quando todos os slots estão ocupados. Alguns controladores de memória reduzem a frequência com quatro módulos para manter estabilidade.</p>
+          <p>Compatibilidade também engloba capacidade máxima por slot e total suportado pela CPU/placa-mãe. Verifique a QVL (lista de memórias validadas pelo fabricante) para aumentar a chance de sucesso com kits específicos.</p>
+          <p><em>Onde vou aplicar isso:</em> na leitura do manual e planejamento da instalação para obter POST estável na primeira tentativa.</p>
+          <hr>
+          <h3 class="h6 fw-bold">5) Perfis XMP/EXPO e UEFI</h3>
+          <p>XMP (Intel) e EXPO (AMD) são perfis que gravam, no SPD do módulo, configurações testadas de frequência/latência/tensão. No UEFI, ativar o perfil aplica essas configurações automaticamente. Em algumas combinações de CPU/placa, pode ser necessário reduzir um nível de frequência para estabilidade plena.</p>
+          <p>Ao ativar o perfil, documente as telas e valide com teste. Se houver instabilidade (loops de boot, travamentos), volte ao perfil padrão (JEDEC) ou ajuste conforme orientação do fabricante.</p>
+          <p><em>Onde vou aplicar isso:</em> ao entrar no UEFI, selecionar XMP/EXPO, salvar e retestar POST.</p>
+          <hr>
+          <h3 class="h6 fw-bold">6) ROM/firmware, SPD e UEFI</h3>
+          <p>ROM (Read-Only Memory) evoluiu para flash regravável usada no firmware UEFI das placas-mãe. O SPD (Serial Presence Detect) é um pequeno armazenamento nos módulos de RAM que contém informações de timing e perfis. O UEFI lê o SPD para aplicar configurações automáticas (JEDEC) ou disponibilizar XMP/EXPO.</p>
+          <p>Entender o papel do SPD e do UEFI ajuda no diagnóstico quando o sistema não dá vídeo por configurações de memória agressivas.</p>
+          <p><em>Onde vou aplicar isso:</em> ao interpretar leituras de CPU-Z/HWInfo e ajustar configurações no UEFI.</p>
+          <hr>
+          <h3 class="h6 fw-bold">7) Cache da CPU (L1/L2/L3)</h3>
+          <p>Cache é memória ultrarrápida integrada ao processador. L1 é o menor e mais rápido, L2/L3 são maiores e um pouco mais lentos. O cache reduz o tempo de busca de dados frequentemente usados, aliviando a necessidade de acessar RAM constantemente. O tamanho e a organização do cache influenciam o desempenho em tarefas específicas.</p>
+          <p>Embora você não instale cache manualmente, saber sua função explica por que aumentar apenas a frequência da RAM nem sempre traz ganhos proporcionais.</p>
+          <p><em>Onde vou aplicar isso:</em> ao interpretar resultados de desempenho e justificar escolhas de configuração de memória.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Instalação e validação de memória (RAM) com perfil XMP/EXPO</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Instalar fisicamente um kit de RAM, habilitar dual-channel, configurar XMP/EXPO no UEFI, validar POST e estabilidade básica, e documentar os resultados.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Preparação de segurança e leitura do manual (10 min)</h3>
+          <ol class="mb-0">
+            <li>Desligue o PC, remova o cabo de energia e pressione o botão de power por 5 segundos para descarregar capacitores.</li>
+            <li>Coloque a pulseira ESD e prenda ao ponto de aterramento adequado. Trabalhe em superfície limpa.</li>
+            <li>Abra o manual da placa-mãe (PDF ou impresso) e localize a seção de slots de memória. Identifique os slots recomendados para 2 módulos (por exemplo, A2 e B2).</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Instalação física dos módulos (15–20 min)</h3>
+          <ol>
+            <li>Abra as travas dos slots identificados. Alinhe o entalhe do módulo ao ressalto do slot (não force).</li>
+            <li>Pressione com firmeza e de forma uniforme até as travas fecharem sozinhas. Verifique o encaixe visualmente.</li>
+            <li>Repita no segundo módulo. Confirme se ambos estão exatamente nos slots recomendados para dual-channel.</li>
+          </ol>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Dica:</strong> Se uma trava não fechar, retire e realinhe. Módulo torto pode danificar o slot.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Primeiro boot e validação de POST (5–10 min)</h3>
+          <ol>
+            <li>Conecte a energia e ligue o PC. Observe se há beeps/códigos de diagnóstico. Se não houver vídeo, desligue e confira os encaixes.</li>
+            <li>Entre no UEFI/BIOS (geralmente teclas Del/F2). Verifique a tela de informações: capacidade total e número de canais (dual).</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Configuração de XMP/EXPO no UEFI (10–15 min)</h3>
+          <ol>
+            <li>Navegue até o menu de memória/overclock. Selecione o perfil XMP (Intel) ou EXPO (AMD) correspondente ao kit.</li>
+            <li>Salve (Save & Exit) e reinicie. Se o sistema não der POST, retorne ao UEFI e teste um perfil inferior ou JEDEC padrão.</li>
+          </ol>
+          <div class="alert alert-warning mt-2 mb-0"><strong>Atenção:</strong> Não altere manualmente subtimings/tensão sem necessidade. Priorize estabilidade para o laboratório.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Coleta de evidências no sistema (10 min)</h3>
+          <p>Após o boot no sistema operacional, valide as leituras com ferramentas.</p>
+          <p class="mb-1"><strong>Windows (PowerShell) — informações básicas:</strong></p>
+          <pre class="language-powershell"><code># Mostrar capacidade total de memória física instalada
+(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB
+
+# Listar módulos de memória e capacidades por slot
+Get-CimInstance Win32_PhysicalMemory | Select-Object BankLabel, Capacity, ConfiguredClockSpeed, Manufacturer | Format-Table -Auto
+
+# Ver dados do controlador de memória (se disponível)
+Get-CimInstance Win32_MemoryArray</code></pre>
+          <p class="mb-1"><strong>Linux — informações básicas:</strong></p>
+          <pre class="language-bash"><code># Quantidade total de memória
+free -h
+
+# SPD e detalhes por slot (requer pacotes/suporte)
+sudo dmidecode -t memory | less</code></pre>
+          <p class="mb-1"><strong>CPU-Z/HWInfo (GUI):</strong> registre capturas das abas “Memory” (frequência efetiva e canais) e “SPD” (perfil XMP/EXPO).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Teste rápido de memória (20–30 min)</h3>
+          <ol>
+            <li>Se disponível, inicialize o MemTest86 por pendrive e execute pelo menos 1 passagem completa.</li>
+            <li>Alternativa dentro do SO: OCCT memória por 15–20 min para triagem rápida (não substitui MemTest86).</li>
+            <li>Registre resultados (número de erros, se houver). Erros indicam instabilidade: rever encaixe, slots, perfil e compatibilidade.</li>
+          </ol>
+          <div class="alert alert-light border mt-2 mb-0"><strong>Nota:</strong> Testes longos (4+ passagens) aumentam a confiança; ajuste o tempo conforme agenda de laboratório.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Documentação e checklist (10 min)</h3>
+          <ul class="mb-0">
+            <li>Fotos dos módulos instalados nos slots corretos.</li>
+            <li>Prints do UEFI mostrando dual-channel e perfil aplicado.</li>
+            <li>Prints CPU-Z/HWInfo: abas Memory e SPD.</li>
+            <li>Relatório sucinto: kit usado, slots, perfil, resultados de teste e observações.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a seleção, instalação e validação de memória, praticando análise de compatibilidade e registro técnico.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li><strong>Comparativo de kits:</strong> escolha 3 kits (por ex., DDR4-2666 CL16, DDR4-3200 CL16, DDR4-3600 CL18) e produza uma tabela comparando frequência, latências, tensão e provável impacto no desempenho. Conclua qual é o melhor custo/benefício para a sua placa/CPU.</li>
+            <li><strong>Planejamento de população:</strong> considerando uma placa com 4 slots, desenhe 3 cenários (2×8 GB; 4×8 GB; 2×16 GB) e discuta prós/contrass de cada um (frequência suportada, possibilidade de upgrade, carga do controlador).</li>
+            <li><strong>Relato de diagnóstico:</strong> simule um erro de POST após ativar XMP/EXPO (por exemplo, tela preta). Escreva um roteiro de resolução com passos ordenados (clear CMOS, testar JEDEC, testar módulos/slots, atualizar UEFI) e descreva o resultado esperado.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (sugestão)</h3>
+          <ul class="mb-0">
+            <li>Correta identificação de padrões de memória e parâmetros (frequência/latência).</li>
+            <li>Instalação física segura e conforme manual (dual-channel habilitado).</li>
+            <li>Configuração apropriada de XMP/EXPO e validação com evidências.</li>
+            <li>Clareza e completude da documentação e da análise comparativa.</li>
+            <li>Aderência a normas de segurança/ESD e organização da bancada.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Leitura de QVL de sua placa-mãe (lista de memórias validadas) e como interpretá-la.</li><li>Whitepapers de DDR5: PMIC on-dIMM e on-die ECC (propósito e limitações).</li><li>Documentação do fabricante sobre perfis XMP/EXPO e compatibilidade por geração de CPU.</li><li>Guias de boas práticas ESD (IPC-A-610/JEDEC) aplicados à instalação de módulos de memória.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 07</h2>
+        <ul><li>Fotos dos módulos instalados nos slots recomendados (dual-channel).</li><li>Capturas do UEFI e de CPU-Z/HWInfo evidenciando frequência efetiva, canais e SPD.</li><li>Relatório breve com configuração aplicada (JEDEC ou XMP/EXPO), resultado do teste de memória e ações tomadas em caso de erro.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Processadores e refrigeração</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Armazenamento: HD, SSD e NVMe</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Montagem e Configuração de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual opção descreve corretamente a relação entre frequência e latência na RAM?","alternativas":{"A":"Maior frequência sempre garante menor latência.","B":"Menor latência sempre garante maior frequência.","C":"Frequência e latência são independentes e não afetam desempenho.","D":"Frequência aumenta largura de banda; latências menores reduzem tempo de acesso.","E":"Apenas a frequência influencia o desempenho, latência é irrelevante."},"correta":"D"},{"id":"q2","titulo":"Para habilitar dual-channel em uma placa com 4 slots (A1, A2, B1, B2), qual prática é mais indicada?","alternativas":{"A":"Instalar os módulos em A1 e A2.","B":"Instalar os módulos em B1 e B2.","C":"Instalar os módulos nos slots recomendados (geralmente A2 e B2) conforme o manual.","D":"Instalar primeiro em qualquer slot, a placa detecta automaticamente.","E":"Instalar os dois módulos no mesmo canal para maior estabilidade."},"correta":"C"},{"id":"q3","titulo":"O que é XMP/EXPO no contexto de memória?","alternativas":{"A":"Um tipo de memória ROM usada para armazenar o UEFI.","B":"Um perfil de fábrica com configurações de frequência/latência/tensão gravado no SPD do módulo.","C":"Um teste de diagnóstico de memória embutido no Windows.","D":"Um recurso para limpar CMOS automaticamente.","E":"Um padrão físico de encaixe dos módulos DDR."},"correta":"B"},{"id":"q4","titulo":"Sobre DDR3, DDR4 e DDR5, assinale a alternativa correta:","alternativas":{"A":"São eletricamente e mecanicamente compatíveis entre si.","B":"DDR5 opera tipicamente com frequências iniciais mais altas que DDR4 e inclui PMIC on-dIMM.","C":"DDR4 usa maior tensão que DDR3 por padrão.","D":"DDR3 tem on-die ECC universal que substitui ECC de sistema.","E":"Todas as gerações usam a mesma posição de entalhe no conector."},"correta":"B"},{"id":"q5","titulo":"Uma máquina não dá POST após ativar XMP/EXPO. Qual sequência é mais adequada?","alternativas":{"A":"Aumentar a tensão da RAM sem verificar nada.","B":"Forçar a frequência máxima anunciada pelo fabricante da RAM.","C":"Voltar ao UEFI, testar perfil inferior ou JEDEC, verificar encaixes/slots e, se necessário, atualizar UEFI.","D":"Ignorar e seguir usando o PC, pois o sistema se ajusta depois.","E":"Trocar a CPU imediatamente."},"correta":"C"},{"id":"q6","titulo":"Qual afirmação descreve melhor L1/L2/L3 cache?","alternativas":{"A":"Memória instalada na placa-mãe semelhante à RAM.","B":"Unidades de armazenamento secundário como SSDs.","C":"Memória integrada ao processador, muito rápida, reduzindo acessos à RAM.","D":"Uma partição da RAM dedicada ao sistema operacional.","E":"Firmware armazenado em ROM para inicialização."},"correta":"C"},{"id":"q7","titulo":"Ao usar quatro módulos em uma plataforma dual-channel, é provável que:","alternativas":{"A":"A frequência suportada aumente automaticamente.","B":"A placa-mãe desative o dual-channel.","C":"Seja necessário reduzir a frequência para manter estabilidade, dependendo do controlador de memória.","D":"O sistema requeira atualização de GPU.","E":"Nada mude; sempre opera igual a dois módulos."},"correta":"C"},{"id":"q8","titulo":"O SPD em um módulo de memória serve para:","alternativas":{"A":"Armazenar arquivos do usuário.","B":"Guardar perfis e informações de temporização para que o UEFI configure a memória.","C":"Atuar como bateria de backup do UEFI.","D":"Habilitar overclock automático da CPU.","E":"Controlar ventoinhas do gabinete."},"correta":"B"},{"id":"q9","titulo":"Qual medida de segurança é essencial ao instalar RAM?","alternativas":{"A":"Desligar apenas o monitor.","B":"Manter o cabo de energia conectado para aterramento.","C":"Usar pulseira ESD, remover energia do PC e trabalhar em superfície apropriada.","D":"Apoiar o PC sobre tecido sintético para reduzir poeira.","E":"Segurar os módulos pelos contatos para melhor firmeza."},"correta":"C"},{"id":"q10","titulo":"Ao comparar DDR4-3200 CL16 com DDR4-2666 CL16, qual tendência é esperada?","alternativas":{"A":"DDR4-2666 terá maior largura de banda.","B":"DDR4-3200 terá maior largura de banda, com latência em ciclos igual, mas menor tempo absoluto.","C":"DDR4-3200 sempre terá latência absoluta maior.","D":"Ambas têm desempenho idêntico em qualquer cenário.","E":"A tensão do DDR4-2666 é obrigatoriamente maior."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Li o manual da placa-mãe e identifiquei os slots corretos para dual-channel."},{"id":"c2","texto":"Instalei os módulos de RAM com técnica ESD adequada e travas totalmente fechadas."},{"id":"c3","texto":"Validei o POST e confirmei a capacidade total e o modo de canal no UEFI."},{"id":"c4","texto":"Ativei XMP/EXPO (quando disponível) e reiniciei sem erros."},{"id":"c5","texto":"Coletei evidências com CPU-Z/HWInfo (abas Memory e SPD)."},{"id":"c6","texto":"Executei um teste básico de memória (MemTest86/OCCT) e registrei resultados."},{"id":"c7","texto":"Em caso de instabilidade, reverti para JEDEC ou reduzi o perfil e documentei."},{"id":"c8","texto":"Organizei e limpei a bancada, descartei resíduos conforme boas práticas."},{"id":"c9","texto":"Atualizei meu relatório com configurações aplicadas e prints do UEFI."}];
+    const CHECKLIST_KEY = 'mtco_cap07_checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>
