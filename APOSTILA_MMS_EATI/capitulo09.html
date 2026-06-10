@@ -1,770 +1,549 @@
-<!DOCTYPE html>
-<!-- arquivo: capitulo09.html -->
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EATI • Capítulo 09 — Fundamentos de Sistemas Embarcados e Plataforma Arduino</title>
-  <meta name="description" content="Apostila EATI — Capítulo 09: fundamentos de sistemas embarcados, microcontroladores, arquitetura do Arduino UNO, memória, clock, I/O, ADC, PWM, comunicação serial e boas práticas." />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 09 — Fundamentos de Lógica Digital</title>
 
-  <style>
-    :root{
-      --bg:#f5f7ff;
-      --surface:#ffffff;
-      --surface-soft:#eef3ff;
-      --surface-strong:#e2eaff;
-      --text:#17233a;
-      --muted:#54627e;
-      --line:#d7def7;
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-      /* Tema Azul */
-      --primary:#0000ee;
-      --primary-600:#0000cc;
-      --primary-700:#0000aa;
-      --primary-800:#000088;
-      --focus:0 0 0 4px rgba(0,0,238,.18);
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
 
-      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
-      --shadow-md:0 16px 38px rgba(23,35,58,.10);
-      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
-
-      --radius-sm:14px;
-      --radius-md:20px;
-      --radius-lg:28px;
-      --container:1100px;
-
-      --ok:#0a7a3b;
-      --bad:#9b2c2c;
-      --warn:#9a6700;
-    }
-
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
-        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
-        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
-      line-height:1.75;
-    }
-
-    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
-    a:hover{color:var(--primary-700)}
-    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
-
-    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
-
-    /* Topbar */
-    header{
-      position:sticky;top:0;z-index:1000;
-      background:rgba(255,255,255,.86);
-      backdrop-filter:blur(14px);
-      border-bottom:1px solid var(--line);
-    }
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      min-height:72px;padding:10px 0;
-    }
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
-    .badge{
-      width:48px;height:48px;border-radius:14px;
-      display:grid;place-items:center;
-      color:#fff;font-weight:900;letter-spacing:.04em;
-      background:linear-gradient(135deg,var(--primary),var(--primary-800));
-      box-shadow:0 14px 24px rgba(0,0,238,.20);
-      flex-shrink:0;
-    }
-    .brand strong{display:block;line-height:1.1}
-    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
-
-    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .nav a{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:9px 12px;border-radius:999px;
-      font-weight:900;font-size:.92rem;
-      border:1px solid transparent;
-      color:var(--text);
-      background:transparent;
-    }
-    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
-    .nav a.primary{
-      background:linear-gradient(135deg,var(--primary),var(--primary-800));
-      color:#fff;border-color:transparent;
-      box-shadow:0 12px 20px rgba(0,0,238,.18);
-    }
-    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
-
-    main{padding-bottom:56px}
-
-    /* Cards */
-    section{padding:18px 0;scroll-margin-top:90px}
-    .card{
-      background:var(--surface);
-      border:1px solid var(--line);
-      border-radius:var(--radius-lg);
-      box-shadow:var(--shadow-lg);
-      overflow:hidden;
-    }
-    .card-inner{padding:22px}
-
-    .hero{
-      border-radius:var(--radius-lg);
-      background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));
-      border-bottom:1px solid var(--line);
-      position:relative;
-      overflow:hidden;
-    }
-    .hero::before{
-      content:"";
-      position:absolute;right:-80px;top:-80px;
-      width:260px;height:260px;border-radius:50%;
-      background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);
-      pointer-events:none;
-    }
-
-    .tag{
-      display:inline-flex;align-items:center;gap:8px;
-      border:1px solid var(--line);
-      background:#fff;
-      padding:7px 12px;
-      border-radius:999px;
-      font-weight:900;
-      color:var(--primary-800);
-      font-size:.85rem;
-    }
-
-    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
-    .meta{color:var(--muted);margin:0 0 14px}
-
-    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-
-    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
-    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
-    p{margin:0 0 12px}
-    ul{margin:0 0 12px;padding-left:18px}
-    li{margin:6px 0}
-
-    .callout{
-      border-left:4px solid var(--primary);
-      background:var(--surface-soft);
-      border-radius:12px;
-      padding:12px 14px;
-      margin:14px 0;
-    }
-    .callout strong{color:var(--primary-800)}
-
-    .warning{
-      border-left:4px solid #ffb300;
-      background:rgba(255, 200, 0, .12);
-      border-radius:12px;
-      padding:12px 14px;
-      margin:14px 0;
-    }
-    .warning strong{color:var(--warn)}
-
-    .note{
-      border:1px dashed var(--line);
-      background:rgba(238,243,255,.7);
-      border-radius:12px;
-      padding:12px 14px;
-      margin:14px 0;
-    }
-
-    .mini{
-      border:1px solid var(--line);
-      background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);
-      border-radius:18px;
-      padding:16px;
-    }
-    .mini h4{margin:0 0 8px;color:var(--primary-800)}
-    .mini p{margin:0;color:var(--muted)}
-
-    .formula{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:16px;
-      padding:14px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      color:#0b1530;
-      overflow:auto;
-      box-shadow:0 6px 14px rgba(23,35,58,.04);
-    }
-
-    /* Table */
-    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
-    table{width:100%;border-collapse:collapse;min-width:940px;background:#fff}
-    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
-
-    /* Steps (conceitual) */
-    .steps{counter-reset: step}
-    .step{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:18px;
-      padding:16px;
-      margin:12px 0;
-    }
-    .step h4{margin:0 0 8px;color:var(--primary-800)}
-    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
-    .step p{margin:0 0 10px;color:var(--muted)}
-
-    /* Quiz */
-    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 14px;border-radius:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-weight:900;cursor:pointer;
-      color:var(--primary-800);
-      box-shadow:var(--shadow-sm);
-    }
-    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
-
-    .q{
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:14px;
-      margin:12px 0;
-      background:#fff;
-    }
-    .q p{margin:0 0 10px}
-    .q label{display:block;margin:6px 0;color:var(--muted)}
-    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-    .res{margin-left:6px;font-weight:900}
-    .ok{color:var(--ok)} .no{color:var(--bad)}
-    .gabarito{
-      display:none;
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(0,0,238,.06);
-      border:1px solid rgba(0,0,238,.15);
-      color:var(--muted);
-    }
-
-    /* Checklist */
-    .checklist li{list-style:none;margin:8px 0}
-    .checklist input{transform:translateY(1px);margin-right:10px}
-
-    /* Back-to-top */
-    .back-top{
-      position:fixed;right:18px;bottom:18px;z-index:1050;
-      width:50px;height:50px;display:none;place-items:center;
-      border:1px solid var(--line);background:#fff;color:var(--primary-800);
-      border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer;
-    }
-    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
-
-    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
-
-    @media (max-width:900px){
-      .grid-2,.grid-3{grid-template-columns:1fr}
-      .brand span{max-width:40ch}
-      table{min-width:760px}
-    }
-  </style>
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
 </head>
-
 <body>
-<header>
-  <div class="container topbar">
-    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
-      <div class="badge">EATI</div>
-      <div>
-        <strong>Capítulo 09</strong>
-        <span>Fundamentos de Sistemas Embarcados e Plataforma Arduino</span>
+
+  <!-- arquivo: capitulo09.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">EATI</span>
+        <span style="color: var(--cor-principal);">Eletrônica Aplicada à Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Apresentação, organização do laboratório e segurança</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Matéria, carga elétrica e materiais</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Grandezas e instrumentos</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Lei de Ohm e associações de resistores</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Leis de Kirchhoff e análise de circuitos</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Componentes passivos I: resistores e capacitores</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Componentes semicondutores I: diodos e LEDs</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Componentes semicondutores II: transistores como chave</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Fundamentos de lógica digital</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Álgebra Booleana e simplificação</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Simulação e prototipagem</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Sistemas embarcados e plataforma Arduino</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Programação básica em C/C++ no Arduino</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Sensores e atuadores: leitura e acionamento</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Integração lógica com automação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto integrador: prototipagem, testes e documentação</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
       </div>
-    </a>
+    </div>
+  </nav>
 
-    <nav class="nav" aria-label="Navegação do capítulo">
-      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
-      <a href="capitulo08.html" title="Voltar para o Capítulo 08">⬅️ Anterior</a>
-      <a class="primary" href="capitulo10.html" title="Avançar para o Capítulo 10">Próximo ➡️</a>
-    </nav>
-  </div>
-</header>
-
-<main id="topo">
-
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner hero">
-        <div class="tag">3º Bimestre • Semanas 17–18 • Sistemas Embarcados + Arduino</div>
-        <h1>Fundamentos de Sistemas Embarcados e Plataforma Arduino</h1>
-        <p class="meta">
-          Este capítulo abre o 3º bimestre. Você vai entender o que é um <strong>sistema embarcado</strong>, como um <strong>microcontrolador</strong>
-          se diferencia de um microprocessador, e como a placa <strong>Arduino UNO</strong> organiza recursos como pinos, memórias e comunicação.
-          O objetivo é que você consiga estudar de forma autônoma e use esse conhecimento para montar e programar sistemas reais nos próximos capítulos.
-        </p>
-
-        <div class="grid-2">
-          <div class="mini">
-            <h4>Objetivos de aprendizagem</h4>
-            <ul>
-              <li>Definir “sistema embarcado” e reconhecer exemplos em TI e automação.</li>
-              <li>Distinguir microcontrolador x microprocessador e entender impactos práticos.</li>
-              <li>Identificar blocos do Arduino UNO: MCU, clock, memórias, I/O e alimentação.</li>
-              <li>Compreender níveis lógicos (5 V / 3,3 V), limites de corrente e cuidados básicos.</li>
-              <li>Entender interfaces: Serial (UART), I²C e SPI — para que servem e quando usar.</li>
-              <li>Relacionar ADC e PWM com sensores e atuadores.</li>
-            </ul>
-          </div>
-          <div class="mini">
-            <h4>Pré-requisitos</h4>
-            <ul>
-              <li>Cap. 05–08: lógica digital, entrada flutuante, tabelas verdade e projeto de decisão simples.</li>
-              <li>Cap. 04: organização de bancada e medições com segurança (quando em bancada real).</li>
-            </ul>
-            <div class="note">
-              <strong>Ferramentas recomendadas:</strong> Tinkercad Circuits (simulação) e/ou Arduino IDE (bancada).
-              <strong>Observação:</strong> neste capítulo o foco é conceitual; a prática de I/O digital começa no Cap. 10.
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 09 — Fundamentos de Lógica Digital</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4–6 horas (teoria e prática em laboratório/simulador)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Validação de portas lógicas e tabelas verdade com CI ou simulador</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Protoboard, multímetro, fontes 5 V, CIs 74xx/40xx, jumpers, LEDs, resistores; simulador (Logisim-evolution, Falstad ou Tinkercad Circuits)</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Reconhecer a diferença entre sinais analógicos e digitais e identificar níveis lógicos alto/baixo.</li><li>Ler e construir tabelas verdade para portas NOT, AND, OR, NAND, NOR e XOR.</li><li>Representar informações em binário e converter entre decimal e binário em contextos simples.</li><li>Montar e testar portas lógicas usando CIs ou simuladores, validando o funcionamento com LEDs e chaves.</li><li>Documentar medições, observações e resultados de testes com clareza técnica.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Compreensão de conceitos fundamentais de lógica digital aplicáveis à TI e automação.</li><li>Capacidade de configurar e testar circuitos digitais básicos com segurança.</li><li>Interpretação de datasheets e pinagem de CIs lógicos.</li><li>Comunicação técnica: tabelas verdade, diagramas e registro de testes.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Componentes semicondutores II: transistores como chave</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Álgebra Booleana e simplificação</a>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="card-inner">
-        <h2>1) Sistemas embarcados: conceito e características</h2>
-        <p>
-          Um <strong>sistema embarcado</strong> é um computador dedicado a uma função específica dentro de um produto. Ele costuma operar com recursos limitados
-          (energia, memória, processamento) e precisa ser confiável, repetível e, muitas vezes, trabalhar em tempo real.
-          Exemplos em TI e automação: roteadores, câmeras IP, impressoras, controladores de temperatura, fechaduras digitais e sensores industriais.
-        </p>
-        <p>
-          Em vez de “abrir programas” como em um PC, um embarcado executa uma aplicação principal continuamente — lendo entradas, decidindo e acionando saídas.
-          Por isso, conceitos como <strong>nível lógico</strong>, <strong>tempo de resposta</strong> e <strong>consumo</strong> são essenciais.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao projetar sistemas que respondem a botões e sensores sem travar (Cap. 15) e ao documentar um projeto final (Cap. 16).</div>
-
-        <h2>2) Microcontrolador x microprocessador (visão técnica)</h2>
-        <p>
-          Um <strong>microcontrolador (MCU)</strong> integra em um único chip o processador, memória e periféricos (I/O, timers, ADC, comunicação). Ele é pensado
-          para controle e automação. Já um <strong>microprocessador (MPU)</strong> (como em PCs e muitos SBCs) normalmente depende de componentes externos
-          (memória RAM, armazenamento, etc.) e é otimizado para desempenho e sistemas operacionais complexos.
-        </p>
-        <p>
-          Na prática: MCU = baixo consumo, custo menor, inicialização rápida e controle direto de pinos. MPU = mais potência, multitarefa avançada,
-          mas exige mais energia e complexidade. O Arduino UNO usa MCU, então você controla o hardware em nível baixo e aprende fundamentos sólidos.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender por que o Arduino “liga e roda” imediatamente e por que recursos (memória) são limitados.</div>
-
-        <h2>3) Anatomia do Arduino UNO: blocos essenciais</h2>
-        <p>
-          A placa Arduino UNO é um conjunto de componentes em torno do microcontrolador <strong>ATmega328P</strong>. Entender os blocos evita erros comuns:
-          pinos errados, alimentação inadequada e uso incorreto de interfaces.
-        </p>
-
-        <h3>3.1 Clock e tempo de execução</h3>
-        <p>
-          O clock é o “ritmo” do microcontrolador — ele define quantas operações o chip consegue fazer por segundo. No UNO, é comum trabalhar com
-          clock na casa de dezenas de MHz. Isso impacta timers, comunicação e a precisão de funções de tempo.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender temporização com <em>millis()</em> e a estabilidade de leituras (Cap. 15).</div>
-
-        <h3>3.2 Memórias: Flash, SRAM e EEPROM</h3>
-        <p>
-          Em microcontroladores, memória é limitada e tem funções diferentes:
-        </p>
-        <ul>
-          <li><strong>Flash:</strong> onde o programa (sketch) fica gravado. Não se apaga quando desliga.</li>
-          <li><strong>SRAM:</strong> memória de trabalho (variáveis em tempo de execução). É pequena e pode “estourar” se você usar muitas strings/arrays.</li>
-          <li><strong>EEPROM:</strong> guarda dados pequenos que precisam persistir (configurações). Não se apaga quando desliga.</li>
-        </ul>
-        <div class="warning"><strong>Erro típico:</strong> usar muitas Strings pode consumir SRAM e causar travamentos e resets inesperados.</div>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao organizar variáveis e escopo (Cap. 14) e ao montar projetos maiores (Cap. 16).</div>
-
-        <h3>3.3 Bootloader e upload do programa</h3>
-        <p>
-          O <strong>bootloader</strong> é um pequeno programa gravado na placa que permite enviar (upload) o seu código via USB/serial.
-          Ele facilita o desenvolvimento porque você não precisa de um gravador externo para programar o chip.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao entender por que escolher a placa/porta correta no Arduino IDE e por que às vezes o upload falha.</div>
-
-        <h2>4) Pinos e periféricos: o que cada tipo faz</h2>
-        <p>
-          Um erro comum é tratar todos os pinos como iguais. No Arduino, há pinos digitais, analógicos (ADC) e pinos com funções especiais
-          (PWM e comunicação). Entender isso é essencial para planejar qualquer projeto.
-        </p>
-
-        <h3>4.1 Pinos digitais (0/1)</h3>
-        <p>
-          Pinos digitais trabalham com <strong>LOW</strong> (0) e <strong>HIGH</strong> (1). Eles servem para ler botões, fim de curso e sensores digitais
-          (entrada), e para acionar LEDs, relés (via driver), transistores e sinais de controle (saída).
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> no Cap. 10 (entradas e saídas digitais) e Cap. 11 (decisão com if/else).</div>
-
-        <h3>4.2 Entrada analógica e ADC (0–1023)</h3>
-        <p>
-          O Arduino converte uma tensão analógica em um número digital usando um <strong>ADC</strong> (conversor analógico-digital).
-          No UNO, é comum ver leituras entre 0 e 1023 (resolução típica de 10 bits), dependendo da referência e da tensão aplicada.
-          Isso permite ler sensores como LDR, potenciômetro e alguns módulos analógicos.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> em projetos com sensores analógicos e limiares (como no Cap. 05 e em extensões de automação).</div>
-
-        <h3>4.3 PWM (simulação de analógico na saída)</h3>
-        <p>
-          PWM (Pulse Width Modulation) não é “analógico puro”: é um sinal digital que alterna rapidamente entre 0 e 1.
-          Mudando a largura do pulso (duty cycle), você controla a energia média entregue — útil para dimmer de LED e controle de velocidade de motor DC.
-          Em muitas placas, alguns pinos são marcados com ~ indicando PWM.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> em controle de brilho/velocidade e em temporização avançada (Cap. 15).</div>
-
-        <h2>5) Comunicação: como a placa conversa com o mundo</h2>
-        <p>
-          Sistemas embarcados raramente ficam isolados. Eles precisam comunicar com sensores, displays e outros módulos.
-          No Arduino, as interfaces mais comuns são:
-        </p>
-
-        <div class="table-wrap" role="region" aria-label="Interfaces de comunicação">
-          <table>
-            <thead>
-              <tr>
-                <th>Interface</th>
-                <th>Uso típico</th>
-                <th>Características</th>
-                <th>Aplicação em projetos</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>UART/Serial</strong></td>
-                <td>Debug, monitor serial, módulos simples</td>
-                <td>Ponto a ponto; fácil para iniciar</td>
-                <td>Registrar leituras e erros (diagnóstico)</td>
-              </tr>
-              <tr>
-                <td><strong>I²C</strong></td>
-                <td>Displays (OLED/LCD), sensores</td>
-                <td>2 fios (SDA/SCL), vários dispositivos no barramento</td>
-                <td>Expandir sensores com poucos fios</td>
-              </tr>
-              <tr>
-                <td><strong>SPI</strong></td>
-                <td>Cartão SD, sensores rápidos</td>
-                <td>Mais rápido; usa 3+ fios (MOSI/MISO/SCK/CS)</td>
-                <td>Leitura/gravação de dados e periféricos mais exigentes</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao depurar com Serial Monitor e ao integrar módulos em projetos finais.</div>
-
-        <h2>6) Alimentação, níveis lógicos e limites — segurança técnica</h2>
-        <p>
-          Um circuito bom não é só “funcionar”: ele precisa ser seguro e estável. Placas têm limites de corrente por pino e limites de tensão.
-          Em geral, o Arduino UNO trabalha com lógica de <strong>5 V</strong>. Já muitos módulos modernos trabalham em <strong>3,3 V</strong>.
-          Misturar tensões sem cuidado pode queimar o módulo ou causar leituras erradas.
-        </p>
-        <ul>
-          <li><strong>Regra prática:</strong> sempre consulte o módulo (datasheet) para tensão de alimentação e nível lógico.</li>
-          <li><strong>Saídas:</strong> use resistor para LED e driver (transistor/relé) para cargas maiores.</li>
-          <li><strong>GND comum:</strong> fontes diferentes precisam compartilhar o mesmo GND para referência.</li>
-        </ul>
-        <div class="warning"><strong>Erro típico:</strong> ligar diretamente motor/relé no pino do Arduino sem driver → risco de sobrecorrente e ruído elétrico.</div>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao montar circuitos nos Cap. 10–12 e no Projeto Final (Cap. 16).</div>
-
-        <h2>7) Modelo mental para programar embarcados</h2>
-        <p>
-          Em embarcados, pense sempre em: <strong>entradas → processamento → saídas</strong>. O programa roda em loop, então você precisa decidir
-          quando ler, quando atualizar e como lidar com tempo. Por isso, evoluímos de decisões simples (Cap. 11) para repetição (Cap. 12),
-          funções (Cap. 13), escopo (Cap. 14) e temporização não bloqueante (Cap. 15).
-        </p>
-        <div class="note"><strong>Resumo do capítulo:</strong> Arduino é uma plataforma para aprender sistemas embarcados com controle direto do hardware. Entender arquitetura, pinos, memória e comunicação evita erros e acelera seus projetos.</div>
-      </div>
     </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 09)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul>
+<li>Contextualização: onde a lógica digital aparece na TI e automação (microcontroladores, computadores, sensores/atuadores).</li>
+<li>Teoria guiada: sinais analógicos vs. digitais; níveis lógicos; sistema binário; portas NOT, AND, OR, NAND, NOR, XOR; tabelas verdade; leitura de datasheet (visão geral).</li>
+<li>Demostração: uso de simulador (Logisim/Falstad/Tinkercad) para montar e observar comportamento de portas lógicas.</li>
+<li>Prática: montagem de portas com CIs 74HCxx/CMOS 4000 em protoboard, teste com chaves e LEDs, registro de tabelas verdade.</li>
+<li>Fechamento: discussão de erros comuns, checklist de segurança e organização, preparação para simplificação booleana (Cap. 10).</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">1) Analógico vs. Digital</h3>
+  <p>Sinais analógicos variam continuamente no tempo (ex.: tensão de um microfone). Sinais digitais assumem níveis discretos, geralmente apenas dois: nível baixo (0) e nível alto (1). Um circuito digital interpreta tensões dentro de faixas como 0 ou 1, conforme o padrão do CI (TTL/CMOS).</p>
+  <p>Por que digital? Robustez a ruídos, facilidade de armazenamento/ processamento (binário), e composição modular usando portas lógicas. Na prática, sensores analógicos podem ser quantizados (ADC) para uso digital.</p>
+  <p><strong>Onde vou aplicar isso:</strong> Ao configurar entradas do Arduino (Cap. 12–14) e criar regras de decisão (Cap. 15), distinguindo estados ON/OFF, presença/ausência.</p>
+
+  <h3 class="h6 fw-bold mt-3">2) Níveis lógicos e padrões</h3>
+  <p>Em TTL (5 V), comumente considera-se nível baixo próximo a 0–0,8 V e nível alto a partir de ~2,0 V. Em CMOS (ex.: 3,3 V ou 5 V), as faixas variam conforme o datasheet. Nunca exceda a tensão de alimentação do CI e evite entradas “flutuando” (use resistores pull-up/pull-down).</p>
+  <p>Termos úteis: Vcc (alimentação positiva), GND (terra), VIL/VIH (limiares de entrada), VOL/VOH (níveis de saída).</p>
+  <p><strong>Onde vou aplicar isso:</strong> Ao ligar LEDs e chaves a entradas/saídas lógicas; ao depurar por que um LED não acende (nível não atingido).</p>
+
+  <h3 class="h6 fw-bold mt-3">3) Sistema binário (base 2)</h3>
+  <p>Binário usa apenas 0 e 1. Cada posição vale uma potência de 2. Ex.: 13 (dec) = 1101 (bin): 8+4+0+1. Converter decimal→binário é dividir por 2 e anotar restos; binário→decimal é somar potências onde há 1.</p>
+  <p>Bits representam estados de entradas/saídas digitais, flags de sensores e combinações de portas lógicas.</p>
+  <p><strong>Onde vou aplicar isso:</strong> Na leitura de tabelas verdade e na depuração de estados (entradas A,B,C → saídas).</p>
+
+  <h3 class="h6 fw-bold mt-3">4) Portas lógicas básicas</h3>
+  <p><strong>NOT (inversora):</strong> saída = 1 quando entrada = 0, e vice-versa. Útil para inverter um sinal ou criar negações de condições.</p>
+  <p><strong>AND (E):</strong> saída = 1 somente quando todas as entradas = 1. Ex.: ligar um motor apenas se “sensor_ok” E “botão_on”.</p>
+  <p><strong>OR (OU):</strong> saída = 1 quando qualquer entrada = 1. Ex.: acionar alarme se “porta” OU “janela” estiver aberta.</p>
+  <p><strong>NAND:</strong> inverso de AND. É funcionalmente completo (com NANDs é possível montar qualquer lógica).</p>
+  <p><strong>NOR:</strong> inverso de OR. Também funcionalmente completo.</p>
+  <p><strong>XOR (OU-exclusivo):</strong> saída = 1 quando entradas são diferentes (um 1 e outro 0). Útil para detectar alternância.</p>
+  <p><strong>Onde vou aplicar isso:</strong> Ao projetar regras de decisão em hardware (CIs) ou software (if/else) e ao simplificar circuitos (Cap. 10).</p>
+
+  <h3 class="h6 fw-bold mt-3">5) Tabelas verdade e diagramas</h3>
+  <p>A tabela verdade lista todas as combinações de entradas e os resultados esperados na saída. Para 2 entradas A,B existem 4 linhas (00,01,10,11). Diagramas mostram portas como blocos conectados por sinais (A, B, OUT).</p>
+  <p>Tabelas verdade são fundamentais para verificar se a montagem está correta e servem como base para a simplificação booleana (Cap. 10).</p>
+  <p><strong>Onde vou aplicar isso:</strong> Ao validar que a saída do seu circuito coincide com a teoria para cada combinação de entradas.</p>
+
+  <div class="mt-3">
+    <p class="mb-1"><strong>Exemplo de tabelas verdade (texto)</strong></p>
+    <pre class="language-text"><code>NOT (1 entrada: A)
+A | OUT
+0 |  1
+1 |  0
+
+AND (2 entradas: A, B)
+A B | OUT
+0 0 |  0
+0 1 |  0
+1 0 |  0
+1 1 |  1
+
+OR (2 entradas: A, B)
+A B | OUT
+0 0 |  0
+0 1 |  1
+1 0 |  1
+1 1 |  1
+
+XOR (2 entradas: A, B)
+A B | OUT
+0 0 |  0
+0 1 |  1
+1 0 |  1
+1 1 |  0</code></pre>
   </div>
-</section>
 
-<!-- Passo a passo conceitual (sem código), conforme solicitado -->
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <h2>Passo a passo conceitual (sem código): preparando seu “mapa mental” do Arduino</h2>
-        <p class="meta">Objetivo: conseguir olhar para a placa (real ou no simulador) e identificar o que é essencial antes de programar.</p>
+  <h3 class="h6 fw-bold mt-3">6) Boas práticas e segurança em digitais</h3>
+  <p>Alimente os CIs com a tensão correta e use capacitores de desacoplamento (100 nF próximos aos pinos Vcc/GND). Evite entradas flutuantes com resistores de pull-up/pull-down. Respeite corrente máxima por pino de saída e use resistores limitadores de corrente em LEDs (tipicamente 220–1kΩ).</p>
+  <p><strong>Onde vou aplicar isso:</strong> Ao montar o circuito de teste com LEDs e chaves, garantindo leituras estáveis e proteção do CI.</p>
+</div>
+      </section>
 
-        <div class="steps">
-          <div class="step">
-            <h4>Identificar alimentação e referência (GND)</h4>
-            <p>Localize os pinos <strong>5V</strong>, <strong>3.3V</strong> (se houver) e <strong>GND</strong>. Entenda que o GND é a referência de 0 V do sistema.</p>
-            <ul>
-              <li>Em qualquer circuito, tudo “volta” pelo GND.</li>
-              <li>Se usar mais de uma fonte/módulo, confirme GND comum.</li>
-            </ul>
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Montagem e validação de portas lógicas</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Montar, testar e documentar o funcionamento de portas lógicas NOT, AND, OR e XOR usando CIs da família 74HCxx (ou CMOS 4000) em protoboard ou simulador, validando as tabelas verdade.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <ol class="mb-0">
+    <li class="mb-3">
+      Preparação e segurança:
+      <ul>
+        <li>Organize a bancada: protoboard, fonte 5 V (ou 3,3 V conforme o CI), jumpers, resistores (220–1kΩ), LEDs, chaves, CIs (ex.: 74HC04 NOT, 74HC08 AND, 74HC32 OR, 74HC86 XOR).</li>
+        <li>Leia rapidamente o datasheet para confirmar pinagem, Vcc e GND, e a função de cada pino de entrada/saída.</li>
+        <li>Coloque um capacitor de 100 nF entre Vcc e GND próximo ao CI para desacoplamento.</li>
+      </ul>
+    </li>
+
+    <li class="mb-3">
+      Montagem de teste padrão:
+      <ul>
+        <li>Conecte Vcc do CI à fonte (ex.: +5 V) e GND ao terra comum.</li>
+        <li>Para entradas: use chaves ou jumpers para ligar A/B a Vcc (1) ou GND (0). Se possível, inclua resistores pull-down (10kΩ) para garantir nível 0 quando a chave estiver aberta.</li>
+        <li>Para a saída: ligue um LED com resistor (ex.: 330Ω) entre a saída e GND (para saída ativa em alto) ou entre Vcc e saída (para saída ativa em baixo, conforme necessidade). Verifique a orientação do LED.</li>
+      </ul>
+    </li>
+
+    <li class="mb-3">
+      Teste da porta NOT (inversora):
+      <ul>
+        <li>Usando o 74HC04, escolha uma porta (um par de pinos IN/OUT). Alimente o CI.</li>
+        <li>Varie a entrada A: conecte a GND (0) e depois a Vcc (1).</li>
+        <li>Observe o LED na saída: deve acender quando A=0 e apagar quando A=1 (ou vice-versa dependendo da ligação do LED).</li>
+        <li>Registre a tabela verdade observada.</li>
+      </ul>
+      <p class="mb-1"><strong>Exemplo de registro (texto):</strong></p>
+      <pre class="language-text"><code>Porta: NOT (74HC04)
+A | OUT (LED)
+0 |  1 (aceso)
+1 |  0 (apagado)</code></pre>
+    </li>
+
+    <li class="mb-3">
+      Teste da porta AND:
+      <ul>
+        <li>Com 74HC08, selecione uma porta (A, B → OUT). Conecte A e B a chaves com pull-down.</li>
+        <li>Teste as 4 combinações: 00, 01, 10, 11.</li>
+        <li>Espere que somente em 11 o LED na saída fique aceso.</li>
+      </ul>
+      <pre class="language-text"><code>Porta: AND (74HC08)
+A B | OUT (LED)
+0 0 |  0
+0 1 |  0
+1 0 |  0
+1 1 |  1</code></pre>
+    </li>
+
+    <li class="mb-3">
+      Teste da porta OR:
+      <ul>
+        <li>Com 74HC32, conecte A e B conforme o padrão de teste.</li>
+        <li>Espere saída 1 quando qualquer entrada for 1 (01, 10, 11).</li>
+      </ul>
+      <pre class="language-text"><code>Porta: OR (74HC32)
+A B | OUT (LED)
+0 0 |  0
+0 1 |  1
+1 0 |  1
+1 1 |  1</code></pre>
+    </li>
+
+    <li class="mb-3">
+      Teste da porta XOR:
+      <ul>
+        <li>Com 74HC86, conecte A e B.</li>
+        <li>Espere saída 1 quando A≠B (01 e 10).</li>
+      </ul>
+      <pre class="language-text"><code>Porta: XOR (74HC86)
+A B | OUT (LED)
+0 0 |  0
+0 1 |  1
+1 0 |  1
+1 1 |  0</code></pre>
+    </li>
+
+    <li class="mb-3">
+      Alternativa com simulador (Logisim/Falstad/Tinkercad):
+      <ul>
+        <li>Insira as portas equivalentes, adicione fontes lógicas (0/1) e um LED na saída.</li>
+        <li>Varie as entradas e compare com as tabelas verdade acima.</li>
+      </ul>
+      <p class="mb-1"><strong>Exemplo de anotações rápidas:</strong></p>
+      <pre class="language-text"><code>Simulador: Logisim-evolution
+Projeto: portas_and_or_xor.circ
+Entradas: chaves A e B; Saída: LED
+Resultados: condizentes com tabelas teóricas.</code></pre>
+    </li>
+
+    <li class="mb-3">
+      Documentação do experimento:
+      <ul>
+        <li>Fotografe a montagem (ou salve o arquivo do simulador).</li>
+        <li>Inclua pinagem usada (A,B,OUT, Vcc, GND), valores de resistores e observações.</li>
+        <li>Compare teoria vs. prática: anote discrepâncias e possíveis causas (ligações, alimentação, LED invertido, ausência de pull-down, etc.).</li>
+      </ul>
+    </li>
+
+    <li class="mb-3">
+      Exercício de aplicação (composição simples):
+      <ul>
+        <li>Monte OUT = (A AND B) OR C usando portas individuais ou um simulador.</li>
+        <li>Construa a tabela verdade de 3 entradas (0–7) e valide ponto a ponto.</li>
+      </ul>
+      <pre class="language-text"><code>Expressão: OUT = (A · B) + C
+A B C | OUT
+0 0 0 |  0
+0 0 1 |  1
+0 1 0 |  0
+0 1 1 |  1
+1 0 0 |  0
+1 0 1 |  1
+1 1 0 |  1
+1 1 1 |  1</code></pre>
+    </li>
+  </ol>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o domínio das portas lógicas e da leitura/produção de tabelas verdade em situações variadas, reforçando documentação técnica e boas práticas.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol class="mb-0">
+    <li class="mb-2"><strong>Derivada 1 — Sensor duplo:</strong> Projete OUT = A NAND B para simular que o sistema desliga se os dois sensores acusarem falha ao mesmo tempo. Monte com 74HC00 (NAND) e valide a tabela verdade.</li>
+    <li class="mb-2"><strong>Derivada 2 — Alarme simples:</strong> OUT = (Porta OR Janela) AND NOT(Manutenção). Implemente em CI ou simulador. Entregue tabela verdade, foto do circuito e breve explicação.</li>
+    <li class="mb-2"><strong>Derivada 3 — Comparador 1-bit:</strong> Use XOR para indicar “diferente” entre dois sinais A e B. Acrescente um LED verde para “igual” usando NOT(XOR). Documente.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (formativos)</h3>
+  <ul class="mb-0">
+    <li>Correção funcional: saídas condizentes com tabelas verdade.</li>
+    <li>Segurança e organização: uso de resistores, alimentação correta, layout limpo.</li>
+    <li>Documentação: tabelas, fotos/arquivos de simulação, anotações de testes.</li>
+    <li>Clareza técnica: identificação de pinos, componentes e justificativas.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Diferenças entre famílias TTL 74xx e CMOS 40xx: níveis lógicos, consumo e velocidade.</li><li>Como interpretar datasheets de CIs lógicos (pinagem, características elétricas, diagramas internos).</li><li>Uso de resistores pull-up/pull-down e seu impacto na estabilidade de sinais.</li><li>História da lógica digital e portas universais (NAND/NOR) na construção de computadores.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 09</h2>
+        <ul><li>Relatório curto com: fotos/arquivo do simulador, tabelas verdade observadas (NOT, AND, OR, XOR), e uma composição OUT = (A AND B) OR C.</li><li>Lista de materiais usados, pinagem e esquema simples do circuito de teste.</li><li>Registro de problemas encontrados e hipóteses de causa/solução.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
           </div>
-
-          <div class="step">
-            <h4>Separar pinos por função</h4>
-            <p>Marque mentalmente três grupos: <strong>digitais</strong>, <strong>analógicos (A0–A5)</strong> e <strong>comunicação</strong>.</p>
-            <ul>
-              <li>Digitais: botões, LEDs, sinais 0/1</li>
-              <li>Analógicos: sensores variáveis (potenciômetro, LDR)</li>
-              <li>Comunicação: Serial, I²C, SPI (para módulos)</li>
-            </ul>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
           </div>
-
-          <div class="step">
-            <h4>Entender limites e proteção</h4>
-            <p>Antes de ligar qualquer coisa:</p>
-            <ul>
-              <li>LED sempre com resistor.</li>
-              <li>Cargas (motor/relé) com driver (transistor + diodo).</li>
-              <li>Evite misturar 5 V e 3,3 V sem conversão.</li>
-            </ul>
-          </div>
-
-          <div class="step">
-            <h4>Definir o fluxo do programa (mental)</h4>
-            <p>Pense em como o loop vai funcionar:</p>
-            <ul>
-              <li>Ler entradas</li>
-              <li>Aplicar regras (decisão)</li>
-              <li>Atualizar saídas</li>
-              <li>Controlar tempo (sem travar) — depois com millis()</li>
-            </ul>
-            <div class="callout"><strong>Aplicação:</strong> este fluxo será implementado no Cap. 10 e refinado até o Cap. 15.</div>
-          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
         </div>
+      </section>
 
-        <div class="note"><strong>Entrega sugerida (opcional):</strong> uma foto/print da placa com setas marcando 5V, GND, pinos digitais, A0–A5 e um comentário de 6 linhas sobre por que isso evita erros.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="quiz">
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <div class="quiz-head">
-          <div>
-            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
-            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
-          </div>
-          <div class="quiz-tools">
-            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
-            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
-          </div>
-        </div>
-
-        <div class="q" data-a="d" data-exp="Sistema embarcado é um computador dedicado a uma função específica dentro de um produto/processo.">
-          <p><strong>1.</strong> Um sistema embarcado é melhor definido como:</p>
-          <label><input type="radio" name="q1" value="a"> Um PC com vários programas abertos</label>
-          <label><input type="radio" name="q1" value="b"> Um servidor de arquivos na rede</label>
-          <label><input type="radio" name="q1" value="c"> Um aplicativo instalado no celular</label>
-          <label><input type="radio" name="q1" value="d"> Um computador dedicado a uma função específica em um equipamento</label>
-          <label><input type="radio" name="q1" value="e"> Um cabo que liga sensores ao computador</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="b" data-exp="Microcontrolador integra CPU, memória e periféricos; microprocessador geralmente depende de componentes externos e é mais voltado a SOs complexos.">
-          <p><strong>2.</strong> Qual alternativa diferencia corretamente MCU e MPU?</p>
-          <label><input type="radio" name="q2" value="a"> MCU é sempre mais potente que MPU</label>
-          <label><input type="radio" name="q2" value="b"> MCU integra periféricos e memórias; MPU depende mais de componentes externos</label>
-          <label><input type="radio" name="q2" value="c"> MPU não executa programas</label>
-          <label><input type="radio" name="q2" value="d"> MCU só funciona com internet</label>
-          <label><input type="radio" name="q2" value="e"> MCU é sinônimo de placa-mãe</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="e" data-exp="Flash guarda o programa; SRAM é memória de trabalho; EEPROM guarda poucos dados persistentes.">
-          <p><strong>3.</strong> Associe corretamente os tipos de memória em microcontroladores:</p>
-          <label><input type="radio" name="q3" value="a"> SRAM guarda o programa permanentemente</label>
-          <label><input type="radio" name="q3" value="b"> EEPROM é usada como RAM principal</label>
-          <label><input type="radio" name="q3" value="c"> Flash é apagada sempre que desliga</label>
-          <label><input type="radio" name="q3" value="d"> Flash é apenas para dados temporários</label>
-          <label><input type="radio" name="q3" value="e"> Flash=programa; SRAM=variáveis em execução; EEPROM=dados persistentes pequenos</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="a" data-exp="ADC converte tensão analógica em valor numérico; no UNO é comum retornar 0..1023.">
-          <p><strong>4.</strong> O que faz o ADC no Arduino?</p>
-          <label><input type="radio" name="q4" value="a"> Converte uma tensão analógica em um número</label>
-          <label><input type="radio" name="q4" value="b"> Converte 1 em 0 automaticamente</label>
-          <label><input type="radio" name="q4" value="c"> Aumenta a corrente disponível no pino</label>
-          <label><input type="radio" name="q4" value="d"> Troca OR por AND</label>
-          <label><input type="radio" name="q4" value="e"> Mede apenas resistência sem energia</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="c" data-exp="PWM é uma modulação por largura de pulso: sinal digital rápido com energia média controlada (duty cycle).">
-          <p><strong>5.</strong> PWM no Arduino é melhor descrito como:</p>
-          <label><input type="radio" name="q5" value="a"> Uma saída analógica verdadeira em tensão contínua</label>
-          <label><input type="radio" name="q5" value="b"> Uma entrada para sensores de corrente</label>
-          <label><input type="radio" name="q5" value="c"> Um sinal digital com largura de pulso ajustável para controlar energia média</label>
-          <label><input type="radio" name="q5" value="d"> Um tipo de memória persistente</label>
-          <label><input type="radio" name="q5" value="e"> Um cabo para comunicação Wi‑Fi</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="d" data-exp="I²C usa dois fios (SDA/SCL) e permite vários dispositivos no mesmo barramento.">
-          <p><strong>6.</strong> Qual interface usa 2 fios e suporta vários dispositivos no mesmo barramento?</p>
-          <label><input type="radio" name="q6" value="a"> UART/Serial</label>
-          <label><input type="radio" name="q6" value="b"> PWM</label>
-          <label><input type="radio" name="q6" value="c"> USB-C</label>
-          <label><input type="radio" name="q6" value="d"> I²C</label>
-          <label><input type="radio" name="q6" value="e"> VGA</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="b" data-exp="GND comum é essencial como referência para sinais; sem GND comum, leituras e sinais ficam incorretos.">
-          <p><strong>7.</strong> Por que “GND comum” é importante ao ligar módulos diferentes?</p>
-          <label><input type="radio" name="q7" value="a"> Porque aumenta a tensão do circuito</label>
-          <label><input type="radio" name="q7" value="b"> Porque define a mesma referência de 0 V para todos os sinais</label>
-          <label><input type="radio" name="q7" value="c"> Porque substitui resistores em LEDs</label>
-          <label><input type="radio" name="q7" value="d"> Porque impede o uso de PWM</label>
-          <label><input type="radio" name="q7" value="e"> Porque torna qualquer sinal analógico em digital</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="e" data-exp="O modelo mental é entradas→processamento→saídas, repetido continuamente no loop.">
-          <p><strong>8.</strong> Qual é o modelo mental básico de um programa embarcado?</p>
-          <label><input type="radio" name="q8" value="a"> Abrir programas → salvar arquivos → desligar</label>
-          <label><input type="radio" name="q8" value="b"> Baixar drivers → instalar jogos → atualizar</label>
-          <label><input type="radio" name="q8" value="c"> Converter AC → DC → medir potência</label>
-          <label><input type="radio" name="q8" value="d"> Escrever tabela verdade → ignorar testes</label>
-          <label><input type="radio" name="q8" value="e"> Ler entradas → processar regras → atualizar saídas (em loop)</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <h2>Checklist do aluno (interativo)</h2>
-        <ul class="checklist">
-          <li><label><input type="checkbox" class="ck"> Consigo explicar o que é um sistema embarcado e citar 3 exemplos.</label></li>
-          <li><label><input type="checkbox" class="ck"> Sei diferenciar microcontrolador e microprocessador com impacto prático.</label></li>
-          <li><label><input type="checkbox" class="ck"> Entendo Flash, SRAM e EEPROM e sei por que SRAM é crítica.</label></li>
-          <li><label><input type="checkbox" class="ck"> Consigo identificar pinos digitais, analógicos (ADC) e PWM na placa.</label></li>
-          <li><label><input type="checkbox" class="ck"> Entendo o básico de Serial, I²C e SPI e sei quando cada um é usado.</label></li>
-        </ul>
-        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
-
-        <h3>Pesquisas complementares</h3>
-        <ul>
-          <li>Datasheet do ATmega328P: o que é clock, timers e interrupções (visão geral).</li>
-          <li>Por que Strings podem causar problemas de SRAM e alternativas (char arrays).</li>
-          <li>Conversão de nível lógico (5 V ↔ 3,3 V) e quando é necessária.</li>
-          <li>Diferença entre ADC e PWM (entrada analógica x saída “quase analógica”).</li>
-        </ul>
-
-        <div class="note">
-          <strong>Próximo capítulo:</strong> <a href="capitulo10.html"><strong>Capítulo 10 — Entradas e Saídas Digitais no Arduino</strong></a>.
-          Você vai começar a programar I/O digital com botões e LEDs com boas práticas.
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Componentes semicondutores II: transistores como chave</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Álgebra Booleana e simplificação</a>
         </div>
       </div>
+
     </div>
-  </div>
-</section>
+  </main>
 
-</main>
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Eletrônica Aplicada à Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
 
-<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
 
-<footer>
-  <div class="container">Apostila EATI • Capítulo 09</div>
-</footer>
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual alternativa descreve corretamente a diferença entre sinal analógico e digital?","correta":"C","alternativas":{"A":"Analógico possui apenas dois níveis e digital é contínuo.","B":"Ambos são sempre contínuos, mas com escalas diferentes.","C":"Analógico varia continuamente; digital assume níveis discretos (geralmente 0 e 1).","D":"Digital depende de corrente alternada; analógico depende de corrente contínua.","E":"Analógico só existe em áudio e digital apenas em vídeo."}},{"id":"q2","titulo":"Em uma porta AND de duas entradas A e B, quando a saída é 1?","correta":"B","alternativas":{"A":"Quando A=0 e B=1.","B":"Somente quando A=1 e B=1.","C":"Quando A=1 e B=0.","D":"Quando A=0 e B=0.","E":"Sempre que pelo menos uma entrada for 0."}},{"id":"q3","titulo":"Qual é a tabela verdade correta da porta XOR de duas entradas?","correta":"D","alternativas":{"A":"Saída 1 apenas em 11.","B":"Saída 1 apenas em 00.","C":"Saída 1 em 00 e 11.","D":"Saída 1 em 01 e 10.","E":"Saída 1 em todas as combinações."}},{"id":"q4","titulo":"Sobre níveis lógicos em CIs, assinale a correta:","correta":"A","alternativas":{"A":"Os limiares de entrada (VIH/VIL) e níveis de saída (VOH/VOL) devem ser verificados no datasheet.","B":"Pode-se ligar qualquer tensão nas entradas desde que a saída tenha LED.","C":"Entradas podem ficar flutuando sem problemas.","D":"TTL e CMOS têm sempre os mesmos limiares, independentemente da alimentação.","E":"Capacitores de desacoplamento não influenciam circuitos digitais."}},{"id":"q5","titulo":"Qual expressão representa corretamente a porta NAND?","correta":"E","alternativas":{"A":"OUT = A · B","B":"OUT = A + B","C":"OUT = (A + B)'","D":"OUT = A' + B'","E":"OUT = (A · B)'"}} ,{"id":"q6","titulo":"Para construir a tabela verdade de uma função com 3 entradas (A,B,C), quantas linhas são necessárias?","correta":"C","alternativas":{"A":"4","B":"6","C":"8","D":"12","E":"16"}},{"id":"q7","titulo":"Ao testar uma porta em protoboard, por que usar resistores pull-down (ex.: 10kΩ) nas entradas ligadas a chaves?","correta":"B","alternativas":{"A":"Para aumentar a corrente de saída do CI.","B":"Para evitar que a entrada fique flutuando quando a chave estiver aberta.","C":"Para reduzir a tensão de alimentação do CI.","D":"Para proteger apenas o LED de saída.","E":"Para reduzir a frequência do sinal de clock."}},{"id":"q8","titulo":"Em um teste com 74HC04 (NOT), a entrada está em 0 e o LED na saída não acende. Uma causa provável é:","correta":"D","alternativas":{"A":"Uso de pull-down na saída.","B":"Excesso de chaves em paralelo.","C":"Alimentação alta demais (acima de 24 V).","D":"LED ligado ao contrário ou ausência de resistor limitador.","E":"Porta NOT não muda o nível lógico."}},{"id":"q9","titulo":"Qual alternativa corresponde a OUT = (A AND B) OR C?","correta":"A","alternativas":{"A":"OUT = (A · B) + C","B":"OUT = (A + B) · C","C":"OUT = (A · C) + B'","D":"OUT = (A + C) · B'","E":"OUT = (A ⊕ B) · C"}},{"id":"q10","titulo":"Sobre documentação do experimento, é recomendado:","correta":"E","alternativas":{"A":"Evitar fotos para não ocupar espaço.","B":"Não registrar discrepâncias entre teoria e prática.","C":"Anotar apenas a combinação 11 em portas de duas entradas.","D":"Dispensar valores de resistores, pois não influenciam.","E":"Registrar tabelas, fotos/esquemas, materiais e observações de testes/erros."}}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Revi a diferença entre sinais analógicos e digitais e identifiquei níveis lógicos."},{"id":"c2","texto":"Consegui converter números simples entre decimal e binário."},{"id":"c3","texto":"Montei e testei as portas NOT, AND, OR e XOR (hardware ou simulador)."},{"id":"c4","texto":"Validei e anotei as tabelas verdade observadas na prática."},{"id":"c5","texto":"Utilizei resistores limitadores e pull-up/pull-down quando necessários."},{"id":"c6","texto":"Inseri capacitores de desacoplamento e respeitei a alimentação do CI."},{"id":"c7","texto":"Documentei pinagem, materiais, fotos/arquivos e observações de teste."},{"id":"c8","texto":"Implementei e testei a expressão OUT = (A · B) + C."},{"id":"c9","texto":"Conferi discrepâncias teoria vs. prática e registrei hipóteses de causa."},{"id":"c10","texto":"Organizei o ambiente ao final e armazenei corretamente os componentes."}];
+    const CHECKLIST_KEY = 'EATI_CAP09_CHECKLIST_V1';
 
-<script>
-  // Back-to-top
-  const backTop = document.getElementById('backTop');
-  window.addEventListener('scroll', () => {
-    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
-  }, { passive:true });
-  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
 
-  // Quiz logic
-  function check(btn){
-    const q = btn.closest('.q');
-    const correct = q.dataset.a;
-    const exp = q.dataset.exp || '';
-    const radios = q.querySelectorAll('input[type=radio]');
-    const selected = Array.from(radios).find(r => r.checked);
-    const res = q.querySelector('.res');
-    const box = q.querySelector('.gabarito');
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
 
-    if(!selected){
-      res.textContent = ' Selecione uma alternativa.';
-      res.className = 'res no';
-      return;
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
     }
 
-    if(selected.value === correct){
-      res.textContent = ' Correto!';
-      res.className = 'res ok';
-    } else {
-      res.textContent = ' Incorreto.';
-      res.className = 'res no';
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
     }
 
-    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
-  }
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
 
-  function toggleAnswer(btn){
-    const q = btn.closest('.q');
-    const box = q.querySelector('.gabarito');
-    if(!box.innerHTML.trim()){
-      const correct = q.dataset.a;
-      const exp = q.dataset.exp || '';
-      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
     }
-    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
-  }
 
-  function showAllAnswers(){
-    document.querySelectorAll('.q').forEach(q => {
-      const box = q.querySelector('.gabarito');
-      const correct = q.dataset.a;
-      const exp = q.dataset.exp || '';
-      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
-      box.style.display = 'block';
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
     });
-  }
 
-  function resetQuiz(){
-    document.querySelectorAll('.q').forEach(q => {
-      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-      const res = q.querySelector('.res');
-      res.textContent = '';
-      res.className = 'res';
-      const box = q.querySelector('.gabarito');
-      box.style.display = 'none';
-      box.innerHTML = '';
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Checklist progress
-  const checks = Array.from(document.querySelectorAll('.ck'));
-  const ckStatus = document.getElementById('ckStatus');
-  function updateChecklist(){
-    const done = checks.filter(c => c.checked).length;
-    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
-  }
-  checks.forEach(c => c.addEventListener('change', updateChecklist));
-  updateChecklist();
-</script>
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
 </body>
 </html>

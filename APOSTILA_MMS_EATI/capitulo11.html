@@ -1,748 +1,473 @@
-<!DOCTYPE html>
-<!-- arquivo: capitulo11.html -->
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EATI • Capítulo 11 — Estruturas de Decisão (if / else) no Arduino</title>
-  <meta name="description" content="Apostila EATI — Capítulo 11: tomada de decisão no Arduino com if/else/else if, operadores relacionais e lógicos, precedência, booleanos, decisões seguras com entradas digitais, tabelas-verdade e diagnóstico. Inclui diagramas estilo Tinkercad/Fritzing e quiz com 8 questões." />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 11 — Simulação e prototipagem</title>
 
-  <!-- Prism (tema escuro) para código -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <style>
-    :root{
-      --bg:#f5f7ff;
-      --surface:#ffffff;
-      --surface-soft:#eef3ff;
-      --surface-strong:#e2eaff;
-      --text:#17233a;
-      --muted:#54627e;
-      --line:#d7def7;
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
 
-      --primary:#0000ee;
-      --primary-600:#0000cc;
-      --primary-700:#0000aa;
-      --primary-800:#000088;
-      --focus:0 0 0 4px rgba(0,0,238,.18);
-
-      --shadow-sm:0 8px 18px rgba(23,35,58,.08);
-      --shadow-md:0 16px 38px rgba(23,35,58,.10);
-      --shadow-lg:0 24px 52px rgba(23,35,58,.13);
-
-      --radius-sm:14px;
-      --radius-md:20px;
-      --radius-lg:28px;
-      --container:1100px;
-
-      --ok:#0a7a3b;
-      --bad:#9b2c2c;
-      --warn:#9a6700;
-    }
-
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top right, rgba(0,0,238,.10), transparent 28%),
-        radial-gradient(circle at top left, rgba(0,0,136,.08), transparent 26%),
-        linear-gradient(180deg, #fcfdff 0%, var(--bg) 100%);
-      line-height:1.75;
-    }
-
-    a{color:var(--primary);text-decoration:none;transition:color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease}
-    a:hover{color:var(--primary-700)}
-    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:none;box-shadow:var(--focus)}
-
-    .container{width:min(calc(100% - 32px), var(--container));margin:0 auto}
-
-    header{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:72px;padding:10px 0}
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
-    .badge{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,var(--primary),var(--primary-800));box-shadow:0 14px 24px rgba(0,0,238,.20);flex-shrink:0}
-    .brand strong{display:block;line-height:1.1}
-    .brand span{display:block;color:var(--muted);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60ch}
-
-    .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .nav a{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;font-weight:900;font-size:.92rem;border:1px solid transparent;color:var(--text);background:transparent}
-    .nav a:hover{background:var(--surface-soft);border-color:var(--line);color:var(--primary-800)}
-    .nav a.primary{background:linear-gradient(135deg,var(--primary),var(--primary-800));color:#fff;border-color:transparent;box-shadow:0 12px 20px rgba(0,0,238,.18)}
-    .nav a.primary:hover{transform:translateY(-1px);color:#fff}
-
-    main{padding-bottom:56px}
-    section{padding:18px 0;scroll-margin-top:90px}
-
-    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden}
-    .card-inner{padding:22px}
-
-    .hero{border-radius:var(--radius-lg);background:linear-gradient(135deg, rgba(255,255,255,.96), rgba(238,243,255,.96));border-bottom:1px solid var(--line);position:relative;overflow:hidden}
-    .hero::before{content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle, rgba(0,0,238,.12), rgba(0,0,238,0) 70%);pointer-events:none}
-
-    .tag{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:999px;font-weight:900;color:var(--primary-800);font-size:.85rem}
-
-    h1{margin:0 0 10px;font-size:clamp(2rem,4vw,2.7rem);line-height:1.12;letter-spacing:-.02em}
-    .meta{color:var(--muted);margin:0 0 14px}
-
-    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-
-    h2{margin:0 0 10px;color:var(--primary-800);font-size:1.35rem}
-    h3{margin:18px 0 8px;color:var(--primary-800);font-size:1.1rem}
-    p{margin:0 0 12px}
-    ul{margin:0 0 12px;padding-left:18px}
-    li{margin:6px 0}
-
-    .callout{border-left:4px solid var(--primary);background:var(--surface-soft);border-radius:12px;padding:12px 14px;margin:14px 0}
-    .callout strong{color:var(--primary-800)}
-    .warning{border-left:4px solid #ffb300;background:rgba(255,200,0,.12);border-radius:12px;padding:12px 14px;margin:14px 0}
-    .danger{border-left:4px solid #e53935;background:rgba(229,57,53,.10);border-radius:12px;padding:12px 14px;margin:14px 0}
-    .note{border:1px dashed var(--line);background:rgba(238,243,255,.7);border-radius:12px;padding:12px 14px;margin:14px 0}
-
-    .mini{border:1px solid var(--line);background:linear-gradient(180deg,#fff 0%, #fbfcff 100%);border-radius:18px;padding:16px}
-    .mini h4{margin:0 0 8px;color:var(--primary-800)}
-
-    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 14px rgba(23,35,58,.04)}
-    table{width:100%;border-collapse:collapse;min-width:980px;background:#fff}
-    th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-    th{background:var(--surface-soft);color:var(--primary-800);font-weight:900}
-
-    .formula{border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;color:#0b1530;overflow:auto;box-shadow:0 6px 14px rgba(23,35,58,.04)}
-
-    figure{margin:14px 0}
-    figcaption{margin:8px 0 0;color:var(--muted);font-size:.95rem}
-
-    .steps{counter-reset: step}
-    .step{border:1px solid var(--line);background:#fff;border-radius:18px;padding:16px;margin:12px 0}
-    .step h4{margin:0 0 8px;color:var(--primary-800)}
-    .step h4::before{counter-increment: step;content:"Passo " counter(step) " — "}
-    .step p{margin:0 0 10px;color:var(--muted)}
-
-    pre{border-radius:16px;overflow:auto}
-    pre[class*="language-"]{margin:12px 0}
-
-    .quiz-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-    .quiz-tools{display:flex;flex-wrap:wrap;gap:10px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:#fff;font-weight:900;cursor:pointer;color:var(--primary-800);box-shadow:var(--shadow-sm)}
-    .btn:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
-
-    .q{border:1px solid var(--line);border-radius:18px;padding:14px;margin:12px 0;background:#fff}
-    .q p{margin:0 0 10px}
-    .q label{display:block;margin:6px 0;color:var(--muted)}
-    .q-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-    .res{margin-left:6px;font-weight:900}
-    .ok{color:var(--ok)} .no{color:var(--bad)}
-    .gabarito{display:none;margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(0,0,238,.06);border:1px solid rgba(0,0,238,.15);color:var(--muted)}
-
-    .checklist li{list-style:none;margin:8px 0}
-    .checklist input{transform:translateY(1px);margin-right:10px}
-
-    .back-top{position:fixed;right:18px;bottom:18px;z-index:1050;width:50px;height:50px;display:none;place-items:center;border:1px solid var(--line);background:#fff;color:var(--primary-800);border-radius:16px;box-shadow:var(--shadow-md);cursor:pointer}
-    .back-top:hover{background:var(--surface-soft);border-color:var(--primary-600);color:var(--primary-700)}
-
-    footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted)}
-
-    @media (max-width:900px){
-      .grid-2,.grid-3{grid-template-columns:1fr}
-      .brand span{max-width:40ch}
-      table{min-width:760px}
-    }
-  </style>
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
 </head>
-
 <body>
-<header>
-  <div class="container topbar">
-    <a class="brand" href="index_eati.html" aria-label="Voltar ao index">
-      <div class="badge">EATI</div>
-      <div>
-        <strong>Capítulo 11</strong>
-        <span>Estruturas de Decisão (if / else) no Arduino</span>
-      </div>
-    </a>
 
-    <nav class="nav" aria-label="Navegação do capítulo">
-      <a href="index_eati.html" title="Voltar ao index">🏠 Index</a>
-      <a href="capitulo10.html" title="Voltar para o Capítulo 10">⬅️ Anterior</a>
-      <a class="primary" href="capitulo12.html" title="Avançar para o Capítulo 12">Próximo ➡️</a>
-    </nav>
-  </div>
-</header>
+  <!-- arquivo: capitulo11.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
 
-<main id="topo">
-
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner hero">
-        <div class="tag">3º Bimestre • Semanas 21–22 • Decisão e Regras</div>
-        <h1>Estruturas de Decisão (if / else) no Arduino</h1>
-        <p class="meta">
-          Depois de dominar I/O digital (Cap. 10), você precisa transformar leituras em <strong>regras</strong>.
-          Este capítulo aprofunda <code>if</code>, <code>else</code> e <code>else if</code>, operadores relacionais e lógicos,
-          precedência e boas práticas para decisões seguras em sistemas embarcados.
-        </p>
-
-        <div class="grid-2">
-          <div class="mini">
-            <h4>Objetivos de aprendizagem</h4>
-            <ul>
-              <li>Escrever decisões simples e múltiplas com <code>if</code>, <code>else</code> e <code>else if</code>.</li>
-              <li>Usar operadores relacionais (<code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, etc.) e lógicos (<code>&amp;&amp;</code>, <code>||</code>, <code>!</code>).</li>
-              <li>Entender precedência e usar parênteses para evitar ambiguidade.</li>
-              <li>Implementar regras de segurança (intertravamento) com múltiplas entradas.</li>
-              <li>Evitar erros comuns: <code>=</code> vs <code>==</code>, lógica invertida com pull-up, decisões inacessíveis.</li>
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">EATI</span>
+        <span style="color: var(--cor-principal);">Eletrônica Aplicada à Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Apresentação, organização do laboratório e segurança</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Matéria, carga elétrica e materiais</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Grandezas e instrumentos</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Lei de Ohm e associações</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Leis de Kirchhoff</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Componentes passivos I</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Componentes semicondutores I</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Componentes semicondutores II</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Fundamentos de lógica digital</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Álgebra Booleana e simplificação</a></li>
+              <li><a class="dropdown-item active" href="capitulo11.html">Capítulo 11 — Simulação e prototipagem</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Sistemas embarcados e Arduino</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Programação básica no Arduino</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Sensores e atuadores</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Integração lógica com automação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto integrador</a></li>
             </ul>
-          </div>
-          <div class="mini">
-            <h4>Pré-requisitos</h4>
-            <ul>
-              <li>Cap. 10: INPUT_PULLUP, leitura de botões e saída para LEDs.</li>
-              <li>Cap. 06: lógica AND/OR/NOT e tabela verdade (visão conceitual).</li>
-            </ul>
-            <div class="note"><strong>Ferramentas:</strong> Tinkercad Circuits ou Arduino UNO + protoboard. Diagramas incluídos para montagem.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-inner">
-        <h2>1) Decisão em sistemas embarcados: por que <code>if</code> é fundamental</h2>
-        <p>
-          Em sistemas embarcados, o programa roda continuamente (loop). A cada ciclo, ele lê entradas e decide o que fazer.
-          A estrutura <code>if</code> é o mecanismo básico para <strong>selecionar</strong> ações com base em condições.
-        </p>
-        <p>
-          Exemplo típico: “Se o botão estiver pressionado, ligue o LED”. Mas em projetos reais, você combina várias entradas,
-          define prioridades (segurança primeiro) e trata estados (ex.: alerta, normal, falha).
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo, criando regras com 2 botões (AND/OR), e prioridades com <code>else if</code>.</div>
-
-        <h2>2) Estrutura <code>if</code>, <code>else</code> e <code>else if</code> (decisão simples e múltipla)</h2>
-        <p>
-          <code>if</code> executa um bloco quando a condição é verdadeira. <code>else</code> é o caminho alternativo.
-          <code>else if</code> cria uma cadeia de decisões, útil quando existem <strong>vários casos</strong> mutuamente exclusivos.
-        </p>
-        <div class="formula">if (condição) {
-  // caminho A
-} else if (outraCondição) {
-  // caminho B
-} else {
-  // caminho padrão
-}</div>
-        <div class="warning"><strong>Dica técnica:</strong> a ordem do <code>else if</code> importa. O primeiro caso verdadeiro “vence”.</div>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao implementar prioridades (ex.: emergência &gt; alerta &gt; normal).</div>
-
-        <h2>3) Operadores relacionais e o erro clássico <code>=</code> vs <code>==</code></h2>
-        <p>
-          Operadores relacionais comparam valores e geram <strong>verdadeiro/falso</strong>.
-          Os mais usados com I/O digital: <code>==</code> (igual) e <code>!=</code> (diferente).
-        </p>
-        <p>
-          Erro comum: usar <code>=</code> (atribuição) no lugar de <code>==</code> (comparação).
-          Isso pode causar comportamento inesperado, porque você altera a variável em vez de comparar.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao ler botões (LOW/HIGH) e criar a variável booleana <em>pressionado</em>.</div>
-
-        <h2>4) Operadores lógicos: AND, OR e NOT na prática</h2>
-        <p>
-          Operadores lógicos combinam condições:
-          <code>&amp;&amp;</code> (AND) exige que ambas sejam verdadeiras; <code>||</code> (OR) exige que pelo menos uma seja verdadeira;
-          <code>!</code> (NOT) inverte o valor.
-        </p>
-        <p>
-          Isso permite implementar regras de segurança e permissões, por exemplo:
-          “Ligar motor apenas se botão A <strong>e</strong> botão B estiverem pressionados” (duas mãos).
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo, criando LEDs para AND/OR e um intertravamento de segurança.</div>
-
-        <h2>5) Precedência e parênteses (evite decisões ambíguas)</h2>
-        <p>
-          Em expressões com vários operadores, existe uma ordem de avaliação (precedência). Em geral, <code>!</code> vem antes de <code>&amp;&amp;</code>,
-          que vem antes de <code>||</code>. Comparações (<code>==</code>, <code>!=</code>) ocorrem antes das combinações lógicas.
-        </p>
-        <div class="formula">// Exemplo de ambiguidade:
-A || B && C
-
-// Forma recomendada (explícita):
-A || (B && C)</div>
-        <div class="warning"><strong>Boa prática:</strong> use parênteses sempre que houver combinação de AND/OR para evitar dúvidas e bugs.</div>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> ao escrever regras compostas no passo a passo (prioridades e permissões).</div>
-
-        <h2>6) Decisões seguras: prioridade e intertravamento (safety first)</h2>
-        <p>
-          Em automação, decisões têm prioridade. Um exemplo: se um botão de emergência estiver ativo, ele deve vencer qualquer outra condição.
-          Isso é implementado colocando a condição de emergência primeiro em uma cadeia <code>if/else if</code>.
-        </p>
-        <p>
-          Intertravamento (interlock) é uma regra que impede que uma saída ligue em condição insegura.
-          No ensino técnico, o exemplo clássico é “duas mãos” (AND) ou “porta fechada” (sensor) antes de permitir acionamento.
-        </p>
-        <div class="callout"><strong>Onde vou aplicar isso:</strong> no passo a passo, criando uma regra de emergência &gt; permitido &gt; bloqueado.</div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <h2>Diagramas de montagem (estilo Tinkercad/Fritzing)</h2>
-        <p class="meta">Circuito base para o capítulo: 2 botões (D2, D3) e 3 LEDs (D9, D10, D11) para representar AND/OR/ALERTA.</p>
-
-        <figure class="note">
-          <strong>Diagrama A — Circuito do capítulo (2 botões + 3 LEDs)</strong>
-          <div class="formula" style="margin-top:10px">
-            <svg viewBox="0 0 980 540" width="100%" height="auto" role="img" aria-label="Protoboard com 2 botões e 3 LEDs">
-              <defs>
-                <style>
-                  .board{fill:#ffffff;stroke:#0b1530;stroke-width:2}
-                  .bb{fill:#fbfcff;stroke:#d7def7;stroke-width:2}
-                  .railP{stroke:#d84343;stroke-width:6}
-                  .railG{stroke:#3b6fd8;stroke-width:6}
-                  .txt{font: 14px Inter, Segoe UI, Arial, sans-serif; fill:#0b1530}
-                  .lab{font: 14px Inter, Segoe UI, Arial, sans-serif; font-weight:700; fill:#000088}
-                  .pin{fill:#fff;stroke:#54627e;stroke-width:1.5}
-                  .wireD{stroke:#0000aa;stroke-width:4;fill:none}
-                  .wireO{stroke:#0a7a3b;stroke-width:4;fill:none}
-                  .wireG{stroke:#2f3b52;stroke-width:4;fill:none}
-                  .part{fill:#fff;stroke:#54627e;stroke-width:2}
-                  .led1{fill:#e8f5e9;stroke:#0a7a3b;stroke-width:2}
-                  .led2{fill:#fff8e1;stroke:#ff8f00;stroke-width:2}
-                  .led3{fill:#ffebee;stroke:#c62828;stroke-width:2}
-                </style>
-              </defs>
-
-              <rect x="40" y="70" width="240" height="420" rx="18" class="board"/>
-              <text x="70" y="105" class="lab">Arduino UNO</text>
-              <circle cx="95" cy="165" r="10" class="pin"/><text x="115" y="170" class="txt">D2 (BTN A)</text>
-              <circle cx="95" cy="205" r="10" class="pin"/><text x="115" y="210" class="txt">D3 (BTN B)</text>
-              <circle cx="95" cy="245" r="10" class="pin"/><text x="115" y="250" class="txt">D9 (LED AND)</text>
-              <circle cx="95" cy="285" r="10" class="pin"/><text x="115" y="290" class="txt">D10 (LED OR)</text>
-              <circle cx="95" cy="325" r="10" class="pin"/><text x="115" y="330" class="txt">D11 (LED ALERTA)</text>
-              <circle cx="95" cy="365" r="10" class="pin"/><text x="115" y="370" class="txt">GND</text>
-              <text x="70" y="455" class="txt">Entradas: INPUT_PULLUP</text>
-
-              <rect x="320" y="90" width="620" height="380" rx="18" class="bb"/>
-              <line x1="340" y1="130" x2="920" y2="130" class="railP"/>
-              <line x1="340" y1="430" x2="920" y2="430" class="railG"/>
-              <text x="345" y="122" class="txt">Trilho + (opcional)</text>
-              <text x="345" y="448" class="txt">Trilho GND</text>
-
-              <!-- Buttons -->
-              <rect x="420" y="180" width="120" height="70" rx="12" class="part"/>
-              <text x="445" y="222" class="lab">Botão A</text>
-              <rect x="420" y="270" width="120" height="70" rx="12" class="part"/>
-              <text x="445" y="312" class="lab">Botão B</text>
-
-              <!-- LEDs -->
-              <rect x="700" y="170" width="230" height="70" rx="12" class="part"/>
-              <text x="715" y="198" class="lab">LED AND + R</text>
-              <rect x="720" y="210" width="80" height="18" rx="8" class="part"/>
-              <text x="725" y="224" class="txt">220–330Ω</text>
-              <circle cx="875" cy="219" r="14" class="led1"/>
-
-              <rect x="700" y="255" width="230" height="70" rx="12" class="part"/>
-              <text x="715" y="283" class="lab">LED OR + R</text>
-              <rect x="720" y="295" width="80" height="18" rx="8" class="part"/>
-              <text x="725" y="309" class="txt">220–330Ω</text>
-              <circle cx="875" cy="304" r="14" class="led2"/>
-
-              <rect x="700" y="340" width="230" height="70" rx="12" class="part"/>
-              <text x="715" y="368" class="lab">LED ALERTA + R</text>
-              <rect x="720" y="380" width="80" height="18" rx="8" class="part"/>
-              <text x="725" y="394" class="txt">220–330Ω</text>
-              <circle cx="875" cy="389" r="14" class="led3"/>
-
-              <!-- wires to buttons -->
-              <path d="M105,165 C220,165 300,190 420,215" class="wireD"/>
-              <path d="M105,205 C220,205 300,270 420,305" class="wireD"/>
-
-              <path d="M480,250 C480,360 480,395 480,430" class="wireG"/>
-              <path d="M480,340 C480,380 480,405 480,430" class="wireG"/>
-
-              <path d="M105,365 C220,390 280,420 340,430" class="wireG"/>
-
-              <!-- wires to leds -->
-              <path d="M105,245 C260,245 520,215 700,215" class="wireO"/>
-              <path d="M105,285 C260,285 520,300 700,300" class="wireO"/>
-              <path d="M105,325 C260,325 520,385 700,385" class="wireO"/>
-
-              <path d="M875,233 C875,380 875,410 875,430" class="wireG"/>
-              <path d="M875,318 C875,390 875,410 875,430" class="wireG"/>
-              <path d="M875,403 C875,415 875,422 875,430" class="wireG"/>
-
-              <text x="860" y="500" class="txt">GND comum</text>
-            </svg>
-          </div>
-          <figcaption>2 botões (D2/D3) com INPUT_PULLUP e 3 LEDs com resistores em série. LEDs representam AND, OR e ALERTA (prioridade).</figcaption>
-        </figure>
-
-        <div class="note"><strong>Observação:</strong> Se estiver usando apenas 2 LEDs, ignore o LED ALERTA (D11) e adapte a lógica para AND/OR.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <h2>Passo a passo prático: decisões AND/OR + prioridade (else if)</h2>
-        <p class="meta">Objetivo: ler dois botões (pull-up) e acender LEDs conforme regras AND/OR, com prioridade de alerta.</p>
-
-        <div class="steps">
-          <div class="step">
-            <h4>Montagem (hardware)</h4>
-            <p>Monte conforme o Diagrama A. Use resistores (220–330 Ω) em todos os LEDs e garanta GND comum.</p>
-          </div>
-
-          <div class="step">
-            <h4>Programa 1 — AND e OR (dois LEDs)</h4>
-            <p>
-              Aqui você transforma leituras em lógica: A e B são <strong>booleans</strong> (pressionado=true). AND liga o LED_AND;
-              OR liga o LED_OR.
-            </p>
-            <pre><code class="language-cpp">// EATI - Capítulo 11
-// Programa 1: AND e OR com 2 botões
-
-const int BTN_A = 2;
-const int BTN_B = 3;
-const int LED_AND = 9;
-const int LED_OR  = 10;
-
-void setup(){
-  pinMode(BTN_A, INPUT_PULLUP);
-  pinMode(BTN_B, INPUT_PULLUP);
-  pinMode(LED_AND, OUTPUT);
-  pinMode(LED_OR, OUTPUT);
-}
-
-void loop(){
-  bool A = (digitalRead(BTN_A) == LOW);
-  bool B = (digitalRead(BTN_B) == LOW);
-
-  bool condAND = (A && B);
-  bool condOR  = (A || B);
-
-  digitalWrite(LED_AND, condAND ? HIGH : LOW);
-  digitalWrite(LED_OR,  condOR  ? HIGH : LOW);
-}
-</code></pre>
-            <div class="callout"><strong>Onde vou aplicar isso:</strong> no Cap. 12 (repetição) você criará sequências baseadas em condições.</div>
-          </div>
-
-          <div class="step">
-            <h4>Programa 2 — Prioridade com else if (ALERTA vence)</h4>
-            <p>
-              Agora definimos prioridade: se A e B estiverem pressionados ao mesmo tempo, acende ALERTA (D11).
-              Caso contrário, se apenas um estiver pressionado, acende OR. Caso nenhum, tudo apagado.
-              Isso demonstra a lógica de cadeia <code>if/else if/else</code>.
-            </p>
-            <pre><code class="language-cpp">// EATI - Capítulo 11
-// Programa 2: Prioridade com else if
-
-const int BTN_A = 2;
-const int BTN_B = 3;
-const int LED_AND = 9;
-const int LED_OR  = 10;
-const int LED_ALERTA = 11;
-
-void setup(){
-  pinMode(BTN_A, INPUT_PULLUP);
-  pinMode(BTN_B, INPUT_PULLUP);
-  pinMode(LED_AND, OUTPUT);
-  pinMode(LED_OR, OUTPUT);
-  pinMode(LED_ALERTA, OUTPUT);
-}
-
-void loop(){
-  bool A = (digitalRead(BTN_A) == LOW);
-  bool B = (digitalRead(BTN_B) == LOW);
-
-  // Limpa tudo
-  digitalWrite(LED_AND, LOW);
-  digitalWrite(LED_OR, LOW);
-  digitalWrite(LED_ALERTA, LOW);
-
-  if(A && B){
-    // Prioridade 1
-    digitalWrite(LED_ALERTA, HIGH);
-  }
-  else if(A || B){
-    // Prioridade 2
-    digitalWrite(LED_OR, HIGH);
-  }
-  else{
-    // Prioridade 3 (nenhuma condição)
-    // Tudo apagado
-  }
-}
-</code></pre>
-            <div class="warning"><strong>Boa prática:</strong> sempre deixe claro a prioridade no código (condições mais críticas primeiro).</div>
-          </div>
-
-          <div class="step">
-            <h4>Teste e diagnóstico (2 minutos, método técnico)</h4>
-            <p>Verifique estes casos (registre resultado):</p>
-            <ul>
-              <li>Nenhum botão pressionado → todos os LEDs apagados</li>
-              <li>A pressionado → LED_OR aceso</li>
-              <li>B pressionado → LED_OR aceso</li>
-              <li>A e B pressionados → LED_ALERTA aceso</li>
-            </ul>
-            <div class="note"><strong>Se falhar:</strong> confirme INPUT_PULLUP, inversão (LOW=pressionado), GND comum e resistores.</div>
-          </div>
-        </div>
-
-        <div class="danger"><strong>Segurança:</strong> LED sempre com resistor. Não ligue cargas pesadas direto em pinos. Intertravamento e prioridade são conceitos de segurança.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <h2>Atividades práticas derivadas (para o aluno desenvolver)</h2>
-        <ul>
-          <li><strong>Regra de permissão:</strong> acender LED “PERMITIDO” somente se (A AND B) e um LED “BLOQUEADO” caso contrário.</li>
-          <li><strong>Seleção por prioridade:</strong> criar 3 estados (Normal/Alerta/Emergência) e controlar LEDs com <code>else if</code> (sem usar delay).</li>
-          <li><strong>Alarme simples:</strong> botão A arma/desarma e botão B dispara alerta (quando armado). Use variáveis de estado (prepara Cap. 14/15).</li>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
         </ul>
       </div>
     </div>
-  </div>
-</section>
+  </nav>
 
-<section class="quiz">
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <div class="quiz-head">
-          <div>
-            <h2 style="margin:0">Quiz do Capítulo (8 questões)</h2>
-            <p class="meta" style="margin:6px 0 0">5 alternativas por questão. Use “Enviar resposta” e “Ver gabarito”.</p>
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 11 — Simulação e prototipagem</h1>
+          <p class="mb-2"><strong>Carga:</strong> Não especificada</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Validar em simulador e reproduzir em protoboard um circuito simples (analógico ou lógico), comparando resultados</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Simulador (ex.: Tinkercad/Proteus/Multisim), protoboard, jumpers, resistores, LEDs, fonte 5V/9V, multímetro</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Planejar e executar o fluxo de simulação: criação do esquemático, parametrização e medição virtual</li><li>Identificar e instrumentar pontos de teste para depuração de circuitos</li><li>Montar protótipos organizados em protoboard e diagnosticar falhas comuns</li><li>Comparar resultados de simulação e prática, registrando discrepâncias e hipóteses</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Medir e analisar sinais com segurança em ambiente simulado e real</li><li>Aplicar boas práticas de organização e ESD na prototipagem</li><li>Comunicar resultados via documentação técnica clara</li><li>Resolver problemas por meio de testes sistemáticos e hipótese/validação</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 10</a>
+              <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 12</a>
+            </div>
           </div>
-          <div class="quiz-tools">
-            <button class="btn" type="button" onclick="resetQuiz()">🔄 Reiniciar quiz</button>
-            <button class="btn" type="button" onclick="showAllAnswers()">✅ Ver gabarito (todas)</button>
-          </div>
-        </div>
-
-        <div class="q" data-a="b" data-exp="if executa um bloco apenas quando a condição é verdadeira; else é o caminho alternativo.">
-          <p><strong>1.</strong> A finalidade principal da estrutura <code>if</code>/<code>else</code> é:</p>
-          <label><input type="radio" name="q1" value="a"> Repetir código automaticamente</label>
-          <label><input type="radio" name="q1" value="b"> Tomar decisões com base em condições</label>
-          <label><input type="radio" name="q1" value="c"> Aumentar a tensão do circuito</label>
-          <label><input type="radio" name="q1" value="d"> Trocar a frequência do clock</label>
-          <label><input type="radio" name="q1" value="e"> Converter sinal analógico em digital</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="c" data-exp="== compara; = atribui. Usar = em condição altera a variável e pode causar erro.">
-          <p><strong>2.</strong> Qual alternativa está correta sobre <code>=</code> e <code>==</code>?</p>
-          <label><input type="radio" name="q2" value="a"> Ambos comparam valores</label>
-          <label><input type="radio" name="q2" value="b"> Ambos atribuem valores</label>
-          <label><input type="radio" name="q2" value="c"> <code>==</code> compara e <code>=</code> atribui</label>
-          <label><input type="radio" name="q2" value="d"> <code>=</code> é o operador AND</label>
-          <label><input type="radio" name="q2" value="e"> <code>==</code> só existe em matemática, não em programação</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="a" data-exp="&& (AND) exige ambas condições verdadeiras.">
-          <p><strong>3.</strong> Em C/Arduino, o operador lógico AND é:</p>
-          <label><input type="radio" name="q3" value="a"> <code>&amp;&amp;</code></label>
-          <label><input type="radio" name="q3" value="b"> <code>||</code></label>
-          <label><input type="radio" name="q3" value="c"> <code>!</code></label>
-          <label><input type="radio" name="q3" value="d"> <code>=</code></label>
-          <label><input type="radio" name="q3" value="e"> <code>++</code></label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="d" data-exp="Com INPUT_PULLUP, botão solto=HIGH e pressionado=LOW.">
-          <p><strong>4.</strong> Com <code>INPUT_PULLUP</code>, o botão pressionado é lido como:</p>
-          <label><input type="radio" name="q4" value="a"> HIGH</label>
-          <label><input type="radio" name="q4" value="b"> 1023</label>
-          <label><input type="radio" name="q4" value="c"> Flutuante</label>
-          <label><input type="radio" name="q4" value="d"> LOW</label>
-          <label><input type="radio" name="q4" value="e"> PWM</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="b" data-exp="else if cria uma cadeia; a primeira condição verdadeira é executada.">
-          <p><strong>5.</strong> Em uma cadeia <code>if</code> / <code>else if</code> / <code>else</code>:</p>
-          <label><input type="radio" name="q5" value="a"> Todas as condições verdadeiras executam seus blocos</label>
-          <label><input type="radio" name="q5" value="b"> Apenas o primeiro bloco com condição verdadeira é executado</label>
-          <label><input type="radio" name="q5" value="c"> O bloco else sempre executa</label>
-          <label><input type="radio" name="q5" value="d"> else if só funciona com sensores analógicos</label>
-          <label><input type="radio" name="q5" value="e"> else if não depende de ordem</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="c" data-exp="! inverte um booleano: true vira false e vice-versa.">
-          <p><strong>6.</strong> O operador <code>!</code> (NOT) faz o quê?</p>
-          <label><input type="radio" name="q6" value="a"> Soma 1 ao valor</label>
-          <label><input type="radio" name="q6" value="b"> Compara se é igual</label>
-          <label><input type="radio" name="q6" value="c"> Inverte o valor lógico (true/false)</label>
-          <label><input type="radio" name="q6" value="d"> Converte tensão em número</label>
-          <label><input type="radio" name="q6" value="e"> Define o pino como OUTPUT</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="a" data-exp="Precedência: ! antes de &&, e && antes de ||; parênteses deixam a intenção explícita.">
-          <p><strong>7.</strong> Por que usar parênteses em expressões com AND/OR?</p>
-          <label><input type="radio" name="q7" value="a"> Para deixar a prioridade explícita e evitar ambiguidade</label>
-          <label><input type="radio" name="q7" value="b"> Para aumentar a tensão do circuito</label>
-          <label><input type="radio" name="q7" value="c"> Para reduzir a corrente do LED</label>
-          <label><input type="radio" name="q7" value="d"> Para substituir o uso de if</label>
-          <label><input type="radio" name="q7" value="e"> Para impedir o loop de rodar</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-        <div class="q" data-a="d" data-exp="Prioridade coloca condições críticas primeiro (emergência/alerta). Intertravamento impede saída em condição insegura.">
-          <p><strong>8.</strong> Em um sistema com emergência, a melhor prática é:</p>
-          <label><input type="radio" name="q8" value="a"> Colocar a emergência por último, para não atrapalhar</label>
-          <label><input type="radio" name="q8" value="b"> Ignorar prioridade e ligar tudo ao mesmo tempo</label>
-          <label><input type="radio" name="q8" value="c"> Evitar else if para não ficar grande</label>
-          <label><input type="radio" name="q8" value="d"> Tratar emergência primeiro e bloquear saídas inseguras (intertravamento)</label>
-          <label><input type="radio" name="q8" value="e"> Trocar INPUT_PULLUP por INPUT para “resolver”</label>
-          <div class="q-actions"><button class="btn" type="button" onclick="check(this)">Enviar resposta</button><button class="btn" type="button" onclick="toggleAnswer(this)">Ver gabarito</button><span class="res"></span></div>
-          <div class="gabarito"></div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="container">
-    <div class="card">
-      <div class="card-inner">
-        <h2>Checklist do aluno (interativo)</h2>
-        <ul class="checklist">
-          <li><label><input type="checkbox" class="ck"> Sei escrever if/else e explicar o que é uma condição.</label></li>
-          <li><label><input type="checkbox" class="ck"> Sei diferenciar <code>=</code> de <code>==</code> e evitar esse erro.</label></li>
-          <li><label><input type="checkbox" class="ck"> Consigo combinar condições com <code>&amp;&amp;</code>, <code>||</code> e <code>!</code>.</label></li>
-          <li><label><input type="checkbox" class="ck"> Sei montar o circuito e validar AND/OR com dois botões.</label></li>
-          <li><label><input type="checkbox" class="ck"> Sei implementar prioridade com <code>else if</code> (alerta/emergência primeiro).</label></li>
-        </ul>
-        <p class="meta" id="ckStatus" style="margin:10px 0 0">0/5 itens concluídos.</p>
-
-        <h3>Pesquisas complementares</h3>
-        <ul>
-          <li>Curto-circuito lógico (short-circuit): como <code>&amp;&amp;</code> e <code>||</code> param de avaliar quando já sabem o resultado.</li>
-          <li>Máquina de estados (state machine): como modelar Normal/Alerta/Emergência (prepara Cap. 15 e Cap. 16).</li>
-          <li>Debounce sem delay com temporização (millis) — ver Cap. 15.</li>
-        </ul>
-
-        <div class="note">
-          <strong>Próximo capítulo:</strong> <a href="capitulo12.html"><strong>Capítulo 12 — Estruturas de Repetição (while/for) + Projeto Integrador 3</strong></a>.
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </header>
 
-</main>
+  <main class="py-5">
+    <div class="container">
 
-<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 11)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li>Revisão breve: grandezas elétricas e lógica digital (10 min)</li><li>Introdução ao fluxo de simulação e ferramentas disponíveis (20 min)</li><li>Demostração: criar um esquemático simples (LED com resistor e fonte) e medir no simulador (20 min)</li><li>Atividade guiada: simular um circuito RC e um circuito lógico (NAND) com medições virtuais (40 min)</li><li>Boas práticas de protoboard: layout, barramentos, identificação de falhas (20 min)</li><li>Atividade prática: reproduzir um dos circuitos simulados na protoboard e comparar medições (50 min)</li><li>Discussão e registro de resultados: discrepâncias e hipóteses (20 min)</li><li>Checklist e questionário do capítulo (20 min)</li></ol></div>
+      </section>
 
-<footer>
-  <div class="container">Apostila EATI • Capítulo 11</div>
-</footer>
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">1) Fluxo de simulação: do esquemático à medição virtual</h3>
+          <p>A simulação é uma etapa anterior à prototipagem que reduz erros e custos. O fluxo típico envolve: (a) desenho do esquemático com componentes adequados e conexões corretas; (b) definição de parâmetros (valores, modelos, fontes); (c) instrumentação virtual (multímetros, osciloscópios, sondas de tensão/corrente); (d) execução da simulação (transiente, DC, AC, digital) e (e) análise dos resultados.</p>
+          <p>Em simuladores educacionais, como Tinkercad, a interface simplifica a escolha de componentes e a medição. Em ferramentas SPICE (PSpice, LTspice, Multisim), você escolhe o tipo de análise (ex.: transiente para tempo, DC sweep para varrer tensões/correntes). O objetivo é verificar se o comportamento segue a teoria (Lei de Ohm, RC, portas lógicas) e antecipar ajustes.</p>
+          <p>Onde vou aplicar isso no passo a passo: você criará dois esquemáticos (um analógico RC e um lógico com porta NAND), instrumentará com medidores virtuais e executará simulações para obter tensões, correntes e formas de onda que servirão de referência para a montagem em protoboard.</p>
+        </div>
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">2) Depuração: pontos de teste e instrumentação</h3>
+          <p>Depurar é localizar e corrigir falhas. Em eletrônica, definimos pontos de teste estratégicos para observar sinais sem interferir no circuito. Exemplos: medir a queda de tensão no resistor de limitação de LED, medir a tensão no capacitor de um circuito RC enquanto carrega, ou observar o nível lógico na entrada/saída de uma porta.</p>
+          <p>Instrumentação virtual inclui voltímetros, amperímetros, osciloscópios e sondas lógicas. Em bancada, usamos multímetro e, quando disponível, osciloscópio. Cada ponto de teste deve ter referência clara (terra/ground) e ser seguro para medir.</p>
+          <p>Onde vou aplicar isso no passo a passo: você definirá e rotulará no esquemático os pontos TP1, TP2 e GND, depois fará as mesmas medições na protoboard, garantindo coerência entre ambiente virtual e real.</p>
+        </div>
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">3) Protoboard: layout, barramentos e falhas comuns</h3>
+          <p>A protoboard é uma matriz de contatos com barramentos de alimentação (linhas laterais) e tiras de contatos centrais (colunas). Os furos de uma mesma coluna (em cada lado do sulco central) estão conectados entre si; os barramentos normalmente conectam horizontalmente. Verifique o padrão da sua protoboard.</p>
+          <p>Boas práticas: organize a alimentação nas linhas laterais (+ e -), use jumpers curtos e de cores padronizadas (vermelho para V+, preto para GND), mantenha resistores e LEDs visíveis e bem espaçados, rotule com fita os pontos de teste e valores. Evite: cruzar muitos jumpers, deixar componentes frouxos, esquecer o resistor em série com LED.</p>
+          <p>Falhas comuns: fila/coluna errada, barramentos partidos (algumas protoboards têm uma quebra no meio da linha lateral), LED invertido (ânodo/cátodo), curto acidental entre V+ e GND, valores de resistores trocados. Sempre meça a continuidade se suspeitar de falhas de contato.</p>
+          <p>Onde vou aplicar isso no passo a passo: você seguirá um layout sugerido, utilizando barramentos e identificando com etiquetas simples os pontos de V+, GND, entradas e saídas, para minimizar erros de montagem.</p>
+        </div>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">4) Comparação simulação x prática e registro técnico</h3>
+          <p>Diferenças entre simulação e prática podem surgir por tolerâncias de componentes (ex.: resistores 5%), modelos ideais nos simuladores, quedas de tensão reais (LED, fios, contatos) e erros do operador. O importante é registrar: esquema final, fotos do protótipo, valores medidos, condições de teste (fonte, instrumentos), discrepâncias observadas e hipóteses para explicá-las.</p>
+          <p>Onde vou aplicar isso no passo a passo: ao final, você preencherá uma tabela comparativa com valores simulados e medidos, e produzirá um breve parágrafo com hipóteses para as diferenças.</p>
+        </div>
+      </section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script>
-  // Back-to-top
-  const backTop = document.getElementById('backTop');
-  window.addEventListener('scroll', () => {
-    backTop.style.display = (window.scrollY > 520) ? 'grid' : 'none';
-  }, { passive:true });
-  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Simular e prototipar circuito analógico e lógico</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Simular um circuito RC (carga/descarga) e um circuito lógico (porta NAND equivalente) e, em seguida, reproduzir um deles na protoboard, medindo resultados e comparando com a simulação.</p>
 
-  // Quiz logic
-  function check(btn){
-    const q = btn.closest('.q');
-    const correct = q.dataset.a;
-    const exp = q.dataset.exp || '';
-    const radios = q.querySelectorAll('input[type=radio]');
-    const selected = Array.from(radios).find(r => r.checked);
-    const res = q.querySelector('.res');
-    const box = q.querySelector('.gabarito');
+<br>
 
-    if(!selected){
-      res.textContent = ' Selecione uma alternativa.';
-      res.className = 'res no';
-      return;
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Parte A — Preparação e segurança</h3>
+          <ol class="mb-0">
+            <li>Organize a bancada: protoboard, multímetro, resistores (ex.: 1 kΩ e 10 kΩ), capacitor eletrolítico (100 µF, 16 V), LEDs (5 mm), jumpers e fonte 5 V.</li>
+            <li>Revisite ESD: toque em superfície aterrada ou use pulseira antiestática antes de manusear componentes.</li>
+            <li>Separe o material por projeto: um saquinho ou bandeja para o circuito RC e outro para o circuito lógico. Rotule-os.</li>
+          </ol>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Parte B — Simulação 1: circuito RC de carga/descarga</h3>
+          <p>Objetivo: observar a curva de tensão no capacitor ao carregar via resistor e descarregar para GND.</p>
+          <ol>
+            <li>No simulador, crie o esquemático: fonte DC de 5 V, resistor R = 10 kΩ em série com capacitor C = 100 µF; adicione um botão/interruptor S1 para conectar/desconectar a fonte.</li>
+            <li>Instrumente: coloque uma sonda de tensão em TP1 (nó entre R e C) em relação ao GND.</li>
+            <li>Parâmetros: análise transiente por 10 s. Inicie com o capacitor descarregado.</li>
+            <li>Execute: feche S1 em t=0 s (carrega), abra S1 em t=5 s (descarga). Observe Vc(t).</li>
+            <li>Registre: tempo de subida até ~63% de 5 V (≈3,15 V) deve ser aproximadamente τ=R·C=10.000×0,0001=1 s.</li>
+          </ol>
+          <p class="mb-1"><strong>Exemplo de netlist SPICE (ilustrativo):</strong></p>
+          <pre class="language-markup"><code>* RC charge/discharge example
+V1 VCC 0 DC 5
+R1 VCC TP1 10k
+C1 TP1 0 100u IC=0
+S1 VCC_in VCC SW 0  ; chave ideal representada no simulador GUI
+* Medir V(TP1) no transiente de 0 a 10s
+.tran 0 10 0
+*.plot tran V(TP1)
+.end</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Parte C — Simulação 2: porta NAND e LED indicador</h3>
+          <p>Objetivo: validar a tabela verdade de uma porta NAND com duas entradas e visualizar a saída com LED.</p>
+          <ol>
+            <li>No simulador digital, insira uma porta NAND (2 entradas), duas chaves (A e B) gerando níveis lógicos (0/1) e um LED com resistor de 330 Ω ligado à saída.</li>
+            <li>Varie as entradas: 00, 01, 10, 11. Registre o estado do LED. Esperado: LED aceso exceto quando A=B=1.</li>
+            <li>Instrumente: adicione sondas lógicas na entrada A, B e saída Y. Capture a forma de onda lógica (se o simulador permitir).</li>
+            <li>Registre: tabela verdade e observações (atraso de propagação em simuladores mais avançados).</li>
+          </ol>
+          <p class="mb-1"><strong>Tabela verdade esperada (NAND 2 entradas):</strong></p>
+          <pre class="language-markup"><code>A B | Y
+0 0 | 1
+0 1 | 1
+1 0 | 1
+1 1 | 0</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Parte D — Prototipagem em protoboard (reproduzir um circuito)</h3>
+          <p>Escolha UM dos circuitos simulados (RC ou NAND com LED) para montar fisicamente.</p>
+          <ol>
+            <li>Alimentação: distribua 5 V no barramento positivo e GND no barramento negativo. Verifique continuidade; algumas protoboards têm barramentos interrompidos no meio.</li>
+            <li>Layout RC: conecte R=10 kΩ do V+ ao nó TP1; conecte C=100 µF de TP1 ao GND, observando a polaridade do capacitor; opcional: insira um botão entre V+ e R para iniciar a carga.</li>
+            <li>Layout NAND: se usar um CI (ex.: 74HC00), conecte pino Vcc ao 5 V e GND ao terra; adicione resistores de pull-down (10 kΩ) nas entradas para garantir 0 lógico quando o botão não está pressionado; use resistor de 330 Ω em série com o LED na saída.</li>
+            <li>Rotulagem: marque com fita os pontos TP1 (RC) ou A, B, Y (NAND). Mantenha jumpers curtos e cores padronizadas.</li>
+            <li>Verificação: com o multímetro, confirme V+ e GND antes de energizar. Verifique orientação do LED (ânodo no V+, cátodo no resistor para GND ou conforme a topologia adotada).</li>
+          </ol>
+          <p class="mb-1"><strong>Boas práticas de montagem:</strong></p>
+          <ul class="mb-0">
+            <li>Evite cruzar jumpers desnecessariamente; mantenha caminhos visíveis.</li>
+            <li>Não force componentes nos furos; garanta bom contato.</li>
+            <li>Confirme valores de resistores pelo código de cores antes de inserir.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Parte E — Medições e comparação</h3>
+          <ol>
+            <li>RC: meça Vc(t) com o multímetro em intervalos de 0 s, 0,5 s, 1 s, 2 s, 3 s durante a carga. Compare com a referência de simulação (τ≈1 s).</li>
+            <li>NAND: teste as quatro combinações de A e B; registre se o LED acende/apaga conforme esperado.</li>
+            <li>Monte uma tabela com colunas: Condição, Valor Simulado, Valor Medido, Diferença (%), Observações.</li>
+            <li>Explique possíveis discrepâncias: tolerância de R e C, queda de tensão do LED, resistência dos contatos da protoboard.</li>
+          </ol>
+          <p class="mb-1"><strong>Exemplo de cálculo rápido (RC, 63% em 1 τ):</strong></p>
+          <pre class="language-js"><code>// estimativa simples de Vc(t) = V * (1 - e^(-t/RC))
+// para V=5V, R=10k, C=100u (tau=1s)
+function Vc(t){ return 5 * (1 - Math.exp(-t/1)); }
+[0,0.5,1,2,3].forEach(t =&gt; console.log(t, Vc(t).toFixed(2), "V"));</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Parte F — Documentação técnica</h3>
+          <ol class="mb-0">
+            <li>Inclua: esquemático final, fotos nítidas da protoboard, medições (tabelas), configurações do simulador, lista de materiais e anotações de depuração.</li>
+            <li>Finalize com um parágrafo: “O que aprendi” e “O que faria diferente na próxima iteração”.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de simuladores e a montagem em protoboard, com medições coerentes e documentação adequada.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Projeto 1: simule e monte um divisor de tensão para acender um LED com corrente segura (10–15 mA). Compare a corrente simulada e medida.</li>
+            <li>Projeto 2: simule uma rede RC como filtro passa-baixa simples para um sinal quadrado lento; observe o arredondamento da borda no simulador (se disponível) e descreva o efeito medido com um multímetro (limite: leitura média).</li>
+            <li>Projeto 3: implemente uma função lógica usando apenas NAND (ex.: NOT A = NAND(A,A)). Simule e comprove na protoboard com LED.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (sugestão)</h3>
+          <ul class="mb-0">
+            <li>Funcionalidade do circuito (simulação e prática) e coerência das medições</li>
+            <li>Organização da protoboard e respeito às boas práticas de segurança</li>
+            <li>Clareza e completude da documentação (esquemático, fotos, tabelas, análise)</li>
+            <li>Capacidade de diagnóstico e explicação de discrepâncias</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Introdução ao SPICE: tipos de análise (DC, AC, transiente) e exemplos básicos</li><li>Datasheets de 74HC00 e boas práticas de alimentação/aterramento de CIs lógicos</li><li>Como ler o código de cores de resistores e a tolerância em medições</li><li>Protoboard: variações de barramentos e como testar continuidade</li><li>Comparação de simuladores educacionais (Tinkercad) e profissionais (LTspice/Multisim)</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 11</h2>
+        <ul><li>Esquemático(s) do(s) circuito(s) simulado(s) com pontos de teste indicados</li><li>Tabela comparativa de valores simulados vs. medidos e breve análise das diferenças</li><li>Fotos da protoboard com layout organizado e identificação dos pontos principais</li><li>Relatório curto (1–2 páginas) com lista de materiais, procedimentos, resultados e conclusões</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 10</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 12</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Eletrônica Aplicada à Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a principal vantagem de simular um circuito antes da prototipagem em protoboard?","alternativas":{"A":"Economizar energia elétrica","B":"Reduzir erros e custos, antecipando ajustes","C":"Garantir que o circuito funcione sem testes","D":"Dispensar o uso de instrumentos de medição","E":"Permitir usar qualquer valor de componente sem impacto"},"correta":"B"},{"id":"q2","titulo":"No circuito RC, o tempo de subida até aproximadamente 63% da tensão final é dado por:","alternativas":{"A":"R/C","B":"C/R","C":"R·C (constante de tempo τ)","D":"R+C","E":"R·C/2"},"correta":"C"},{"id":"q3","titulo":"Em uma porta NAND de duas entradas, qual linha da tabela verdade é a única com saída 0 (baixo)?","alternativas":{"A":"A=0, B=0","B":"A=0, B=1","C":"A=1, B=0","D":"A=1, B=1","E":"Todas as opções resultam em 1"},"correta":"D"},{"id":"q4","titulo":"Qual boa prática NÃO é recomendada na protoboard?","alternativas":{"A":"Padronizar cores (vermelho=V+, preto=GND)","B":"Usar jumpers curtos e bem posicionados","C":"Verificar barramentos interrompidos antes de usar","D":"Cruzar jumpers desnecessariamente e deixar fios frouxos","E":"Rotular pontos de teste e valores"},"correta":"D"},{"id":"q5","titulo":"Ao comparar simulação e prática, uma diferença significativa de valores pode estar relacionada principalmente a:","alternativas":{"A":"Tolerância dos componentes e quedas de tensão reais","B":"Falta de cores nos jumpers","C":"Uso de uma protoboard muito nova","D":"O simulador sempre erra por definição","E":"A potência da fonte ser infinita"},"correta":"A"},{"id":"q6","titulo":"Para depuração, por que é importante definir pontos de teste (TPs) no esquemático?","alternativas":{"A":"Para aumentar o consumo do circuito","B":"Para ter locais seguros e claros para medir sinais","C":"Para reduzir a necessidade de multímetro","D":"Para eliminar o aterramento do circuito","E":"Para ligar componentes sem esquema"},"correta":"B"},{"id":"q7","titulo":"Qual instrumento virtual é mais adequado para observar a forma de onda de Vc(t) em um RC?","alternativas":{"A":"Ohmímetro","B":"Fonte de corrente","C":"Osciloscópio","D":"Gerador de funções","E":"Contador de frequência"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Revisei grandezas básicas e confirmei a fonte e o GND no simulador e na bancada"},{"id":"c2","texto":"Criei o esquemático do circuito RC com pontos de teste definidos (TP1, GND)"},{"id":"c3","texto":"Executei a simulação transiente e registrei Vc(t) e τ estimado"},{"id":"c4","texto":"Simulei a porta NAND, validei a tabela verdade e registrei resultados"},{"id":"c5","texto":"Montei um dos circuitos na protoboard seguindo boas práticas de layout"},{"id":"c6","texto":"Realizei medições no protótipo e comparei com os resultados simulados"},{"id":"c7","texto":"Registrei discrepâncias e formulei hipóteses para explicá-las"},{"id":"c8","texto":"Produzi documentação: esquemático, fotos, tabelas e conclusões"}];
+    const CHECKLIST_KEY = 'chk_eati_cap11';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
     }
 
-    if(selected.value === correct){
-      res.textContent = ' Correto!';
-      res.className = 'res ok';
-    } else {
-      res.textContent = ' Incorreto.';
-      res.className = 'res no';
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
     }
 
-    box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
-  }
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
 
-  function toggleAnswer(btn){
-    const q = btn.closest('.q');
-    const box = q.querySelector('.gabarito');
-    if(!box.innerHTML.trim()){
-      const correct = q.dataset.a;
-      const exp = q.dataset.exp || '';
-      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
     }
-    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
-  }
 
-  function showAllAnswers(){
-    document.querySelectorAll('.q').forEach(q => {
-      const box = q.querySelector('.gabarito');
-      const correct = q.dataset.a;
-      const exp = q.dataset.exp || '';
-      box.innerHTML = '<strong>Gabarito:</strong> alternativa <strong>' + correct.toUpperCase() + '</strong>.<br><span>' + exp + '</span>';
-      box.style.display = 'block';
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
     });
-  }
 
-  function resetQuiz(){
-    document.querySelectorAll('.q').forEach(q => {
-      q.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-      const res = q.querySelector('.res');
-      res.textContent = '';
-      res.className = 'res';
-      const box = q.querySelector('.gabarito');
-      box.style.display = 'none';
-      box.innerHTML = '';
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Checklist progress
-  const checks = Array.from(document.querySelectorAll('.ck'));
-  const ckStatus = document.getElementById('ckStatus');
-  function updateChecklist(){
-    const done = checks.filter(c => c.checked).length;
-    ckStatus.textContent = done + '/' + checks.length + ' itens concluídos.';
-  }
-  checks.forEach(c => c.addEventListener('change', updateChecklist));
-  updateChecklist();
-</script>
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
 </body>
 </html>
