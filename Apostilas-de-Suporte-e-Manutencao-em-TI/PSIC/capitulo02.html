@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 02 — Revisão de programação para IoT</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo02.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PSIC</span>
+        <span style="color: var(--cor-principal);">Projetos e Suporte à Internet das Coisas</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução à IoT</a></li>
+              <li><a class="dropdown-item active" href="capitulo02.html">Capítulo 02 — Revisão de programação para IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Eletrônica básica aplicada</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Plataformas e IDEs</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — GPIO</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Modularização e bibliotecas</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Conectividade Wi‑Fi</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — MQTT</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — HTTP e WebSocket</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Bancos de dados</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Dashboards</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Segurança em IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Versionamento e docs</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Suporte e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Projeto guiado</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto final</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 02 — Revisão de programação para IoT (Python e C/C++)</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (teoria) + 2h (prática guiada)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Telemetria de temperatura/umidade com máquina de estados e parser JSON</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Python 3.11+, Arduino IDE (C/C++), ESP8266/ESP32 (Wokwi opcional), ArduinoJson, logging, JSON</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Aplicar condicionais, laços, funções e módulos para organizar código de firmware e scripts.</li><li>Manipular arquivos e JSON para registrar e consumir telemetria.</li><li>Tratar exceções e produzir logs úteis para diagnóstico.</li><li>Construir uma máquina de estados simples para um sensor.</li><li>Escrever código legível com docstrings/comentários e boas práticas.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Programar em Python e C/C++ aplicando estruturas de controle e modularização.</li><li>Interpretar e gerar JSON para telemetria IoT.</li><li>Implementar logs e tratamento de exceções.</li><li>Projetar máquinas de estados para lógica embarcada.</li><li>Documentar código com comentários, docstrings e padrões simples.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo01.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 01</a>
+              <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 03</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 02)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0">
+  <li>Retomada breve dos conceitos do Capítulo 01 e conexão com a programação para dispositivos IoT.</li>
+  <li>Revisão guiada:
+    <ul>
+      <li>Condicionais e laços; funções e módulos; tratamento de exceções e logs.</li>
+      <li>Manipulação de arquivos e JSON; dependências e bibliotecas.</li>
+      <li>Boas práticas de legibilidade e docstrings; máquina de estados.</li>
+    </ul>
+  </li>
+  <li>Hands-on em duas frentes:
+    <ul>
+      <li>Python: parser de telemetria JSON + logs e arquivo CSV/JSON local.</li>
+      <li>C/C++ (Arduino): máquina de estados do sensor + parsing simples JSON (ArduinoJson).</li>
+    </ul>
+  </li>
+  <li>Registro e análise de saídas (logs e prints seriais); discussão de erros comuns.</li>
+  <li>Atividades derivadas e checklist de qualidade do código.</li>
+</ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-3">
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Condicionais e laços</h3>
+    <p>Condicionais (if/elif/else) e laços (for/while) controlam o fluxo do programa. Em IoT, são usados para verificar limites, temporizações e decidir quando ler sensores ou acionar atuadores. Em C/C++ e Python, a lógica é similar, mudando a sintaxe.</p>
+    <p>Laços não bloqueantes são preferíveis: usar contadores e checar tempo decorrido ao invés de delays longos melhora a responsividade do firmware.</p>
+    <p><em>Onde vou aplicar isso:</em> no passo a passo, usaremos condicionais para validar leituras e laços para varrer o loop principal do firmware e do script.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Funções e módulos</h3>
+    <p>Funções encapsulam tarefas recorrentes (ex.: ler_sensor, publicar_json). Módulos separam responsabilidades e melhoram manutenção. Em Python, criamos arquivos .py; em C/C++, dividimos em .h/.cpp.</p>
+    <p>Separar “camada de hardware” (GPIO) da “lógica de negócio” (regras do sensor) e da “rede” (MQTT/HTTP) facilita testes e evolução.</p>
+    <p><em>Onde vou aplicar isso:</em> criaremos funções utilitárias para parsing de JSON e leitura de sensor; no Arduino, isolaremos a máquina de estados em funções.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Exceções e logs</h3>
+    <p>Exceções indicam erros em tempo de execução. Em Python, use try/except e logging para registrar mensagens com níveis (DEBUG, INFO, WARNING, ERROR). Em embedded C/C++, não há exceções por padrão; use códigos de retorno e mensagens seriais/LEDs para diagnóstico.</p>
+    <p>Logs facilitam o troubleshooting, principalmente em IoT distribuída.</p>
+    <p><em>Onde vou aplicar isso:</em> o script Python fará logging estruturado; no firmware, exibiremos estados e erros via Serial.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Arquivos e JSON</h3>
+    <p>JSON é o formato de dados mais comum na telemetria IoT. Em Python, o módulo json lê/escreve dicionários; em Arduino, bibliotecas como ArduinoJson ajudam a compor e interpretar payloads com baixo custo.</p>
+    <p>Salvaremos leituras em um arquivo local (simulando um log) e construiremos/parciaremos JSON de telemetria.</p>
+    <p><em>Onde vou aplicar isso:</em> persistiremos dados em arquivo no Python e receberemos/enviaremos JSON no firmware.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Dependências e bibliotecas</h3>
+    <p>Bibliotecas aceleram o desenvolvimento. Em Python, use pip/venv; no Arduino IDE, use o Library Manager. Mantenha registro de versões no README para reprodutibilidade.</p>
+    <p><em>Onde vou aplicar isso:</em> instalaremos ArduinoJson no Arduino IDE e estruturaremos requirements no Python.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Boas práticas de legibilidade</h3>
+    <p>Nomeie variáveis claramente, comente intenções, use docstrings em Python e cabeçalhos em C. Evite “números mágicos”, prefira constantes. Mantenha funções curtas e coesas.</p>
+    <p><em>Onde vou aplicar isso:</em> todo o código do passo a passo seguirá padrão de nomes, comentários e docstrings.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Máquina de estados finita (FSM) em IoT</h3>
+    <p>FSM organiza a lógica como estados e transições: IDLE, READ, PROCESS, ALERT, etc. É fácil de debugar e escala melhor que “ifs” espalhados.</p>
+    <p><em>Onde vou aplicar isso:</em> implementaremos uma FSM para um sensor de temperatura com alarme por limiar e histerese.</p>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">Estruturas de dados úteis</h3>
+    <p>Em Python, dicionários e listas bastam para muitos fluxos de telemetria. Em C/C++, structs representam pacotes e buffers fixos são importantes para economia de RAM.</p>
+    <p><em>Onde vou aplicar isso:</em> usaremos dict em Python para o payload e uma struct no Arduino para leituras.</p>
+  </div>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Parser de Telemetria e Máquina de Estados</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Implementar um parser de telemetria JSON em Python (com logs e arquivo local) e uma máquina de estados em C/C++ (Arduino) que lê um “sensor” de temperatura simulado, aplica limiar com histerese e gera JSON.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold"><i class="bi bi-1-circle me-2"></i>Preparar ambiente</h3>
+    <ol class="mb-0">
+      <li>Python:
+        <pre class="language-bash"><code># criar e ativar um ambiente virtual (opcional, recomendado)
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# Linux/macOS
+source .venv/bin/activate
+
+# nenhuma dependência externa obrigatória neste passo
+python --version</code></pre>
+      </li>
+      <li>Arduino IDE:
+        <ul>
+          <li>Instale/atualize o Arduino IDE.</li>
+          <li>Abra Ferramentas &gt; Gerenciar Bibliotecas e instale: “ArduinoJson” (por Benoit Blanchon).</li>
+          <li>Se usar ESP8266/ESP32: instale o core da placa e selecione a placa (ex.: ESP32 Dev Module).</li>
+        </ul>
+      </li>
+      <li>Opcional: Wokwi para simulação rápida do firmware.</li>
+    </ol>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold"><i class="bi bi-2-circle me-2"></i>Python — Parser de telemetria JSON com logs e arquivo</h3>
+    <p>Crie o arquivo parser.py. O script simula recebimento de JSON de telemetria, valida campos, grava em arquivo e emite logs.</p>
+    <pre class="language-python"><code>"""
+parser.py — Parser de telemetria IoT com logs e persistência local
+Conteúdo aplicado:
+- condicionais, laços, funções, módulos
+- exceções e logging
+- leitura/escrita de arquivos e JSON
+"""
+
+import json
+import logging
+from datetime import datetime
+from typing import Dict, Any, Optional
+
+# Configuração de logs
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S"
+)
+logger = logging.getLogger("telemetry")
+
+def validar_payload(payload: Dict[str, Any]) -> bool:
+    """Valida campos mínimos de uma telemetria."""
+    campos = ["deviceId", "ts", "type", "value"]
+    for c in campos:
+        if c not in payload:
+            logger.warning("Campo ausente: %s", c)
+            return False
+    if not isinstance(payload["value"], (int, float)):
+        logger.warning("value deve ser numérico")
+        return False
+    return True
+
+def processar_json(linha: str) -> Optional[Dict[str, Any]]:
+    """Recebe uma string JSON, valida e retorna dict normalizado."""
+    try:
+        data = json.loads(linha)
+        if not validar_payload(data):
+            return None
+        # Normaliza timestamp (ts) para ISO se vier numérico
+        if isinstance(data["ts"], (int, float)):
+            data["ts_iso"] = datetime.fromtimestamp(data["ts"]).isoformat()
+        else:
+            data["ts_iso"] = str(data["ts"])
+        return data
+    except json.JSONDecodeError as e:
+        logger.error("JSON inválido: %s", e)
+    except Exception as e:
+        logger.error("Falha inesperada: %s", e)
+    return None
+
+def salvar_em_arquivo(reg: Dict[str, Any], caminho: str = "telemetria.log") -> None:
+    """Acrescenta o registro JSON normalizado em um arquivo local (uma linha por JSON)."""
+    try:
+        with open(caminho, "a", encoding="utf-8") as f:
+            f.write(json.dumps(reg, ensure_ascii=False) + "\n")
+    except OSError as e:
+        logger.error("Erro ao gravar arquivo: %s", e)
+
+def main():
+    exemplo = [
+        '{"deviceId":"sensor-01","ts": 1700000000,"type":"temperature","value": 26.7}',
+        '{"deviceId":"sensor-01","ts": "2024-01-01T10:00:00","type":"humidity","value": 55}',
+        '{"deviceId":"sensor-01","ts": 1700000300,"type":"temperature","value": "alto"}'  # inválido
+    ]
+    for linha in exemplo:
+        logger.info("Recebido: %s", linha)
+        reg = processar_json(linha)
+        if reg:
+            logger.info("OK: %s %.2f @ %s", reg["type"], reg["value"], reg["ts_iso"])
+            salvar_em_arquivo(reg)
+        else:
+            logger.warning("Registro descartado")
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+    <p>Exemplo de um payload esperado:</p>
+    <pre class="language-json"><code>{
+  "deviceId": "sensor-01",
+  "ts": 1700000000,
+  "type": "temperature",
+  "value": 25.2
+}</code></pre>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold"><i class="bi bi-3-circle me-2"></i>Arduino (C/C++) — Máquina de estados com histerese e JSON</h3>
+    <p>Crie um sketch (ex.: cap02_fsm.ino). Simularemos a leitura do sensor com ruído, aplicaremos histerese e publicaremos JSON via Serial.</p>
+    <pre class="language-c"><code>// cap02_fsm.ino — FSM simples para temperatura com histerese e JSON
+// Conceitos: laços não bloqueantes, funções, struct, estados, logs seriais
+#include &lt;Arduino.h&gt;
+#include &lt;ArduinoJson.h&gt;
+
+enum State { IDLE, READ, PROCESS, ALERT };
+State state = IDLE;
+
+struct Telemetry {
+  const char* deviceId;
+  float value;
+  unsigned long ts;
+};
+
+const char* DEVICE_ID = "sensor-01";
+const float LIMIAR = 28.0;
+const float HISTER = 0.8;   // para evitar liga/desliga frequente
+bool alertaAtivo = false;
+
+unsigned long lastRead = 0;
+const unsigned long READ_INTERVAL = 1000; // ms
+
+float lerTemperaturaSimulada() {
+  // Simulação: valor base + pequena variação
+  static float base = 26.0;
+  base += (random(-5, 6)) / 10.0; // -0.5 a +0.5
+  return base;
+}
+
+void enviarJSON(const Telemetry &t) {
+  StaticJsonDocument&lt;200&gt; doc;
+  doc["deviceId"] = t.deviceId;
+  doc["ts"] = t.ts / 1000;   // timestamp em segundos
+  doc["type"] = "temperature";
+  doc["value"] = t.value;
+  String out;
+  serializeJson(doc, out);
+  Serial.println(out);
+}
+
+void setup() {
+  Serial.begin(115200);
+  delay(500);
+  randomSeed(analogRead(A0));
+  Serial.println(F("# Iniciando FSM de temperatura"));
+}
+
+void loop() {
+  unsigned long now = millis();
+
+  switch (state) {
+    case IDLE:
+      if (now - lastRead &gt;= READ_INTERVAL) {
+        state = READ;
+      }
+      break;
+
+    case READ: {
+      float temp = lerTemperaturaSimulada();
+      Telemetry t{DEVICE_ID, temp, now};
+      enviarJSON(t);
+      lastRead = now;
+      state = PROCESS;
+      break;
+    }
+
+    case PROCESS: {
+      // checa limiar com histerese
+      // Entrar em ALERT se valor &gt;= LIMIAR; sair apenas se valor &lt;= (LIMIAR - HISTER)
+      // Para obter o último valor lido, poderíamos guardar em variável global;
+      // como exemplo didático, vamos recalcular nesta etapa:
+      float temp = lerTemperaturaSimulada(); // (em projeto real, use o valor da leitura)
+      if (!alertaAtivo && temp &gt;= LIMIAR) {
+        alertaAtivo = true;
+        Serial.println(F("# ALERTA ATIVADO"));
+        state = ALERT;
+      } else if (alertaAtivo && temp &lt;= (LIMIAR - HISTER)) {
+        alertaAtivo = false;
+        Serial.println(F("# ALERTA DESATIVADO"));
+        state = IDLE;
+      } else {
+        state = IDLE;
+      }
+      break;
+    }
+
+    case ALERT:
+      // Poderia acionar buzzer/LED ou publicar mensagem específica
+      // Aqui, apenas loga a condição e retorna ao IDLE
+      Serial.println(F("# Estado ALERT (ação: led/buzzer)"));
+      state = IDLE;
+      break;
+  }
+}</code></pre>
+
+    <div class="alert alert-light border mt-3 mb-0">
+      Dica: em produção, não relia o sensor no PROCESS. Armazene a última leitura para consistência entre estados.
+    </div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold"><i class="bi bi-4-circle me-2"></i>Arduino — Parsing de JSON recebido (comandos)</h3>
+    <p>Suponha que o dispositivo receba comandos JSON pela Serial (ex.: alterar limiar). Use ArduinoJson para parse.</p>
+    <pre class="language-c"><code>// Trecho adicional: leitura de comando JSON pela Serial
+void processarComandoSerial() {
+  if (!Serial.available()) return;
+  String linha = Serial.readStringUntil('\n');
+  StaticJsonDocument&lt;200&gt; doc;
+  DeserializationError err = deserializeJson(doc, linha);
+  if (err) {
+    Serial.println(F("# JSON inválido"));
+    return;
+  }
+  const char* cmd = doc["cmd"];
+  if (cmd &amp;&amp; String(cmd) == "setThreshold") {
+    float novo = doc["value"] | LIMIAR; // fallback no valor atual
+    // Validação simples
+    if (novo &gt;= 10.0 &amp;&amp; novo &lt;= 80.0) {
+      // cast away const for didática (em produção use variável não-const)
+      *(float*)&LIMIAR = novo; // apenas para demo; prefira variável mutável
+      Serial.print(F("# Limiar atualizado para: "));
+      Serial.println(novo);
+    } else {
+      Serial.println(F("# Valor fora da faixa permitida"));
+    }
+  }
+}
+
+void loop() {
+  unsigned long now = millis();
+  processarComandoSerial();
+  // ... restante do switch(state) mostrado antes ...
+}</code></pre>
+    <div class="alert alert-warning border mt-3 mb-0">
+      Importante: evite alterar variáveis const em projetos reais. Aqui foi ilustrativo. Use uma variável global mutável (ex.: float g_threshold).
+    </div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold"><i class="bi bi-5-circle me-2"></i>Testes rápidos</h3>
+    <ul class="mb-0">
+      <li>Python: execute o parser e observe o telemetria.log.
+        <pre class="language-bash"><code>python parser.py
+type telemetria.log  # Windows
+cat telemetria.log   # Linux/macOS</code></pre>
+      </li>
+      <li>Arduino: abra o Monitor Serial (115200). Verifique JSONs e mensagens de alerta. Envie um comando:
+        <pre class="language-json"><code>{"cmd":"setThreshold","value":30.0}</code></pre>
+      </li>
+    </ul>
+  </div>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de estruturas de controle, JSON, logs, arquivos e FSM em problemas próximos ao cotidiano de IoT.</p>
+        <div class="vstack gap-3 mt-3">
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">1) Logger de eventos com rotação simples (Python)</h3>
+    <p>Amplie o parser para criar um novo arquivo por dia (ex.: telemetria-YYYYMMDD.log) e incluir um contador de erros. Ao final da execução, escreva um resumo (linhas válidas/descartadas).</p>
+  </div>
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">2) FSM com dois sensores (Arduino)</h3>
+    <p>Adapte a máquina de estados para ler temperatura e umidade. Estado ALERT deve considerar duas regras: (a) temperatura acima do limiar e (b) umidade abaixo do limiar. Gere JSON com ambos os valores.</p>
+  </div>
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">3) Conversor JSON → CSV (Python)</h3>
+    <p>Crie um script que leia o telemetria.log e gere um arquivo CSV com colunas: ts_iso, deviceId, type, value.</p>
+  </div>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (autoavaliação)</h3>
+  <ul class="mb-0">
+    <li>Código organizado em funções/módulos e comentado.</li>
+    <li>Tratamento de erros e mensagens de log claras.</li>
+    <li>Uso correto de JSON e formatos de dados.</li>
+    <li>FSM funcional, não bloqueante e com histerese.</li>
+    <li>Reprodutibilidade: passos para executar/testar documentados.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Quando usar máquina de estados versus RTOS em dispositivos IoT.</li><li>Comparação entre formatos JSON, CBOR e MessagePack para dispositivos restritos.</li><li>Boas práticas de logging em sistemas embarcados sem filesystem.</li><li>Estratégias de histerese e filtros simples (média móvel) em sensores ruidosos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 02</h2>
+        <ul><li>Script Python (parser.py) funcional, com logs e arquivo telemetria.log gerado.</li><li>Sketch Arduino com FSM e geração/consumo de JSON testado no Monitor Serial.</li><li>README curto explicando execução, parâmetros e decisões de projeto.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo01.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 01</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 03</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projetos e Suporte à Internet das Coisas — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a principal vantagem de usar uma máquina de estados (FSM) em firmware IoT?","alternativas":{"A":"Reduzir o consumo de energia automaticamente","B":"Organizar a lógica em estados e transições, facilitando manutenção e testes","C":"Evitar a necessidade de funções","D":"Permitir o uso de exceções em C/C++","E":"Eliminar a necessidade de logs"},"correta":"B"},{"id":"q2","titulo":"No script Python, qual a finalidade do bloco try/except ao fazer json.loads()?","alternativas":{"A":"Melhorar desempenho do parser","B":"Permitir que o programa ignore o JSON e siga a execução","C":"Capturar erros de parsing para registrar log e evitar quebra do programa","D":"Converter automaticamente números em strings","E":"Fechar arquivos abertos"},"correta":"C"},{"id":"q3","titulo":"Em C/C++ (Arduino), por que preferir laços não bloqueantes ao invés de longos delays?","alternativas":{"A":"Para economizar flash","B":"Para permitir que o loop execute outras tarefas e mantenha responsividade","C":"Para aumentar o uso de RAM","D":"Porque delay não funciona em ESP32","E":"Para melhorar a cor do LED onboard"},"correta":"B"},{"id":"q4","titulo":"Qual é a melhor prática ao lidar com 'números mágicos' no código?","alternativas":{"A":"Escondê-los dentro de funções","B":"Comentá-los com // importante","C":"Trocar por constantes nomeadas e bem documentadas","D":"Escrever em letras maiúsculas sem explicar","E":"Deixar como está para evitar mudanças"},"correta":"C"},{"id":"q5","titulo":"Ao validar um payload de telemetria JSON, qual conjunto mínimo de campos é razoável para este capítulo?","alternativas":{"A":"ip, mac, ssid, rssi","B":"deviceId, ts, type, value","C":"user, password, token","D":"lat, lon, alt","E":"header, body, checksum"},"correta":"B"},{"id":"q6","titulo":"Sobre histerese em sensores, assinale a alternativa correta:","alternativas":{"A":"Histerese aumenta a frequência de acionamento do alarme","B":"Histerese reduz oscilações próximas ao limiar, evitando liga/desliga frequente","C":"Histerese é um tipo de exceção do Python","D":"Histerese substitui a necessidade de logs","E":"Histerese impede o uso de FSM"},"correta":"B"},{"id":"q7","titulo":"Qual biblioteca foi sugerida para manipular JSON no Arduino IDE?","alternativas":{"A":"RapidJSON","B":"cJSON","C":"ArduinoJson","D":"Boost.PropertyTree","E":"jsoncpp"},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Configurei o ambiente Python (venv opcional) e testei o parser.py."},{"id":"c2","texto":"Implementei validação de campos no JSON (deviceId, ts, type, value)."},{"id":"c3","texto":"Registrei logs com níveis adequados (INFO/WARNING/ERROR)."},{"id":"c4","texto":"Gravei telemetria normalizada em arquivo local."},{"id":"c5","texto":"Estruturei o código em funções claras e bem nomeadas."},{"id":"c6","texto":"No Arduino, implementei uma FSM com estados bem definidos."},{"id":"c7","texto":"Apliquei histerese para evitar oscilações de alarme."},{"id":"c8","texto":"Gerei JSON no firmware e validei no Monitor Serial."},{"id":"c9","texto":"Implementei parsing de comando JSON (ex.: setThreshold)."},{"id":"c10","texto":"Escrevi um README com instruções de execução e testes."}];
+    const CHECKLIST_KEY = 'psic-cap02-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

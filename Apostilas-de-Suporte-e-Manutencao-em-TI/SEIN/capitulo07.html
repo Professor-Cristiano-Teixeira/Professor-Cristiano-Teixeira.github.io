@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 — Hardening em Windows</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo07.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SEIN</span>
+        <span style="color: var(--cor-principal);">Segurança da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos e princípios da Segurança da Informação (CID)</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Gestão inicial de riscos e classificação da informação</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Normas, políticas e legislação aplicável</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Papéis, responsabilidades e ética em Segurança da Informação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Conscientização e engenharia social</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Segurança de sistemas operacionais: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Hardening em Windows</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Hardening em Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Patches, antimalware e proteção de host (HIDS/EDR)</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Fundamentos de segurança de redes</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Firewalls, NAT e regras de filtragem</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Redes sem fio, VPN, DMZ e segurança física</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Criptografia: conceitos, PKI e certificados</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Backup e recuperação de dados</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Segurança em nuvem e virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Segurança em IoT e projeto integrador</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 07 — Hardening em Windows</h1>
+          <p class="mb-2"><strong>Carga:</strong> —</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> —</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows 10/11, PowerShell</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Aplicar atualizações e configurar Windows Update de forma segura.</li><li>Configurar e validar o Microsoft Defender Antivirus e o Firewall do Windows.</li><li>Ajustar políticas locais, UAC e endurecer contas e permissões.</li><li>Habilitar e gerenciar criptografia com BitLocker (dados em repouso).</li><li>Endurecer acesso remoto (RDP) e revisar logs no Event Viewer, definindo retenção.</li><li>Documentar antes/depois e gerar um relatório de hardening reproduzível.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Identificar riscos e aplicar controles preventivos e detectivos em Windows.</li><li>Executar configurações de segurança via GUI e PowerShell com registro de evidências.</li><li>Interpretar logs e ajustar retenção para auditoria.</li><li>Comunicar resultados técnicos por meio de checklist e relatório.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Segurança de sistemas operacionais: fundamentos</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Hardening em Linux</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 07)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul class="mb-0">
+<li>Parte 1 — Contextualização (20 min): objetivos do hardening, relação com CID, visão geral dos controles nativos do Windows.</li>
+<li>Parte 2 — Demonstração guiada (40–60 min): Windows Update, Defender, Firewall, políticas locais/UAC, BitLocker, RDP, logs.</li>
+<li>Parte 3 — Mão na massa (60–90 min): execução do checklist de hardening em uma VM, coleta de evidências (prints, comandos).</li>
+<li>Parte 4 — Validação (20–30 min): testes de bloqueio, verificação de criptografia e análise de logs.</li>
+<li>Parte 5 — Documentação (20–30 min): relatório antes/depois com itens do checklist e justificativas técnicas.</li>
+<li>Recursos: VM Windows 10/11, conta com permissões administrativas na VM, PowerShell, acesso à internet para updates (opcional).</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+  <div>
+    <h3 class="h5 fw-bold">Atualizações de segurança (Windows Update)</h3>
+    <p>Atualizações corrigem vulnerabilidades e melhoram a estabilidade. No Windows, o Windows Update gerencia patches de sistema, drivers e definições do antivírus. Manter o sistema atualizado reduz a janela de exposição a ameaças que exploram falhas conhecidas.</p>
+    <p>É importante configurar horários ativos, política de reinício e fontes de atualização. Em ambientes gerenciados, o WSUS/Intune pode orquestrar patches; em laboratório, você pode usar as configurações locais e o PowerShell.</p>
+    <p><em>Onde vou aplicar isso:</em> você realizará a verificação e instalação de updates, além de configurar parâmetros básicos no passo a passo.</p>
+  </div>
+
+  <div>
+    <h3 class="h5 fw-bold">Microsoft Defender Antivirus</h3>
+    <p>O Defender fornece proteção em tempo real, varreduras sob demanda e recursos antimalware integrados ao Windows. Definições atualizadas e políticas adequadas (como proteção em tempo real, proteção baseada na nuvem e controle de amostras) são essenciais.</p>
+    <p>Além da proteção de base, é válido executar uma verificação completa inicial e configurar ações padrão para ameaças detectadas.</p>
+    <p><em>Onde vou aplicar isso:</em> você ativará/validará a proteção em tempo real, atualizará assinaturas e executará uma varredura completa.</p>
+  </div>
+
+  <div>
+    <h3 class="h5 fw-bold">Firewall do Windows</h3>
+    <p>O Firewall do Windows controla tráfego de entrada e saída por regra, por perfil (Domínio, Particular, Público). Um firewall bem configurado reduz a superfície de ataque, permitindo apenas o necessário.</p>
+    <p>Boas práticas incluem: bloquear por padrão e liberar explicitamente serviços, registrar logs e separar perfis de rede.</p>
+    <p><em>Onde vou aplicar isso:</em> você habilitará o firewall em todos os perfis, criará regras básicas e ativará logging.</p>
+  </div>
+
+  <div>
+    <h3 class="h5 fw-bold">Políticas locais, UAC e contas</h3>
+    <p>As políticas locais (Local Security Policy) e o UAC (Controle de Conta de Usuário) ajudam a impor regras de senha, bloqueio de conta, auditoria e consentimento administrativo. O princípio do menor privilégio deve guiar a configuração das contas.</p>
+    <p>Desabilitar a conta Administrador padrão (quando possível), exigir senha forte e usar contas padrão para o dia a dia reduzem o risco de escalonamento de privilégios.</p>
+    <p><em>Onde vou aplicar isso:</em> você ajustará UAC, política de senha/bloqueio e revisará grupos administrativos locais.</p>
+  </div>
+
+  <div>
+    <h3 class="h5 fw-bold">BitLocker (Criptografia de Disco)</h3>
+    <p>O BitLocker protege dados em repouso criptografando volumes. Em caso de perda/roubo do equipamento, a confidencialidade dos dados é preservada. Requer TPM ou uso de senha/chave de inicialização.</p>
+    <p>Planeje a recuperação (chaves de recuperação) e valide o estado de criptografia. Em laboratório, uma unidade do sistema ou secundária pode ser protegida.</p>
+    <p><em>Onde vou aplicar isso:</em> você verificará pré-requisitos, ativará o BitLocker e salvará a chave de recuperação com segurança.</p>
+  </div>
+
+  <div>
+    <h3 class="h5 fw-bold">RDP seguro (Acesso remoto)</h3>
+    <p>O Protocolo de Desktop Remoto (RDP) é alvo comum de ataques de força bruta. Se precisar usá-lo, restrinja sua superfície: altere portas somente com justificativa, aplique MFA/Network Level Authentication (NLA), limite a origem por firewall e evite expor diretamente à internet.</p>
+    <p><em>Onde vou aplicar isso:</em> você habilitará NLA, restringirá grupos autorizados e criará regra de firewall restritiva para RDP.</p>
+  </div>
+
+  <div>
+    <h3 class="h5 fw-bold">Logs, Visualizador de Eventos e retenção</h3>
+    <p>Logs são evidências. O Event Viewer centraliza registros do sistema, segurança, aplicativos e mais. Definir retenção adequada evita perda de evidências em incidentes.</p>
+    <p>Habilitar auditoria de logon, objetos e mudanças críticas ajuda na detecção e resposta. Em laboratório, ajuste o tamanho máximo e a política de substituição.</p>
+    <p><em>Onde vou aplicar isso:</em> você revisará canais de log, aumentará o tamanho dos logs principais e habilitará auditorias básicas.</p>
+  </div>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Hardening básico em Windows (VM de laboratório)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Executar um checklist de hardening no Windows 10/11 com configurações nativas, registrando evidências antes/depois e validando o resultado.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">1) Preparação e registro de estado atual</h3>
+    <p>- Faça login com uma conta que possua privilégios administrativos na VM de laboratório.</p>
+    <p>- Crie uma pasta C:\Hardening para salvar prints e exportações.</p>
+    <pre class="language-powershell"><code># Criar pasta de trabalho
+New-Item -ItemType Directory -Path 'C:\Hardening' -Force | Out-Null
+
+# Inventário rápido
+systeminfo &gt; C:\Hardening\01-systeminfo.txt
+Get-ComputerInfo &gt; C:\Hardening\01-computerinfo.txt
+
+# Estado do Firewall
+Get-NetFirewallProfile | Format-Table Name, Enabled &gt; C:\Hardening\01-firewall.txt
+
+# Estado do Defender
+Get-MpComputerStatus | Select AMServiceEnabled, RealTimeProtectionEnabled, NISEnabled, AntivirusEnabled | Format-List &gt; C:\Hardening\01-defender.txt
+
+# Logs atuais (tamanho configurado)
+wevtutil el | ForEach-Object { "$_ : $(wevtutil gl $_ | Select-String 'maxSize:')" } &gt; C:\Hardening\01-logs-size.txt</code></pre>
+    <div class="alert alert-light border mb-0" role="note">Evidência: capture telas importantes (Windows Update, Defender, Firewall) antes das mudanças e salve em C:\Hardening.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">2) Atualizações do Windows</h3>
+    <p>- Acesse Configurações &gt; Windows Update, clique em Verificar atualizações e instale as pendências. Reinicie se solicitado.</p>
+    <pre class="language-powershell"><code># PowerShell: verificar e instalar atualizações (Windows 10/11 com PSWindowsUpdate)
+# Observação: se o módulo não estiver instalado, instale primeiro (em laboratório)
+Install-Module -Name PSWindowsUpdate -Force -Scope CurrentUser
+Import-Module PSWindowsUpdate
+Get-WindowsUpdate
+Install-WindowsUpdate -AcceptAll -AutoReboot</code></pre>
+    <div class="alert alert-light border mb-0" role="note">Aplicação do conceito: reduzir vulnerabilidades conhecidas com patches atualizados.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">3) Microsoft Defender Antivirus</h3>
+    <p>- Verifique se a proteção em tempo real está ativa e atualize as definições.</p>
+    <pre class="language-powershell"><code># Atualizar assinaturas
+Update-MpSignature
+
+# Garantir proteção em tempo real
+Set-MpPreference -DisableRealtimeMonitoring $false
+
+# Ativar envio de amostras (em laboratório)
+Set-MpPreference -SubmitSamplesConsent 1
+
+# Verificação rápida e completa
+Start-MpScan -ScanType QuickScan
+Start-MpScan -ScanType FullScan</code></pre>
+    <div class="alert alert-light border mb-0" role="note">Aplicação do conceito: proteção antimalware ativa e assinaturas em dia minimizam risco de infecção.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">4) Firewall do Windows: perfis e logging</h3>
+    <p>- Ative o firewall em todos os perfis e habilite logs (conexões permitidas/negadas) com tamanho maior.</p>
+    <pre class="language-powershell"><code># Habilitar firewall em todos os perfis
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+
+# Ativar logging e aumentar tamanho do log
+Set-NetFirewallProfile -Profile Domain,Public,Private `
+  -LogAllowed True -LogBlocked True `
+  -LogFileName '%systemroot%\system32\LogFiles\Firewall\pfirewall.log' `
+  -LogMaxSizeKilobytes 32767
+
+# Exemplo de regra: permitir somente RDP a partir de uma sub-rede específica (ajuste para seu laboratório)
+# Substitua 192.168.1.0/24 pela sua rede
+New-NetFirewallRule -DisplayName 'RDP-Allow-From-LAN' -Direction Inbound -Protocol TCP -LocalPort 3389 -Action Allow -RemoteAddress 192.168.1.0/24
+# Bloquear outras entradas de RDP (garante que apenas a LAN tenha acesso)
+New-NetFirewallRule -DisplayName 'RDP-Deny-Other' -Direction Inbound -Protocol TCP -LocalPort 3389 -Action Block -RemoteAddress Any</code></pre>
+    <div class="alert alert-light border mb-0" role="note">Aplicação do conceito: princípio do menor privilégio de rede e geração de evidências via logs.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">5) Políticas locais, UAC e contas</h3>
+    <p>- UAC: deixe no nível padrão ou superior. Políticas de senha e bloqueio de conta: defina requisitos mínimos.</p>
+    <pre class="language-powershell"><code># UAC (ConsentPromptBehaviorAdmin = 5 mantém prompts seguros; 2 é menos restritivo)
+# 5 = Prompt for consent for non-Windows binaries
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' `
+  -Name 'ConsentPromptBehaviorAdmin' -Value 5 -PropertyType DWord -Force | Out-Null
+
+# Forçar senha forte (via secedit/Net accounts como exemplo simples em laboratório)
+# Observação: para granularidade completa, usar Local Security Policy (secpol.msc) ou LGPO.
+net accounts /minpwlen:10 /maxpwage:60 /minpwage:1 /uniquepw:5
+net accounts /lockoutthreshold:5 /lockoutduration:30 /lockoutwindow:30
+
+# Revisar membros do grupo Administradores locais
+net localgroup Administradores
+# Remover usuários não autorizados (exemplo):
+# net localgroup Administradores "USUARIO-NÃO-AUTORIZADO" /delete</code></pre>
+    <div class="alert alert-light border mb-0" role="note">Aplicação do conceito: aumentar barreiras contra escalonamento de privilégios e ataques por senha fraca.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">6) BitLocker (Criptografia de disco)</h3>
+    <p>- Verifique suporte a TPM e estado do BitLocker. Ative a criptografia para a unidade do sistema (C:) em laboratório.</p>
+    <pre class="language-powershell"><code># Verificar status do BitLocker
+manage-bde -status
+
+# Ativar BitLocker no C: com proteção por TPM (se disponível) e gerar chave de recuperação
+# ATENÇÃO: Salve a chave de recuperação em local seguro ANTES de prosseguir.
+$RecoveryPath = 'C:\Hardening\RecoveryKey.txt'
+# Habilitar
+manage-bde -on C: -RecoveryPassword
+# Exportar informações de recuperação
+(Get-BitLockerVolume -MountPoint 'C:').KeyProtector | Out-File -FilePath $RecoveryPath -Encoding utf8
+
+# Acompanhar progresso
+manage-bde -status C:</code></pre>
+    <div class="alert alert-warning mb-0" role="alert"><strong>Atenção:</strong> Em VM sem TPM, utilize senha de recuperação. Não desligue a máquina durante a criptografia inicial.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">7) RDP seguro</h3>
+    <p>- Se o RDP for necessário no laboratório, habilite a NLA, restrinja o grupo de usuários autorizados e limite a origem no firewall (passo 4).</p>
+    <pre class="language-powershell"><code># Habilitar NLA
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v UserAuthentication /t REG_DWORD /d 1 /f
+
+# Garantir que somente "Usuários da Área de Trabalho Remota" tenham acesso
+# Adicione usuários necessários; remova os indevidos pela GUI (System Properties) ou via comandos de grupo local
+net localgroup "Usuários da Área de Trabalho Remota"
+# Para adicionar (exemplo):
+# net localgroup "Usuários da Área de Trabalho Remota" LAB\aluno /add</code></pre>
+    <div class="alert alert-light border mb-0" role="note">Aplicação do conceito: diminuir riscos de brute force e acessos indevidos em serviços remotos.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">8) Logs e retenção no Event Viewer</h3>
+    <p>- Aumente o tamanho dos principais logs (Application, System, Security) e configure política de substituição por necessidade.</p>
+    <pre class="language-powershell"><code># Aumentar tamanho dos logs para 64 MB (ajuste conforme laboratório)
+wevtutil sl Application /ms:67108864
+wevtutil sl System /ms:67108864
+wevtutil sl Security /ms:134217728  # Segurança costuma ser maior
+
+# Habilitar auditorias básicas (logon/logoff, alteração de política)
+# Em laboratório, via auditpol:
+auditpol /set /category:"Logon/Logoff" /success:enable /failure:enable
+auditpol /set /category:"Policy Change" /success:enable /failure:enable
+
+# Exportar logs (amostra)
+wevtutil epl Security C:\Hardening\Security.evtx
+wevtutil epl System C:\Hardening/System.evtx
+wevtutil epl Application C:\Hardening/Application.evtx</code></pre>
+    <div class="alert alert-light border mb-0" role="note">Aplicação do conceito: preservar evidências e facilitar investigação.</div>
+  </div>
+
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold mb-2">9) Validação e comparação antes/depois</h3>
+    <p>- Gere novamente os relatórios rápidos, compare com o estado inicial e registre prints da configuração final.</p>
+    <pre class="language-powershell"><code># Coleta após hardening
+Get-NetFirewallProfile | Format-Table Name, Enabled &gt; C:\Hardening\99-firewall-after.txt
+Get-MpComputerStatus | Select AMServiceEnabled, RealTimeProtectionEnabled, NISEnabled, AntivirusEnabled | Format-List &gt; C:\Hardening\99-defender-after.txt
+wevtutil el | ForEach-Object { "$_ : $(wevtutil gl $_ | Select-String 'maxSize:')" } &gt; C:\Hardening\99-logs-size-after.txt
+
+# Opcional: teste de porta RDP a partir de outra máquina (apenas em rede de laboratório controlada)
+# Test-NetConnection -ComputerName 192.168.1.100 -Port 3389</code></pre>
+    <div class="alert alert-success mb-0" role="alert">Entregável: Checklist preenchido + relatório com evidências (antes/depois) em C:\Hardening.</div>
+  </div>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a configuração de hardening e a capacidade de documentar tecnicamente o processo.</p>
+        <div class="vstack gap-3 mt-3">
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">Atividade 1 — Checklist comparativo</h3>
+    <p>Crie um checklist próprio com 15–20 itens baseados no passo a passo. Aplique em outra VM Windows e compare as diferenças (o que já estava conforme, o que precisou de ajuste). Anexe prints e saídas de comandos.</p>
+  </div>
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">Atividade 2 — Política de senha e UAC</h3>
+    <p>Implemente uma política de senha mais rígida (ex.: 12 caracteres, histórico 10, expiração 45 dias) e registre as telas/saídas que comprovem a mudança. Justifique o nível de UAC escolhido.</p>
+  </div>
+  <div class="card-soft bg-white p-4">
+    <h3 class="h6 fw-bold">Atividade 3 — Logs e auditoria</h3>
+    <p>Crie um plano de retenção de logs para 3 perfis de uso (usuário comum, estação de suporte, servidor) e aplique no Windows de laboratório, exportando os canais para verificação.</p>
+  </div>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+  <ul class="mb-0">
+    <li>Correção técnica e aderência às boas práticas de segurança.</li>
+    <li>Documentação clara, com evidências antes/depois reproduzíveis.</li>
+    <li>Justificativas coerentes para cada configuração aplicada.</li>
+    <li>Organização dos artefatos (estrutura de pastas, nomes de arquivos, versões).</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação Microsoft: Segurança do Windows, Microsoft Defender Antivirus, Windows Firewall.</li><li>Guia CIS Benchmarks para Microsoft Windows (visão geral de controles de hardening).</li><li>Políticas de Grupo e LGPO: como aplicar e exportar políticas locais.</li><li>BitLocker: melhores práticas de implantação e recuperação.</li><li>Event Viewer e wevtutil: gerenciamento e automação de logs no Windows.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 07</h2>
+        <ul><li>Checklist de hardening preenchido.</li><li>Relatório antes/depois com evidências (prints, arquivos .txt/.evtx) em C:\Hardening ou pasta equivalente.</li><li>Resumo de riscos mitigados e próximos passos sugeridos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Segurança de sistemas operacionais: fundamentos</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Hardening em Linux</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Segurança da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual a principal razão para manter o Windows Update em dia em um processo de hardening?","correta":"B","alternativas":{"A":"Melhorar exclusivamente o desempenho gráfico.","B":"Corrigir vulnerabilidades conhecidas e reduzir a superfície de ataque.","C":"Liberar mais espaço em disco automaticamente.","D":"Desativar serviços não utilizados.","E":"Forçar a reinstalação do sistema periodicamente."}},{"id":"q2","titulo":"No Microsoft Defender, qual prática é adequada em um laboratório de hardening?","correta":"C","alternativas":{"A":"Desabilitar a proteção em tempo real para economizar CPU.","B":"Nunca atualizar assinaturas para evitar conflitos.","C":"Manter proteção em tempo real ativada e atualizar assinaturas antes da varredura.","D":"Executar apenas verificação rápida uma vez ao ano.","E":"Confiar somente em proteção offline."}},{"id":"q3","titulo":"Sobre o Firewall do Windows, qual configuração está alinhada ao princípio do menor privilégio?","correta":"E","alternativas":{"A":"Desativar o firewall em todos os perfis.","B":"Permitir todas as portas TCP de entrada por padrão.","C":"Criar uma regra ampla permitindo qualquer origem.","D":"Permitir RDP de qualquer endereço público por conveniência.","E":"Habilitar o firewall em todos os perfis e liberar apenas o tráfego estritamente necessário."}},{"id":"q4","titulo":"Qual combinação melhora a segurança de contas locais no Windows?","correta":"A","alternativas":{"A":"UAC ativo em nível seguro, senhas fortes e política de bloqueio de conta.","B":"UAC desativado e nenhuma expiração de senha.","C":"Permitir que todos sejam administradores locais.","D":"Reutilizar senhas e manter histórico zerado.","E":"Nunca exigir complexidade de senha."}},{"id":"q5","titulo":"O BitLocker atua principalmente na proteção de qual aspecto da segurança da informação?","correta":"C","alternativas":{"A":"Disponibilidade do serviço.","B":"Integridade de pacotes de rede.","C":"Confidencialidade de dados em repouso.","D":"Desempenho do sistema.","E":"Controle de banda de internet."}},{"id":"q6","titulo":"Sobre RDP seguro, qual opção é mais adequada?","correta":"D","alternativas":{"A":"Expor RDP à internet sem restrições.","B":"Desativar NLA para facilitar o acesso.","C":"Permitir RDP para qualquer endereço IP por padrão.","D":"Habilitar NLA, restringir grupo de acesso e limitar origem no firewall.","E":"Compartilhar a senha do administrador por e-mail."}},{"id":"q7","titulo":"Por que aumentar o tamanho dos logs e ajustar a retenção no Event Viewer é importante?","correta":"B","alternativas":{"A":"Para reduzir a quantidade de eventos registrados.","B":"Para evitar perda de evidências importantes e facilitar auditoria.","C":"Para desabilitar auditorias e economizar espaço.","D":"Para apagar eventos automaticamente sem controle.","E":"Para impedir que o sistema crie novos eventos."}}];
+    const CHECKLIST_DATA = [{"id":"chk-prepare","texto":"Criei a pasta C:\\Hardening e coletei o estado inicial (systeminfo, firewall, defender, logs)."},{"id":"chk-update","texto":"Verifiquei e instalei atualizações do Windows (reiniciei se necessário)."},{"id":"chk-defender-rtp","texto":"Ativei a proteção em tempo real e atualizei assinaturas do Defender."},{"id":"chk-defender-scan","texto":"Executei ao menos uma verificação completa do sistema."},{"id":"chk-fw-enable","texto":"Habilitei o Firewall do Windows em todos os perfis (Domínio/Privado/Público)."},{"id":"chk-fw-logs","texto":"Ativei logging do firewall (allowed/blocked) e aumentei o tamanho do log."},{"id":"chk-fw-rdp","texto":"Restrigi RDP via firewall apenas a origens necessárias (ou desabilitei se não for usar)."},{"id":"chk-uac","texto":"Ajustei UAC para nível seguro e confirmei prompts adequados."},{"id":"chk-policy","texto":"Apliquei política de senha/bloqueio de conta (mín. 10 caracteres, histórico, expiração)."},{"id":"chk-admins","texto":"Revisei membros do grupo Administradores locais e removi acessos indevidos."},{"id":"chk-bitlocker","texto":"Ativei BitLocker (quando aplicável) e guardei a chave de recuperação em local seguro."},{"id":"chk-logs","texto":"Aumentei tamanho dos logs (Application/System/Security) e habilitei auditorias básicas."},{"id":"chk-export-logs","texto":"Exporteis os principais canais de log (.evtx) para evidência."},{"id":"chk-compare","texto":"Refiz as coletas pós-hardening e comparei antes/depois."},{"id":"chk-report","texto":"Organizei relatório com prints, saídas e justificativas técnicas."}];
+    const CHECKLIST_KEY = 'sein-cap07-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

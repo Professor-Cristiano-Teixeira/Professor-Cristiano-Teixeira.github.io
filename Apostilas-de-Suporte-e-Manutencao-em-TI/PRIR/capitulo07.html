@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 — IPv6: Fundamentos e Endereços</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo07.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRIR</span>
+        <span style="color: var(--cor-principal);">Projeto e Implementação de Redes de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução às Redes e à Internet</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Topologias, Dispositivos e Representações</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Camada Física: Cabeamento e Padrões</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Ethernet e Operação de Enlace</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Endereçamento IPv4: Conceitos e Prática</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Sub-redes IPv4 e VLSM</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — IPv6: Fundamentos e Endereços</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Introdução a VLANs e Segmentação Lógica</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Sistema IOS e Acesso a Dispositivos</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Configuração Básica de Switches</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — ICMP, Ping e Traceroute para Troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Rastreadores de Pacotes e Encapsulamento</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Conexões com a Internet e Redes Confiáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Tecnologias Sem Fio, Datacenters e Servidores</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — QoS, Segurança e Escalabilidade em LANs</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto Integrador: Construção de uma Pequena LAN</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 07 — IPv6: Fundamentos e Endereços</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (teoria e prática)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> LAN didática com duplo stack (IPv4/IPv6) em simulação (Packet Tracer/GNS3)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows/Linux, Cisco IOS, ICMPv6, SLAAC, NDP</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar o formato de endereços e prefixos IPv6 e sua notação abreviada.</li><li>Diferenciar tipos de endereços IPv6: global unicast, ULA e link-local, e reconhecer seus escopos.</li><li>Configurar endereços IPv6 estáticos em hosts e dispositivos de rede.</li><li>Habilitar e verificar autoconfiguração SLAAC e vizinhança via NDP/ICMPv6.</li><li>Comparar aspectos práticos de IPv4 vs. IPv6 em testes de conectividade (ping, traceroute).</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>MSI03: Identificar e aplicar endereçamento IP adequado ao projeto.</li><li>MSI07: Configurar dispositivos de rede e validar conectividade.</li><li>MSI18: Documentar planos de endereçamento e resultados de testes.</li><li>Habilidades: planejamento de prefixos, execução de testes ICMPv6, análise de NDP.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Sub-redes IPv4 e VLSM</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Introdução a VLANs e Segmentação Lógica</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 07)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul class="mb-0">
+  <li><strong>Objetivo da aula:</strong> apresentar fundamentos do IPv6 e realizar configuração básica (estática e SLAAC) com testes de ICMPv6 e análise de vizinhança (NDP).</li>
+  <li><strong>Materiais:</strong> PCs/VMs com Windows/Linux, Packet Tracer ou GNS3, roteador/switch simulados, anotações e planilha de endereçamento.</li>
+  <li><strong>Sequência (sugestão 4h):</strong>
+    <ul>
+      <li>0:00–0:20 — Motivação e panorama IPv6 vs IPv4.</li>
+      <li>0:20–0:50 — Endereços, prefixos, abreviações e tipos (global, ULA, link-local).</li>
+      <li>0:50–1:20 — ICMPv6 e NDP; SLAAC, RA/RS; escopos.</li>
+      <li>1:20–1:30 — Pausa.</li>
+      <li>1:30–2:30 — Laboratório: configuração estática em hosts e testes (ping6, ip -6 neigh).</li>
+      <li>2:30–3:30 — Laboratório: habilitar SLAAC via roteador Cisco e verificar RA/NDP.</li>
+      <li>3:30–4:00 — Troubleshooting, checklist e consolidado.</li>
+    </ul>
+  </li>
+  <li><strong>Avaliação formativa:</strong> participação nos testes, acertos no checklist e curto relato técnico de evidências (prints e comandos).</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+  <h3 class="h5 fw-bold">1) Por que IPv6?</h3>
+  <p>O IPv6 surgiu para resolver a escassez de endereços públicos do IPv4 e simplificar operações de rede. Ele oferece um espaço de endereçamento muito maior (128 bits), autoconfiguração mais robusta e melhorias em protocolos de descoberta e ICMP.</p>
+  <p>Além da quantidade de endereços, o IPv6 padroniza mecanismos como SLAAC e Neighbor Discovery Protocol (NDP), facilitando a configuração automática de hosts e a descoberta de roteadores.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao planejar sua LAN com suporte a IPv6 e ao comparar comportamentos de conectividade com IPv4.</p>
+  <hr>
+  <h3 class="h5 fw-bold">2) Formato de endereços IPv6 e notação</h3>
+  <p>Um endereço IPv6 tem 128 bits, representados em oito grupos de 16 bits (hexadecimal), separados por dois-pontos. Exemplo: 2001:0db8:0000:0000:0000:0000:0000:0001/64.</p>
+  <p>Abreviações permitidas: remover zeros à esquerda em cada grupo e usar “::” uma única vez para substituir sequência de grupos 0. Ex.: 2001:db8::1/64 é equivalente ao exemplo anterior.</p>
+  <p>Prefixo indica a parte de rede (semelhante à máscara no IPv4). Um /64 é comum em LANs, permitindo IIDs (identificadores de interface) de 64 bits.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao escrever/ler endereços em configurações estáticas e ao validar se o prefixo foi atribuído corretamente na LAN.</p>
+  <hr>
+  <h3 class="h5 fw-bold">3) Tipos de endereços e escopos</h3>
+  <p><strong>Global Unicast</strong> (2000::/3): roteáveis na Internet; utilizados para comunicação externa. <strong>ULA</strong> (fc00::/7, comumente fd00::/8): endereços locais não roteáveis na Internet, úteis para redes internas. <strong>Link-local</strong> (fe80::/10): válidos apenas no enlace (não roteados), criados automaticamente, usados para NDP e roteamento local.</p>
+  <p>O escopo define onde o endereço é válido: link-local (somente no enlace), site (ULA) e global (Internet). Um host pode ter múltiplos endereços simultaneamente.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao escolher endereços para laboratório (ULA em testes internos), ao verificar conectividade local (link-local) e ao planejar acesso externo (global).</p>
+  <hr>
+  <h3 class="h5 fw-bold">4) SLAAC, ICMPv6 e NDP</h3>
+  <p>O SLAAC (Stateless Address Autoconfiguration) permite que hosts formem endereços automaticamente a partir de anúncios de roteador (Router Advertisements, RAs) enviados via ICMPv6. O NDP inclui mensagens RS/RA, Neighbor Solicitation/Advertisement (NS/NA) e substitui ARP do IPv4.</p>
+  <p>Com SLAAC, um roteador anuncia o prefixo (ex.: 2001:db8:acad:1::/64) e os hosts criam seus próprios IIDs, além de definirem gateway padrão automaticamente.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao habilitar IPv6 em um roteador Cisco (RAs) e validar se os PCs receberam endereços e gateway via SLAAC.</p>
+  <hr>
+  <h3 class="h5 fw-bold">5) Comparação IPv4 vs IPv6 (visão prática)</h3>
+  <p>No IPv4, usamos máscaras e ARP; no IPv6, usamos prefixos e NDP. O broadcast é substituído por multicast bem definido. Em testes, ping vira ping6 (ou ping -6) e vizinhança é consultada com ip -6 neigh.</p>
+  <p>O roteamento e a noção de gateway existem em ambos, mas a descoberta e a autoconfiguração são mais padronizadas no IPv6.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao executar ping6 e traceroute6 e ao comparar tabelas de vizinhança ARP (IPv4) vs NDP (IPv6).</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Configurando IPv6 (estático e SLAAC) e validando com ICMPv6/NDP</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Configurar IPv6 em hosts e roteador, habilitar SLAAC, e comprovar conectividade e vizinhança por meio de comandos práticos.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">Cenário</h3>
+  <p>Topologia simples: PC-A e PC-B conectados a um switch, que se conecta a um roteador (R1). O R1 anunciará o prefixo 2001:db8:acad:1::/64 na VLAN/LAN. Você fará testes com endereços ULA alternativos fd12:3456:789a:1::/64 para laboratório interno.</p>
+
+  <hr>
+  <h3 class="h6 fw-bold">1) Configuração IPv6 estática em hosts</h3>
+  <p>Escolha ULA para laboratório: prefixo fd12:3456:789a:1::/64. Defina endereços e gateway para PC-A e PC-B. Em Linux, use o ip; em Windows, netsh.</p>
+
+  <p class="mb-1"><strong>Linux (ex.: interface enp0s3)</strong></p>
+  <pre class="language-bash"><code># verificar interfaces e IPv6
+ip -6 addr show
+# adicionar endereço estático
+sudo ip -6 addr add fd12:3456:789a:1::10/64 dev enp0s3
+# definir gateway padrão (link-local do roteador provisório)
+sudo ip -6 route add default via fe80::1 dev enp0s3
+# validar
+ip -6 addr show dev enp0s3
+ip -6 route show
+ping -6 fd12:3456:789a:1::11 -c 4</code></pre>
+
+  <p class="mb-1"><strong>Windows (PowerShell/Prompt como Admin)</strong></p>
+  <pre class="language-bash"><code># listar interfaces
+netsh interface ipv6 show interfaces
+# adicionar endereço estático (ajuste o nome da interface)
+netsh interface ipv6 add address "Ethernet" fd12:3456:789a:1::10
+# adicionar rota default via gateway link-local (ajuste a interface index)
+netsh interface ipv6 add route ::/0 "Ethernet" fe80::1
+# testar
+ping -6 fd12:3456:789a:1::11
+tracert -6 fd12:3456:789a:1::11</code></pre>
+
+  <div class="alert alert-light border mt-3 mb-0">
+    Dica: endereços link-local começam com fe80::/10 e são necessários para gateway quando a vizinhança ainda não está aprendida.
+  </div>
+
+  <hr>
+  <h3 class="h6 fw-bold">2) Habilitar IPv6 e SLAAC no roteador (Cisco IOS)</h3>
+  <p>No R1, habilite IPv6 globalmente, configure a interface conectada à LAN com um endereço do prefixo global e/ou ULA e ative a emissão de RAs (normalmente automática ao configurar IPv6 em interface L3).</p>
+  <pre class="language-bash"><code>enable
+configure terminal
+ipv6 unicast-routing
+
+interface g0/0
+ description LAN
+ ipv6 address 2001:db8:acad:1::1/64
+ ipv6 address fd12:3456:789a:1::1/64
+ no shutdown
+exit
+
+! Opcional: anunciar apenas um prefixo em laboratório
+! interface já envia RA por padrão com ipv6 unicast-routing
+end
+write memory</code></pre>
+
+  <div class="alert alert-light border mt-3 mb-0">
+    Observação: Com ipv6 unicast-routing habilitado e um endereço IPv6 na interface, o roteador envia RAs periodicamente, permitindo SLAAC nos hosts.
+  </div>
+
+  <hr>
+  <h3 class="h6 fw-bold">3) Receber endereço via SLAAC nos hosts</h3>
+  <p>Deixe a interface dos PCs em modo automático para IPv6. Em Linux, reinicie a interface para forçar RS/RA; no Windows, desative/ative a interface.</p>
+  <pre class="language-bash"><code># Linux
+sudo ip link set enp0s3 down
+sudo ip link set enp0s3 up
+sleep 2
+ip -6 addr show dev enp0s3 | grep "scope global"
+
+# Windows (PowerShell)
+Disable-NetAdapter -Name "Ethernet" -Confirm:$false
+Enable-NetAdapter -Name "Ethernet"
+Get-NetIPConfiguration | Select-Object -ExpandProperty IPv6Address</code></pre>
+
+  <p>Espere ver endereços 2001:db8:acad:1::/64 e/ou fd12:3456:789a:1::/64 além de um link-local fe80::. O gateway padrão deve apontar para o roteador anunciado via RA.</p>
+
+  <hr>
+  <h3 class="h6 fw-bold">4) Testes de conectividade e NDP</h3>
+  <p>Verifique conectividade entre PCs, gateway e, se houver, outras sub-redes. Examine tabela de vizinhança (equivalente ao ARP do IPv4).</p>
+  <pre class="language-bash"><code># Linux
+ping -6 2001:db8:acad:1::1 -c 4
+ip -6 neigh show
+traceroute -6 2001:db8:acad:1::1
+
+# Windows
+ping -6 2001:db8:acad:1::1
+netsh interface ipv6 show neighbors
+tracert -6 2001:db8:acad:1::1</code></pre>
+
+  <hr>
+  <h3 class="h6 fw-bold">5) Troubleshooting comum</h3>
+  <ul>
+    <li>Sem endereço global: confirme que o roteador está com ipv6 unicast-routing e endereço /64 na interface.</li>
+    <li>Sem gateway: verifique se há RA chegando (sniffer/simulador) e se o link-local do roteador é alcançável.</li>
+    <li>Prefixo incorreto: valide o /64; em clientes estáticos, confira notação e interface correta.</li>
+  </ul>
+
+  <pre class="language-bash"><code># Cisco IOS — verificação
+show ipv6 interface g0/0
+show ipv6 neighbors
+show running-config | section interface g0/0</code></pre>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de endereços IPv6, SLAAC e ferramentas de teste em uma topologia simples.</p>
+        <div class="card-soft bg-white p-4">
+  <ol class="mb-3">
+    <li><strong>Mapa de endereçamento:</strong> crie uma tabela com endereços link-local, ULA e global (se aplicável) para dois hosts e um roteador em uma mesma LAN /64.</li>
+    <li><strong>Dual-stack básico:</strong> mantenha IPv4 funcional e adicione IPv6 via SLAAC; registre comparativos de ping e traceroute (v4 vs v6).</li>
+    <li><strong>Teste de escopo:</strong> tente pingar um endereço link-local do roteador a partir do host, especificando a interface quando necessário, e explique o porquê.</li>
+  </ol>
+  <div class="alert alert-light border mb-0">
+    Entregue evidências: comandos utilizados, capturas de tela, e breve explicação (3–5 linhas) por atividade.
+  </div>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de Avaliação</h3>
+  <ul class="mb-0">
+    <li>Correção técnica do endereçamento e prefixos.</li>
+    <li>Comprovação de conectividade e leitura da vizinhança (NDP).</li>
+    <li>Clareza das evidências e organização do relatório.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação do ICMPv6 e mensagens RS/RA, NS/NA (RFCs relacionadas).</li><li>Práticas recomendadas para atribuição de ULA e planejamento de prefixos em redes internas.</li><li>Comparação de mecanismos de privacidade em IPv6 (Stable Privacy, Temporary Addresses).</li><li>Diferenças entre SLAAC, DHCPv6 e endereçamento estático em ambientes corporativos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 07</h2>
+        <ul><li>Tabela de endereçamento IPv6 da LAN (link-local, ULA e/ou global) com indicação de interfaces.</li><li>Relatório curto com resultados de ping6, traceroute6 e saída de vizinhança (ip -6 neigh ou equivalente).</li><li>Prints/outputs que comprovem recebimento de RA/SLAAC e gateway padrão IPv6.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Sub-redes IPv4 e VLSM</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Introdução a VLANs e Segmentação Lógica</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; PRIR — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual opção representa corretamente um endereço IPv6 abreviado?","alternativas":{"A":"2001:0db8:0000:0000:0000:0000:0000:0001","B":"2001:db8::1","C":"2001::db8::1","D":"2001:db8:1","E":"2001-db8-::-1"},"correta":"B"},{"id":"q2","titulo":"Qual é o escopo do endereço fe80::/10?","alternativas":{"A":"Global (Internet)","B":"Site (ULA)","C":"Link-local (somente no enlace)","D":"Loopback","E":"Reservado, não utilizável"},"correta":"C"},{"id":"q3","titulo":"No IPv6, o SLAAC depende de quais mensagens do ICMPv6?","alternativas":{"A":"ARP Request/Reply","B":"Echo Request/Reply","C":"Router Solicitation/Router Advertisement","D":"Time Exceeded","E":"Redirect apenas"},"correta":"C"},{"id":"q4","titulo":"Qual prefixo é tipicamente usado para endereços ULA?","alternativas":{"A":"10.0.0.0/8","B":"172.16.0.0/12","C":"192.168.0.0/16","D":"fd00::/8 (dentro de fc00::/7)","E":"ff00::/8"},"correta":"D"},{"id":"q5","titulo":"Qual afirmação é correta sobre NDP no IPv6?","alternativas":{"A":"NDP substitui ARP e usa mensagens NS/NA para resolver vizinhança.","B":"NDP é exclusivo para roteadores BGP.","C":"NDP envia broadcast para descobrir MACs.","D":"NDP só funciona com DHCPv6 habilitado.","E":"NDP existe apenas em redes sem fio."},"correta":"A"},{"id":"q6","titulo":"Em uma LAN IPv6 com /64, o que os RAs fornecem aos hosts?","alternativas":{"A":"Somente o DNS","B":"Somente o endereço MAC do roteador","C":"Informações de prefixo e gateway para autoconfiguração","D":"Somente o MTU da interface","E":"Nada; RAs são opcionais e não impactam SLAAC"},"correta":"C"},{"id":"q7","titulo":"Qual alternativa diferencia corretamente IPv4 e IPv6?","alternativas":{"A":"IPv6 usa ARP para resolver endereços, IPv4 usa NDP.","B":"IPv6 utiliza multicast em vez de broadcast amplo.","C":"IPv6 não possui roteadores default.","D":"IPv6 não suporta ICMP.","E":"IPv6 não permite endereços estáticos."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Expliquei a diferença entre global, ULA e link-local e citei exemplos."},{"id":"c2","texto":"Consegui escrever endereços IPv6 em notação abreviada corretamente."},{"id":"c3","texto":"Configurei um endereço IPv6 estático no meu host e validei com ping -6."},{"id":"c4","texto":"Habilitei SLAAC no roteador e o host recebeu endereço/gateway automaticamente."},{"id":"c5","texto":"Listei vizinhos com ip -6 neigh (ou equivalente) e interpretei a saída."},{"id":"c6","texto":"Comparei testes v4 e v6 (ping/traceroute) e registrei resultados."},{"id":"c7","texto":"Montei um pequeno relatório com evidências (comandos e prints)."}];
+    const CHECKLIST_KEY = 'prir_cap07_checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

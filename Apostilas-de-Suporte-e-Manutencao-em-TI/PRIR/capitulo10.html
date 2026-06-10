@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 10 — Configuração Básica de Switches</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo10.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRIR</span>
+        <span style="color: var(--cor-principal);">Projeto e Implementação de Redes de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução às Redes e à Internet</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Topologias, Dispositivos e Representações</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Camada Física: Cabeamento e Padrões</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Ethernet e Operação de Enlace</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Endereçamento IPv4: Conceitos e Prática</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Sub-redes IPv4 e VLSM</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — IPv6: Fundamentos e Endereços</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Introdução a VLANs e Segmentação Lógica</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Sistema IOS e Acesso a Dispositivos</a></li>
+              <li><a class="dropdown-item active" href="capitulo10.html">Capítulo 10 — Configuração Básica de Switches</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — ICMP, Ping e Traceroute para Troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Rastreadores de Pacotes e Encapsulamento</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Conexões com a Internet e Redes Confiáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Tecnologias Sem Fio, Datacenters e Servidores</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — QoS, Segurança e Escalabilidade em LANs</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto Integrador: Construção de uma Pequena LAN</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 10 — Configuração Básica de Switches</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (sugerida)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> LAN Ethernet com gerenciamento seguro do switch</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Cisco IOS (Packet Tracer/GNS3 ou equipamento real), IPv4, SSH</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Configurar identidade do switch (hostname, banners) e proteger o acesso com senhas criptografadas.</li><li>Habilitar e endereçar a SVI de gerenciamento (VLAN 1 ou VLAN dedicada) e testar conectividade.</li><li>Ajustar parâmetros de interfaces (descrição, speed e duplex) e verificar status/estatísticas.</li><li>Ativar acesso remoto seguro via SSH e desabilitar Telnet, salvando e documentando configurações.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>MSI03 — Identificar e configurar dispositivos de rede em topologias LAN.</li><li>MSI07 — Aplicar procedimentos de instalação e configuração de serviços de rede (acesso remoto seguro).</li><li>MSI18 — Elaborar documentação técnica de configurações e testes.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 09 — Sistema IOS e Acesso a Dispositivos</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 11 — ICMP, Ping e Traceroute para Troubleshooting</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 10)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Contexto:</strong> Continuidade do Cap. 09 (IOS e acesso). Neste capítulo, consolidamos a configuração base de um switch para colocá-lo em operação em uma LAN.</p><ol class="mb-0"><li><strong>Introdução (15 min):</strong> Objetivos, boas práticas de endurecimento (hardening) e visão geral de SVI de gerenciamento.</li><li><strong>Teoria (40 min):</strong> Hostname, banners, senhas e service password-encryption; SVI (VLAN 1 vs VLAN dedicada); interfaces (descrição, speed/duplex); verificações.</li><li><strong>Laboratório guiado (90 min):</strong> Aplicação passo a passo em Packet Tracer ou equipamento real: identidade do switch, hardening, SVI, SSH, testes ICMP, verificação de portas.</li><li><strong>Atividades independentes (20–30 min):</strong> Tarefas propostas e checklist.</li><li><strong>Encerramento (15 min):</strong> Revisão, questionário e orientações de documentação.</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Identidade do dispositivo: hostname e banners</h3>
+          <p>O <em>hostname</em> identifica unicamente o switch na rede e aparece em logs, prompts e ferramentas de gerenciamento. Padronizar nomes (ex.: SW-ANDAR1-01) facilita troubleshooting e operação.</p>
+          <p>Os <em>banners</em> exibem mensagens ao acesso (legal/aviso). O <strong>banner motd</strong> é uma boa prática para comunicar política de uso e dissuadir acessos não autorizados.</p>
+          <p><strong>Onde vou aplicar isso no passo a passo:</strong> Etapas 1 e 2 — definir hostname e configurar banners de aviso.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">2) Senhas e criptografia (hardening inicial)</h3>
+          <p>Proteger o acesso local (console e vty) é essencial. Use senha de modo privilegiado com <code>enable secret</code> (hash) em vez de <code>enable password</code>. Ative <code>service password-encryption</code> para ofuscar senhas legadas no running-config.</p>
+          <p>Para sessões remotas, prefira autenticação por usuário/senha e SSH. Desabilite Telnet para reduzir superfície de ataque.</p>
+          <p><strong>Onde vou aplicar isso no passo a passo:</strong> Etapa 3 — criar usuários, proteger console e vty, e criptografar senhas.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">3) SVI de gerenciamento (VLAN de gerenciamento)</h3>
+          <p>A SVI (<em>Switch Virtual Interface</em>) permite gerenciar o switch via IP. Por padrão, muitos ambientes usam VLAN 1; entretanto, recomenda-se uma <strong>VLAN dedicada de gerenciamento</strong> para isolar o tráfego administrativo.</p>
+          <p>Para a SVI funcionar, é necessário: atribuir IP/máscara, garantir que a VLAN exista, e que haja ao menos uma porta <em>up/up</em> nessa VLAN. É comum também configurar <em>default gateway</em> para gerenciamento intersub-redes.</p>
+          <p><strong>Onde vou aplicar isso no passo a passo:</strong> Etapa 4 — criar VLAN de gerenciamento (opcional), configurar a SVI e o gateway padrão.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">4) Configuração de portas: descrição, speed e duplex</h3>
+          <p>A descrição da interface documenta o que está conectado (ex.: “Uplink para R1 G0/0/1” ou “PC-LAB01”). Ajustar <strong>velocidade</strong> e <strong>duplex</strong> pode ser necessário para compatibilidade com equipamentos legados. Em ambientes homogêneos, o auto-negociação é recomendada.</p>
+          <p>Desajustes de duplex causam colisões tardias e baixa performance. Sempre verifique ambos os lados do link.</p>
+          <p><strong>Onde vou aplicar isso no passo a passo:</strong> Etapa 5 — definir descrições e, quando necessário, fixar speed/duplex.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">5) Verificações e salvamento</h3>
+          <p>Use comandos de verificação para confirmar o estado do switch: tabelas de MAC, status de interfaces e configuração de VLANs e SVI. Salve a configuração para preservar mudanças após reinicialização.</p>
+          <p><strong>Onde vou aplicar isso no passo a passo:</strong> Etapa 6 — testes (ping, SSH) e comandos de verificação; Etapa 7 — salvamento e backup.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Preparar e Gerenciar um Switch na LAN</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Aplicar a configuração essencial de um switch: identidade, hardening, SVI de gerenciamento, parâmetros de interfaces e acesso remoto seguro (SSH), validando com testes de conectividade.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Pré-requisitos de laboratório</h3>
+          <ul>
+            <li>Topologia mínima: 1 switch (IOS), 1 PC em VLAN de gerenciamento (ou mesma VLAN 1), 1 roteador para gateway (opcional).</li>
+            <li>Endereçamento disponível: exemplo 192.168.10.0/24 (VLAN 10 Gerenciamento).</li>
+            <li>Acesso inicial ao switch via console (emulador de terminal) e privilégios administrativos.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 1 — Ajustes iniciais e hostname</h3>
+          <p>Entre no modo privilegiado e configure o nome do dispositivo seguindo seu padrão.</p>
+          <pre class="language-bash"><code>enable
+configure terminal
+hostname SW-ANDAR1-01
+no ip domain-lookup
+</code></pre>
+          <div class="alert alert-light border mt-3 mb-0" role="note">
+            Dica: <code>no ip domain-lookup</code> evita atrasos quando um comando é digitado incorretamente.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 2 — Banners de aviso</h3>
+          <p>Crie um banner de aviso de uso autorizado. Use delimitadores iguais para abrir/fechar a mensagem.</p>
+          <pre class="language-bash"><code>configure terminal
+banner motd ^C
+Acesso restrito: uso autorizado apenas por pessoal de TI.
+Ações não autorizadas serão registradas.
+^C
+</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 3 — Hardening de senhas e usuários</h3>
+          <p>Defina a senha de modo privilegiado com hash, crie um usuário administrativo, proteja console e vty e ative a criptografia de senhas legadas.</p>
+          <pre class="language-bash"><code>configure terminal
+enable secret S3nh@Fort3!
+
+username admin secret Adm1n#2024
+
+line console 0
+ login local
+ logging synchronous
+ exec-timeout 10 0
+exit
+
+line vty 0 4
+ login local
+ transport input ssh
+ exec-timeout 10 0
+exit
+
+service password-encryption
+</code></pre>
+          <div class="alert alert-warning mt-3 mb-0" role="alert">
+            Segurança: Evite senhas fracas. Em produção, prefira chaves SSH e políticas de senhas.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 4 — SVI de gerenciamento e gateway padrão</h3>
+          <p>Opção A (recomendada): criar uma VLAN de gerenciamento (ex.: VLAN 10) e usar sua SVI. Opção B (didática): usar a VLAN 1.</p>
+          <p><strong>Opção A — VLAN dedicada (10):</strong></p>
+          <pre class="language-bash"><code>configure terminal
+vlan 10
+ name GERENCIAMENTO
+exit
+
+interface vlan 10
+ ip address 192.168.10.2 255.255.255.0
+ no shutdown
+exit
+
+ip default-gateway 192.168.10.1
+</code></pre>
+          <p><strong>Opção B — VLAN 1 (não recomendado em produção):</strong></p>
+          <pre class="language-bash"><code>configure terminal
+interface vlan 1
+ ip address 192.168.1.2 255.255.255.0
+ no shutdown
+exit
+
+ip default-gateway 192.168.1.1
+</code></pre>
+          <div class="alert alert-light border mt-3 mb-0" role="note">
+            Observação: A SVI ficará ativa quando existir pelo menos uma interface física ativa na mesma VLAN.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 5 — Ajustes de interfaces (descrição, speed e duplex)</h3>
+          <p>Documente os links e ajuste speed/duplex apenas quando necessário (compatibilidade). Na dúvida, mantenha auto.</p>
+          <pre class="language-bash"><code>configure terminal
+interface fastethernet0/1
+ description PC-LAB01
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+exit
+
+interface gigabitethernet0/1
+ description Uplink-para-R1-G0/0/1
+ speed 1000
+ duplex full
+exit
+</code></pre>
+          <div class="alert alert-light border mt-3 mb-0" role="note">
+            Em ambientes heterogêneos pode ser necessário fixar speed/duplex. Verifique nos dois lados do link.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 6 — SSH: domínio, chave e versões</h3>
+          <p>SSH requer nome de domínio e chave RSA. Ative apenas SSH nas linhas VTY (já feito na Etapa 3).</p>
+          <pre class="language-bash"><code>configure terminal
+ip domain-name escola.local
+crypto key generate rsa modulus 2048
+ip ssh version 2
+</code></pre>
+          <p>Teste o acesso a partir de um host da mesma rede:</p>
+          <pre class="language-bash"><code># no PC (terminal)
+ssh admin@192.168.10.2
+</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 7 — Verificação, testes e salvamento</h3>
+          <p>Valide conectividade e estado do switch. Em seguida, salve as configurações.</p>
+          <pre class="language-bash"><code># do switch
+show ip interface brief
+show interfaces status
+show running-config | section username|line|vty|interface Vlan
+show vlan brief
+show mac address-table
+ping 192.168.10.1
+ping 192.168.10.3
+
+# salvar
+copy running-config startup-config
+# ou:
+write memory
+</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 8 — Backup da configuração (opcional)</h3>
+          <p>Realize backup via TFTP/FTP/SCP se disponível no ambiente.</p>
+          <pre class="language-bash"><code>copy running-config tftp:
+Address or name of remote host []? 192.168.10.100
+Destination filename [running-config]? SW-ANDAR1-01_running_2024-10-01.cfg
+</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a configuração básica de switches, reforçando segurança, gerenciamento e documentação técnica.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li><strong>Atividade 1 — VLAN de Gerenciamento Dedicada:</strong> Replique o laboratório usando uma VLAN 20 (em vez da 10), ajuste portas de acesso, IP da SVI e gateway. Comprove acesso via SSH e registre evidências (prints de ping/ssh e comandos show).</li>
+            <li><strong>Atividade 2 — Padrão de Nomes e Descrições:</strong> Defina um padrão de hostname e descrições de portas para um andar com 10 PCs e 2 uplinks. Aplique no switch e gere um “relatório de portas” com <code>show interfaces description</code>.</li>
+            <li><strong>Atividade 3 — Diagnóstico de Duplex:</strong> Simule um desajuste de duplex em um link e registre os sintomas observados (erros, colisões, lentidão). Em seguida, corrija e compare as métricas.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correção técnica das configurações (hostname, banners, senhas, SVI, SSH, portas).</li>
+            <li>Segurança: uso de <code>enable secret</code>, desativação de Telnet, SSH v2 e tempos de inatividade.</li>
+            <li>Documentação adequada: comandos utilizados, resultados de verificação e testes de conectividade.</li>
+            <li>Organização e padronização: descrições de interface e nomenclatura coerentes.</li>
+            <li>Capacidade de diagnóstico: identificação e correção de problemas (ex.: duplex/speed).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Boas práticas de hardening em switches de acesso (listas de verificação recomendadas por fabricantes).</li><li>VLAN de gerenciamento: prós/cons de usar VLAN 1 vs VLAN dedicada.</li><li>Auto-negociação de speed/duplex: funcionamento, padrões e cenários de compatibilidade.</li><li>Comparação de métodos de backup de configuração (TFTP, SCP, ferramentas de automação).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 10</h2>
+        <ul><li>Arquivo de configuração do switch (running-config) com identidade, hardening, SVI e SSH.</li><li>Registro de testes: pings, acesso SSH e saídas de comandos show principais.</li><li>Relatório curto com padrão de nomenclatura e descrições de portas aplicadas.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 09 — Sistema IOS e Acesso a Dispositivos</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 11 — ICMP, Ping e Traceroute para Troubleshooting</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projeto e Implementação de Redes de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a principal vantagem de usar enable secret em vez de enable password?","correta":"B","alternativas":{"A":"Permite login sem senha no modo privilegiado","B":"Armazena a senha em formato de hash (mais seguro)","C":"Desativa o acesso ao modo privilegiado","D":"Criptografa todas as senhas do running-config automaticamente","E":"Permite múltiplos níveis de privilégio por usuário"}} ,{"id":"q2","titulo":"Para ativar a SVI de gerenciamento, qual requisito é verdadeiro?","correta":"C","alternativas":{"A":"É obrigatório usar sempre a VLAN 1","B":"A SVI só funciona com endereços IPv6","C":"Deve existir pelo menos uma interface física ativa na mesma VLAN","D":"É necessário configurar DHCP no switch","E":"A SVI só funciona em switches camada 3"}} ,{"id":"q3","titulo":"Qual comando restringe as linhas VTY para aceitar apenas SSH?","correta":"D","alternativas":{"A":"transport output ssh","B":"ip ssh version 2","C":"login local","D":"transport input ssh","E":"crypto key generate rsa 2048"}} ,{"id":"q4","titulo":"O que pode ocorrer em um desajuste de duplex entre dois dispositivos?","correta":"A","alternativas":{"A":"Baixa performance e colisões tardias","B":"Queda automática para full duplex em ambos","C":"Perda total de conectividade sempre","D":"Nada, o padrão Ethernet ignora duplex","E":"Aumento do MTU de forma automática"}} ,{"id":"q5","titulo":"Qual sequência é adequada para habilitar SSH em um switch?","correta":"E","alternativas":{"A":"enable password, ip ssh version 2, login local","B":"username admin secret X; transport input telnet; ip domain-name","C":"service password-encryption; ip route 0.0.0.0 0.0.0.0; ssh on","D":"crypto key generate rsa modulus 512; transport input all","E":"ip domain-name & gerar chave RSA (≥1024); ip ssh version 2; login local; transport input ssh"}} ,{"id":"q6","titulo":"Qual comando salva a configuração corrente na NVRAM?","correta":"B","alternativas":{"A":"show running-config","B":"copy running-config startup-config","C":"reload save","D":"write erase","E":"copy startup-config running-config"}} ,{"id":"q7","titulo":"Qual prática é recomendada em produção para gerenciamento do switch?","correta":"C","alternativas":{"A":"Usar VLAN 1 para tudo, incluindo gerenciamento","B":"Permitir Telnet para compatibilidade máxima","C":"Usar uma VLAN dedicada de gerenciamento","D":"Desabilitar SSH e usar somente console","E":"Evitar banner MOTD por causar lentidão"}} ];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Defini o hostname do switch conforme padrão da instituição."},{"id":"c2","texto":"Configurei banner MOTD de aviso de uso autorizado."},{"id":"c3","texto":"Ajustei o hardening: enable secret, usuário admin e service password-encryption."},{"id":"c4","texto":"Restringi VTY para SSH e desativei Telnet (transport input ssh)."},{"id":"c5","texto":"Criei VLAN de gerenciamento e configurei a SVI com IP/máscara."},{"id":"c6","texto":"Configurei ip default-gateway correto para a rede de gerenciamento."},{"id":"c7","texto":"Documentei descrições de portas e, quando necessário, speed/duplex."},{"id":"c8","texto":"Gerei chaves RSA, ativei SSH v2 e testei acesso remoto seguro."},{"id":"c9","texto":"Validei conectividade com ping e comandos show (interfaces, VLANs, MAC)."},{"id":"c10","texto":"Salvei a configuração (copy running-config startup-config) e fiz backup opcional."}];
+    const CHECKLIST_KEY = 'chk_prir_cap10';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 11 — Dashboards em tempo real</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo11.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PSIC</span>
+        <span style="color: var(--cor-principal);">Projetos e Suporte à Internet das Coisas</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução à IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Programação para IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Eletrônica aplicada</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Plataformas e IDEs</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — GPIO e PWM</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Modularização</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Wi‑Fi e rede</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — MQTT</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — HTTP e WebSocket</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Integração com bancos</a></li>
+              <li><a class="dropdown-item active" href="capitulo11.html">Capítulo 11 — Dashboards em tempo real</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Segurança em IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Versionamento e docs</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Suporte e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Projeto guiado</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto final e manutenção</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 11 — Visualização e dashboards em tempo real</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (estimada)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Dashboard web local que exibe telemetria em tempo real e dispara alertas por limiar</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> HTML/CSS/JS + Chart.js + MQTT sobre WebSocket (HiveMQ público) e/ou REST/WebSocket local</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Planejar e montar um dashboard simples para dados IoT em tempo real.</li><li>Plotar séries temporais com atualização contínua e janelas de tempo.</li><li>Implementar alertas por limiar com histerese para reduzir falso positivo.</li><li>Consumir dados via MQTT (WebSocket) e/ou API REST/WS local.</li><li>Aplicar princípios básicos de UX para operação e leitura rápida.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Configurar e consumir fontes de dados em tempo real.</li><li>Construir gráficos de linha e cartões de KPI com JavaScript.</li><li>Aplicar agregações simples (média, min, max) por janela.</li><li>Projetar alertas com histerese e mensagens operacionais claras.</li><li>Documentar decisões de UX e testar com dados simulados e reais.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 10</a>
+              <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 12</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 11)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p class="mb-2"><strong>1) Abertura (10 min)</strong> — Relembrar fluxo IoT ponta a ponta (dispositivo → broker/API → BD → dashboard). Apresentar objetivos: exibir séries temporais, KPIs e alertas em tempo real.</p><p class="mb-2"><strong>2) Teoria guiada (30–40 min)</strong> — Dashboards e princípios de UX; atualização em tempo real; séries temporais; janelas e agregações; alertas com histerese; quando usar MQTT x HTTP x WebSocket.</p><p class="mb-2"><strong>3) Laboratório (60–80 min)</strong> — Montar dashboard HTML/JS com Chart.js, assinar tópico MQTT via WebSocket ou consumir API/WS local, plotar dados e implementar alertas.</p><p class="mb-2"><strong>4) Testes e validação (20–30 min)</strong> — Simular diferentes taxas, latência e perda; inspecionar console; ajustar janela e limites.</p><p class="mb-0"><strong>5) Encerramento (10 min)</strong> — Revisar lições; propor atividades derivadas e checklist de entregáveis.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">1) O que é um dashboard em IoT e quando usar</h3>
+          <p>Um dashboard é uma interface visual que reúne dados-chave para operação e decisão. Em IoT, ele mostra leituras de sensores, estado de atuadores e eventos. Bons dashboards priorizam clareza, confiabilidade e baixa latência para que operadores identifiquem rapidamente desvios ou alarmes.</p>
+          <p>Você pode ter dashboards locais (rodando no notebook/lab) ou web hospedados. Para prototipagem e aulas, uma página HTML com JavaScript e uma biblioteca de gráficos (ex.: Chart.js) é suficiente.</p>
+          <p><em>Onde vou aplicar isso?</em> No passo a passo, você criará um dashboard HTML/JS que assina dados em tempo real e exibe cartões de KPI e um gráfico de linha.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">2) Dados em tempo real: MQTT, HTTP e WebSocket</h3>
+          <p><strong>MQTT</strong> é leve e orientado a publicação/assinatura. Com suporte a WebSocket, o navegador consegue se conectar a um broker e receber mensagens instantaneamente. <strong>HTTP/REST</strong> é útil para consultas e histórico, mas não é ideal para push contínuo. <strong>WebSocket</strong> cria um canal bidirecional persistente entre cliente e servidor para eventos em tempo real.</p>
+          <p>Escolha MQTT quando tiver um broker disponível e tópicos bem definidos; use WebSocket quando você controla um servidor que emite eventos; mantenha HTTP para endpoints de histórico ou agregações.</p>
+          <p><em>Onde vou aplicar isso?</em> No passo a passo, daremos duas opções: consumir MQTT via WebSocket (HiveMQ público) ou usar fetch/REST (simulador local) como fallback.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">3) Séries temporais e janelas de visualização</h3>
+          <p>Séries temporais são pontos no tempo (timestamp, valor). Em visualização, é prático manter uma janela deslizante (ex.: últimos 5 minutos ou últimos 100 pontos) para que o gráfico permaneça legível. Limitar a quantidade evita consumo excessivo de memória e melhora desempenho.</p>
+          <p>Também é comum aplicar agregações simples na janela (média, mínimo, máximo) e exibir como KPIs ou linhas auxiliares.</p>
+          <p><em>Onde vou aplicar isso?</em> No script do dashboard, você manterá um buffer com tamanho máximo e atualizará KPIs de média/min/máx em cada novo ponto.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">4) Alertas por limiar com histerese</h3>
+          <p>Alerta por limiar dispara quando o valor ultrapassa um limite. Contudo, ruído pode causar “pisca” constante. <strong>Histerese</strong> define dois limiares: um para entrar em alerta (ex.: 30.0) e outro, menor, para sair (ex.: 29.0). Assim, o alerta só desarma quando o valor fica suficientemente abaixo do limite de entrada.</p>
+          <p>Boas práticas incluem debounce temporal (manter condição por X segundos antes de disparar) e mensagens objetivas para operação.</p>
+          <p><em>Onde vou aplicar isso?</em> No passo a passo, você implementará um estado de alerta com limiar de entrada e saída e um badge visual.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">5) UX mínima para operação</h3>
+          <p>UX em dashboards deve facilitar leitura rápida: cores consistentes, unidades sempre visíveis, escala do gráfico adequada e cartões de KPI com rótulos claros. Disponibilize botões essenciais (pausar, limpar dados, alterar janela) e seções identificadas (Conexão, Métricas, Alertas).</p>
+          <p><em>Onde vou aplicar isso?</em> Você criará cartões de KPI, um indicador de status de conexão e botões para controlar a janela/limites.</p>
+          <hr class="my-3">
+          <h3 class="h6 fw-bold">6) Dados de exemplo e saneamento</h3>
+          <p>Ao consumir dados externos, valide o formato esperado (ex.: JSON com campos deviceId, ts, value). Descarte leituras absurdas (outliers), converta unidades se necessário e trate exceções para que o dashboard não trave por um pacote inválido.</p>
+          <p><em>Onde vou aplicar isso?</em> No código, você validará campos obrigatórios e ignorará mensagens incompletas, logando avisos no console.</p>
+          <div class="mt-3">
+            <p class="mb-1"><strong>Exemplo de payload de telemetria (JSON)</strong></p>
+            <pre class="language-json"><code>{
+  "deviceId": "esp32-lab-01",
+  "ts": 1713985200000,
+  "sensor": "tempC",
+  "value": 28.6
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Dashboard web em tempo real (MQTT/WebSocket ou REST)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Construir uma página HTML local que: (1) mostre KPIs (média, min, max), (2) plote gráfico de linha em tempo real, (3) dispare alerta com histerese, consumindo dados de um tópico MQTT via WebSocket ou de uma API REST de teste.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <h3 class="h6 fw-bold mb-0"><i class="bi bi-1-circle me-2" style="color:var(--cor-principal)"></i>Preparar o ambiente e arquivos</h3>
+            <span class="badge badge-outline-red">Setup</span>
+          </div>
+          <p class="mt-2 mb-2">Crie uma pasta de trabalho e um arquivo index.html. Usaremos CDNs para Chart.js e MQTT sobre WebSocket. Alternativamente, adicionaremos um modo “simulado/REST”.</p>
+          <pre class="language-bash"><code>mkdir dashboard-cap11
+cd dashboard-cap11
+code index.html  # ou use seu editor</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <h3 class="h6 fw-bold mb-0"><i class="bi bi-2-circle me-2" style="color:var(--cor-principal)"></i>Estrutura base HTML + estilos simples</h3>
+            <span class="badge badge-outline-red">HTML/CSS</span>
+          </div>
+          <p class="mt-2 mb-2">Cole o conteúdo abaixo no seu index.html. Ele cria a estrutura de KPIs, status de conexão, controles e o canvas do gráfico.</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;Dashboard IoT — Cap 11&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"&gt;&lt;/script&gt;
+  &lt;!-- MQTT por WebSocket (MQTT.js) --&gt;
+  &lt;script src="https://unpkg.com/mqtt/dist/mqtt.min.js"&gt;&lt;/script&gt;
+  &lt;style&gt;
+    :root { --ok:#198754; --warn:#ffc107; --danger:#dc3545; }
+    .kpi { min-width: 160px; }
+    .status-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body class="bg-light"&gt;
+&lt;div class="container py-4"&gt;
+  &lt;h1 class="h4 fw-bold"&gt;Dashboard IoT — Temperatura (tempo real)&lt;/h1&gt;
+  &lt;div class="d-flex align-items-center gap-2"&gt;
+    &lt;span id="statusDot" class="status-dot" style="background:#6c757d"&gt;&lt;/span&gt;
+    &lt;span id="statusText" class="small text-muted"&gt;Desconectado&lt;/span&gt;
+  &lt;/div&gt;
+
+  &lt;div class="row g-3 mt-2"&gt;
+    &lt;div class="col-auto"&gt;
+      &lt;div class="card p-3 kpi"&gt;
+        &lt;div class="small text-muted"&gt;Média (janela)&lt;/div&gt;
+        &lt;div class="h5 mb-0"&gt;&lt;span id="kpiAvg"&gt;--&lt;/span&gt; &lt;span class="small"&gt;°C&lt;/span&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-auto"&gt;
+      &lt;div class="card p-3 kpi"&gt;
+        &lt;div class="small text-muted"&gt;Mín (janela)&lt;/div&gt;
+        &lt;div class="h5 mb-0"&gt;&lt;span id="kpiMin"&gt;--&lt;/span&gt; &lt;span class="small"&gt;°C&lt;/span&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-auto"&gt;
+      &lt;div class="card p-3 kpi"&gt;
+        &lt;div class="small text-muted"&gt;Máx (janela)&lt;/div&gt;
+        &lt;div class="h5 mb-0"&gt;&lt;span id="kpiMax"&gt;--&lt;/span&gt; &lt;span class="small"&gt;°C&lt;/span&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-auto"&gt;
+      &lt;div class="card p-3 kpi"&gt;
+        &lt;div class="small text-muted"&gt;Alertas&lt;/div&gt;
+        &lt;div class="h5 mb-0"&gt;&lt;span id="kpiAlerts"&gt;0&lt;/span&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="card p-3 mt-3"&gt;
+    &lt;div class="d-flex flex-wrap align-items-end gap-2"&gt;
+      &lt;div&gt;
+        &lt;label class="form-label small mb-0"&gt;Tópico MQTT&lt;/label&gt;
+        &lt;input id="inpTopic" class="form-control" value="lab/telemetria/temp" /&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;label class="form-label small mb-0"&gt;Janela (pontos)&lt;/label&gt;
+        &lt;input id="inpWindow" class="form-control" type="number" min="10" value="100" /&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;label class="form-label small mb-0"&gt;Limiar (°C) entrar&lt;/label&gt;
+        &lt;input id="inpThOn" class="form-control" type="number" step="0.1" value="30" /&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;label class="form-label small mb-0"&gt;Limiar (°C) sair&lt;/label&gt;
+        &lt;input id="inpThOff" class="form-control" type="number" step="0.1" value="29" /&gt;
+      &lt;/div&gt;
+      &lt;div class="ms-auto d-flex gap-2"&gt;
+        &lt;button id="btnConnect" class="btn btn-sm btn-primary"&gt;Conectar MQTT&lt;/button&gt;
+        &lt;button id="btnDisconnect" class="btn btn-sm btn-outline-secondary"&gt;Desconectar&lt;/button&gt;
+        &lt;button id="btnClear" class="btn btn-sm btn-outline-danger"&gt;Limpar dados&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;canvas id="chart" height="120" class="mt-3"&gt;&lt;/canvas&gt;
+    &lt;div id="alertBox" class="alert mt-3 d-none" role="alert"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="small text-muted mt-3"&gt;Formato esperado: { deviceId, ts, sensor, value }&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// ===== Config MQTT (HiveMQ público) =====
+const MQTT_URL = "wss://broker.hivemq.com:8884/mqtt"; // público, sem TLS mútua
+let client = null;
+
+// ===== Estado do dashboard =====
+let buffer = []; // {x: Date, y: Number}
+let alerts = 0;
+let inAlarm = false;
+
+const els = {
+  dot: document.getElementById('statusDot'),
+  txt: document.getElementById('statusText'),
+  kAvg: document.getElementById('kpiAvg'),
+  kMin: document.getElementById('kpiMin'),
+  kMax: document.getElementById('kpiMax'),
+  kAlr: document.getElementById('kpiAlerts'),
+  alertBox: document.getElementById('alertBox'),
+  win: document.getElementById('inpWindow'),
+  thOn: document.getElementById('inpThOn'),
+  thOff: document.getElementById('inpThOff'),
+  topic: document.getElementById('inpTopic'),
+};
+
+// ===== Chart.js =====
+const ctx = document.getElementById('chart');
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    datasets: [{
+      label: 'Temperatura (°C)',
+      data: buffer,
+      borderColor: '#dc3545',
+      backgroundColor: 'rgba(220,53,69,.1)',
+      tension: .2,
+      pointRadius: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    animation: false,
+    parsing: false,
+    scales: {
+      x: { type: 'time', time: { unit: 'second', tooltipFormat: 'HH:mm:ss' } },
+      y: { title: { display: true, text: '°C' } }
+    },
+    plugins: {
+      legend: { display: true }
+    }
+  }
+});
+
+// ===== Funções utilitárias =====
+function setStatus(ok, text) {
+  els.dot.style.background = ok ? '#198754' : '#6c757d';
+  els.txt.textContent = text || (ok ? 'Conectado' : 'Desconectado');
+}
+function updateKpis() {
+  const vals = buffer.map(p =&gt; p.y);
+  if(vals.length === 0){
+    els.kAvg.textContent = '--';
+    els.kMin.textContent = '--';
+    els.kMax.textContent = '--';
+    return;
+  }
+  const sum = vals.reduce((a,b)=&gt;a+b,0);
+  const avg = sum/vals.length;
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  els.kAvg.textContent = avg.toFixed(2);
+  els.kMin.textContent = min.toFixed(2);
+  els.kMax.textContent = max.toFixed(2);
+}
+function trimWindow() {
+  const maxPoints = parseInt(els.win.value || '100', 10);
+  if(buffer.length &gt; maxPoints){
+    buffer.splice(0, buffer.length - maxPoints);
+  }
+}
+function handleAlarm(value){
+  const thOn = parseFloat(els.thOn.value);
+  const thOff = parseFloat(els.thOff.value);
+  if(!Number.isFinite(thOn) || !Number.isFinite(thOff)) return;
+
+  // entra em alarme
+  if(!inAlarm &amp;&amp; value &gt;= thOn){
+    inAlarm = true;
+    alerts += 1;
+    els.kAlr.textContent = alerts;
+    els.alertBox.className = 'alert alert-danger mt-3';
+    els.alertBox.textContent = `ALERTA: valor ${value.toFixed(2)}°C ≥ limiar ${thOn.toFixed(2)}°C`;
+    els.alertBox.classList.remove('d-none');
+  }
+  // sai do alarme (histerese)
+  if(inAlarm &amp;&amp; value &lt;= thOff){
+    inAlarm = false;
+    els.alertBox.className = 'alert alert-warning mt-3';
+    els.alertBox.textContent = `RECUPERAÇÃO: valor ${value.toFixed(2)}°C ≤ limiar de saída ${thOff.toFixed(2)}°C`;
+    els.alertBox.classList.remove('d-none');
+    // opcional: esconder após 3s
+    setTimeout(() =&gt; els.alertBox.classList.add('d-none'), 3000);
+  }
+}
+function addPoint(ts, value){
+  // validação básica
+  if(!Number.isFinite(value) || !Number.isFinite(ts)) return;
+  const time = new Date(ts);
+  if(isNaN(time.getTime())) return;
+
+  buffer.push({ x: time, y: value });
+  trimWindow();
+  chart.update();
+  updateKpis();
+  handleAlarm(value);
+}
+
+// ===== Conexão MQTT =====
+function connectMqtt(){
+  const topic = els.topic.value.trim();
+  if(!topic){ alert('Informe um tópico'); return; }
+
+  if(client){ try{ client.end(true); }catch(e){} client = null; }
+
+  client = mqtt.connect(MQTT_URL);
+  client.on('connect', () =&gt; {
+    setStatus(true, 'Conectado (MQTT WS)');
+    client.subscribe(topic, (err) =&gt; {
+      if(err){ console.warn('Erro ao assinar:', err); }
+    });
+  });
+  client.on('message', (topic, payload) =&gt; {
+    try{
+      const msg = JSON.parse(payload.toString());
+      // esperado: { deviceId, ts, sensor, value }
+      if(typeof msg.value !== 'number') return;
+      const ts = msg.ts || Date.now();
+      addPoint(ts, msg.value);
+    }catch(e){
+      console.warn('JSON inválido:', e);
+    }
+  });
+  client.on('error', (err) =&gt; {
+    console.error('MQTT erro:', err);
+    setStatus(false, 'Erro MQTT');
+  });
+  client.on('close', () =&gt; setStatus(false, 'Desconectado'));
+}
+
+function disconnectMqtt(){
+  if(client){
+    try{ client.end(true); }catch(e){}
+    client = null;
+  }
+  setStatus(false, 'Desconectado');
+}
+
+document.getElementById('btnConnect').addEventListener('click', connectMqtt);
+document.getElementById('btnDisconnect').addEventListener('click', disconnectMqtt);
+document.getElementById('btnClear').addEventListener('click', () =&gt; {
+  buffer.length = 0;
+  chart.update();
+  updateKpis();
+  inAlarm = false;
+  els.alertBox.classList.add('d-none');
+});
+
+// ===== Modo alternativo: simular dados locais (para testes sem MQTT) =====
+/*
+setInterval(() =&gt; {
+  const base = 28 + Math.sin(Date.now()/5000)*2;
+  const noise = (Math.random()*0.6 - 0.3);
+  const v = base + noise;
+  addPoint(Date.now(), v);
+}, 1000);
+*/
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+          <div class="alert alert-light border mt-3 mb-0" role="note">
+            Dica: Se não puder usar MQTT agora, ative o simulador comentado no final do script. Depois volte ao MQTT.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <h3 class="h6 fw-bold mb-0"><i class="bi bi-3-circle me-2" style="color:var(--cor-principal)"></i>Publicar telemetria de teste via cliente MQTT</h3>
+            <span class="badge badge-outline-red">Teste com MQTT</span>
+          </div>
+          <p class="mt-2 mb-2">Use um cliente MQTT (MQTTX/Explorer/Studio) e publique em lab/telemetria/temp um JSON no formato abaixo a cada 1s. Verifique o gráfico atualizar.</p>
+<pre class="language-json"><code>{
+  "deviceId": "esp32-lab-01",
+  "ts":  {{Date.now}},
+  "sensor": "tempC",
+  "value": 29.2
+}</code></pre>
+          <p class="text-muted">Substitua ts por um timestamp em milissegundos (ou omita para o dashboard usar Date.now()).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <h3 class="h6 fw-bold mb-0"><i class="bi bi-4-circle me-2" style="color:var(--cor-principal)"></i>Alternativa: consumir dados via REST (pull)</h3>
+            <span class="badge badge-outline-red">HTTP/JSON</span>
+          </div>
+          <p class="mt-2 mb-2">Se você implementou um endpoint local no Cap. 10 (ex.: http://localhost:3000/telemetria/ultimos), pode fazer polling simples:</p>
+<pre class="language-js"><code>// Exemplo de polling REST (adicione abaixo do script principal)
+async function fetchUltimos(){
+  try{
+    const r = await fetch('http://localhost:3000/telemetria/ultimos?limit=1', { cache:'no-store' });
+    if(!r.ok) return;
+    const dados = await r.json(); // esperado: lista de { ts, value }
+    dados.forEach(p =&gt; addPoint(p.ts || Date.now(), Number(p.value)));
+  }catch(e){ /* silencioso no dashboard */ }
+}
+setInterval(fetchUltimos, 1000);</code></pre>
+          <div class="alert alert-light border mt-3 mb-0" role="note">
+            Observação: Polling tem mais latência e overhead que MQTT/WS. Útil para histórico e provas de conceito.
+          </div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <h3 class="h6 fw-bold mb-0"><i class="bi bi-5-circle me-2" style="color:var(--cor-principal)"></i>Validação: janela, KPIs e histerese</h3>
+            <span class="badge badge-outline-red">Teste</span>
+          </div>
+          <p class="mt-2 mb-2">- Ajuste a janela para 50 pontos e observe o gráfico mais responsivo. - Suba o limiar de entrada para forçar alerta e depois reduza valores para sair por histerese. - Gere ruído e verifique se o alerta não “pisca”.</p>
+          <p class="mb-0">Registre capturas de tela e explique como escolheu os limiares.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de séries temporais, KPIs, MQTT/REST e alertas de forma aplicada ao contexto do seu projeto.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Adicione um segundo dataset ao gráfico (ex.: umidade) com escala secundária. Publique ambos no mesmo tópico ou em tópicos diferentes e adapte o parser.</li>
+            <li>Implemente um botão “Exportar CSV” que faça o download dos pontos da janela atual (timestamp ISO; valor).</li>
+            <li>Crie um painel de “histórico rápido”: ao clicar em “Carregar últimas 24h”, busque via REST as agregações por minuto e mostre um gráfico de barras com médias por minuto.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold mb-2">Critérios de avaliação (rubrica resumida)</h3>
+          <ul class="mb-0">
+            <li>Funcionalidade: dados em tempo real exibidos corretamente; KPIs atualizados.</li>
+            <li>Qualidade do código: clareza, comentários essenciais e tratamento de erros.</li>
+            <li>UX: legibilidade, cores consistentes, unidades, responsividade básica.</li>
+            <li>Alertas: histerese implementada e comportamento estável sob ruído.</li>
+            <li>Teste e evidências: prints, vídeos curtos ou logs que comprovem funcionamento.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Comparação de bibliotecas de gráficos para web (Chart.js, ECharts, Plotly): prós, contras e desempenho.</li><li>MQTT over WebSocket: como funciona no navegador, limitações e segurança.</li><li>Padrões de cores e acessibilidade em dashboards (WCAG): contraste e daltonismo.</li><li>Estratégias de agregação e downsampling para séries temporais volumosas.</li><li>Boas práticas de mensagens operacionais: como escrever alertas claros e acionáveis.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 11</h2>
+        <ul><li>Página HTML/JS funcional com gráfico de linha, KPIs e alertas com histerese.</li><li>Configuração de conexão MQTT WebSocket ou rotina de polling REST funcional.</li><li>Registro de testes (prints/gifs) e breve nota técnica explicando escolhas de janela e limiares.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 10</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 12</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projetos e Suporte à Internet das Coisas — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual a principal vantagem de MQTT sobre HTTP para dados em tempo real no navegador (via WebSocket)?","alternativas":{"A":"Menor tamanho de binários JavaScript.","B":"Entrega garantida em rede offline.","C":"Modelo pub/sub com push imediato de mensagens.","D":"Criptografa automaticamente todas as mensagens.","E":"Não depende de um broker para funcionar."},"correta":"C"},{"id":"q2","titulo":"Em um gráfico de série temporal com janela deslizante de 100 pontos, qual benefício principal dessa abordagem?","alternativas":{"A":"Aumentar consumo de memória para histórico infinito.","B":"Melhorar legibilidade e desempenho mantendo dados recentes.","C":"Impedir atualizações em tempo real.","D":"Eliminar necessidade de validação de dados.","E":"Garantir que todos os pontos sejam exibidos sempre."},"correta":"B"},{"id":"q3","titulo":"O que caracteriza um alerta com histerese?","alternativas":{"A":"Dois limiares: um para entrar e outro para sair do estado de alerta.","B":"Um único limiar com debounce temporal de 5s.","C":"Alerta que só dispara quando o gráfico está pausado.","D":"Uso de TLS na conexão para reduzir falsos positivos.","E":"Sinalização feita apenas por e-mail."},"correta":"A"},{"id":"q4","titulo":"Ao consumir JSON de telemetria, qual validação mínima é recomendada antes de plotar?","alternativas":{"A":"Verificar se o valor é número e se o timestamp é válido.","B":"Checar se o deviceId tem mais de 10 caracteres.","C":"Converter tudo para string para padronizar.","D":"Ignorar timestamp e usar índice do array.","E":"Aplicar compressão GZIP no navegador."},"correta":"A"},{"id":"q5","titulo":"Quando é mais adequado usar HTTP/REST em vez de MQTT no dashboard?","alternativas":{"A":"Para receber comandos em tempo real com QoS 2.","B":"Para histórico e agregações sob demanda (consulta).","C":"Para evitar qualquer infraestrutura de servidor.","D":"Para publicar dados do dispositivo no broker.","E":"Quando o dashboard precisa de latência zero."},"correta":"B"},{"id":"q6","titulo":"Qual prática de UX ajuda na operação de um dashboard?","alternativas":{"A":"Usar cores aleatórias a cada atualização.","B":"Esconder unidades para reduzir poluição visual.","C":"Exibir unidades e rótulos claros em KPIs e eixos.","D":"Permitir rolagem horizontal no canvas.","E":"Desativar qualquer mensagem de status."},"correta":"C"},{"id":"q7","titulo":"Em uma janela de 100 pontos, a média exibida no KPI deve ser calculada sobre:","alternativas":{"A":"Todos os dados históricos no banco.","B":"Somente os dados do último minuto, independente da janela.","C":"A janela atual mantida em memória.","D":"Apenas os picos (máximos) da janela.","E":"Apenas os vales (mínimos) da janela."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei o arquivo index.html com Bootstrap, Chart.js e MQTT.js via CDN."},{"id":"c2","texto":"Implementei o gráfico de linha e os cartões de KPI (média, min, max)."},{"id":"c3","texto":"Configurei conexão MQTT via WebSocket e assinei o tópico correto."},{"id":"c4","texto":"Validei o payload JSON e ignorei mensagens inválidas."},{"id":"c5","texto":"Limitei a janela de pontos e verifiquei desempenho/legibilidade."},{"id":"c6","texto":"Implementei alerta com histerese (limiar de entrada e saída)."},{"id":"c7","texto":"Testei com dados simulados e/ou cliente MQTT publicando periodicamente."},{"id":"c8","texto":"Documentei escolhas de janela, limiares e UX (cores, unidades)."},{"id":"c9","texto":"Opcional: adicionei modo REST/polling para histórico ou fallback."},{"id":"c10","texto":"Registrei evidências (prints/vídeo) e gerei os entregáveis do capítulo."}];
+    const CHECKLIST_KEY = 'PSIC-CAP11-CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

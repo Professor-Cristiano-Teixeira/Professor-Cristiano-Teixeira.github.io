@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 12 — Redes sem fio, VPN, DMZ e segurança física</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo12.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SEIN</span>
+        <span style="color: var(--cor-principal);">Segurança da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos e princípios da Segurança da Informação (CID)</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Gestão inicial de riscos e classificação da informação</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Normas, políticas e legislação aplicável</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Papéis, responsabilidades e ética em Segurança da Informação</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Conscientização e engenharia social</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Segurança de sistemas operacionais: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Hardening em Windows</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Hardening em Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Patches, antimalware e proteção de host (HIDS/EDR)</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Fundamentos de segurança de redes</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Firewalls, NAT e regras de filtragem</a></li>
+              <li><a class="dropdown-item active" href="capitulo12.html">Capítulo 12 — Redes sem fio, VPN, DMZ e segurança física</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Criptografia: conceitos, PKI e certificados</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Backup e recuperação de dados</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Segurança em nuvem e virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Segurança em IoT e projeto integrador</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 12 — Redes sem fio, VPN, DMZ e segurança física</h1>
+          <p class="mb-2"><strong>Carga:</strong> —</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório com VMs (Linux/Windows), roteador virtual ou pfSense, serviço web simples em DMZ e túnel VPN WireGuard para acesso remoto seguro.</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ubuntu Server, Windows 10/11, WireGuard, OpenSSH, UFW/NFTables, Nginx, pfSense (opcional), Wireshark.</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Configurar Wi‑Fi seguro aplicando WPA2/WPA3, isolamento de clientes e segmentação para hóspedes/IoT.</li><li>Implantar uma VPN de acesso remoto (WireGuard) e validar o túnel e políticas de acesso.</li><li>Projetar e simular uma DMZ para publicação segura de um serviço web com regras de firewall e NAT.</li><li>Aplicar controles básicos de segurança física e ambiental alinhados à disponibilidade.</li><li>Documentar configurações, evidências e testes de verificação.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Aplicar CID (Confidencialidade, Integridade e Disponibilidade) em redes sem fio e serviços expostos.</li><li>Configurar e validar controles de rede: VPN, NAT, firewall e segmentação lógica.</li><li>Identificar riscos e vulnerabilidades em topologias com DMZ e propor mitigação.</li><li>Manter documentação e evidências de conformidade e testes.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Firewalls, NAT e regras de filtragem</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Criptografia: conceitos, PKI e certificados</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 12)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul class="mb-0">
+  <li>Parte 1 — Aquecimento (15 min): revisão rápida de Cap. 10 e 11 (segmentação, NAT, estados), objetivos do dia e mapa CID.</li>
+  <li>Parte 2 — Teoria aplicada (50 min): Wi‑Fi seguro (WPA2/WPA3, SSIDs, isolamento), VPN (conceitos e WireGuard), DMZ e bastion, segurança física/ambiental.</li>
+  <li>Parte 3 — Lab guiado (90–120 min): configuração de VPN WireGuard; simulação de DMZ com Nginx em VM e regras UFW/NFTables; checklist de Wi‑Fi seguro (roteador doméstico/lab).</li>
+  <li>Parte 4 — Testes e validação (30–40 min): ping/HTTP pelo túnel, escopo de acesso, variação de regras, captura rápida com Wireshark.</li>
+  <li>Parte 5 — Documentação (20 min): print de telas, versões, arquivos de configuração e evidências. Registro de lições aprendidas.</li>
+  <li>Fechamento (10 min): apontar atividades práticas, checklist final e entregáveis. Apresentar proposta do Projeto Integrador do bimestre.</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+  <h3 class="h5 fw-bold">1) Wi‑Fi seguro: WPA2/WPA3, hóspedes e IoT</h3>
+  <p>Redes sem fio ampliam a superfície de ataque porque o meio é compartilhado e aberto. Os padrões WPA2 e WPA3 definem como a autenticação e a criptografia protegem o tráfego. WPA2‑Personal usa PSK (senha compartilhada) com AES‑CCMP; WPA3 introduz SAE, mais resistente a ataques de dicionário e melhorias de confidencialidade. Para ambientes com convidados e IoT, a prática recomendada é separar SSIDs e VLANs, limitando o escopo de cada grupo.</p>
+  <p>Além da criptografia, controles como “client isolation” (AP Isolate), WPS desativado, senha forte, atualizações do firmware do AP e controle de largura de banda ajudam a reduzir riscos. Em redes de produção, considere WPA2‑Enterprise/WPA3‑Enterprise com 802.1X e RADIUS.</p>
+  <p><strong>Onde vou aplicar isso:</strong> no Passo a Passo, você fará um checklist de endurecimento do seu AP/roteador e registrará evidências de configurações seguras.</p>
+
+  <hr class="my-4">
+
+  <h3 class="h5 fw-bold">2) VPN de acesso remoto (WireGuard)</h3>
+  <p>VPNs criam túneis seguros entre redes/hosts, provendo confidencialidade e integridade em trânsito. Protocolos comuns incluem IPsec, OpenVPN e WireGuard. O WireGuard adota criptografia moderna (Curve25519, ChaCha20‑Poly1305) e configuração simples, sendo adequado a laboratórios e produção.</p>
+  <p>Em uma VPN de acesso remoto, clientes externos se conectam ao servidor e recebem um endereço virtual; políticas de firewall controlam o que o cliente pode acessar. É essencial restringir o túnel ao mínimo necessário, registrar logs e validar que o tráfego roteado está de acordo com a intenção.</p>
+  <p><strong>Onde vou aplicar isso:</strong> você irá criar um servidor WireGuard na VM Linux e um cliente (outra VM/host), testar o túnel e aplicar regras de acesso.</p>
+
+  <hr class="my-4">
+
+  <h3 class="h5 fw-bold">3) DMZ, publicação segura e bastion</h3>
+  <p>DMZ (zona desmilitarizada) é um segmento de rede isolado para serviços expostos (como um site). A ideia é que, mesmo que um serviço na DMZ seja comprometido, a rede interna permaneça protegida por regras de firewall e políticas de acesso estritas. Uma arquitetura comum: Internet ↔ Firewall/NAT ↔ DMZ ↔ Firewall ↔ Rede Interna.</p>
+  <p>Boas práticas incluem princípio do menor privilégio, regras stateful de entrada/saída, logging, hardening do serviço (por exemplo, Nginx), e, quando necessário, o uso de um bastion host para administração a partir de uma zona controlada. Publicar apenas portas necessárias (ex.: 80/443), com TLS e redirecionamento seguro, e bloquear tráfego “leste‑oeste” desnecessário dentro da DMZ.</p>
+  <p><strong>Onde vou aplicar isso:</strong> você publicará um Nginx em VM da DMZ e criará regras UFW/NFTables simulando o filtro entre DMZ e LAN.</p>
+
+  <hr class="my-4">
+
+  <h3 class="h5 fw-bold">4) Controles físicos e ambientais</h3>
+  <p>A disponibilidade depende de controles físicos: travas, controle de acesso, CCTV, organização de cabos, nobreak (UPS), proteção contra surtos e monitoramento ambiental (temperatura/umidade). Em ambientes escolares/pequenos, simples medidas como manter equipamentos em locais trancados, rotular ativos, inventário e rotas de cabos protegidas já mitigam diversos riscos.</p>
+  <p>Políticas de visitante, descarte seguro de mídias, e plano de contingência para energia/entrada de pessoal completam o conjunto. Sempre registre não conformidades e trate-as com prioridade conforme o impacto.</p>
+  <p><strong>Onde vou aplicar isso:</strong> você preencherá um mini‑checklist ambiental e físico no fim do passo a passo, registrando evidências.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Wi‑Fi seguro, VPN WireGuard, DMZ com Nginx e checklist físico</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Configurar e validar um ambiente com VPN de acesso remoto, serviço web em DMZ com firewall/NAT simulados e reforço de Wi‑Fi, documentando evidências e testes.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold text-uppercase">Pré-requisitos</h3>
+  <ul>
+    <li>2 a 3 VMs: Ubuntu Server (servidor VPN e DMZ), uma VM cliente (Linux/Windows). Opcional: pfSense.</li>
+    <li>Acesso com privilégio administrativo (sudo) na VM Linux.</li>
+    <li>Conceitos dos capítulos 10 e 11 (redes, firewall, NAT) revisados.</li>
+  </ul>
+
+  <hr>
+
+  <h3 class="h5 fw-bold">1) Wi‑Fi seguro (checklist rápido)</h3>
+  <ol>
+    <li>Acesse a interface do seu AP/roteador.</li>
+    <li>Atualize o firmware se houver atualização disponível.</li>
+    <li>Ative WPA2‑PSK (AES) ou WPA3‑SAE quando suportado. Desative WEP e TKIP.</li>
+    <li>Crie SSID separado para convidados/IoT, com isolamento de clientes (AP isolation) e sem acesso à LAN.</li>
+    <li>Desative WPS. Defina senhas fortes e troque a senha de administração do roteador.</li>
+    <li>Registre capturas de tela de cada alteração (evidência).</li>
+  </ol>
+
+  <div class="alert alert-light border mt-3">
+    Dica: em ambientes com suporte, use WPA2‑Enterprise/WPA3‑Enterprise com 802.1X/RADIUS.
+  </div>
+
+  <hr>
+
+  <h3 class="h5 fw-bold">2) VPN de acesso remoto com WireGuard</h3>
+  <p>Instale o WireGuard no servidor (Ubuntu) e em um cliente. Gere pares de chaves e crie a interface wg0.</p>
+
+  <p class="mb-1"><strong>Servidor (Ubuntu)</strong></p>
+  <pre class="language-bash"><code># 2.1 Instalar WireGuard
+sudo apt update &amp;&amp; sudo apt install -y wireguard
+
+# 2.2 Gerar chaves
+umask 077
+wg genkey | tee /etc/wireguard/server_private.key | wg pubkey | tee /etc/wireguard/server_public.key
+SERVER_PRIV=$(cat /etc/wireguard/server_private.key)
+
+# 2.3 Configurar wg0
+sudo tee /etc/wireguard/wg0.conf &gt; /dev/null &lt;&lt;'EOF'
+[Interface]
+Address = 10.8.0.1/24
+ListenPort = 51820
+PrivateKey = REPLACE_SERVER_PRIVATE
+
+# Permitir encaminhamento de pacotes (Linux)
+PostUp   = sysctl -w net.ipv4.ip_forward=1
+PostDown = sysctl -w net.ipv4.ip_forward=0
+EOF
+
+# 2.4 Substituir chave privada no arquivo
+sudo sed -i "s|REPLACE_SERVER_PRIVATE|$SERVER_PRIV|" /etc/wireguard/wg0.conf
+
+# 2.5 Ativar serviço
+sudo systemctl enable --now wg-quick@wg0
+
+# 2.6 Verificar status
+sudo wg show</code></pre>
+
+  <p class="mb-1"><strong>Cliente (Linux)</strong></p>
+  <pre class="language-bash"><code># 2.7 Instalar WireGuard e gerar chaves
+sudo apt update &amp;&amp; sudo apt install -y wireguard
+umask 077
+wg genkey | tee ~/client_private.key | wg pubkey | tee ~/client_public.key
+CLIENT_PRIV=$(cat ~/client_private.key)
+CLIENT_PUB=$(cat ~/client_public.key)
+
+# 2.8 Criar configuração do cliente
+sudo tee /etc/wireguard/wg0.conf &gt; /dev/null &lt;&lt;EOF
+[Interface]
+Address = 10.8.0.2/32
+PrivateKey = $CLIENT_PRIV
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = SERVER_PUBLIC_KEY
+AllowedIPs = 10.8.0.0/24
+Endpoint = SERVER_PUBLIC_IP:51820
+PersistentKeepalive = 25
+EOF
+
+# 2.9 Ativar cliente
+sudo systemctl enable --now wg-quick@wg0
+sudo wg show</code></pre>
+
+  <p class="mb-1"><strong>Adicionar peer do cliente no servidor</strong></p>
+  <pre class="language-bash"><code># No servidor, obtenha a chave pública do cliente e adicione:
+CLIENT_PUB="INSIRA_A_CHAVE_PUBLICA_CLIENTE"
+sudo wg set wg0 peer "$CLIENT_PUB" allowed-ips 10.8.0.2/32
+
+# Persistir no /etc/wireguard/wg0.conf
+sudo tee -a /etc/wireguard/wg0.conf &gt; /dev/null &lt;&lt;EOF
+
+[Peer]
+PublicKey = $CLIENT_PUB
+AllowedIPs = 10.8.0.2/32
+EOF
+
+# Reiniciar a interface
+sudo systemctl restart wg-quick@wg0</code></pre>
+
+  <div class="alert alert-light border">
+    Substitua SERVER_PUBLIC_KEY e SERVER_PUBLIC_IP nos arquivos do cliente. Se estiver atrás de NAT, crie um redirecionamento de porta 51820/UDP para o servidor.
+  </div>
+
+  <h6 class="fw-bold mt-3">Testes rápidos</h6>
+  <pre class="language-bash"><code># Do cliente:
+ping -c 3 10.8.0.1
+# Verificar handshake e transferência:
+sudo wg show
+# Trafegar HTTP via túnel (se rota permitir):
+curl -I http://10.8.0.1</code></pre>
+
+  <hr>
+
+  <h3 class="h5 fw-bold">3) DMZ com Nginx e firewall (UFW/NFTables)</h3>
+  <p>Usaremos uma VM (DMZ) com Nginx exposto e o servidor (ou pfSense) atuando como firewall/NAT. Em laboratório, simulamos “Internet → Firewall → DMZ → (opcional) LAN”.</p>
+
+  <p class="mb-1"><strong>Instalar e configurar Nginx (VM DMZ)</strong></p>
+  <pre class="language-bash"><code>sudo apt update &amp;&amp; sudo apt install -y nginx
+sudo systemctl enable --now nginx
+# Página simples com identificação do host
+echo '&lt;h1&gt;DMZ Web&lt;/h1&gt;&lt;p&gt;Servidor: '$(hostname -I)'&lt;/p&gt;' | sudo tee /var/www/html/index.html
+sudo systemctl status nginx --no-pager</code></pre>
+
+  <p class="mb-1"><strong>Firewall básico com UFW (host DMZ)</strong></p>
+  <pre class="language-bash"><code>sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+sudo ufw status verbose</code></pre>
+
+  <p class="mb-1"><strong>Regras no “firewall” (VM que faz NAT)</strong></p>
+  <pre class="language-bash"><code># Exemplo com UFW — liberar acesso externo apenas ao HTTP da DMZ
+# Ajuste as interfaces e IPs conforme seu lab
+DMZ_IP=192.168.50.10
+
+# Ativar encaminhamento no firewall
+echo 'net.ipv4.ip_forward=1' | sudo tee /etc/sysctl.d/99-forward.conf
+sudo sysctl --system
+
+# DNAT/Port Forward 80 externo → DMZ:80
+# Em UFW, use before.rules para PREROUTING do iptables/nftables
+sudo sed -n '1,200p' /etc/ufw/before.rules &gt; /tmp/before.rules.bak
+sudo tee -a /etc/ufw/before.rules &gt; /dev/null &lt;&lt;EOF
+
+*nat
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A PREROUTING -p tcp --dport 80 -j DNAT --to-destination $DMZ_IP:80
+-A POSTROUTING -s 192.168.50.0/24 -o eth0 -j MASQUERADE
+COMMIT
+EOF
+
+# Regras de filtro (somente porta 80 da Internet para DMZ)
+sudo ufw default deny incoming
+sudo ufw allow 80/tcp
+sudo ufw enable
+sudo systemctl restart ufw
+
+# Verificar regras
+sudo iptables -t nat -L -n -v
+sudo ufw status numbered</code></pre>
+
+  <div class="alert alert-light border">
+    Alternativa com pfSense: crie regras WAN para 80/TCP apontando para DMZ_IP:80 e políticas restritivas entre DMZ ↔ LAN. Registre prints das telas de NAT e Rules.
+  </div>
+
+  <h6 class="fw-bold mt-3">Testes DMZ</h6>
+  <pre class="language-bash"><code># De um host externo (ou simulando via outra VM):
+curl -I http://ENDERECO_PUBLICO
+# Validar que apenas 80/TCP está acessível publicamente
+nmap -Pn -p 80,443,22 ENDERECO_PUBLICO
+# Da DMZ, tente acessar a LAN (deve estar bloqueado, se assim definido)
+ping -c 2 192.168.10.10  # esperado: sem resposta, conforme regras</code></pre>
+
+  <hr>
+
+  <h3 class="h5 fw-bold">4) Políticas de acesso pelo túnel (VPN + DMZ)</h3>
+  <p>Restringir o que o cliente VPN pode acessar no servidor e na DMZ.</p>
+  <pre class="language-bash"><code># Exemplo: permitir que a VPN acesse apenas DMZ:80
+# No firewall (servidor WireGuard), permitir origem 10.8.0.0/24 → DMZ:80
+sudo ufw allow from 10.8.0.0/24 to 192.168.50.10 port 80 proto tcp
+
+# Bloquear outras portas por padrão (regra implícita deny)
+sudo ufw status verbose</code></pre>
+
+  <div class="alert alert-light border">
+    Lembre-se: princípio do menor privilégio. Apenas portas/hosts necessários.
+  </div>
+
+  <hr>
+
+  <h3 class="h5 fw-bold">5) Checklist físico e ambiental (mínimo)</h3>
+  <ul>
+    <li>Equipamentos em local trancado ou fora de circulação?</li>
+    <li>Fontes e cabos identificados/organizados? Proteção contra surtos?</li>
+    <li>UPS/nobreak funcionando e testado?</li>
+    <li>Controle de acesso (chave/senhas) e registro de visitantes?</li>
+    <li>Temperatura/poeira sob controle? Limpeza periódica?</li>
+  </ul>
+
+  <hr>
+
+  <h3 class="h5 fw-bold">6) Evidências e documentação</h3>
+  <ul>
+    <li>Arquivos de configuração: /etc/wireguard/wg0.conf, before.rules do UFW, prints do roteador/AP e do pfSense (se usado).</li>
+    <li>Resultados de teste: ping, curl, nmap (limite ao seu laboratório), wg show, capturas do Wireshark.</li>
+    <li>Resumo de risco residual e próximos passos (melhorias).</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a proteção de redes sem fio, VPN e DMZ com testes e documentação replicáveis.</p>
+        <div class="card-soft bg-white p-4">
+  <ol class="mb-0">
+    <li>Mapeamento de riscos da DMZ: elabore uma matriz simples (ativo/ameaça/impacto/mitigação) para o seu serviço Nginx publicado. Aponte 3 melhorias de curto prazo.</li>
+    <li>Wi‑Fi Segmentado: crie um SSID “Guests” isolado e valide que não alcança a LAN. Registre evidências (print do AP e traceroute/arp sem visibilidade da LAN).</li>
+    <li>Política de VPN restritiva: ajuste AllowedIPs e regras de firewall para permitir somente HTTP do cliente VPN para a DMZ. Mostre o que quebra se tentar SSH ou outros serviços.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (sugestão)</h3>
+  <ul class="mb-0">
+    <li>Correção técnica das configurações (VPN/DMZ/Wi‑Fi) e testes (40%).</li>
+    <li>Segurança efetiva: regras mínimas necessárias, isolamento e registros (30%).</li>
+    <li>Documentação clara e reprodutível com evidências (20%).</li>
+    <li>Conformidade com procedimentos e boas práticas (10%).</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>WPA3 and SAE: visão técnica e requisitos de compatibilidade em APs domésticos e corporativos.</li><li>Comparativo IPsec, OpenVPN e WireGuard: desempenho, segurança e facilidade de operação.</li><li>Arquiteturas de DMZ com duplo firewall vs. firewall único com zonas/vLANs.</li><li>Boas práticas de segurança física em pequenos data rooms (TIA‑942, ITIL Facilities em alto nível).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 12</h2>
+        <ul><li>Relatório com evidências: prints do AP/roteador, configs do WireGuard e do firewall/NAT, testes (ping/curl/nmap), e checklist físico.</li><li>Arquivos de configuração: wg0.conf (servidor e cliente sanitizado), regras UFW/NFTables, export das regras do pfSense (se usado).</li><li>Resumo de riscos e melhorias propostas para Wi‑Fi, VPN e DMZ.</li><li>Projeto Integrador (bimestre): entrega incremental consolidando firewall, VPN e monitoramento básico do serviço da DMZ.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Firewalls, NAT e regras de filtragem</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Criptografia: conceitos, PKI e certificados</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Segurança da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual opção representa uma boa prática imediata para redes Wi‑Fi domésticas/laboratoriais?","alternativas":{"A":"Ativar WEP para compatibilidade com dispositivos antigos","B":"Ativar WPA2/WPA3, desativar WPS e usar senha forte","C":"Liberar SSID oculto para aumentar a segurança","D":"Usar a mesma senha em SSID principal e de convidados","E":"Ativar TKIP para maximizar desempenho"},"correta":"B"},{"id":"q2","titulo":"No contexto de VPN de acesso remoto, o WireGuard é conhecido por:","alternativas":{"A":"Usar chaves RSA de 4096 bits como requisito obrigatório","B":"Basear-se em TLS 1.2 como camada de transporte","C":"Configuração simples e criptografia moderna (Curve25519/ChaCha20)","D":"Exigir servidor Windows para funcionar","E":"Aceitar apenas topologia site-to-site"},"correta":"C"},{"id":"q3","titulo":"Em uma arquitetura com DMZ, o objetivo principal é:","alternativas":{"A":"Aumentar a performance de Wi‑Fi","B":"Permitir acesso irrestrito da DMZ à LAN","C":"Isolar serviços expostos para reduzir o impacto de comprometimentos","D":"Eliminar a necessidade de firewall","E":"Substituir a necessidade de VPN"},"correta":"C"},{"id":"q4","titulo":"Sobre regras de firewall em publicação de serviço web na DMZ, escolha a melhor prática:","alternativas":{"A":"Abrir todas as portas para evitar problemas de conexão","B":"Permitir somente portas necessárias (ex.: 80/443) e registrar logs","C":"Permitir tráfego de saída irrestrito da DMZ para a LAN","D":"Usar NAT sem regras de filtro","E":"Bloquear 80/443 e liberar 22 para debug público"},"correta":"B"},{"id":"q5","titulo":"Qual alternativa está alinhada ao princípio do menor privilégio para clientes da VPN?","alternativas":{"A":"Permitir acesso a toda a rede por facilidade","B":"Restringir o AllowedIPs e as regras de firewall ao estritamente necessário","C":"Desativar autenticação para reduzir atrito","D":"Permitir escaneamentos de porta regularmente","E":"Ativar roteamento padrão (0.0.0.0/0) para todo cliente"},"correta":"B"},{"id":"q6","titulo":"WPA3‑SAE traz principalmente qual benefício em relação ao WPA2‑PSK?","alternativas":{"A":"Criptografia WEP mais forte","B":"Redução de latência do Wi‑Fi","C":"Melhor resistência a ataques de dicionário offline","D":"Compatibilidade universal com dispositivos antigos","E":"Eliminação da necessidade de senha"},"correta":"C"},{"id":"q7","titulo":"Sobre segurança física e ambiental, qual item NÃO é uma boa prática?","alternativas":{"A":"Organização e identificação de cabos","B":"Uso de nobreak (UPS) para equipamentos críticos","C":"Deixar rack aberto para facilitar acesso","D":"Controle de acesso a salas e inventário de ativos","E":"Proteção contra surtos e monitoramento básico de temperatura"},"correta":"C"},{"id":"q8","titulo":"Para validar o funcionamento da publicação na DMZ, qual teste é adequado?","alternativas":{"A":"curl -I http://ENDERECO_PUBLICO para verificar resposta HTTP","B":"Executar format c: no servidor","C":"Desabilitar o firewall para ver se funciona","D":"Bloquear a porta 80 e testar acesso HTTP","E":"Executar ping somente dentro da LAN"},"correta":"A"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Atualizei o firmware do AP/roteador e desativei WPS."},{"id":"c2","texto":"Configurei WPA2/WPA3 com senha forte e, se possível, client isolation."},{"id":"c3","texto":"Implementei SSID separado para convidados/IoT sem acesso à LAN."},{"id":"c4","texto":"Implantei WireGuard (servidor e cliente) e validei handshake e ping pelo túnel."},{"id":"c5","texto":"Restringi AllowedIPs e criei regras de firewall específicas para o cliente VPN."},{"id":"c6","texto":"Subi Nginx na VM da DMZ e publiquei apenas a porta necessária (80/443)."},{"id":"c7","texto":"Configurei NAT/port‑forward e validei com curl/nmap a partir de host externo."},{"id":"c8","texto":"Bloqueei tráfego desnecessário da DMZ para a LAN (menor privilégio)."},{"id":"c9","texto":"Registrei evidências (prints/configs) e preenchi o checklist físico/ambiental."},{"id":"c10","texto":"Elaborei um resumo de riscos e melhorias para Wi‑Fi, VPN e DMZ."}];
+    const CHECKLIST_KEY = 'SEIN_CAP12_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

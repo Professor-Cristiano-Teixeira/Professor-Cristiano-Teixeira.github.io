@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 09 — HTTP e WebSocket</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo09.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PSIC</span>
+        <span style="color: var(--cor-principal);">Projetos e Suporte à Internet das Coisas</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Introdução à IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Revisão de programação para IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Eletrônica básica aplicada</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Plataformas e IDEs</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — GPIO e PWM</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Modularização e bibliotecas</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Conectividade Wi‑Fi</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — MQTT: tópicos e QoS</a></li>
+              <li><a class="dropdown-item active" href="capitulo09.html">Cap. 09 — HTTP e WebSocket</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Integração com bancos de dados</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Dashboards em tempo real</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Segurança em IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Versionamento e documentação</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Suporte e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Projeto guiado</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto final</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 09 — HTTP e WebSocket para IoT: REST, códigos de status, timeouts e tempo real</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h (2 encontros)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Dispositivo IoT enviando telemetria via HTTP POST e recebendo configuração via HTTP GET, com prova de conceito de WebSocket eco</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> ESP32 + MicroPython (ou Arduino C++), servidor local em Python (Flask) + WebSocket (websocket/ws), JSON, cURL/Postman</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar diferenças entre HTTP (REST) e WebSocket e quando usar cada um na IoT.</li><li>Construir requisições GET/POST/PUT com JSON e interpretar códigos de status HTTP.</li><li>Implementar timeouts, retries e idempotência básica em clientes IoT.</li><li>Consumir uma API local para enviar telemetria e obter configurações do dispositivo.</li><li>Implementar um canal WebSocket de eco para mensagens em tempo real.</li><li>Registrar e analisar respostas e erros (logs) para troubleshooting.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Interpretar protocolos de aplicação (HTTP/WS) em cenários de IoT.</li><li>Serializar e validar dados em JSON.</li><li>Aplicar boas práticas de cliente HTTP: timeout, retry, backoff e verificação de status.</li><li>Operar ferramentas de teste (cURL/Postman) para inspecionar requisições/respostas.</li><li>Documentar endpoints, payloads e fluxos.</li><li>Configurar servidor local simples (Flask) e WS de teste para integração.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: MQTT: publicação, assinatura, tópicos e QoS</a>
+              <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Integração com bancos de dados e formatação de dados</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 09)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0">
+  <li><strong>Aquecimento (15 min):</strong> Revisão rápida de MQTT e motivação para HTTP/REST e WebSocket. Exibição de um fluxo “dispositivo → API → resposta”.</li>
+  <li><strong>Exposição teórica (50 min):</strong> Métodos HTTP, códigos de status, idempotência, timeouts/retries; WebSocket e comparação com HTTP/MQTT.</li>
+  <li><strong>Demo guiada (25 min):</strong> Testar endpoints com cURL/Postman e observar respostas.</li>
+  <li><strong>Laboratório 1 (60 min):</strong> Subir servidor Flask local com endpoints /telemetria (POST) e /config (GET). Validar no navegador/cURL.</li>
+  <li><strong>Laboratório 2 (60 min):</strong> Programar ESP32 (MicroPython) para enviar POST JSON e buscar config via GET, com timeout e retry.</li>
+  <li><strong>Laboratório 3 (30 min):</strong> Prova de conceito de WebSocket eco (cliente web e/ou script Python).</li>
+  <li><strong>Fechamento (10 min):</strong> Checklist, entregáveis e orientações para atividades individuais.</li>
+</ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">1) HTTP para IoT: métodos e recursos</h3>
+  <p>HTTP é um protocolo de aplicação cliente-servidor amplamente utilizado. Em IoT, é comum criar uma API REST para que o dispositivo envie telemetria (POST) e busque configurações (GET). Recursos são identificados por URLs (ex.: /telemetria, /config/dispositivo123) e representações transitam em formatos como JSON.</p>
+  <p><strong>Onde vou aplicar:</strong> Você criará um endpoint /telemetria para receber POST JSON do dispositivo e um /config para o dispositivo fazer GET de parâmetros.</p>
+
+  <h3 class="h6 fw-bold mt-3">2) Métodos GET, POST, PUT e idempotência</h3>
+  <p><strong>GET</strong> recupera dados sem alterar estado do servidor; deve ser idempotente e seguro. <strong>POST</strong> cria/enfileira ações ou envia dados; não é idempotente por padrão. <strong>PUT</strong> substitui/atualiza um recurso e <em>é</em> idempotente (repetir o mesmo PUT não muda o resultado final). Em IoT, usar PUT para atualizar uma configuração específica é útil, enquanto POST é adequado para telemetria histórica.</p>
+  <p><strong>Onde vou aplicar:</strong> Usaremos POST para telemetria e GET para buscar configurações. Você também verá um exemplo de PUT para alterar um limite de temperatura.</p>
+
+  <h3 class="h6 fw-bold mt-3">3) Códigos de status e tratamento de erros</h3>
+  <p>Respostas HTTP possuem códigos de status: 2xx (sucesso), 4xx (erro do cliente), 5xx (erro do servidor). Exemplos: 200 OK, 201 Created, 400 Bad Request (JSON inválido), 401 Unauthorized (sem credencial), 404 Not Found (recurso inexistente), 500 Internal Server Error. O cliente deve registrar o código e agir: reprocessar, corrigir payload, aguardar e tentar novamente, etc.</p>
+  <p><strong>Onde vou aplicar:</strong> No firmware, você fará logs do status e mensagens de erro; no servidor Flask, retornará códigos adequados.</p>
+
+  <h3 class="h6 fw-bold mt-3">4) Timeouts, retries e backoff</h3>
+  <p>Dispositivos IoT estão sujeitos a variações de rede. Sempre configure <em>timeout</em> para as requisições. Em caso de falha transitória (ex.: 5xx ou timeout), aplique <em>retry</em> com backoff exponencial e limite de tentativas para evitar tempestades de tráfego e gasto excessivo de energia.</p>
+  <p><strong>Onde vou aplicar:</strong> O cliente MicroPython implementará timeout e tentativas com backoff simples.</p>
+
+  <h3 class="h6 fw-bold mt-3">5) WebSocket: comunicação bidirecional</h3>
+  <p>WebSocket mantém uma conexão persistente e full‑duplex entre cliente e servidor, útil para atualizações em tempo real (ex.: comandos imediatos, dashboards reativos). Diferente de HTTP, não requer nova conexão a cada mensagem. Em IoT, é comum no backend/dashboard; no dispositivo, o suporte depende da memória e bibliotecas disponíveis.</p>
+  <p><strong>Onde vou aplicar:</strong> Você executará uma prova de conceito com um servidor de eco WebSocket e um cliente (navegador ou script) para entender o fluxo.</p>
+
+  <h3 class="h6 fw-bold mt-3">6) HTTP vs. MQTT vs. WebSocket: quando usar</h3>
+  <p><strong>HTTP</strong> é ótimo para integrações com serviços web e endpoints REST, coleta eventual e <em>webhooks</em>. <strong>MQTT</strong> é excelente para telemetria leve e pub/sub com tópicos e QoS. <strong>WebSocket</strong> serve para streams em tempo real e dashboards. A escolha depende de latência, overhead, confiabilidade, consumo de energia e arquitetura do sistema.</p>
+  <p><strong>Onde vou aplicar:</strong> Você comparará latência percebida e esforço de implementação entre POST periódico e WebSocket de eco.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passos">
+      </section>
+
+      <section class="mb-5" id="passo-a-passos">
+      </section>
+
+      <section class="mb-5" id="passo-a-passos">
+      </section>
+
+      <section class="mb-5" id="passo-a-passos">
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Enviando telemetria via HTTP e configurando WebSocket de eco</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Construir um fluxo completo: subir uma API local (Flask), testar com cURL/Postman, programar o ESP32 (MicroPython) para enviar POST JSON e realizar GET de configurações com timeout e retries; por fim, rodar um servidor de eco WebSocket e interagir com um cliente.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">1) Preparar o ambiente no PC (servidor HTTP com Flask)</h3>
+  <p>Instale Python 3.10+ e crie um ambiente virtual. Em seguida, instale Flask.</p>
+  <pre class="language-bash"><code># Windows (PowerShell) / Linux / macOS
+python -m venv .venv
+# Ativar:
+# Windows:
+.venv\Scripts\Activate.ps1
+# Linux/macOS:
+source .venv/bin/activate
+
+pip install flask</code></pre>
+  <p>Crie o arquivo servidor.py com dois endpoints: POST /telemetria e GET /config.</p>
+  <pre class="language-python"><code>from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+CONFIG_ATUAL = {
+    "deviceId": "esp32-01",
+    "intervalo_s": 10,
+    "limite_temp": 28.5
+}
+
+@app.route("/telemetria", methods=["POST"])
+def telemetria():
+    try:
+        data = request.get_json(force=True, silent=False)
+        # Validação simples
+        if not data or "deviceId" not in data or "temperatura" not in data:
+            return jsonify({"erro": "payload inválido"}), 400
+        # Simule persistência/log
+        print("[TELEMETRIA]", data)
+        return jsonify({"status": "ok", "received": data}), 201
+    except Exception as e:
+        print("Erro:", e)
+        return jsonify({"erro": "falha no servidor"}), 500
+
+@app.route("/config", methods=["GET"])
+def config():
+    device_id = request.args.get("deviceId", "")
+    # Poderia personalizar por device_id; aqui retorna config padrão
+    return jsonify(CONFIG_ATUAL), 200
+
+@app.route("/config/limite", methods=["PUT"])
+def atualizar_limite():
+    body = request.get_json(force=True, silent=False) or {}
+    novo = body.get("limite_temp")
+    if isinstance(novo, (int, float)):
+        CONFIG_ATUAL["limite_temp"] = float(novo)
+        return jsonify({"status": "atualizado", "limite_temp": CONFIG_ATUAL["limite_temp"]}), 200
+    return jsonify({"erro": "limite_temp ausente ou inválido"}), 400
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)</code></pre>
+  <p>Execute o servidor:</p>
+  <pre class="language-bash"><code>python servidor.py
+# Acesse http://localhost:5000/config no navegador</code></pre>
+  <p>Teste via cURL:</p>
+  <pre class="language-bash"><code># GET de config
+curl -s http://localhost:5000/config | jq
+
+# POST de telemetria
+curl -s -X POST http://localhost:5000/telemetria ^
+  -H "Content-Type: application/json" ^
+  -d "{\"deviceId\":\"esp32-01\",\"temperatura\":26.9,\"umidade\":55}" | jq
+
+# PUT de limite (idempotente)
+curl -s -X PUT http://localhost:5000/config/limite \
+  -H "Content-Type: application/json" \
+  -d '{"limite_temp":27.2}' | jq</code></pre>
+
+  <hr class="my-4">
+
+  <h3 class="h6 fw-bold">2) Cliente no dispositivo (ESP32 + MicroPython)</h3>
+  <p>Carregue MicroPython no ESP32 e conecte-se ao Wi‑Fi. Em seguida, crie o arquivo main.py com timeout e retry simples.</p>
+  <pre class="language-python"><code># main.py (MicroPython no ESP32)
+import time, json
+import network
+import urequests as requests
+
+WIFI_SSID = "SEU_SSID"
+WIFI_PSK  = "SUA_SENHA"
+API_BASE  = "http://SEU_PC:5000"  # ex: http://192.168.0.10:5000
+DEVICE_ID = "esp32-01"
+
+def wifi_connect():
+    sta = network.WLAN(network.STA_IF)
+    sta.active(True)
+    if not sta.isconnected():
+        sta.connect(WIFI_SSID, WIFI_PSK)
+        t0 = time.ticks_ms()
+        while not sta.isconnected() and time.ticks_diff(time.ticks_ms(), t0) &lt; 15000:
+            time.sleep_ms(300)
+    print("Wi-Fi:", "OK" if sta.isconnected() else "FALHA", sta.ifconfig())
+    return sta.isconnected()
+
+def http_get(url, timeout=5):
+    try:
+        resp = requests.get(url, timeout=timeout)
+        code = resp.status_code
+        text = resp.text
+        resp.close()
+        return code, text
+    except Exception as e:
+        return None, str(e)
+
+def http_post(url, payload, timeout=5):
+    try:
+        headers = {"Content-Type":"application/json"}
+        resp = requests.post(url, data=json.dumps(payload), headers=headers, timeout=timeout)
+        code = resp.status_code
+        text = resp.text
+        resp.close()
+        return code, text
+    except Exception as e:
+        return None, str(e)
+
+def backoff_sleep(attempt):
+    # backoff exponencial com limite
+    wait = min(2 ** attempt, 30)
+    print("Retry em", wait, "s")
+    time.sleep(wait)
+
+def loop_main():
+    if not wifi_connect():
+        return
+    tentativa = 0
+    while True:
+        # 1) Obter config
+        code, text = http_get(API_BASE + "/config?deviceId=" + DEVICE_ID, timeout=5)
+        if code == 200:
+            cfg = json.loads(text)
+            intervalo = int(cfg.get("intervalo_s", 10))
+            limite = float(cfg.get("limite_temp", 30))
+            print("Config:", cfg)
+            tentativa = 0  # zera backoff após sucesso
+        else:
+            print("GET falhou:", code, text)
+            tentativa += 1
+            backoff_sleep(tentativa)
+            continue
+
+        # 2) Medir sensor (simulado)
+        temperatura = 26.5
+        umidade = 55.0
+        payload = {"deviceId": DEVICE_ID, "temperatura": temperatura, "umidade": umidade}
+        code, text = http_post(API_BASE + "/telemetria", payload, timeout=5)
+        if code in (200, 201):
+            print("POST ok:", code, text)
+            tentativa = 0
+        else:
+            print("POST falhou:", code, text)
+            tentativa += 1
+            backoff_sleep(tentativa)
+            continue
+
+        # 3) Espera pelo próximo ciclo
+        time.sleep(intervalo)
+
+loop_main()</code></pre>
+  <p>Substitua SEU_PC pelo IP do computador que executa o Flask. Verifique o console serial do ESP32 para logs de status e respostas.</p>
+
+  <hr class="my-4">
+
+  <h3 class="h6 fw-bold">3) Prova de conceito WebSocket (eco)</h3>
+  <p>Instale a biblioteca websockets no PC e rode um servidor de eco simples.</p>
+  <pre class="language-bash"><code>pip install websockets</code></pre>
+  <pre class="language-python"><code># ws_eco.py
+import asyncio, websockets
+
+async def echo(websocket):
+    async for msg in websocket:
+        print("Recebido:", msg)
+        await websocket.send("eco: " + msg)
+
+async def main():
+    async with websockets.serve(echo, "0.0.0.0", 8765):
+        print("WS eco em ws://localhost:8765")
+        await asyncio.Future()  # roda para sempre
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+  <p>Cliente rápido via navegador (abra um arquivo .html local e teste):</p>
+  <pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;h3&gt;Teste WebSocket Eco&lt;/h3&gt;
+&lt;input id="msg" placeholder="digite..."/&gt; &lt;button onclick="sendMsg()"&gt;Enviar&lt;/button&gt;
+&lt;pre id="log"&gt;&lt;/pre&gt;
+&lt;script&gt;
+const ws = new WebSocket("ws://localhost:8765");
+ws.onopen = ()=&gt; log("WS aberto");
+ws.onmessage = e =&gt; log("Servidor: " + e.data);
+function log(t){ document.getElementById('log').textContent += t + "\n"; }
+function sendMsg(){ ws.send(document.getElementById('msg').value); }
+&lt;/script&gt;</code></pre>
+  <p>Compare a interação em tempo real (WS) com o ciclo periódico do HTTP.</p>
+
+  <hr class="my-4">
+
+  <h3 class="h6 fw-bold">4) Testes, diagnósticos e variações</h3>
+  <ul>
+    <li>Simule erro 400 enviando um POST sem campo deviceId e observe o tratamento.</li>
+    <li>Altere o limite de temperatura via PUT e confirme que o GET reflete o novo valor.</li>
+    <li>Desligue o Flask e observe as tentativas com backoff no dispositivo.</li>
+    <li>Opcional: proteja a API com um token simples via cabeçalho HTTP e valide no servidor.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de HTTP/REST e WebSocket em cenários reais de IoT, reforçando boas práticas de cliente, servidor e depuração.</p>
+        <div class="card-soft bg-white p-4">
+  <ol class="mb-0">
+    <li><strong>Extensão do cliente:</strong> Inclua cabeçalho Authorization: Bearer &lt;token&gt; no POST/GET do ESP32 e valide o token no Flask (retorne 401 se ausente/errado).</li>
+    <li><strong>Endpoint de comandos:</strong> Crie um endpoint /comandos (GET) que retorne uma lista JSON de ações (ex.: buzzer=on/off). Faça o dispositivo buscar e imprimir no console.</li>
+    <li><strong>Mini-dashboard:</strong> Crie uma página HTML que faça fetch periódico em /ultimas (novo endpoint) e liste as últimas 5 telemetrias. Opcional: use WebSocket para atualizar em tempo real.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de Avaliação (rubrica resumida)</h3>
+  <ul class="mb-0">
+    <li>Funcionamento: requisições corretas, respostas adequadas, tratamento de erros.</li>
+    <li>Código: legibilidade, modularização mínima, comentários e logs claros.</li>
+    <li>Rede e protocolo: uso de status HTTP apropriados e timeouts/retries.</li>
+    <li>Segurança básica: token simples ou separação de credenciais do código.</li>
+    <li>Documentação: README curto com endpoints, exemplos de cURL e instruções de execução.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Comparação de overhead e latência: HTTP/REST vs. MQTT em redes instáveis.</li><li>Boas práticas de desenho de APIs REST para dispositivos restritos (paginação, compactação, cache).</li><li>WebSocket seguro (wss://) e implicações de firewall/NAT em ambientes industriais.</li><li>Estratégias de idempotência no cliente e no servidor (chaves de deduplicação).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 09</h2>
+        <ul><li>Servidor Flask funcional com endpoints /telemetria (POST), /config (GET) e /config/limite (PUT), com códigos de status adequados.</li><li>Firmware MicroPython do ESP32 com POST de telemetria, GET de config, timeout e retries com backoff, e logs no serial.</li><li>Prova de conceito de WebSocket de eco com captura de mensagens trocadas.</li><li>README com instruções de execução, exemplos de cURL e descrição dos endpoints.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: MQTT: publicação, assinatura, tópicos e QoS</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo10.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Integração com bancos de dados e formatação de dados</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projetos e Suporte à Internet das Coisas — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a melhor descrição para o uso de GET em uma API IoT?","alternativas":{"A":"Atualizar recursos de forma não idempotente.","B":"Criar novos registros de telemetria no servidor.","C":"Recuperar informações sem alterar o estado do servidor.","D":"Estabelecer conexão full‑duplex para tempo real.","E":"Enviar comandos para o dispositivo por broadcast."},"correta":"C"},{"id":"q2","titulo":"Qual combinação de método e característica está correta?","alternativas":{"A":"POST — sempre idempotente.","B":"PUT — idempotente (mesmo corpo repetido mantém o resultado).","C":"GET — altera estado do servidor por padrão.","D":"DELETE — nunca idempotente.","E":"PATCH — sempre idempotente."},"correta":"B"},{"id":"q3","titulo":"Um cliente IoT fez POST e recebeu 400. O que isso indica?","alternativas":{"A":"Erro de servidor, tente novamente imediatamente.","B":"Sucesso parcial, mas com alerta.","C":"Erro no cliente (ex.: payload inválido); deve corrigir antes de reenviar.","D":"Recurso não encontrado; tente mudar para PUT.","E":"Conexão persistente encerrada."},"correta":"C"},{"id":"q4","titulo":"Por que configurar timeout e retries com backoff no cliente IoT?","alternativas":{"A":"Para aumentar o consumo de energia e tráfego.","B":"Para evitar bloqueio indefinido e reduzir tempestade de requisições em falhas.","C":"Para garantir que toda requisição falhe rapidamente.","D":"Para impedir que o servidor responda 2xx.","E":"Para substituir a validação do payload."},"correta":"B"},{"id":"q5","titulo":"Em qual cenário o WebSocket tende a ser mais adequado que HTTP polling?","alternativas":{"A":"Quando há poucas mensagens e latência não é relevante.","B":"Quando o dispositivo não tem suporte a TCP/IP.","C":"Quando é necessário canal bidirecional e atualizações imediatas.","D":"Quando a comunicação precisa ser stateless a cada requisição.","E":"Quando a API exige apenas CRUD síncrono."},"correta":"C"},{"id":"q6","titulo":"Ao comparar HTTP e MQTT na IoT, assinale a alternativa correta:","alternativas":{"A":"HTTP sempre consome menos overhead que MQTT.","B":"MQTT é pub/sub e pode ser mais leve para telemetria frequente.","C":"HTTP não suporta códigos de status.","D":"MQTT não permite QoS configurável.","E":"Ambos exigem conexões persistentes obrigatoriamente."},"correta":"B"},{"id":"q7","titulo":"Qual é a resposta adequada do servidor ao criar um recurso com POST bem-sucedido?","alternativas":{"A":"200 OK sem corpo obrigatoriamente.","B":"201 Created e, idealmente, corpo/Location com referência ao recurso.","C":"204 No Content com mensagem de erro no corpo.","D":"301 Moved Permanently.","E":"500 Internal Server Error para confirmar a criação."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Instalei e executei o servidor Flask local com /telemetria, /config e /config/limite."},{"id":"c2","texto":"Testei os endpoints usando cURL ou Postman e observei os códigos de status."},{"id":"c3","texto":"Programei o ESP32 (MicroPython) para GET de /config com timeout."},{"id":"c4","texto":"Implementei POST de telemetria com JSON e conferi resposta 201/200."},{"id":"c5","texto":"Adicionei retries com backoff em falhas (timeout/5xx)."},{"id":"c6","texto":"Ajustei o limite de temperatura via PUT e verifiquei no GET."},{"id":"c7","texto":"Implementei logs claros no dispositivo e no servidor."},{"id":"c8","texto":"Montei a prova de conceito de WebSocket eco e troquei mensagens."},{"id":"c9","texto":"Documentei endpoints e exemplos de requisição no README."},{"id":"c10","texto":"Opcional: adicionei token simples de autenticação nas requisições."}];
+    const CHECKLIST_KEY = 'psic-cap09-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

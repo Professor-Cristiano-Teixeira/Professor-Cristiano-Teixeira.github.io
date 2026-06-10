@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 14 — Backup e Recuperação de Dados</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo14.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SEIN</span>
+        <span style="color: var(--cor-principal);">Segurança da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">01 — Fundamentos e princípios (CID)</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">02 — Gestão inicial de riscos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">03 — Normas, políticas e legislação</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">04 — Papéis, responsabilidades e ética</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">05 — Conscientização e engenharia social</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">06 — Segurança de sistemas operacionais</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">07 — Hardening em Windows</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">08 — Hardening em Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">09 — Patches e proteção de host</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">10 — Fundamentos de segurança de redes</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">11 — Firewalls, NAT e filtragem</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">12 — Wi-Fi, VPN, DMZ e segurança física</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">13 — Criptografia e certificados</a></li>
+              <li><a class="dropdown-item active" href="capitulo14.html">14 — Backup e recuperação de dados</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">15 — Segurança em nuvem e virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">16 — Segurança em IoT e PI</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 14 — Backup e Recuperação de Dados</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório 3-2-1 com backups full e incrementais de arquivos, VM e banco de dados de exemplo</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Windows, Linux, PowerShell, Bash, robocopy, rsync, 7-Zip, tar, pg_dump/mysqldump, cron/Agendador de Tarefas</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Planejar uma política de backup 3-2-1 com retenção adequada e janelas de execução.</li><li>Executar backups full e incrementais em Windows e Linux usando ferramentas nativas.</li><li>Realizar e validar restaurações, verificando integridade por hash e logs.</li><li>Configurar agendamento automatizado e registrar evidências dos processos.</li><li>Conhecer abordagens para backup de VMs e bancos de dados.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Aplicar boas práticas de backup e retenção para garantir disponibilidade (CID).</li><li>Operar ferramentas de sistema para backup/restore com segurança e documentação.</li><li>Diagnosticar falhas de backup a partir de logs e realizar correções.</li><li>Automatizar rotinas com scripts e agendadores.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 13 — Criptografia e certificados</a>
+              <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 15 — Segurança em nuvem e virtualização</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 14)</h2>
+        <div class="card-soft bg-white p-4 mt-3">1) Explanação teórica: política 3-2-1, tipos de backup (full, incremental, diferencial), retenção, testes de restauração e verificação de integridade (hash).<br>2) Demonstração: backup de diretório de projeto em Linux com rsync/tar e em Windows com robocopy/7-Zip; criação de hashes; simulação de falha e restore.<br>3) Prática guiada: cada aluno executa um ciclo completo (full + incremental + restore) e agenda a rotina (cron/Agendador).<br>4) Extensão: visão geral de backup de VMs e bancos de dados (snapshots, pg_dump/mysqldump).<br>5) Registro: cada etapa documentada com comandos, prints, logs e checksums; checklist final.</div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div>
+            <h3 class="h6 fw-bold">Política 3-2-1 de Backup</h3>
+            <p>A política 3-2-1 recomenda manter pelo menos 3 cópias dos dados, em 2 mídias diferentes e 1 cópia fora do site (off-site). Isso reduz o risco de perda por falhas de hardware, ransomware, desastres físicos ou erros humanos.</p>
+            <p>Exemplo: dados de produção (cópia 1), backup em disco externo/NAS (cópia 2) e cópia na nuvem (cópia 3/off-site). O off-site pode ser um storage em nuvem ou mídia rotativa armazenada em local diferente.</p>
+            <p>Onde vou aplicar isso: definir os destinos no passo a passo (diretório local, unidade externa e pasta sincronizada/nuvem) e evidenciar no relatório a conformidade 3-2-1.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">Tipos de Backup: Full, Incremental e Diferencial</h3>
+            <p>Backup full copia todos os dados selecionados. É a base para qualquer restauração, porém consome mais tempo e espaço. Incremental copia apenas o que mudou desde o último backup (qualquer tipo), economizando espaço e janela. Diferencial copia o que mudou desde o último full, crescendo a cada dia até o próximo full.</p>
+            <p>Escolha típica: um full semanal e incrementais diários. Diferencial pode simplificar o restore (full + último diferencial), enquanto incremental maximiza economia de espaço (full + todos os incrementais até a data).</p>
+            <p>Onde vou aplicar isso: executar um full inicial e um incremental no laboratório, registrando tamanhos e tempo de execução.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">Agendamento, Retenção e Janela de Backup</h3>
+            <p>Agendar garante consistência e reduz dependência manual. Retenção define por quanto tempo manter versões (ex.: 7 diários, 4 semanais, 3 mensais). Janela de backup é o período de menor impacto no ambiente para executar as cópias (madrugada, horários ociosos).</p>
+            <p>Automação via cron (Linux) ou Agendador de Tarefas (Windows) com scripts versionados e logs. Retenção pode ser aplicada com políticas de expiração e rotação.</p>
+            <p>Onde vou aplicar isso: criar um agendamento simples (cron/Agendador) e simular rotação de arquivos antigos.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">Testes de Restauração e Verificação de Integridade</h3>
+            <p>Backup sem teste de restore é um risco: é essencial restaurar periodicamente amostras ou cenários completos para provar que funciona. A verificação de integridade por hash (ex.: SHA-256) confirma que o arquivo restaurado é idêntico ao original.</p>
+            <p>Registrar checksums antes do backup e comparar após a restauração é uma prática simples e eficaz. Alguns softwares oferecem verificação interna, mas o hash é universal.</p>
+            <p>Onde vou aplicar isso: gerar e salvar hashes dos arquivos fonte, restaurar e comparar os hashes no final do exercício.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">Backup de VMs e Bancos de Dados (visão geral)</h3>
+            <p>VMs: preferir snapshots consistentes (com agente) ou desligamento/quieting da VM para evitar corrupção. Ferramentas de hypervisor e storage facilitam backups consistentes e restaurações rápidas.</p>
+            <p>Bancos de dados: usar ferramentas nativas (pg_dump/pg_restore, mysqldump/mysql, dumps binários) e considerar logs de transação. Backups “a quente” requerem mecanismos de consistência para não perder transações.</p>
+            <p>Onde vou aplicar isso: executar um dump simples de banco de dados de exemplo e incluir no pacote de backup.</p>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold">Criptografia e Off-site</h3>
+            <p>Criptografar backups evita exposição de dados caso a mídia seja perdida ou roubada. A gestão de chaves deve ser segura e com cópias de recuperação. Para off-site, opções incluem armazenamento em nuvem com criptografia do lado do cliente.</p>
+            <p>Onde vou aplicar isso: compactar e criptografar um pacote de backup com senha, documentando o procedimento e o local seguro da senha.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Ciclo completo de backup (full + incremental) e restauração com verificação</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Planejar e executar um backup full inicial e um incremental, simular perda, restaurar e validar integridade, automatizando com agendamento simples.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">1) Preparação do ambiente e política 3-2-1</h3>
+            <ol class="mb-0">
+              <li>Defina fontes: uma pasta de projeto com subpastas e arquivos (ex.: Documentos/projetoA).</li>
+              <li>Defina destinos:
+                <ul>
+                  <li>Destino 1 (local): uma pasta “/backups/local” (Linux) ou “D:\Backups\Local” (Windows).</li>
+                  <li>Destino 2 (mídia diferente): um pendrive/NAS (simular como outra unidade de disco).</li>
+                  <li>Destino 3 (off-site): simular como uma pasta “Offsite” separada ou serviço sincronizado.</li>
+                </ul>
+              </li>
+              <li>Crie estrutura de diretórios e registre no seu diário de bordo.</li>
+            </ol>
+            <p class="mt-3 mb-1"><strong>Linux (Bash)</strong></p>
+            <pre class="language-bash"><code># criar diretórios (ajuste caminhos conforme seu usuário)
+mkdir -p ~/projetoA/{docs,src,imgs}
+echo "versao 1" &gt; ~/projetoA/docs/README.txt
+
+sudo mkdir -p /backups/{local,midia,offsite}
+sudo chown -R "$USER":"$USER" /backups
+
+# conferir
+tree -L 2 ~/projetoA /backups || ls -R ~/projetoA &amp;&amp; ls -R /backups</code></pre>
+            <p class="mb-1"><strong>Windows (PowerShell)</strong></p>
+            <pre class="language-powershell"><code># criar diretórios
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\projetoA\docs","$env:USERPROFILE\projetoA\src","$env:USERPROFILE\projetoA\imgs" | Out-Null
+"versao 1" | Out-File "$env:USERPROFILE\projetoA\docs\README.txt" -Encoding utf8
+
+New-Item -ItemType Directory -Force -Path "D:\Backups\Local","E:\Backups\Midia","D:\Backups\Offsite" | Out-Null
+
+# listar
+Get-ChildItem -Recurse "$env:USERPROFILE\projetoA"
+Get-ChildItem -Recurse "D:\Backups"</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">2) Gerar hashes de integridade (baseline)</h3>
+            <p>Crie uma lista de checksums dos arquivos fonte. Guarde esse arquivo junto com os backups.</p>
+            <p class="mb-1"><strong>Linux</strong></p>
+            <pre class="language-bash"><code>cd ~/projetoA
+find . -type f -print0 | xargs -0 sha256sum &gt; /backups/local/projetoA_hashes_baseline.sha256
+head -n 5 /backups/local/projetoA_hashes_baseline.sha256</code></pre>
+            <p class="mb-1"><strong>Windows (PowerShell)</strong></p>
+            <pre class="language-powershell"><code>Set-Location "$env:USERPROFILE\projetoA"
+Get-ChildItem -Recurse -File | ForEach-Object {
+  $hash = Get-FileHash $_.FullName -Algorithm SHA256
+  "{0}  {1}" -f $hash.Hash, $_.FullName.Replace($pwd.Path,' .') 
+} | Out-File "D:\Backups\Local\projetoA_hashes_baseline.sha256" -Encoding ascii
+
+Get-Content "D:\Backups\Local\projetoA_hashes_baseline.sha256" -TotalCount 5</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">3) Backup Full inicial</h3>
+            <p>Faça um full para o destino local e gere um pacote compactado/criptografado para off-site.</p>
+            <p class="mb-1"><strong>Linux — rsync + tar.gz + senha (7z)</strong></p>
+            <pre class="language-bash"><code># full para destino local (preserva atributos, deleta no destino o que não existe na origem? NÃO no full inicial)
+rsync -avh --progress ~/projetoA/ /backups/local/projetoA_full/
+
+# pacote compactado (tar.gz) para mídia
+tar -czf /backups/midia/projetoA_full_$(date +%F).tar.gz -C /backups/local projetoA_full
+
+# opcional: criptografar com 7z (requer p7zip-full)
+# senha: guarde de forma segura
+7z a -p -mhe=on /backups/offsite/projetoA_full_$(date +%F).7z /backups/local/projetoA_full/</code></pre>
+            <p class="mb-1"><strong>Windows — Robocopy + 7-Zip</strong></p>
+            <pre class="language-powershell"><code># full para destino local
+$src = "$env:USERPROFILE\projetoA"
+$dst = "D:\Backups\Local\projetoA_full"
+robocopy $src $dst /MIR /R:2 /W:2 /FFT
+
+# compactar em mídia (zip) e offsite (7z com senha) — ajustar caminhos do 7z.exe
+$zipMidia = "E:\Backups\Midia\projetoA_full_$(Get-Date -Format 'yyyy-MM-dd').zip"
+$sevenOff = "D:\Backups\Offsite\projetoA_full_$(Get-Date -Format 'yyyy-MM-dd').7z"
+
+Compress-Archive -Path $dst\* -DestinationPath $zipMidia -Force
+
+# criptografar com 7-Zip (substituir caminho do 7z.exe)
+& "C:\Program Files\7-Zip\7z.exe" a -p -mhe=on $sevenOff "$dst\*" | Out-Null</code></pre>
+            <div class="alert alert-light border mt-3 mb-0" role="note">
+              Dica: Registre tamanho e tempo do backup. Garanta que a senha do pacote criptografado esteja em local seguro.
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">4) Backup Incremental</h3>
+            <p>Simule alterações na pasta de origem e execute um incremental.</p>
+            <p class="mb-1"><strong>Preparar alterações</strong></p>
+            <pre class="language-bash"><code># Linux
+echo "alteracao $(date)" &gt;&gt; ~/projetoA/docs/README.txt
+cp /etc/hosts ~/projetoA/docs/hosts_copia.txt 2&gt;/dev/null || true</code></pre>
+            <pre class="language-powershell"><code># Windows
+Add-Content "$env:USERPROFILE\projetoA\docs\README.txt" ("alteracao {0}" -f (Get-Date))
+Copy-Item "$env:SystemRoot\System32\drivers\etc\hosts" "$env:USERPROFILE\projetoA\docs\hosts_copia.txt" -ErrorAction SilentlyContinue</code></pre>
+            <p class="mb-1"><strong>Linux — rsync incremental</strong></p>
+            <pre class="language-bash"><code>rsync -avh --delete --progress ~/projetoA/ /backups/local/projetoA_full/
+# registrar arquivo de log
+rsync -avh --delete --log-file=/backups/local/rsync_incremental.log ~/projetoA/ /backups/local/projetoA_full/</code></pre>
+            <p class="mb-1"><strong>Windows — Robocopy incremental</strong></p>
+            <pre class="language-powershell"><code>robocopy "$env:USERPROFILE\projetoA" "D:\Backups\Local\projetoA_full" /MIR /R:2 /W:2 /FFT /LOG:"D:\Backups\Local\robocopy_incremental.log"</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">5) Simular perda e restaurar</h3>
+            <p>Renomeie a pasta original para simular perda e, em seguida, restaure a partir do backup.</p>
+            <p class="mb-1"><strong>Linux — restore</strong></p>
+            <pre class="language-bash"><code>mv ~/projetoA ~/projetoA_perdido_$(date +%H%M%S)
+mkdir -p ~/projetoA
+
+# restaurar do backup (cópia reversa)
+rsync -avh --progress /backups/local/projetoA_full/ ~/projetoA/</code></pre>
+            <p class="mb-1"><strong>Windows — restore</strong></p>
+            <pre class="language-powershell"><code>Rename-Item "$env:USERPROFILE\projetoA" ("projetoA_perdido_{0}" -f (Get-Date -Format 'HHmmss'))
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\projetoA" | Out-Null
+
+robocopy "D:\Backups\Local\projetoA_full" "$env:USERPROFILE\projetoA" /E /R:2 /W:2 /FFT</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">6) Verificar integridade pós-restore</h3>
+            <p>Compare os hashes do conjunto restaurado com os da linha de base. Arquivos novos após o baseline não terão correspondência; foque nos que existiam no momento do baseline.</p>
+            <p class="mb-1"><strong>Linux</strong></p>
+            <pre class="language-bash"><code>cd ~/projetoA
+# gerar hashes atuais
+find . -type f -print0 | xargs -0 sha256sum &gt; /backups/local/projetoA_hashes_restored.sha256
+
+# comparar (interseção pelos caminhos)
+comm -12 &lt;(awk '{print $2}' /backups/local/projetoA_hashes_baseline.sha256 | sort) \
+        &lt;(awk '{print $2}' /backups/local/projetoA_hashes_restored.sha256 | sort) | while read f; do
+  base=$(grep " $f$" /backups/local/projetoA_hashes_baseline.sha256 | awk '{print $1}')
+  curr=$(grep " $f$" /backups/local/projetoA_hashes_restored.sha256 | awk '{print $1}')
+  if [ "$base" != "$curr" ]; then echo "DIFERENTE: $f"; fi
+done || true</code></pre>
+            <p class="mb-1"><strong>Windows (PowerShell)</strong></p>
+            <pre class="language-powershell"><code>$baseline = Get-Content "D:\Backups\Local\projetoA_hashes_baseline.sha256"
+$mapBase = @{}
+foreach($line in $baseline){
+  if($line -match "^(?&lt;hash&gt;[0-9A-Fa-f]{64})\s+(?&lt;path&gt;.+)$"){
+    $mapBase[$Matches.path] = $Matches.hash
+  }
+}
+$currMap = @{}
+Get-ChildItem -Recurse -File "$env:USERPROFILE\projetoA" | ForEach-Object {
+  $h = Get-FileHash $_.FullName -Algorithm SHA256
+  $rel = " ." + $_.FullName.Replace("$env:USERPROFILE\projetoA","")
+  $currMap[$rel] = $h.Hash
+}
+$diffs = @()
+foreach($k in $mapBase.Keys){
+  if($currMap.ContainsKey($k) -and $currMap[$k] -ne $mapBase[$k]){
+    $diffs += $k
+  }
+}
+if($diffs.Count -eq 0){ "Integridade OK (baseline vs restaurado)." } else { "Diferenças: "; $diffs }</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">7) Agendar backups e retenção</h3>
+            <p>Crie um script que faça incrementais diários e mantenha logs. Agende no cron (Linux) ou Agendador de Tarefas (Windows).</p>
+            <p class="mb-1"><strong>Linux — script incremental (rsync_inc.sh)</strong></p>
+            <pre class="language-bash"><code>#!/usr/bin/env bash
+set -euo pipefail
+SRC="$HOME/projetoA/"
+DST="/backups/local/projetoA_full/"
+LOG="/backups/local/rsync_$(date +%F).log"
+rsync -avh --delete --log-file="$LOG" "$SRC" "$DST"</code></pre>
+            <p class="mb-1"><strong>Linux — cron diário às 02:00</strong></p>
+            <pre class="language-bash"><code>crontab -e
+# adicione:
+0 2 * * * /usr/bin/bash /home/SEU_USUARIO/rsync_inc.sh</code></pre>
+            <p class="mb-1"><strong>Windows — script incremental (inc.ps1)</strong></p>
+            <pre class="language-powershell"><code>$src = "$env:USERPROFILE\projetoA"
+$dst = "D:\Backups\Local\projetoA_full"
+$log = "D:\Backups\Local\robocopy_$(Get-Date -Format 'yyyy-MM-dd').log"
+robocopy $src $dst /MIR /R:2 /W:2 /FFT /LOG:$log</code></pre>
+            <p class="mb-1"><strong>Windows — Agendador de Tarefas</strong></p>
+            <pre class="language-powershell"><code># Exemplo com SchTasks: executar diariamente às 02:00
+SchTasks /Create /SC DAILY /TN "BackupIncrementalProjetoA" /TR "powershell.exe -ExecutionPolicy Bypass -File D:\Backups\inc.ps1" /ST 02:00</code></pre>
+            <div class="alert alert-light border mt-3 mb-0" role="note">
+              Para retenção, automatize limpeza de arquivos antigos por data ou mantenha versões em zip por mês. Documente sua política (ex.: 7 diários, 4 semanais, 3 mensais).
+            </div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">8) Backup de banco de dados (visão prática)</h3>
+            <p>Inclua um dump lógico no pacote, garantindo consistência dos dados.</p>
+            <p class="mb-1"><strong>PostgreSQL (Linux)</strong></p>
+            <pre class="language-bash"><code># dump de um banco "appdb" (ajuste usuário/senha/host)
+PGPASSWORD="senha" pg_dump -U postgres -h localhost -F c -f /backups/local/appdb_$(date +%F).dump appdb</code></pre>
+            <p class="mb-1"><strong>MySQL/MariaDB (Linux)</strong></p>
+            <pre class="language-bash"><code>mysqldump -u root -p appdb &gt; /backups/local/appdb_$(date +%F).sql</code></pre>
+            <p class="mb-1"><strong>Restauração (exemplo PostgreSQL)</strong></p>
+            <pre class="language-bash"><code>PGPASSWORD="senha" pg_restore -U postgres -h localhost -d appdb_restaurado /backups/local/appdb_$(date +%F).dump</code></pre>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold mb-2">9) Evidências e relatório</h3>
+            <ul class="mb-0">
+              <li>Liste comandos executados, horário, duração e tamanhos.</li>
+              <li>Inclua trechos de logs (rsync/robocopy), hashes e capturas de tela.</li>
+              <li>Declare a política 3-2-1, retenção e como foi agendado.</li>
+              <li>Descreva o teste de restauração e o resultado da verificação de integridade.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a autonomia na execução de políticas de backup, automação, restauração e validação de integridade.</p>
+        <div class="vstack gap-3 mt-3">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 1 — Rotina semanal com full + incrementais e retenção</h3>
+            <p>Projete e implemente uma rotina com full aos domingos e incrementais de segunda a sábado. Crie um script de limpeza que mantenha: 7 diários, 4 semanais e 3 mensais. Registre logs e tamanhos.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 2 — Restore seletivo</h3>
+            <p>Apague intencionalmente apenas a subpasta “imgs” da origem, restaure somente essa subpasta a partir do backup e valide por hashes que apenas ela foi afetada.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 3 — Dump de banco no ciclo</h3>
+            <p>Crie um pequeno banco de dados de teste, gere um dump em cada execução (com timestamp), inclua no pacote e valide a restauração em um banco separado.</p>
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de Avaliação</h3>
+          <ul class="mb-0">
+            <li>Correção técnica da política 3-2-1 e retenção implementada.</li>
+            <li>Execução bem-sucedida dos backups e restores, com logs e evidências.</li>
+            <li>Automação funcional (cron/Agendador) e scripts bem documentados.</li>
+            <li>Validação por hash sem divergências injustificadas.</li>
+            <li>Clareza e reprodutibilidade do relatório.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Comparativo: incremental vs. diferencial — impacto no tempo de restore.</li><li>Estratégias de backup para VMs: snapshots consistentes e quiescing.</li><li>Criptografia de backups e gestão de chaves (boas práticas).</li><li>Backups em nuvem: custos, latência e verificação de integridade.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 14</h2>
+        <ul><li>Relatório com política 3-2-1, retenção e janela de backup.</li><li>Scripts de backup/restore e de agendamento (cron/Agendador).</li><li>Logs das execuções e arquivos de hash (baseline e pós-restore).</li><li>Evidência de um dump de banco e teste de restauração.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 13 — Criptografia e certificados</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 15 — Segurança em nuvem e virtualização</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Segurança da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual afirmação melhor descreve a política 3-2-1?","alternativas":{"A":"Três backups completos por semana em um único disco.","B":"Três cópias, duas mídias diferentes e uma off-site.","C":"Dois backups incrementais e um diferencial por dia.","D":"Um backup completo e dois testes de restauração.","E":"Três cópias criptografadas na mesma mídia."},"correta":"B"},{"id":"q2","titulo":"Sobre backups incremental e diferencial, assinale a correta.","alternativas":{"A":"Incremental copia mudanças desde o último full; diferencial desde o último incremental.","B":"Incremental copia mudanças desde o último backup; diferencial desde o último full.","C":"Diferencial sempre ocupa menos que incremental.","D":"Incremental exige restauração apenas do último conjunto.","E":"Diferencial não depende de backup full."},"correta":"B"},{"id":"q3","titulo":"Por que testar a restauração e verificar integridade por hash é essencial?","alternativas":{"A":"Para reduzir o tamanho do backup.","B":"Para acelerar o cron.","C":"Para assegurar que os dados restaurados estejam íntegros e utilizáveis.","D":"Para evitar criptografia.","E":"Para dispensar logs."},"correta":"C"},{"id":"q4","titulo":"Qual é uma boa prática de agendamento e retenção?","alternativas":{"A":"Executar backups a qualquer hora para evitar janelas definidas.","B":"Executar apenas backups full diários sem retenção.","C":"Definir janela de baixa atividade, agendar e manter política de retenção documentada.","D":"Nunca apagar versões antigas.","E":"Evitar logs para reduzir espaço."},"correta":"C"},{"id":"q5","titulo":"Ao compactar e criptografar um pacote de backup off-site, o que é fundamental?","alternativas":{"A":"Salvar a senha no mesmo pacote.","B":"Publicar a senha em um chat do time.","C":"Gerenciar a senha/chaves de forma segura e acessível em emergência.","D":"Usar sempre a mesma senha para todos os pacotes.","E":"Desabilitar a criptografia."},"correta":"C"},{"id":"q6","titulo":"Em backups de bancos de dados, qual ferramenta e cuidado são adequados?","alternativas":{"A":"Copiar a pasta do DB em uso sem parar o serviço.","B":"Usar pg_dump/mysqldump e considerar consistência/transações.","C":"Apenas copiar arquivos temporários.","D":"Nunca versionar dumps.","E":"Evitar checksums."},"correta":"B"},{"id":"q7","titulo":"No Windows, qual comando é apropriado para backups incrementais de diretórios?","alternativas":{"A":"ipconfig","B":"robocopy com /MIR","C":"netstat","D":"format c:","E":"chkdsk"},"correta":"B"},{"id":"q8","titulo":"No Linux, qual ferramenta é comumente usada para sincronizar backups incrementais?","alternativas":{"A":"curl","B":"top","C":"rsync","D":"ls","E":"echo"},"correta":"C"},{"id":"q9","titulo":"Qual benefício do backup diferencial em relação ao incremental?","alternativas":{"A":"Restore geralmente requer apenas o full + último diferencial.","B":"Sempre menor em tamanho que incremental.","C":"Não precisa de backup full.","D":"Elimina necessidade de logs.","E":"É mais rápido que qualquer incremental."},"correta":"A"},{"id":"q10","titulo":"Na política 3-2-1, o componente \"1 off-site\" visa principalmente:","alternativas":{"A":"Reduzir tempo de backup.","B":"Aumentar compressão.","C":"Proteger contra desastres locais e ransomware.","D":"Evitar necessidade de restore.","E":"Cumprir requisito de criptografia."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Defini e documentei as fontes de dados para backup."},{"id":"c2","texto":"Implementei a política 3-2-1 (ou simulação equivalente) com destinos distintos."},{"id":"c3","texto":"Gerei o baseline de hashes dos arquivos fonte."},{"id":"c4","texto":"Executei um backup full inicial com logs e evidências."},{"id":"c5","texto":"Compactei e criptografei um pacote para off-site e guardei a senha com segurança."},{"id":"c6","texto":"Simulei alterações e executei um backup incremental com log."},{"id":"c7","texto":"Simulei perda e realizei o restore a partir do backup."},{"id":"c8","texto":"Verifiquei integridade pós-restore comparando hashes."},{"id":"c9","texto":"Implementei agendamento (cron/Agendador) para backup incremental."},{"id":"c10","texto":"Defini e testei a política de retenção (limpeza de versões antigas)."},{"id":"c11","texto":"Incluí um dump de banco de dados no ciclo de backup."},{"id":"c12","texto":"Produzi um relatório completo com comandos, logs, hashes e prints."}];
+    const CHECKLIST_KEY = 'SEIN_CAP14_CHECKLIST_V1';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

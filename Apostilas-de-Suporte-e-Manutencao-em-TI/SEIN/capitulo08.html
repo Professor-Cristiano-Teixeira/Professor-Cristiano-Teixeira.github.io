@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — Hardening em Linux</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo08.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">SEIN</span>
+        <span style="color: var(--cor-principal);">Segurança da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Fundamentos e princípios (CID)</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Gestão inicial de riscos</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Normas, políticas e legislação</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Papéis e ética</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Conscientização e engenharia social</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Segurança de sistemas operacionais</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Hardening em Windows</a></li>
+              <li><a class="dropdown-item active" href="capitulo08.html">Capítulo 08 — Hardening em Linux</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Patches, antimalware e HIDS/EDR</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Fundamentos de segurança de redes</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Firewalls e NAT</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Redes sem fio, VPN, DMZ e física</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Criptografia e certificados</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Backup e recuperação</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Nuvem e virtualização</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Segurança em IoT e projeto</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 08 — Hardening em Linux</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (estimado)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Laboratório de hardening em Linux com VM dedicada</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ubuntu/Debian, bash, OpenSSH, UFW, nftables/iptables, fail2ban, systemd-journald, rsyslog</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Aplicar atualizações de segurança e configurar repositórios de forma segura.</li><li>Endurecer serviços críticos: SSH seguro, firewall local e políticas básicas de acesso.</li><li>Configurar permissões de arquivos, sudoers e contas com boas práticas.</li><li>Habilitar e ajustar logs (journald/rsyslog) e proteção contra tentativas de força bruta com fail2ban.</li><li>Documentar cada etapa com comandos, saídas e validações.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Interpretar requisitos de segurança e traduzi-los em configurações do Linux.</li><li>Executar comandos administrativos de forma consciente e reprodutível.</li><li>Validar configurações por meio de testes, logs e verificação de portas/serviços.</li><li>Registrar evidências e elaborar relatório comparativo antes/depois (baseline vs hardening).</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 07 — Hardening em Windows</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 09 — Patches, antimalware e HIDS/EDR</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 08)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li><strong>Contexto e objetivos (15 min):</strong> Revisão do capítulo anterior e mapeamento CID no Linux. Apresentar escopo: updates, firewall, SSH, permissões, logs e fail2ban.</li><li><strong>Teoria guiada (35 min):</strong> Conceitos de hardening, superfícies de ataque, serviços e portas, contas/sudoers, registro de logs e mitigação por bloqueio.</li><li><strong>Demo do instrutor (20 min):</strong> Aplicação de updates, configuração do UFW e endurecimento básico do sshd.</li><li><strong>Prática assistida (60–80 min):</strong> Alunos seguem o passo a passo para ajustar contas, permissões, SSH, firewall e fail2ban; validar com testes.</li><li><strong>Documentação e evidências (20 min):</strong> Padronizar relatório com comandos, prints e estado final. Checklist de conformidade.</li><li><strong>Discussão rápida (10 min):</strong> O que mudou na superfície de ataque? Próximos controles a considerar.</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div>
+            <h3 class="h5 fw-bold">O que é hardening e por que fazer?</h3>
+            <p>Hardening é o processo de reduzir a superfície de ataque de um sistema por meio de atualizações, desabilitação de serviços desnecessários, configuração de permissões, políticas de acesso e monitoramento. Em Linux, isso envolve desde o kernel e pacotes até serviços como SSH e firewall.</p>
+            <p>A meta é alcançar um estado seguro por padrão, no qual apenas o necessário está ativo, minimizando janelas de oportunidade para exploração de vulnerabilidades e configurando controles para detectar e responder a anomalias.</p>
+            <p><em>Onde vou aplicar isso:</em> no passo a passo você executará uma sequência que consolida essas práticas: updates → contas/permissões → SSH → firewall → logs → fail2ban.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">Atualizações e repositórios</h3>
+            <p>Manter o sistema atualizado corrige vulnerabilidades conhecidas e reforça bibliotecas e serviços. É essencial usar repositórios confiáveis e assinar pacotes, garantindo integridade e autenticidade dos binários instalados.</p>
+            <p>Em distribuições baseadas em Debian/Ubuntu, utilize apt com checagem de assinaturas. Avalie também atualizações automáticas programadas, balanceando disponibilidade e segurança.</p>
+            <p><em>Onde vou aplicar isso:</em> você executará atualização completa, ativará unattended-upgrades (opcional) e registrará as versões aplicadas.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">Contas, grupos, permissões e sudoers</h3>
+            <p>Contas e grupos definem quem pode acessar o sistema. Permissões controlam o que pode ser lido, escrito ou executado. O sudo fornece elevação de privilégio auditável para tarefas administrativas, reduzindo a necessidade de uso direto do root.</p>
+            <p>Boas práticas incluem: desabilitar login de contas não utilizadas, exigir senhas fortes, MFA quando possível, e configurar sudo com o mínimo necessário, preferindo grupos administrativos específicos.</p>
+            <p><em>Onde vou aplicar isso:</em> você criará um usuário administrativo, ajustará sudoers, revisará permissões e aplicará políticas de senha.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">SSH seguro</h3>
+            <p>O OpenSSH é a principal porta de entrada administrativa. Endurecer o SSH envolve restringir métodos de autenticação, desabilitar root remoto, definir algoritmos seguros, usar chaves e limitar tentativas.</p>
+            <p>Uma configuração equilibrada reduz a chance de ataques de força bruta e impede abuso de contas privilegiadas.</p>
+            <p><em>Onde vou aplicar isso:</em> você configurará o sshd_config para desabilitar root, exigir chaves e limitar tentativas, validando a reconexão.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">Firewall local (UFW/iptables/nftables)</h3>
+            <p>O firewall local filtra tráfego de entrada/saída por portas e protocolos. Em ambientes simples, o UFW facilita regras sobre iptables/nftables. Em cenários avançados, pode-se usar nftables diretamente.</p>
+            <p>Configurar políticas padrão de negação e permitir somente o necessário oferece uma defesa adicional a serviços expostos.</p>
+            <p><em>Onde vou aplicar isso:</em> você ativará o UFW, definirá default deny e liberará apenas SSH ou um serviço de laboratório.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">Logs (journald/rsyslog) e detecção (fail2ban)</h3>
+            <p>Logs são essenciais para auditoria e investigação. journald e rsyslog podem complementar-se: journald armazena logs binários integrados ao systemd; rsyslog oferece roteamento/formatos tradicionais.</p>
+            <p>O fail2ban monitora logs para detectar padrões de ataque (como tentativas múltiplas de login) e aplica banimentos temporários via firewall, reduzindo ruído e risco.</p>
+            <p><em>Onde vou aplicar isso:</em> você ajustará retenção do journald/rsyslog e instalará fail2ban com uma jail para sshd.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Hardening básico em Linux (Ubuntu/Debian)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Aplicar uma sequência segura e reprodutível de hardening: atualizar sistema, ajustar contas e sudo, endurecer SSH, configurar firewall local, habilitar logs com retenção adequada e instalar fail2ban para mitigar força bruta, registrando evidências em todas as etapas.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">0) Preparação e baseline</h3>
+            <p>Antes de alterar, registre o estado atual: serviços ativos, portas abertas e versões.</p>
+            <pre class="language-bash"><code># identificar versão e kernel
+lsb_release -a || cat /etc/os-release
+uname -r
+
+# listar serviços ativos (systemd)
+systemctl list-units --type=service --state=running
+
+# portas abertas e programas ouvindo
+ss -tulpen
+
+# espaço de disco e memória
+df -h
+free -h</code></pre>
+            <div class="alert alert-light border mb-0"><strong>Dica:</strong> Salve as saídas em arquivos texto (ex.: baseline.txt) para comparar com o estado final.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">1) Atualizações de segurança</h3>
+            <p>Atualize índices e pacotes. Avalie a ativação de atualizações automáticas.</p>
+            <pre class="language-bash"><code>sudo apt update
+sudo apt full-upgrade -y
+# reinicie se houver kernel/serviços críticos atualizados
+[ -f /var/run/reboot-required ] &amp;&amp; sudo reboot
+
+# (opcional) instalar unattended-upgrades
+sudo apt install -y unattended-upgrades apt-listchanges
+sudo dpkg-reconfigure -plow unattended-upgrades</code></pre>
+            <div class="alert alert-warning mb-0"><strong>Atenção:</strong> Em servidores de produção, programe janelas de manutenção e testes antes do upgrade.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">2) Contas, grupos e sudo</h3>
+            <p>Crie um usuário administrativo, adicione ao grupo sudo e desestimule uso direto do root.</p>
+            <pre class="language-bash"><code># criar usuário (substitua aluno pelo seu usuário)
+sudo adduser aluno
+sudo usermod -aG sudo aluno
+
+# verifique grupos do usuário
+id aluno
+
+# ajustar política de senha (libpam-pwquality)
+sudo apt install -y libpam-pwquality
+sudo sed -i 's/^#* minlen.*/minlen = 10/' /etc/security/pwquality.conf
+sudo sed -i 's/^#* dcredit.*/dcredit = -1/' /etc/security/pwquality.conf
+sudo sed -i 's/^#* ucredit.*/ucredit = -1/' /etc/security/pwquality.conf
+sudo sed -i 's/^#* lcredit.*/lcredit = -1/' /etc/security/pwquality.conf
+sudo sed -i 's/^#* ocredit.*/ocredit = -1/' /etc/security/pwquality.conf</code></pre>
+            <p>Configure o sudoers com segurança, usando visudo.</p>
+            <pre class="language-bash"><code>sudo visudo
+# Exemplo de linhas:
+# %sudo   ALL=(ALL:ALL) ALL
+# Defaults logfile="/var/log/sudo.log", timestamp_timeout=5</code></pre>
+            <div class="alert alert-light border mb-0"><strong>Validação:</strong> Troque para o usuário e execute um comando com sudo: <code>su - aluno</code> e <code>sudo whoami</code>.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">3) Permissões essenciais</h3>
+            <p>Revise permissões de diretórios sensíveis e aplique o princípio do menor privilégio.</p>
+            <pre class="language-bash"><code># diretório home privado
+sudo chmod 700 /home/aluno
+
+# logs e ssh
+sudo chown root:adm /var/log
+sudo chmod 750 /var/log
+
+# arquivos de chaves privadas devem ser 600
+# (exemplo) chmod 600 ~/.ssh/id_ed25519</code></pre>
+            <div class="alert alert-light border mb-0"><strong>Dica:</strong> Use <code>find</code> para localizar arquivos com permissões excessivas em diretórios críticos.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">4) SSH seguro (OpenSSH)</h3>
+            <p>Endureça o servidor SSH restringindo autenticação e acesso root.</p>
+            <pre class="language-bash"><code>sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# edite o arquivo
+sudo nano /etc/ssh/sshd_config
+# Recomendações:
+# Port 22
+# Protocol 2
+# PermitRootLogin no
+# PasswordAuthentication no        # após configurar chaves
+# PubkeyAuthentication yes
+# KexAlgorithms curve25519-sha256@libssh.org
+# Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+# MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+# LoginGraceTime 20
+# MaxAuthTries 3
+# AllowUsers aluno
+
+# reinicie e valide
+sudo systemctl restart ssh
+sudo systemctl status ssh --no-pager</code></pre>
+            <div class="alert alert-warning mb-0"><strong>Atenção:</strong> Teste uma nova sessão SSH antes de encerrar a atual. Assim você evita perder acesso caso algo falhe.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">5) Firewall local com UFW</h3>
+            <p>Defina política padrão de negação e libere apenas o necessário.</p>
+            <pre class="language-bash"><code>sudo apt install -y ufw
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# liberar SSH e (opcional) um serviço web em laboratório
+sudo ufw allow OpenSSH
+# sudo ufw allow 80/tcp
+# sudo ufw allow 443/tcp
+
+sudo ufw enable
+sudo ufw status verbose</code></pre>
+            <div class="alert alert-light border mb-0"><strong>Validação:</strong> Em outro host, faça um <code>nmap -Pn -sS &lt;IP_DO_SERVIDOR&gt;</code> e confirme portas mínimas abertas.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">6) Logs: journald e rsyslog</h3>
+            <p>Garanta retenção adequada e possibilidade de consulta.</            p>
+            <pre class="language-bash"><code># rsyslog (se ainda não instalado)
+sudo apt install -y rsyslog
+sudo systemctl enable --now rsyslog
+
+# ajustar journald: persistência e limites
+sudo sed -i 's/^#*Storage=.*/Storage=persistent/' /etc/systemd/journald.conf
+sudo sed -i 's/^#*SystemMaxUse=.*/SystemMaxUse=200M/' /etc/systemd/journald.conf
+sudo systemctl restart systemd-journald
+
+# consultar logs
+journalctl -p 3 -xb   # erros do boot atual
+journalctl -u ssh     # logs do ssh
+tail -f /var/log/auth.log</code></pre>
+            <div class="alert alert-light border mb-0"><strong>Dica:</strong> Defina uma rotina para exportar logs relevantes ao seu relatório de laboratório.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">7) fail2ban (mitigação de força bruta)</h3>
+            <p>Monitora logs e aplica banimentos temporários em IPs maliciosos.</p>
+            <pre class="language-bash"><code>sudo apt install -y fail2ban
+sudo systemctl enable --now fail2ban
+
+# arquivo local de override
+sudo tee /etc/fail2ban/jail.local &gt;/dev/null &lt;&lt;'EOF'
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 3
+backend = systemd
+
+[sshd]
+enabled = true
+port = ssh
+logpath = %(sshd_log)s
+EOF
+
+sudo systemctl restart fail2ban
+sudo fail2ban-client status
+sudo fail2ban-client status sshd</code></pre>
+            <div class="alert alert-light border mb-0"><strong>Teste:</strong> De outro host, force logins falhos no SSH e observe <code>fail2ban-client status sshd</code> listar IP banido.</div>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">8) Validação final e evidências</h3>
+            <p>Compare com a baseline e confira se o estado final está conforme as metas do capítulo.</p>
+            <pre class="language-bash"><code># revalidar serviços, portas e status
+systemctl list-units --type=service --state=running
+ss -tulpen
+sudo ufw status verbose
+sudo journalctl -u ssh --since "today" | tail -n 50
+sudo fail2ban-client status sshd
+
+# gerar um resumo
+hostnamectl
+date
+who
+last -n 5</code></pre>
+            <div class="alert alert-success mb-0"><strong>Entrega:</strong> Compile um relatório com comandos executados, prints das saídas e justificativa de cada decisão de hardening.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o hardening aplicado, explorando variações e validações adicionais.</p>
+        <div class="vstack gap-3 mt-3">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 1 — Porta SSH alternativa e port knocking (básico)</h3>
+            <p>Altere a porta do SSH para um valor alto (ex.: 2222) e ajuste o UFW. Documente prós e contras. Opcional: pesquise uma solução simples de port knocking e descreva como testar.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 2 — Lista de controle de acesso no SSH</h3>
+            <p>Utilize AllowUsers/AllowGroups para restringir o acesso a um grupo específico. Valide negando acesso a um usuário de teste. Registre as mensagens no auth.log.</p>
+          </div>
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold">Atividade 3 — Backup de configuração e restauração de emergência</h3>
+            <p>Crie um script que faça backup de arquivos críticos (/etc/ssh/sshd_config, /etc/fail2ban/jail.local, /etc/ufw/user.rules, /etc/systemd/journald.conf). Simule uma restauração e valide serviços.</p>
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correção técnica das configurações e ausência de erros na validação.</li>
+            <li>Documentação clara, com comandos, saídas e justificativas.</li>
+            <li>Capacidade de reverter mudanças ou ajustar sem perda de disponibilidade.</li>
+            <li>Aderência às boas práticas de segurança e princípio do menor privilégio.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Guia de Segurança do OpenSSH (documentação oficial) e algoritmos recomendados.</li><li>Diferenças entre iptables e nftables: prós, contras e exemplos.</li><li>Políticas de retenção de logs com journald e encaminhamento seguro com rsyslog.</li><li>Endurecimento adicional: AppArmor/SELinux (visão geral e casos de uso).</li><li>Listas CIS Benchmarks para Linux (itens mais relevantes no seu ambiente).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 08</h2>
+        <ul><li>Relatório de hardening contendo baseline, comandos executados, evidências e validações.</li><li>Arquivos de configuração modificados com backups correspondentes.</li><li>Checklist preenchido e assinado (digitalmente) de conformidade do capítulo.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 07 — Hardening em Windows</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 09 — Patches, antimalware e HIDS/EDR</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Segurança da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é o objetivo principal do hardening em um sistema Linux?","alternativas":{"A":"Aumentar o desempenho do hardware","B":"Reduzir a superfície de ataque e fortalecer configurações","C":"Instalar o maior número de serviços possível","D":"Habilitar acesso root por padrão","E":"Desabilitar todos os logs para economizar espaço"},"correta":"B"},{"id":"q2","titulo":"No contexto de SSH seguro, qual prática é mais recomendada?","alternativas":{"A":"Permitir root login via senha","B":"Permitir apenas autenticação por chaves e desabilitar senha","C":"Aumentar MaxAuthTries para 10","D":"Desabilitar PubkeyAuthentication","E":"Abrir a porta 22 para toda a Internet sem firewall"},"correta":"B"},{"id":"q3","titulo":"Ao configurar o UFW, qual combinação reflete uma política padrão segura para um servidor?","alternativas":{"A":"allow incoming, deny outgoing","B":"deny incoming, allow outgoing","C":"allow incoming, allow outgoing","D":"deny incoming, deny outgoing","E":"sem regras padrão"},"correta":"B"},{"id":"q4","titulo":"Qual arquivo deve ser usado para criar ajustes persistentes e seguros no fail2ban sem sobrescrever padrões do pacote?","alternativas":{"A":"/etc/fail2ban/fail2ban.conf","B":"/var/log/fail2ban.log","C":"/etc/fail2ban/jail.local","D":"/etc/hosts","E":"/etc/default/ufw"},"correta":"C"},{"id":"q5","titulo":"Qual comando lista portas TCP/UDP em escuta com detalhes de processos?","alternativas":{"A":"whoami","B":"df -h","C":"ss -tulpen","D":"journalctl -b","E":"top"},"correta":"C"},{"id":"q6","titulo":"Sobre sudoers, qual é uma boa prática?","alternativas":{"A":"Editar /etc/sudoers com qualquer editor sem validação","B":"Dar NOPASSWD a todos os usuários","C":"Usar visudo e limitar privilégios a grupos específicos","D":"Permitir sudo para convidados","E":"Registrar sudo em /dev/null"},"correta":"C"},{"id":"q7","titulo":"Qual a função principal do fail2ban?","alternativas":{"A":"Substituir o firewall do sistema","B":"Gerar certificados TLS automaticamente","C":"Monitorar logs e banir IPs com comportamento malicioso","D":"Fazer backup de /etc","E":"Atualizar pacotes do sistema"},"correta":"C"},{"id":"q8","titulo":"Para garantir persistência dos logs do systemd-journald, qual diretiva deve ser ajustada em journald.conf?","alternativas":{"A":"Storage=persistent","B":"Logs=always","C":"Persist=true","D":"SaveLogs=on","E":"Keep=forever"},"correta":"A"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Registrei a baseline (serviços, portas, versões) antes das mudanças."},{"id":"c2","texto":"Atualizei o sistema e anotei versões aplicadas; reiniciei se necessário."},{"id":"c3","texto":"Criei usuário administrativo e configurei sudo com boas práticas."},{"id":"c4","texto":"Revisitei permissões essenciais em home, logs e chaves SSH."},{"id":"c5","texto":"Endureci o SSH: desabilitei root remoto e senha (usando chaves)."},{"id":"c6","texto":"Ativei UFW com deny incoming e permiti apenas o necessário."},{"id":"c7","texto":"Ajustei journald/rsyslog e validei a persistência de logs."},{"id":"c8","texto":"Instalei e configurei fail2ban com a jail do sshd."},{"id":"c9","texto":"Validei configurações: portas mínimas, tentativas bloqueadas, logs registrando eventos."},{"id":"c10","texto":"Compilei o relatório com evidências antes/depois e backups de configuração."}];
+    const CHECKLIST_KEY = 'sein_cap08_checklist_v1';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

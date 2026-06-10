@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 07 — Conectividade Wi‑Fi</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo07.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PSIC</span>
+        <span style="color: var(--cor-principal);">Projetos e Suporte à Internet das Coisas</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução à IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Programação para IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Eletrônica aplicada</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Plataformas e IDEs</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — GPIO e PWM</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Modularização</a></li>
+              <li><a class="dropdown-item active" href="capitulo07.html">Capítulo 07 — Conectividade Wi‑Fi</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — MQTT</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — HTTP e WebSocket</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Bancos de dados</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Dashboards</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Segurança em IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Versionamento e docs</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Suporte e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Projeto guiado</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto final</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 07 — Conectividade Wi‑Fi e Fundamentos de Rede</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h (2h teoria + 4h prática)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Dispositivo ESP8266/ESP32 com rotina robusta de conexão Wi‑Fi, LED de status e registro de métricas</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> ESP8266/ESP32, Arduino IDE ou Thonny (MicroPython), Wokwi/Tinkercad, Ping/Traceroute, medição de RSSI</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Configurar SSID/senha e conectar o dispositivo à rede via DHCP e, opcionalmente, IP fixo.</li><li>Interpretar RSSI e adotar estratégias de reconexão automática com backoff exponencial.</li><li>Executar testes de conectividade (ping e portas) e reconhecer causas comuns de falha.</li><li>Mensurar latência, perda e variação simples, registrando métricas para análise.</li><li>Implementar indicação de status de conexão por LED e logs seriais.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Configurar e depurar interfaces de rede Wi‑Fi em microcontroladores.</li><li>Aplicar fundamentos de endereçamento IP, DHCP e gateway.</li><li>Coletar e interpretar métricas de desempenho de rede.</li><li>Documentar parâmetros de rede e evidências de testes.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 06 — Estruturas e Módulos</a>
+              <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 08 — MQTT</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 07)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li>Introdução e objetivos do capítulo (10 min): visão geral, importância de robustez na conexão.</li><li>Fundamentos de rede para IoT (30 min): SSID, autenticação, DHCP vs. IP fixo, gateway, DNS, RSSI.</li><li>Testes de conectividade (20 min): ping, checagem de portas e bloqueios comuns (AP/roteador/firewall).</li><li>Estratégias de reconexão (20 min): timeouts, retries, backoff exponencial e watchdog.</li><li>Laboratório 1 (60 min): conexão Wi‑Fi com LED de status e logs seriais.</li><li>Laboratório 2 (60 min): medição de latência/perda e registro de métricas.</li><li>Consolidação (20 min): checklist, entrega e questionário.</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) SSID, senha e autenticação</h3>
+          <p>SSID é o nome da rede Wi‑Fi. Para conectar, o dispositivo precisa do SSID e da credencial correta (WPA2/WPA3 na maioria dos casos). Em ambientes educacionais, redes de 2,4 GHz são as mais compatíveis com ESP8266/ESP32. Evite caracteres especiais fora do padrão em SSID/senha para minimizar erros de digitação e encoding.</p>
+          <p>Onde vou aplicar isso no passo a passo: na configuração de credenciais e rotina de conexão (etapas 1 e 2), bem como na separação de segredos em arquivo.</p>
+
+          <h3 class="h6 fw-bold mt-4">2) DHCP vs. IP Fixo</h3>
+          <p>DHCP atribui IP automaticamente e é a opção padrão e mais simples. IP fixo pode ser útil para dispositivos que precisam ser acessados diretamente e de forma previsível. Ao usar IP fixo, defina corretamente máscara, gateway e DNS; um erro em qualquer campo resulta em “conectado, porém sem internet”.</p>
+          <p>Onde vou aplicar isso no passo a passo: configuração opcional de IP estático e validação com ping (etapa 3).</p>
+
+          <h3 class="h6 fw-bold mt-4">3) RSSI (força do sinal)</h3>
+          <p>RSSI indica a potência do sinal recebido, medido em dBm (valores negativos). Quanto mais próximo de 0, melhor. Por exemplo, -50 dBm é excelente; -70 dBm é aceitável; abaixo de -80 dBm tende a instabilidade. Antenas, obstáculos e interferências (co‑canal) impactam o RSSI.</p>
+          <p>Onde vou aplicar isso no passo a passo: leitura de RSSI após conexão e registro da métrica (etapas 4 e 5).</p>
+
+          <h3 class="h6 fw-bold mt-4">4) Reconexão automática e backoff exponencial</h3>
+          <p>Falhas de Wi‑Fi são comuns: SSID indisponível, senha incorreta, queda do roteador. Tentativas constantes em loop podem piorar a congestão e drenar energia. O backoff exponencial aumenta o intervalo entre tentativas (por exemplo: 1s, 2s, 4s, 8s…), limitando o esforço e permitindo recuperação do ambiente.</p>
+          <p>Onde vou aplicar isso no passo a passo: implementação da rotina robusta de reconexão com limites e LED de status (etapa 2).</p>
+
+          <h3 class="h6 fw-bold mt-4">5) Testes de conectividade: ping e portas</h3>
+          <p>Após obter IP, use ping para validar rota até o gateway e até um host externo. Falhas podem indicar DNS inválido, gateway errado ou bloqueio. Para serviços específicos (ex.: MQTT na porta 1883), verifique se a porta está acessível e não bloqueada por firewall.</p>
+          <p>Onde vou aplicar isso no passo a passo: roteiro de teste com ping pelo PC e interpretação de resultados (etapa 3).</p>
+
+          <h3 class="h6 fw-bold mt-4">6) Medição de desempenho: latência e perda</h3>
+          <p>Latência é o tempo que um pacote leva para ir e voltar (RTT). Perda ocorre quando pacotes não chegam ao destino. Meça várias amostras para obter média e desvio simples. Em IoT, latência consistente é mais importante do que picos eventuais, dependendo do uso.</p>
+          <p>Onde vou aplicar isso no passo a passo: coleta de 10–20 amostras de ping e cálculo de métricas simples (etapa 5).</p>
+
+          <h3 class="h6 fw-bold mt-4">7) Consumo energético e Wi‑Fi</h3>
+          <p>O rádio Wi‑Fi consome mais energia que o processamento local. Estratégias como reconexão com backoff, sleep entre tentativas e envio em lotes ajudam a economizar, principalmente em projetos a bateria.</p>
+          <p>Onde vou aplicar isso no passo a passo: ajustes de intervalo e logs de tentativas para entender impacto (etapa 6).</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Conexão Wi‑Fi robusta com métricas e LED de status</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Configurar Wi‑Fi com credenciais externas, implementar reconexão com backoff exponencial, indicar status via LED, medir RSSI/latência/perda e registrar métricas para análise.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mt-2">
+          <h3 class="h6 fw-bold">Pré‑requisitos e materiais</h3>
+          <ul class="mb-0">
+            <li>Placa ESP8266 (NodeMCU) ou ESP32, cabo USB e Arduino IDE ou Thonny (MicroPython).</li>
+            <li>Rede Wi‑Fi 2,4 GHz com SSID e senha disponíveis.</li>
+            <li>Simulador Wokwi (opcional) para testes preliminares.</li>
+            <li>Ferramentas de teste: terminal com ping; cliente serial para logs.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 1 — Organizar credenciais e parâmetros (segregação de segredos)</h3>
+          <p>Evite hardcode de SSID/senha no código principal. Use um arquivo de configuração simples. Exemplos a seguir em MicroPython e Arduino (C++). Escolha uma das stacks.</p>
+
+          <p class="mb-1"><strong>MicroPython — config.json</strong></p>
+          <pre class="language-json"><code>{
+  "wifi": {
+    "ssid": "SUA_REDE_24G",
+    "password": "SUA_SENHA",
+    "static": false,
+    "ip": "192.168.1.50",
+    "mask": "255.255.255.0",
+    "gw": "192.168.1.1",
+    "dns": "1.1.1.1"
+  },
+  "probe_host": "1.1.1.1",
+  "samples": 10
+}</code></pre>
+
+          <p class="mb-1"><strong>Arduino (C++) — secrets.h</strong></p>
+          <pre class="language-cpp"><code>#pragma once
+#define WIFI_SSID     "SUA_REDE_24G"
+#define WIFI_PASSWORD "SUA_SENHA"
+
+// Definições opcionais para IP fixo
+#define USE_STATIC_IP false
+#define STATIC_IP     IPAddress(192,168,1,50)
+#define GATEWAY_IP    IPAddress(192,168,1,1)
+#define SUBNET_MASK   IPAddress(255,255,255,0)
+#define DNS_IP        IPAddress(1,1,1,1)</code></pre>
+          <div class="alert alert-light border mt-3 mb-0">Se optar por IP fixo, confirme se o endereço não conflita com o DHCP do roteador.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 2 — Conexão com backoff exponencial e LED de status</h3>
+          <p>Implemente uma função que tente conectar, usando timeouts e backoff. Utilize LED para comunicar estados: piscando rápido (tentando), aceso (conectado), piscando lento (erro).</p>
+
+          <p class="mb-1"><strong>MicroPython (ESP8266/ESP32)</strong></p>
+          <pre class="language-python"><code>import network, time, json, machine
+
+LED_PIN = 2 if (hasattr(machine, "Pin")) else 2  # D4 no ESP8266, embutido no ESP32 pode ser 2
+led = machine.Pin(LED_PIN, machine.Pin.OUT)
+
+def led_trying():
+    led.value(0); time.sleep(0.1); led.value(1); time.sleep(0.1)
+
+def led_connected():
+    led.value(0)  # invertido em alguns boards: 0 acende no ESP8266
+
+def led_error():
+    led.value(0); time.sleep(0.4); led.value(1); time.sleep(0.4)
+
+def load_config():
+    with open("config.json") as f:
+        return json.load(f)
+
+def connect_wifi(cfg):
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    if cfg["wifi"].get("static"):
+        wlan.ifconfig((cfg["wifi"]["ip"], cfg["wifi"]["mask"], cfg["wifi"]["gw"], cfg["wifi"]["dns"]))
+
+    if not wlan.isconnected():
+        wlan.connect(cfg["wifi"]["ssid"], cfg["wifi"]["password"])
+
+    backoff = 1
+    max_backoff = 16
+    start = time.ticks_ms()
+
+    while not wlan.isconnected():
+        # feedback visual
+        led_trying()
+        # timeout de tentativa atual
+        if time.ticks_diff(time.ticks_ms(), start) > 10000:
+            # reinicia tentativa com backoff
+            print("Timeout: aguardando", backoff, "s para nova tentativa")
+            for _ in range(int(backoff*5)):
+                led_error()
+            time.sleep(backoff)
+            start = time.ticks_ms()
+            backoff = min(backoff * 2, max_backoff)
+            # Tenta reconectar
+            wlan.disconnect()
+            time.sleep(0.2)
+            wlan.connect(cfg["wifi"]["ssid"], cfg["wifi"]["password"])
+
+    print("Conectado:", wlan.ifconfig())
+    led_connected()
+    return wlan
+
+cfg = load_config()
+wlan = connect_wifi(cfg)
+print("RSSI:", wlan.status('rssi') if hasattr(wlan, "status") else "n/d")</code></pre>
+
+          <p class="mb-1"><strong>Arduino (C++ com ESP8266/ESP32)</strong></p>
+          <pre class="language-cpp"><code>#include &lt;WiFi.h&gt;        // ESP32
+// #include &lt;ESP8266WiFi.h&gt; // ESP8266
+#include "secrets.h"
+
+const int LED_PIN = 2;
+
+void setLedTrying(){
+  digitalWrite(LED_PIN, LOW); delay(100);
+  digitalWrite(LED_PIN, HIGH); delay(100);
+}
+void setLedConnected(){
+  digitalWrite(LED_PIN, LOW);
+}
+void setLedError(){
+  digitalWrite(LED_PIN, LOW); delay(400);
+  digitalWrite(LED_PIN, HIGH); delay(400);
+}
+
+void setup(){
+  pinMode(LED_PIN, OUTPUT);
+  Serial.begin(115200);
+  delay(1000);
+
+  WiFi.mode(WIFI_STA);
+
+  if(USE_STATIC_IP){
+    if(!WiFi.config(STATIC_IP, GATEWAY_IP, SUBNET_MASK, DNS_IP)){
+      Serial.println("Falha ao setar IP estático.");
+    }
+  }
+
+  unsigned long backoff = 1000;
+  const unsigned long MAX_BACKOFF = 16000;
+
+  while(WiFi.status() != WL_CONNECTED){
+    Serial.printf("Conectando a %s...\n", WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+    unsigned long start = millis();
+    while(WiFi.status() != WL_CONNECTED && millis() - start &lt; 10000){
+      setLedTrying();
+      delay(50);
+    }
+
+    if(WiFi.status() == WL_CONNECTED) break;
+
+    Serial.printf("Timeout. Nova tentativa em %lu ms\n", backoff);
+    unsigned long waitStart = millis();
+    while(millis() - waitStart &lt; backoff){
+      setLedError();
+    }
+    backoff = min(backoff * 2, MAX_BACKOFF);
+  }
+
+  Serial.print("Conectado. IP: "); Serial.println(WiFi.localIP());
+  setLedConnected();
+}
+
+void loop(){
+  // Exemplo: imprimir RSSI periodicamente
+  static unsigned long t = 0;
+  if(millis() - t &gt; 3000){
+    t = millis();
+    Serial.printf("RSSI: %d dBm\n", WiFi.RSSI());
+  }
+}</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 3 — Testes de conectividade (PC → dispositivo e internet)</h3>
+          <p>Com o dispositivo conectado, teste no computador:</p>
+          <ol>
+            <li>Ping para o gateway (verifica rota local).</li>
+            <li>Ping para um host externo (ex.: 1.1.1.1) — verifica saída para internet.</li>
+            <li>Opcional: teste de porta do serviço que usará (por exemplo, broker MQTT 1883, mais no Cap. 08).</li>
+          </ol>
+          <pre class="language-bash"><code># Descobrir gateway (varia por SO)
+ipconfig             # Windows (ver "Gateway Padrão")
+ip route | grep default  # Linux/Mac
+
+# Ping gateway e host externo
+ping 192.168.1.1    # substitua pelo seu gateway
+ping 1.1.1.1        # latência/perda externa
+
+# Testar porta (Linux/Mac com nc)
+nc -vz broker.hivemq.com 1883
+# Windows (PowerShell):
+Test-NetConnection broker.hivemq.com -Port 1883</code></pre>
+          <div class="alert alert-light border mt-3 mb-0">Se o ping ao gateway falhar, verifique IP, máscara e distância física do roteador. Se somente o externo falhar, examine DNS ou regras de firewall/NAT.</div>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 4 — Ler e registrar RSSI</h3>
+          <p>Após conectar, capture o RSSI periodicamente e guarde com timestamp. Isso ajuda a correlacionar instabilidades com sinal fraco.</p>
+          <p class="mb-1"><strong>MicroPython — registro simples</strong></p>
+          <pre class="language-python"><code>import time, network
+
+def rssi_log(wlan, n=10, interval=2):
+    for i in range(n):
+        r = wlan.status('rssi') if hasattr(wlan, "status") else None
+        ts = time.time()
+        print("TS:", ts, "RSSI:", r)
+        time.sleep(interval)
+
+# Uso: rssi_log(wlan, n=10, interval=2)</code></pre>
+
+          <p class="mb-1"><strong>Arduino — Serial</strong></p>
+          <pre class="language-cpp"><code>// Dentro do loop, já há exemplo de RSSI. Para registrar com timestamp:
+unsigned long t0 = millis();
+int rssi = WiFi.RSSI();
+Serial.printf("t=%lu ms, RSSI=%d dBm\n", t0, rssi);</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 5 — Medir latência e perda (amostras)</h3>
+          <p>Realize um conjunto de pings do seu PC a um host externo e compute métricas simples. Em seguida, registre no seu caderno ou README do projeto.</p>
+          <pre class="language-bash"><code># Coletar 10 amostras (Linux/Mac)
+ping -c 10 1.1.1.1
+
+# Windows (PowerShell)
+ping -n 10 1.1.1.1
+
+# Interprete: média de RTT, desvio, perda (% pacotes), picos (máximo)</code></pre>
+          <p>Opcional: implemente uma “sonda” no dispositivo fazendo uma requisição leve (HTTP HEAD) a cada intervalo para estimar latência fim‑a‑fim do próprio hardware (será detalhado no Cap. 09). </p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-4">
+          <h3 class="h6 fw-bold">Etapa 6 — Ajustes de consumo e estabilidade</h3>
+          <p>Se a rede for instável, aumente o backoff máximo e reduza o número de tentativas por minuto. Em projetos a bateria, considere deep sleep entre tentativas. Documente suas decisões no README (racional e impacto esperado).</p>
+          <pre class="language-python"><code># MicroPython: exemplo de espera progressiva entre tentativas já implementada no backoff.
+# Para economia adicional, você pode colocar o dispositivo em deepsleep após certo número de falhas:
+import machine, time
+falhas = 3
+if falhas &gt;= 3:
+    print("Muitas falhas, entrando em deep sleep por 30s")
+    machine.deepsleep(30000)</code></pre>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a habilidade de diagnosticar, corrigir e documentar problemas de conectividade Wi‑Fi com métricas objetivas.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Variação de distância: registre RSSI e perda de pacotes em 3 locais diferentes (próximo, médio, distante do roteador). Compare resultados e anote hipóteses.</li>
+            <li>IP fixo vs. DHCP: configure IP fixo conforme seu ambiente e compare latência média, variação e comportamento em reconexões.</li>
+            <li>Cenários de falha: mude a senha propositalmente e observe o comportamento da rotina de backoff. Faça capturas de logs e explique como detectou o erro.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold mb-2">Critérios de avaliação sugeridos</h3>
+          <ul class="mb-0">
+            <li>Funcionamento: conecta, reconecta e indica status por LED corretamente.</li>
+            <li>Qualidade do código: legível, modular, com comentários e separação de credenciais.</li>
+            <li>Diagnóstico: evidências de testes (ping, RSSI, perda, prints seriais) bem organizadas.</li>
+            <li>Documentação: README com parâmetros de rede, resultados e decisões técnicas.</li>
+            <li>Boas práticas: tratamento de erros, backoff, cuidado com consumo.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação oficial ESP8266/ESP32 sobre Wi‑Fi, modos de energia e APIs de rede.</li><li>Impacto de canais congestionados em 2,4 GHz e como escolher o melhor canal no roteador.</li><li>Diferenças entre WPA2 e WPA3 para dispositivos embarcados e compatibilidade.</li><li>Técnicas de medição de jitter e sua relevância para IoT em tempo quase real.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 07</h2>
+        <ul><li>Código do dispositivo com rotina de conexão Wi‑Fi, backoff exponencial e LED de status.</li><li>Arquivo de configuração separado (secrets/config) com credenciais e, se aplicável, IP fixo.</li><li>Logs seriais demonstrando conexão, RSSI e tentativas de reconexão.</li><li>Relato curto com resultados de ping (média, perda) e análise de RSSI em diferentes posições.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo06.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 06 — Estruturas e Módulos</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo08.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 08 — MQTT</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projetos e Suporte à Internet das Coisas — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual alternativa descreve corretamente RSSI em redes Wi‑Fi?","alternativas":{"A":"Valor positivo em dBm; quanto maior, melhor.","B":"Valor negativo em dBm; quanto mais próximo de 0, melhor.","C":"Valor percentual (0–100%); 100% é excelente.","D":"Indicador de largura de banda máxima contratada.","E":"Tempo de ida e volta do pacote em milissegundos."},"correta":"B"},{"id":"q2","titulo":"Ao configurar IP fixo no dispositivo, qual conjunto mínimo de parâmetros é indispensável para acesso à internet?","alternativas":{"A":"Somente IP e máscara.","B":"IP, máscara, gateway e DNS.","C":"Somente gateway e DNS.","D":"Somente SSID e senha.","E":"SSID, senha e porta."},"correta":"B"},{"id":"q3","titulo":"O que caracteriza o backoff exponencial em tentativas de reconexão?","alternativas":{"A":"Intervalos fixos entre tentativas.","B":"Intervalos que diminuem ao longo do tempo.","C":"Intervalos que dobram a cada falha até um limite.","D":"Tentativas simultâneas em múltiplas threads.","E":"Tentativas apenas quando o usuário aperta um botão."},"correta":"C"},{"id":"q4","titulo":"Após conectar ao Wi‑Fi, o ping ao gateway funciona, mas não a um host externo. Qual é a causa provável?","alternativas":{"A":"Senha do Wi‑Fi incorreta.","B":"GPIO configurado errado.","C":"Problema de DNS ou rota para fora da rede local.","D":"SSID invisível.","E":"MAC address inválido do dispositivo."},"correta":"C"},{"id":"q5","titulo":"Em projetos IoT a bateria, por que é importante limitar tentativas de conexão?","alternativas":{"A":"Para reduzir latência de rede.","B":"Para diminuir consumo energético do rádio Wi‑Fi.","C":"Para aumentar a taxa de transferência.","D":"Para melhorar a qualidade do sinal (RSSI).","E":"Para evitar a necessidade de gateway."},"correta":"B"},{"id":"q6","titulo":"Sobre DHCP e IP fixo, assinale a correta:","alternativas":{"A":"DHCP é sempre mais rápido que IP fixo.","B":"IP fixo dispensa configuração de gateway.","C":"DHCP atribui IP automaticamente; IP fixo exige configuração completa.","D":"Com IP fixo não é possível acessar a internet.","E":"DHCP impede o uso de DNS."},"correta":"C"},{"id":"q7","titulo":"Qual LED pattern é adequado para indicar tentativa de conexão?","alternativas":{"A":"Aceso contínuo.","B":"Piscando rápido.","C":"Pisca uma vez e apaga.","D":"Piscando muito lento (1×/2s).","E":"Sem LED para economizar energia sempre."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Configurei SSID e senha corretamente e separei credenciais do código."},{"id":"c2","texto":"Implementei rotina de conexão com timeout e backoff exponencial."},{"id":"c3","texto":"Indico o status de conexão via LED (tentando, conectado, erro)."},{"id":"c4","texto":"Validei conectividade com ping ao gateway e a um host externo."},{"id":"c5","texto":"Registrei RSSI com timestamp e analisei estabilidade do sinal."},{"id":"c6","texto":"Medi latência e perda em 10+ amostras e resumi no README."},{"id":"c7","texto":"Testei IP fixo (opcional) e documentei a configuração."},{"id":"c8","texto":"Revisei impacto de tentativas na energia e ajustei intervalos."}];
+    const CHECKLIST_KEY = 'psic_cap07_chk';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

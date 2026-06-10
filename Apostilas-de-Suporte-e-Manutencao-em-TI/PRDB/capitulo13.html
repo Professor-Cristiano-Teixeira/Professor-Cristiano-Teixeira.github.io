@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 13 — CRUD Completo com Tratamento de Erros e Transações</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo13.html -->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRDB</span>
+        <span style="color: var(--cor-principal);">Programação e Banco de Dados</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">01 — Introdução a Programação e Banco de Dados</a></li>
+<li><a class="dropdown-item" href="capitulo02.html">02 — Fundamentos de Banco de Dados e SGBD</a></li>
+<li><a class="dropdown-item" href="capitulo03.html">03 — Modelagem Conceitual com DER</a></li>
+<li><a class="dropdown-item" href="capitulo04.html">04 — Do DER ao Modelo Relacional</a></li>
+<li><a class="dropdown-item" href="capitulo05.html">05 — Normalização (1FN, 2FN, 3FN)</a></li>
+<li><a class="dropdown-item" href="capitulo06.html">06 — DDL: Criação de Esquemas no MySQL</a></li>
+<li><a class="dropdown-item" href="capitulo07.html">07 — DML Básico: Inserção e Consulta</a></li>
+<li><a class="dropdown-item" href="capitulo08.html">08 — Agrupamentos e Agregações</a></li>
+<li><a class="dropdown-item" href="capitulo09.html">09 — Junções (JOINs)</a></li>
+<li><a class="dropdown-item" href="capitulo10.html">10 — DML Avançado e DCL Essencial</a></li>
+<li><a class="dropdown-item" href="capitulo11.html">11 — Revisão de Programação com Foco em Dados (Python)</a></li>
+<li><a class="dropdown-item" href="capitulo12.html">12 — Conexão Python–MySQL e Execução de SQL</a></li>
+<li><a class="dropdown-item active" href="capitulo13.html">13 — CRUD Completo com Tratamento de Erros e Transações</a></li>
+<li><a class="dropdown-item" href="capitulo14.html">14 — Introdução a ORM e Acesso Estruturado</a></li>
+<li><a class="dropdown-item" href="capitulo15.html">15 — NoSQL e MongoDB Básico</a></li>
+<li><a class="dropdown-item" href="capitulo16.html">16 — Integração, Relatórios e Caso Introductório de IoT</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 13 — CRUD Completo com Tratamento de Erros e Transações</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Miniaplicação de linha de comando para gerenciar produtos</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Python 3, mysql-connector-python, MySQL, MySQL Workbench</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Implementar operações Create, Read, Update e Delete de forma modular e reutilizável.</li>
+<li>Aplicar transações (COMMIT/ROLLBACK) e tratamento de exceções no acesso ao banco.</li>
+<li>Utilizar consultas parametrizadas para prevenir SQL Injection e validar entradas.</li>
+<li>Exibir mensagens de erro úteis e códigos de retorno em uma CLI simples.</li>
+<li>Testar cenários de falha e garantir consistência dos dados com transações.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Modelar e implementar operações de persistência de dados.</li>
+<li>Gerenciar transações e lidar com exceções em aplicações de dados.</li>
+<li>Escrever código limpo, modular e seguro no acesso ao SGBD.</li>
+<li>Realizar testes de mesa e verificar efeitos no banco após falhas.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 12 — Conexão Python–MySQL e Execução de SQL</a>
+              <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 14 — Introdução a ORM e Acesso Estruturado</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 13)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Objetivos específicos:</strong></p>
+<ul>
+  <li>Construir um CRUD completo em Python com MySQL, usando consultas parametrizadas.</li>
+  <li>Aplicar tratamento de erros com try/except e garantir integridade com transações.</li>
+  <li>Projetar uma interface de linha de comando para operar o CRUD com feedback ao usuário.</li>
+</ul>
+<p><strong>Materiais e requisitos:</strong></p>
+<ul>
+  <li>Python 3 instalado e IDE Thonny (ou similar).</li>
+  <li>MySQL Server e MySQL Workbench operacionais.</li>
+  <li>Biblioteca mysql-connector-python instalada.</li>
+  <li>Banco criado previamente (dos capítulos 06–12) ou script de criação deste capítulo.</li>
+</ul>
+<p><strong>Roteiro sugerido (6h):</strong></p>
+<ol>
+  <li>(45 min) Revisão de conexões e comandos parametrizados.</li>
+  <li>(75 min) Implementação modular de funções CRUD com validação básica.</li>
+  <li>(60 min) Transações: cenários de sucesso e falha; COMMIT/ROLLBACK.</li>
+  <li>(45 min) Tratamento de exceções e mensagens de erro amigáveis/logging.</li>
+  <li>(75 min) Integração em CLI, testes e ajustes.</li>
+  <li>(30 min) Exercícios práticos e checklist.</li>
+</ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h5 fw-bold">1) O que é CRUD e por que importa</h3>
+  <p>CRUD é o acrônimo de Create, Read, Update e Delete — quatro operações fundamentais para sistemas que manipulam dados. Elas representam o ciclo de vida padrão das informações em bancos relacionais e também em diversos sistemas NoSQL. Dominar CRUD significa saber implementar a persistência de dados de forma confiável.</p>
+  <p>Na prática, um sistema está a todo momento inserindo, consultando, atualizando e removendo registros. Quando essas rotinas são bem projetadas, o restante da aplicação ganha previsibilidade e segurança.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> você criará funções dedicadas para cada operação (criar, listar/buscar, atualizar, apagar) e as conectará a um menu de linha de comando.</p>
+
+  <h3 class="h5 fw-bold mt-4">2) Consultas parametrizadas e segurança</h3>
+  <p>Consultas parametrizadas usam placeholders (ex.: %s no MySQL Connector/Python) para separar a lógica SQL dos valores fornecidos pelo usuário. Isso ajuda a prevenir SQL Injection e a padronizar o tratamento de tipos.</p>
+  <p>Além da segurança, consultas parametrizadas melhoram legibilidade e manutenção do código. Evite concatenar strings para montar SQL.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> todas as funções CRUD usarão parâmetros nas instruções SQL, com validação de entrada antes da chamada.</p>
+
+  <h3 class="h5 fw-bold mt-4">3) Transações e consistência</h3>
+  <p>Uma transação é uma unidade lógica de trabalho que agrupa operações; ou tudo é confirmado (<em>COMMIT</em>) ou tudo é revertido (<em>ROLLBACK</em>). Ela garante as propriedades ACID, principalmente atomicidade e consistência.</p>
+  <p>Em operações que envolvem múltiplas tabelas ou passos, transações evitam estados intermediários incoerentes. Mesmo em operações simples, usar transações e pontos de restauração pode simplificar a recuperação de falhas.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> você controlará <code>commit()</code> e <code>rollback()</code> explicitamente ao inserir, atualizar e excluir produtos.</p>
+
+  <h3 class="h5 fw-bold mt-4">4) Tratamento de exceções</h3>
+  <p>Exceções podem ocorrer por problemas de conexão, violação de constraints, tipos inválidos, entre outros. Um bom tratamento captura a exceção, registra detalhes e comunica ao usuário uma mensagem clara, sem expor informações sensíveis.</p>
+  <p>Utilize blocos <code>try/except</code> e, quando necessário, <code>finally</code> para garantir a liberação adequada de recursos. Defina uma política: se falhar, faça <code>rollback()</code> e retorne um indicador de erro.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> todas as funções de acesso ao banco terão <code>try/except</code> e retornarão status/mensagens adequadas para a CLI.</p>
+
+  <h3 class="h5 fw-bold mt-4">5) Modularização e camadas</h3>
+  <p>Separar a camada de dados (funções que falam com o SGBD) da camada de interface (CLI) facilita testes e manutenção. Cada função deve fazer uma coisa só e bem definida, com assinatura clara de entrada/saída.</p>
+  <p>Uma camada de serviço pode encapsular regras de negócio e validação. Isso torna o código menos acoplado e mais fácil de evoluir.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> vamos criar um módulo para banco (conexão e CRUD) e outro para a interface (menu e fluxo do usuário).</p>
+
+  <h3 class="h5 fw-bold mt-4">6) Mensagens de erro e códigos de retorno</h3>
+  <p>Ao programar uma CLI, indique ao usuário o que aconteceu: sucesso, erro e por quê. Evite termos técnicos excessivos. Para o código, padronize retornos: por exemplo, <code>(ok: bool, msg: str, data: Optional)</code>.</p>
+  <p>Essa padronização simplifica a exibição das mensagens e facilita testes automatizados no futuro.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> toda função do CRUD retorna uma tupla padronizada consumida pelo menu principal.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — CRUD de Produtos com Transações e Tratamento de Erros</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Construir uma miniaplicação de linha de comando que realiza CRUD em uma tabela de produtos no MySQL, usando funções modulares, consultas parametrizadas, transações explícitas e tratamento de exceções.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-1-circle me-2" style="color:var(--cor-principal)"></i>Preparar o banco de dados e a tabela de produtos</h3>
+  <p>Caso ainda não exista, crie o banco e a tabela. Use tipos e constraints adequados (PK, NOT NULL, UNIQUE se necessário).</p>
+  <pre class="language-sql"><code>CREATE DATABASE IF NOT EXISTS loja;
+USE loja;
+
+CREATE TABLE IF NOT EXISTS produtos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL CHECK (preco &gt;= 0),
+  estoque INT NOT NULL CHECK (estoque &gt;= 0),
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Opcional: índice para busca por nome
+CREATE INDEX idx_produtos_nome ON produtos (nome);</code></pre>
+  <div class="alert alert-light border mt-3 mb-0" role="note">
+    Valide no Workbench se a tabela foi criada corretamente. Se o MySQL da sua versão não suportar CHECK, mantenha a validação do lado da aplicação.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-2-circle me-2" style="color:var(--cor-principal)"></i>Instalar dependência e configurar conexão</h3>
+  <p>Instale o conector oficial e crie um módulo dedicado à conexão (reutilizável em todo o projeto).</p>
+  <pre class="language-bash"><code>pip install mysql-connector-python</code></pre>
+  <p>Arquivo: <code>db.py</code></p>
+  <pre class="language-python"><code>import mysql.connector
+from mysql.connector import Error
+
+def get_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="sua_senha",
+        database="loja",
+        autocommit=False  # importante para controlar transações
+    )
+
+def test_connection():
+    try:
+        cnx = get_connection()
+        print("Conexão bem-sucedida!")
+    except Error as e:
+        print(f"Erro de conexão: {e}")
+    finally:
+        try:
+            cnx.close()
+        except:
+            pass
+
+if __name__ == "__main__":
+    test_connection()</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-3-circle me-2" style="color:var(--cor-principal)"></i>Camada de dados: funções CRUD parametrizadas</h3>
+  <p>Crie um módulo com funções focadas no banco. Cada função retorna uma tupla padronizada: <code>(ok: bool, msg: str, data: Any)</code>.</p>
+  <p>Arquivo: <code>produtos_repo.py</code></p>
+  <pre class="language-python"><code>from typing import Any, Tuple, Optional, List, Dict
+from mysql.connector import Error
+from db import get_connection
+
+ReturnType = Tuple[bool, str, Any]
+
+def criar_produto(nome: str, preco: float, estoque: int) -> ReturnType:
+    if not nome or preco is None or estoque is None:
+        return False, "Dados obrigatórios ausentes.", None
+    if preco &lt; 0 or estoque &lt; 0:
+        return False, "Preço e estoque não podem ser negativos.", None
+    sql = "INSERT INTO produtos (nome, preco, estoque) VALUES (%s, %s, %s)"
+    params = (nome.strip(), preco, estoque)
+    cnx = None
+    try:
+        cnx = get_connection()
+        cur = cnx.cursor()
+        cur.execute(sql, params)
+        cnx.commit()
+        new_id = cur.lastrowid
+        return True, f"Produto criado com ID {new_id}.", new_id
+    except Error as e:
+        if cnx:
+            cnx.rollback()
+        return False, f"Erro ao criar produto: {e}", None
+    finally:
+        try:
+            cur.close()
+            cnx.close()
+        except:
+            pass
+
+def listar_produtos() -> ReturnType:
+    sql = "SELECT id, nome, preco, estoque, criado_em FROM produtos ORDER BY id"
+    try:
+        cnx = get_connection()
+        cur = cnx.cursor(dictionary=True)
+        cur.execute(sql)
+        rows = cur.fetchall()
+        return True, f"{len(rows)} produto(s) encontrado(s).", rows
+    except Error as e:
+        return False, f"Erro ao listar produtos: {e}", None
+    finally:
+        try:
+            cur.close()
+            cnx.close()
+        except:
+            pass
+
+def buscar_por_id(pid: int) -> ReturnType:
+    sql = "SELECT id, nome, preco, estoque, criado_em FROM produtos WHERE id = %s"
+    try:
+        cnx = get_connection()
+        cur = cnx.cursor(dictionary=True)
+        cur.execute(sql, (pid,))
+        row = cur.fetchone()
+        if not row:
+            return False, "Produto não encontrado.", None
+        return True, "Produto encontrado.", row
+    except Error as e:
+        return False, f"Erro na busca: {e}", None
+    finally:
+        try:
+            cur.close()
+            cnx.close()
+        except:
+            pass
+
+def atualizar_produto(pid: int, nome: Optional[str], preco: Optional[float], estoque: Optional[int]) -> ReturnType:
+    campos = []
+    valores = []
+    if nome is not None:
+        if not nome.strip():
+            return False, "Nome não pode ser vazio.", None
+        campos.append("nome = %s"); valores.append(nome.strip())
+    if preco is not None:
+        if preco &lt; 0:
+            return False, "Preço não pode ser negativo.", None
+        campos.append("preco = %s"); valores.append(preco)
+    if estoque is not None:
+        if estoque &lt; 0:
+            return False, "Estoque não pode ser negativo.", None
+        campos.append("estoque = %s"); valores.append(estoque)
+
+    if not campos:
+        return False, "Nada para atualizar.", None
+
+    sql = f"UPDATE produtos SET {', '.join(campos)} WHERE id = %s"
+    valores.append(pid)
+
+    cnx = None
+    try:
+        cnx = get_connection()
+        cur = cnx.cursor()
+        cur.execute(sql, tuple(valores))
+        if cur.rowcount == 0:
+            cnx.rollback()
+            return False, "Produto não encontrado para atualização.", None
+        cnx.commit()
+        return True, f"{cur.rowcount} registro(s) atualizado(s).", cur.rowcount
+    except Error as e:
+        if cnx:
+            cnx.rollback()
+        return False, f"Erro ao atualizar produto: {e}", None
+    finally:
+        try:
+            cur.close()
+            cnx.close()
+        except:
+            pass
+
+def deletar_produto(pid: int) -> ReturnType:
+    sql = "DELETE FROM produtos WHERE id = %s"
+    cnx = None
+    try:
+        cnx = get_connection()
+        cur = cnx.cursor()
+        cur.execute(sql, (pid,))
+        if cur.rowcount == 0:
+            cnx.rollback()
+            return False, "Produto não encontrado para exclusão.", None
+        cnx.commit()
+        return True, f"{cur.rowcount} registro(s) excluído(s).", cur.rowcount
+    except Error as e:
+        if cnx:
+            cnx.rollback()
+        return False, f"Erro ao excluir produto: {e}", None
+    finally:
+        try:
+            cur.close()
+            cnx.close()
+        except:
+            pass</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-4-circle me-2" style="color:var(--cor-principal)"></i>Camada de interface (CLI): menu e fluxo</h3>
+  <p>A CLI deve ler entradas, invocar funções do repositório e exibir mensagens amigáveis. Mantenha validações simples.</p>
+  <p>Arquivo: <code>app.py</code></p>
+  <pre class="language-python"><code>from typing import Optional
+from produtos_repo import (
+    criar_produto, listar_produtos, buscar_por_id,
+    atualizar_produto, deletar_produto
+)
+
+def input_float(msg: str) -> Optional[float]:
+    try:
+        return float(input(msg).replace(",", ".").strip())
+    except:
+        print("Valor inválido.")
+        return None
+
+def input_int(msg: str) -> Optional[int]:
+    try:
+        return int(input(msg).strip())
+    except:
+        print("Valor inválido.")
+        return None
+
+def menu():
+    print("\n==== Gerenciador de Produtos ====")
+    print("1) Criar produto")
+    print("2) Listar produtos")
+    print("3) Buscar por ID")
+    print("4) Atualizar produto")
+    print("5) Excluir produto")
+    print("0) Sair")
+
+def acao_criar():
+    nome = input("Nome: ").strip()
+    preco = input_float("Preço: ")
+    if preco is None: return
+    estoque = input_int("Estoque: ")
+    if estoque is None: return
+    ok, msg, data = criar_produto(nome, preco, estoque)
+    print(msg)
+
+def acao_listar():
+    ok, msg, rows = listar_produtos()
+    print(msg)
+    if ok and rows:
+        for r in rows:
+            print(f"[{r['id']}] {r['nome']} | R$ {r['preco']:.2f} | estoque: {r['estoque']}")
+
+def acao_buscar():
+    pid = input_int("ID do produto: ")
+    if pid is None: return
+    ok, msg, row = buscar_por_id(pid)
+    print(msg)
+    if ok:
+        print(row)
+
+def acao_atualizar():
+    pid = input_int("ID do produto: ")
+    if pid is None: return
+    print("Deixe em branco para manter o valor atual.")
+    nome = input("Novo nome: ").strip()
+    nome = nome if nome != "" else None
+    preco_txt = input("Novo preço: ").strip()
+    preco = float(preco_txt.replace(",", ".")) if preco_txt else None
+    estoque_txt = input("Novo estoque: ").strip()
+    estoque = int(estoque_txt) if estoque_txt else None
+
+    ok, msg, _ = atualizar_produto(pid, nome, preco, estoque)
+    print(msg)
+
+def acao_excluir():
+    pid = input_int("ID do produto: ")
+    if pid is None: return
+    confirma = input(f"Confirma excluir ID {pid}? (s/n): ").strip().lower()
+    if confirma != "s":
+        print("Operação cancelada.")
+        return
+    ok, msg, _ = deletar_produto(pid)
+    print(msg)
+
+def main():
+    while True:
+        menu()
+        opc = input("Escolha uma opção: ").strip()
+        if opc == "1":
+            acao_criar()
+        elif opc == "2":
+            acao_listar()
+        elif opc == "3":
+            acao_buscar()
+        elif opc == "4":
+            acao_atualizar()
+        elif opc == "5":
+            acao_excluir()
+        elif opc == "0":
+            print("Saindo...")
+            break
+        else:
+            print("Opção inválida.")
+
+if __name__ == "__main__":
+    main()</code></pre>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-5-circle me-2" style="color:var(--cor-principal)"></i>Testes de transação e simulação de falhas</h3>
+  <p>Para validar a atomicidade, force uma falha no meio de uma operação e verifique se o banco reverteu corretamente.</p>
+  <p>Exemplo: inclua intencionalmente um erro após o <code>execute</code> e antes do <code>commit</code> para checar o <code>rollback()</code>.</p>
+  <pre class="language-python"><code># Exemplo didático (NÃO deixar em produção)
+def criar_produto_com_falha(nome, preco, estoque):
+    from db import get_connection
+    cnx = None
+    try:
+        cnx = get_connection()
+        cur = cnx.cursor()
+        cur.execute("INSERT INTO produtos (nome, preco, estoque) VALUES (%s, %s, %s)", (nome, preco, estoque))
+        # Falha proposital
+        raise ValueError("Erro simulado antes do commit")
+        cnx.commit()
+        return True, "OK", cur.lastrowid
+    except Exception as e:
+        if cnx:
+            cnx.rollback()
+        return False, f"Rollback executado: {e}", None
+    finally:
+        try:
+            cur.close()
+            cnx.close()
+        except:
+            pass</code></pre>
+  <div class="alert alert-light border mt-3 mb-0" role="note">
+    Após executar a função com falha, verifique no banco se o registro não foi inserido. Isso confirma o funcionamento do rollback.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-6-circle me-2" style="color:var(--cor-principal)"></i>Boas práticas finais</h3>
+  <ul class="mb-0">
+    <li>Valide entradas: tipos, intervalos, campos obrigatórios.</li>
+    <li>Use consultas parametrizadas e nunca concatene SQL com dados do usuário.</li>
+    <li>Controle transações explicitamente: commit no sucesso, rollback no erro.</li>
+    <li>Separe camadas: repositório (dados) e interface (CLI).</li>
+    <li>Padronize retornos e mensagens; facilite a manutenção e os testes.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de CRUD, transações e tratamento de exceções ampliando o projeto-base.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol class="mb-0">
+    <li>Adicionar validações: impeça nomes duplicados criando uma constraint UNIQUE em <code>produtos.nome</code>. Adapte a função de criação para capturar a exceção e informar ao usuário.</li>
+    <li>Implementar busca por nome (com LIKE parametrizado) e filtro por faixa de preço. Exibir resultados formatados.</li>
+    <li>Relatório simples: total de itens em estoque e valor total em estoque (SUM(estoque*preco)).</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (sugestão)</h3>
+  <ul class="mb-0">
+    <li>Corretude do CRUD e integridade com transações (40%).</li>
+    <li>Segurança: parâmetros, validações e tratamento de exceções (30%).</li>
+    <li>Organização do código e mensagens ao usuário (20%).</li>
+    <li>Relatório/consultas adicionais funcionando (10%).</li>
+  </ul>
+</div>
+        
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Boas práticas de transações ACID em MySQL e diferenças entre autocommit on/off.</li>
+<li>Padrões de repositório e camadas em aplicações Python.</li>
+<li>Tratamento de erros e códigos de erro do MySQL (ex.: 1062 DUPLICATE KEY).</li>
+<li>SQL Injection: casos reais e como consultas parametrizadas mitigam riscos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 13</h2>
+        <ul><li>Código-fonte da CLI com funções CRUD modulares, transações e tratamento de exceções.</li>
+<li>Script SQL de criação/ajustes da tabela de produtos (incluindo índices/constraints adicionais, se houver).</li>
+<li>Breve relatório (1 página) descrevendo como transações e exceções foram usadas e testes de falha realizados.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo12.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 12 — Conexão Python–MySQL e Execução de SQL</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo14.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 14 — Introdução a ORM e Acesso Estruturado</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Programação e Banco de Dados — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a principal vantagem de utilizar consultas parametrizadas no CRUD?","alternativas":{"A":"Melhorar a estética do código.","B":"Aumentar a velocidade de digitação do desenvolvedor.","C":"Prevenir SQL Injection e padronizar o tratamento de tipos.","D":"Permitir concatenação de strings mais complexas.","E":"Eliminar a necessidade de validação de entrada."},"correta":"C"},{"id":"q2","titulo":"Em uma transação, o que significa realizar ROLLBACK?","alternativas":{"A":"Confirmar as alterações no banco.","B":"Desfazer as alterações realizadas desde o último COMMIT.","C":"Aumentar o desempenho das consultas.","D":"Aplicar um índice temporário.","E":"Criar um ponto de restauração permanente."},"correta":"B"},{"id":"q3","titulo":"Sobre tratamento de exceções no acesso ao banco, qual é a prática recomendada?","alternativas":{"A":"Ignorar exceções para não interromper o fluxo.","B":"Capturar exceções, registrar informações úteis e retornar mensagem amigável.","C":"Exibir ao usuário a stack trace completa.","D":"Realizar commit mesmo em caso de erro.","E":"Encerrar a aplicação imediatamente sem avisos."},"correta":"B"},{"id":"q4","titulo":"Qual retorno padronizado facilita a integração entre camadas na CLI proposta?","alternativas":{"A":"Somente um booleano indicando sucesso ou falha.","B":"Uma string com a mensagem e nada mais.","C":"Uma tupla (ok: bool, msg: str, data: Any).","D":"Um dicionário com qualquer estrutura.","E":"Nenhum retorno; imprimir direto na função de repositório."},"correta":"C"},{"id":"q5","titulo":"Ao atualizar um produto, qual conduta é adequada se nenhum registro for afetado pela query?","alternativas":{"A":"Realizar COMMIT mesmo assim.","B":"Executar um SELECT para compensar.","C":"Executar ROLLBACK e informar que o produto não foi encontrado.","D":"Tentar novamente em loop infinito.","E":"Excluir a tabela para evitar inconsistência."},"correta":"C"},{"id":"q6","titulo":"Qual opção descreve corretamente o papel das camadas no projeto?","alternativas":{"A":"A camada de interface (CLI) deve conter toda a lógica SQL.","B":"A camada de dados (repositório) deve exibir mensagens ao usuário.","C":"A camada de dados executa SQL e retorna resultados; a interface apresenta e coleta entradas.","D":"Não há vantagem em separar camadas em projetos pequenos.","E":"A separação aumenta o acoplamento do sistema."},"correta":"C"},{"id":"q7","titulo":"Sobre autocommit=False no conector, é correto afirmar que:","alternativas":{"A":"Dispensa o uso de COMMIT e ROLLBACK.","B":"Permite controlar manualmente quando confirmar ou desfazer alterações.","C":"Impede o uso de SELECT.","D":"Garante que não haverá exceções.","E":"Desativa as transações no MySQL."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei a base e a tabela produtos (com constraints adequadas)."},{"id":"c2","texto":"Instalei mysql-connector-python e testei a conexão."},{"id":"c3","texto":"Implementei funções CRUD usando consultas parametrizadas."},{"id":"c4","texto":"Adotei transações explícitas: commit no sucesso, rollback no erro."},{"id":"c5","texto":"Padronizei retornos (ok, msg, data) e mensagens amigáveis."},{"id":"c6","texto":"Implementei a CLI com menu e validações de entrada."},{"id":"c7","texto":"Testei cenários de falha e confirmei o rollback."},{"id":"c8","texto":"Organizei o código em módulos (db, repositório, app)."}];
+    const CHECKLIST_KEY = 'PRDB-CAP13-CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

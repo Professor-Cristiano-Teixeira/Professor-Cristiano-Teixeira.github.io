@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 06 — DDL no MySQL</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo06.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRDB</span>
+        <span style="color: var(--cor-principal);">Programação e Banco de Dados</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução a Programação e Banco de Dados</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Fundamentos de Banco de Dados e SGBD</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Modelagem Conceitual com DER</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Do DER ao Modelo Relacional</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Normalização (1FN, 2FN, 3FN)</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — DDL: Criação de Esquemas no MySQL</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — DML Básico: Inserção e Consulta</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Agrupamentos e Agregações</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Junções (JOINs)</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — DML Avançado e DCL Essencial</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Revisão de Programação com Foco em Dados (Python)</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Conexão Python–MySQL e Execução de SQL</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — CRUD Completo com Tratamento de Erros e Transações</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Introdução a ORM e Acesso Estruturado</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — NoSQL e MongoDB Básico</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração, Relatórios e Caso Introductório de IoT</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 06 — DDL: Criação de Esquemas no MySQL</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4–6 horas (teoria e prática em laboratório)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Caso de Vendas (clientes, produtos, pedidos e itens)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> MySQL + MySQL Workbench</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Implementar um esquema relacional no MySQL usando comandos DDL (CREATE, ALTER, DROP).</li><li>Definir tipos de dados e constraints adequados (PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, DEFAULT, CHECK).</li><li>Converter o modelo lógico do caso de vendas em tabelas físicas funcionais.</li><li>Executar alterações seguras de esquema (ALTER TABLE) e compreender impactos em dados.</li><li>Validar integridade referencial, opções ON DELETE/UPDATE e boas práticas de nomeação.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Aplicar linguagem SQL DDL para criação e manutenção de estruturas de dados.</li><li>Escolher tipos de dados e constraints coerentes com regras de negócio.</li><li>Garantir integridade e consistência via chaves e referências.</li><li>Documentar e versionar mudanças de esquema em scripts organizados.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 05 — Normalização (1FN, 2FN, 3FN)</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 07 — DML Básico: Inserção e Consulta</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 06)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul>
+<li>Revisão rápida do modelo relacional do caso de vendas (do Cap. 04 e 05) e decisão de tipos/constraints.</li>
+<li>Demonstração de DDL no MySQL Workbench: criação de banco, tabelas e chaves.</li>
+<li>Prática guiada: escrever scripts DDL incrementais e executar no Workbench.</li>
+<li>Discussão: integridade referencial, ON DELETE/UPDATE, nomes e convenções.</li>
+<li>Exercício: realizar pequenas alterações com ALTER TABLE (adicionar coluna, índice, constraint).</li>
+<li>Validação: testar constraints com INSERTs simples e observar erros para aprender.</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+  <h3 class="h5 fw-bold">1) O que é DDL (Data Definition Language)</h3>
+  <p>A DDL é o subconjunto da SQL responsável por definir e alterar a estrutura do banco: bancos de dados, tabelas, colunas, índices e constraints. Os principais comandos são CREATE, ALTER e DROP. Eles moldam o “esqueleto” que receberá os dados.</p>
+  <p>Ao contrário da DML (que insere/atualiza/exclui linhas), a DDL cria e modifica objetos. Por isso, exige cuidado: mudanças estruturais impactam todas as aplicações que consomem o banco.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> você usará DDL para criar o banco do caso de vendas, suas tabelas, definir tipos e todas as chaves/constraints.</p>
+
+  <hr>
+  <h3 class="h5 fw-bold">2) CREATE DATABASE e CREATE TABLE</h3>
+  <p><strong>CREATE DATABASE</strong> cria um novo banco com um nome único. Em geral, define-se o conjunto de caracteres (CHARSET) e a collation, afetando ordenação e comparações de strings.</p>
+  <p><strong>CREATE TABLE</strong> estabelece colunas, tipos de dados e constraints. Uma boa definição inicial reduz retrabalho depois. Convém padronizar nomes em <em>snake_case</em>, usar singular para tabelas de entidades (ex.: cliente, produto) e plural quando fizer sentido localmente, mantendo a consistência.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> logo no início criaremos o banco e cada tabela do caso de vendas, uma por uma, em script versionado.</p>
+
+  <hr>
+  <h3 class="h5 fw-bold">3) Tipos de dados no MySQL (visão prática)</h3>
+  <p>Os tipos mais comuns: <strong>INT/BIGINT</strong> para inteiros, <strong>DECIMAL(p,s)</strong> para valores monetários, <strong>VARCHAR(n)</strong> para textos curtos, <strong>TEXT</strong> para textos longos, <strong>DATE/DATETIME/TIMESTAMP</strong> para datas, <strong>BOOLEAN</strong> (TINYINT(1)) para flags lógicas.</p>
+  <p>Para dinheiro, prefira DECIMAL a FLOAT/DOUBLE, evitando imprecisões binárias. Para códigos e nomes, escolha tamanhos suficientes (ex.: VARCHAR(100) para nome). Para datas de criação/atualização, DATETIME com DEFAULT CURRENT_TIMESTAMP pode ser útil.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> ao definir colunas de clientes, produtos, pedidos e itens, escolheremos tipos adequados ao domínio.</p>
+
+  <hr>
+  <h3 class="h5 fw-bold">4) Constraints: PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, DEFAULT, CHECK</h3>
+  <p><strong>PRIMARY KEY (PK)</strong> identifica cada linha de forma única. Pode ser um inteiro auto_increment ou uma chave natural (desde que estável). <strong>FOREIGN KEY (FK)</strong> garante referência válida entre tabelas (ex.: pedido → cliente).</p>
+  <p><strong>UNIQUE</strong> impede duplicidades (ex.: e-mail do cliente). <strong>NOT NULL</strong> exige valor informado. <strong>DEFAULT</strong> define valor padrão quando nada é passado. <strong>CHECK</strong> valida uma condição (MySQL 8+ implementa CHECK, mas algumas restrições podem variar por engine).</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> definiremos PKs, FKs com ações ON DELETE/UPDATE, e constraints para garantir integridade de dados.</p>
+
+  <hr>
+  <h3 class="h5 fw-bold">5) Integridade referencial e ON DELETE/ON UPDATE</h3>
+  <p>Ao criar FKs, você pode escolher a ação quando o registro pai é apagado/alterado: <strong>RESTRICT</strong>/<strong>NO ACTION</strong> (impede), <strong>CASCADE</strong> (propaga a exclusão/atualização), <strong>SET NULL</strong> (define FK como NULL, se permitido) e <strong>SET DEFAULT</strong> (menos comum no MySQL).</p>
+  <p>Use CASCADE com cautela: pode remover itens em cadeia. Em muitos cenários transacionais, preferimos RESTRICT/NO ACTION para evitar perdas acidentais.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> ao declarar FKs de itens de pedido e pedidos, escolheremos a melhor política para o caso.</p>
+
+  <hr>
+  <h3 class="h5 fw-bold">6) ALTER TABLE e mudanças seguras</h3>
+  <p><strong>ALTER TABLE</strong> adiciona/renomeia/remove colunas, cria índices e adiciona/drope constraints. Em ambientes com dados, sempre avalie impactos e faça backup. Em laboratório, exercitaremos adições e alterações simples.</p>
+  <p>Estratégias seguras incluem: criar colunas novas (mantendo as antigas até migração), preencher valores, depois remover as colunas antigas; executar em transações quando possível, e testar em ambiente de homologação.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> faremos ajustes incrementais, como adicionar índice/coluna e modificar tamanho de VARCHAR.</p>
+
+  <hr>
+  <h3 class="h5 fw-bold">7) DROP e ordem de exclusão</h3>
+  <p><strong>DROP TABLE</strong> remove a tabela e seus dados; <strong>DROP DATABASE</strong> remove todo o banco. A ordem importa por causa das FKs: primeiro remova tabelas filhas, depois as pais, ou <em>drope</em> as FKs explicitamente.</p>
+  <p>Em produção, <em>drop</em> é crítico e normalmente evitado sem backup/migração. No laboratório, usaremos com consciência para refazer o esquema quando necessário.</p>
+  <p><strong>Onde vou aplicar isso no passo a passo:</strong> você poderá recriar do zero o esquema para treinar, seguindo a ordem correta.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Implementar o esquema do Caso de Vendas no MySQL</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Criar um banco de dados e todas as tabelas do caso de vendas (clientes, produtos, pedidos, itens_pedido) com tipos e constraints corretos, além de executar ajustes via ALTER TABLE e validar a integridade referencial.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">1) Preparar o ambiente (MySQL Workbench)</h3>
+  <ol class="mb-0">
+    <li>Abra o MySQL Workbench e conecte-se ao servidor local (ou do laboratório).</li>
+    <li>Crie um novo script SQL: File → New Query Tab.</li>
+    <li>Guarde seu arquivo como 06_ddl_caso_vendas.sql no seu projeto.</li>
+  </ol>
+  <p class="mt-2 mb-1"><strong>Script inicial: criar o banco</strong></p>
+  <pre class="language-sql"><code>-- 1) Criar o banco de dados com charset/collation
+CREATE DATABASE IF NOT EXISTS caso_vendas
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_general_ci;
+
+-- 2) Selecionar o banco
+USE caso_vendas;</code></pre>
+
+  <div class="alert alert-light border mt-3" role="note">
+    Dica: use um script por capítulo para versionar sua evolução. Comente bem cada bloco.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold">2) Tabela cliente</h3>
+  <p>Clientes têm id, nome, email único, data de cadastro e status (ativo/inativo). Escolhemos tipos que refletem o domínio.</p>
+  <pre class="language-sql"><code>-- Tabela: cliente
+DROP TABLE IF EXISTS cliente;
+CREATE TABLE cliente (
+  id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  CHECK (nome &lt;&gt; '')
+) ENGINE=InnoDB;</code></pre>
+  <div class="alert alert-light border mt-3" role="note">
+    Onde aplico teoria: PK (id_cliente), UNIQUE (email), NOT NULL/DEFAULT, CHECK e engine InnoDB para FKs.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold">3) Tabela produto</h3>
+  <p>Produtos têm id, nome, preço e estoque. Para valores monetários, use DECIMAL.</p>
+  <pre class="language-sql"><code>-- Tabela: produto
+DROP TABLE IF EXISTS produto;
+CREATE TABLE produto (
+  id_produto INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL CHECK (preco &gt;= 0),
+  estoque INT NOT NULL DEFAULT 0 CHECK (estoque &gt;= 0),
+  ativo BOOLEAN NOT NULL DEFAULT TRUE
+) ENGINE=InnoDB;</code></pre>
+  <div class="alert alert-light border mt-3" role="note">
+    Onde aplico teoria: tipos adequados (VARCHAR, DECIMAL, INT) e validações com CHECK.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold">4) Tabela pedido (FK para cliente)</h3>
+  <p>Pedidos pertencem a um cliente. Decida a política de exclusão: aqui usamos RESTRICT para evitar perda acidental de histórico.</p>
+  <pre class="language-sql"><code>-- Tabela: pedido
+DROP TABLE IF EXISTS pedido;
+CREATE TABLE pedido (
+  id_pedido INT AUTO_INCREMENT PRIMARY KEY,
+  id_cliente INT NOT NULL,
+  data_pedido DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(20) NOT NULL DEFAULT 'ABERTO',
+  observacoes TEXT NULL,
+  CONSTRAINT fk_pedido_cliente
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;</code></pre>
+  <div class="alert alert-light border mt-3" role="note">
+    Onde aplico teoria: FK com ON DELETE/UPDATE. Use CASCADE em UPDATE (id raramente muda) e RESTRICT na exclusão.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold">5) Tabela item_pedido (tabela de relacionamento N:M resolvida)</h3>
+  <p>Itens ligam pedido a produto. A PK pode ser composta (id_pedido, id_produto) para impedir duplicidade do mesmo produto no mesmo pedido.</p>
+  <pre class="language-sql"><code>-- Tabela: item_pedido
+DROP TABLE IF EXISTS item_pedido;
+CREATE TABLE item_pedido (
+  id_pedido INT NOT NULL,
+  id_produto INT NOT NULL,
+  quantidade INT NOT NULL CHECK (quantidade &gt; 0),
+  preco_unitario DECIMAL(10,2) NOT NULL CHECK (preco_unitario &gt;= 0),
+  PRIMARY KEY (id_pedido, id_produto),
+  CONSTRAINT fk_item_pedido_pedido
+    FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_item_pedido_produto
+    FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;</code></pre>
+  <div class="alert alert-light border mt-3" role="note">
+    Onde aplico teoria: PK composta, múltiplas FKs e CHECKs garantindo quantidades/preços.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold">6) Executar e validar o esquema</h3>
+  <ol class="mb-0">
+    <li>Selecione todo o script e execute (raio/“Execute the selected portion”).</li>
+    <li>No Schema Navigator, atualize e confirme as tabelas criadas.</li>
+    <li>Teste a integridade com inserts mínimos (ex.: inserir cliente, depois pedido e itens).</li>
+  </ol>
+  <p class="mt-2 mb-1"><strong>Testes rápidos</strong></p>
+  <pre class="language-sql"><code>USE caso_vendas;
+
+INSERT INTO cliente (nome, email) VALUES ('Ana Silva', 'ana@exemplo.com');
+
+-- Tente criar pedido para cliente inexistente (deve falhar)
+INSERT INTO pedido (id_cliente) VALUES (999);
+
+-- Crie pedido correto
+INSERT INTO pedido (id_cliente) VALUES (1);
+
+-- Tente item com produto inexistente (deve falhar)
+INSERT INTO item_pedido (id_pedido, id_produto, quantidade, preco_unitario)
+VALUES (1, 999, 2, 10.00);
+
+-- Crie um produto e o item
+INSERT INTO produto (nome, preco, estoque) VALUES ('Caneta Azul', 2.50, 100);
+INSERT INTO item_pedido (id_pedido, id_produto, quantidade, preco_unitario)
+VALUES (1, 1, 2, 2.50);</code></pre>
+  <div class="alert alert-light border mt-3" role="note">
+    Onde aplico teoria: validação prática das FKs (erros esperados quando referências não existem).
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold">7) ALTER TABLE: ajustes comuns</h3>
+  <p>Agora faremos alterações incrementais com ALTER TABLE, simulando evolução do esquema.</p>
+  <pre class="language-sql"><code>USE caso_vendas;
+
+-- 7.1) Adicionar índice em produto.nome para buscas rápidas
+ALTER TABLE produto
+  ADD INDEX idx_produto_nome (nome);
+
+-- 7.2) Aumentar tamanho do email do cliente
+ALTER TABLE cliente
+  MODIFY COLUMN email VARCHAR(200) NOT NULL;
+
+-- 7.3) Adicionar coluna 'desconto' no item_pedido com padrão 0
+ALTER TABLE item_pedido
+  ADD COLUMN desconto DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (desconto &gt;= 0);
+
+-- 7.4) Criar constraint de domínio de status do pedido via CHECK (MySQL 8+)
+ALTER TABLE pedido
+  ADD CONSTRAINT chk_pedido_status
+  CHECK (status IN ('ABERTO','PAGO','CANCELADO'));</code></pre>
+  <div class="alert alert-light border mt-3" role="note">
+    Onde aplico teoria: ALTER TABLE para evoluir o esquema, índices, mudança de tipos e regras de domínio.
+  </div>
+</div>
+
+<div class="card-soft bg-white p-4 mt-4">
+  <h3 class="h6 fw-bold">8) DROP (opcional, somente para treino)</h3>
+  <p>Se quiser recriar tudo do zero, siga a ordem correta: primeiro tabelas filhas, depois pais.</p>
+  <pre class="language-sql"><code>-- CUIDADO: isso removerá dados!
+DROP TABLE IF EXISTS item_pedido;
+DROP TABLE IF EXISTS pedido;
+DROP TABLE IF EXISTS produto;
+DROP TABLE IF EXISTS cliente;
+
+-- Remover o banco todo (opcional)
+-- DROP DATABASE IF EXISTS caso_vendas;</code></pre>
+  <div class="alert alert-light border mt-3" role="note">
+    Onde aplico teoria: ordem de DROP por causa de FKs. Use somente para treinos controlados.
+  </div>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de DDL criando, alterando e validando esquemas com integridade e boas práticas.</p>
+        <div class="card-soft bg-white p-4">
+  <ol>
+    <li>Amplie o caso de vendas adicionando a tabela categoria e vinculando produto→categoria via FK. Crie índices úteis e defina UNIQUE para nome de categoria.</li>
+    <li>Inclua auditoria simples em pedido: colunas criado_em e atualizado_em, com DEFAULT e atualização automática via trigger (se já estudou) ou ajuste manual por enquanto.</li>
+    <li>Projete e implemente uma constraint que impeça pedido sem itens: pense em como garantir isso via lógica de aplicação e/ou validação posterior (discuta limitações no SGBD).</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+  <ul class="mb-0">
+    <li>Corretude do esquema (tipos, PKs, FKs, constraints) e execução sem erros.</li>
+    <li>Clareza e organização dos scripts (comentários, seções, ordem lógica).</li>
+    <li>Aderência às regras de negócio propostas e justificativa das decisões (ex.: políticas ON DELETE).</li>
+    <li>Uso adequado de ALTER TABLE e índices, com breve explicação do impacto.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação MySQL 8.0 — Data Types e Constraints (dev.mysql.com).</li><li>InnoDB: conceitos de integridade referencial e transações.</li><li>Boas práticas de modelagem física: nomeação, índices e normalização vs. desempenho.</li><li>CHECK constraints no MySQL 8+: limitações e alternativas anteriores.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 06</h2>
+        <ul><li>Script SQL completo do esquema do caso de vendas (CREATEs e FKs), testado no MySQL.</li><li>Script com alterações (ALTER TABLE) e breve README explicando cada mudança.</li><li>Comprovantes de testes: inserts mínimos demonstrando integridade referencial e erros esperados.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 05 — Normalização (1FN, 2FN, 3FN)</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 07 — DML Básico: Inserção e Consulta</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Programação e Banco de Dados — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual comando é usado para criar uma nova tabela no MySQL?","alternativas":{"A":"CREATE DATABASE","B":"CREATE TABLE","C":"MAKE TABLE","D":"NEW TABLE","E":"ADD TABLE"},"correta":"B"},{"id":"q2","titulo":"Qual a melhor opção de tipo para armazenar valores monetários com precisão?","alternativas":{"A":"FLOAT","B":"DOUBLE","C":"DECIMAL(10,2)","D":"VARCHAR(20)","E":"INT"},"correta":"C"},{"id":"q3","titulo":"Qual conjunto de constraints garante identidade e referência entre tabelas?","alternativas":{"A":"PRIMARY KEY e FOREIGN KEY","B":"UNIQUE e DEFAULT","C":"NOT NULL e CHECK","D":"INDEX e VIEW","E":"TRIGGER e PROCEDURE"},"correta":"A"},{"id":"q4","titulo":"O que faz ON DELETE RESTRICT em uma FOREIGN KEY?","alternativas":{"A":"Apaga automaticamente as linhas filhas","B":"Define o valor como NULL na coluna filha","C":"Impede a exclusão do pai se houver filhos","D":"Atualiza o valor da FK nas filhas","E":"Não tem efeito no MySQL"},"correta":"C"},{"id":"q5","titulo":"Qual comando adiciona uma nova coluna a uma tabela existente?","alternativas":{"A":"ALTER TABLE ... ADD COLUMN","B":"UPDATE TABLE ... ADD","C":"MODIFY TABLE ... ADD COLUMN","D":"CHANGE TABLE ... NEW COLUMN","E":"INSERT COLUMN ... INTO"},"correta":"A"},{"id":"q6","titulo":"Qual ordem é mais segura para dropar tabelas relacionadas por FKs?","alternativas":{"A":"Pais antes das filhas","B":"Filhas antes dos pais","C":"Qualquer ordem, não importa","D":"Dropar primeiro o banco","E":"Dropar índices primeiro sempre"},"correta":"B"},{"id":"q7","titulo":"Para evitar duplicidade de produto no mesmo pedido em item_pedido, uma solução direta é:","alternativas":{"A":"Criar uma VIEW","B":"PK composta (id_pedido, id_produto)","C":"Usar TEXT ao invés de INT","D":"Remover a FK para produto","E":"Usar TRIGGER para tudo"},"correta":"B"},{"id":"q8","titulo":"Qual afirmativa é verdadeira sobre NOT NULL e DEFAULT?","alternativas":{"A":"NOT NULL define um valor automático","B":"DEFAULT impede valores repetidos","C":"NOT NULL exige valor; DEFAULT fornece um valor padrão","D":"DEFAULT transforma coluna em PK","E":"Ambos são equivalentes a UNIQUE"},"correta":"C"},{"id":"q9","titulo":"Em geral, para strings curtas e indexáveis (nome, email), usa-se:","alternativas":{"A":"TEXT","B":"CHAR sem tamanho","C":"VARCHAR(n)","D":"JSON","E":"BLOB"},"correta":"C"},{"id":"q10","titulo":"No MySQL 8+, CHECK:","alternativas":{"A":"Não existe","B":"Existe, mas pode ter limitações conforme a engine","C":"É sempre ignorado","D":"Substitui a necessidade de FKs","E":"Funciona apenas com campos numéricos"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei o banco caso_vendas com charset/collation adequados."},{"id":"c2","texto":"Implementei as tabelas cliente, produto, pedido e item_pedido com PKs."},{"id":"c3","texto":"Defini FKs com políticas ON DELETE/ON UPDATE apropriadas."},{"id":"c4","texto":"Configurei tipos coerentes (DECIMAL para preços, VARCHAR para textos)."},{"id":"c5","texto":"Apliquei NOT NULL, UNIQUE, DEFAULT e CHECK quando necessário."},{"id":"c6","texto":"Executei ALTER TABLE para evoluir o esquema (colunas, índices, checks)."},{"id":"c7","texto":"Testei a integridade inserindo dados válidos e inválidos (erros esperados)."},{"id":"c8","texto":"Documentei minhas decisões de modelagem e constraints no README."},{"id":"c9","texto":"Entendi a ordem correta para DROP de tabelas relacionadas."},{"id":"c10","texto":"Verssionei meus scripts DDL em arquivos organizados por etapas."}];
+    const CHECKLIST_KEY = 'PRDB-cap06-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

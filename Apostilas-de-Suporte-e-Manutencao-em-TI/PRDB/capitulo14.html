@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 14 — ORM e Acesso Estruturado</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo14.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRDB</span>
+        <span style="color: var(--cor-principal);">Programação e Banco de Dados</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 14 — Introdução a ORM e Acesso Estruturado</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Miniaplicação CRUD de Produtos (cap. 13) evoluída para uso de ORM</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Python 3.x, SQLAlchemy, Alembic (noções), MySQL, Thonny/VSCode, MySQL Workbench</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar o conceito de ORM e seus benefícios/limitações na camada de persistência.</li><li>Mapear classes Python para tabelas relacionais e criar modelos com SQLAlchemy.</li><li>Operar sessões (unit of work) para executar CRUD transacional via ORM.</li><li>Comparar acesso direto por SQL vs. acesso via ORM quanto a produtividade, segurança e manutenção.</li><li>Compreender noções de migrações de esquema (Alembic) e versionamento do banco.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Modelar e implementar camadas de dados usando padrões de mercado.</li><li>Aplicar boas práticas de transações e tratamento de exceções com ORM.</li><li>Analisar trade-offs entre escrita manual de SQL e uso de ORM.</li><li>Documentar e versionar alterações de esquema de forma incremental.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: CRUD com Transações</a>
+              <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: NoSQL e MongoDB Básico</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 14)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul>
+  <li>0h10 — Abertura: revisão rápida do CRUD (cap. 13), objetivo do ORM.</li>
+  <li>0h30 — Teoria: o que é ORM, mapeamento objeto-relacional, sessões e unidade de trabalho.</li>
+  <li>0h25 — Teoria: comparativo SQL direto vs. ORM, vantagens, limites e segurança.</li>
+  <li>1h30 — Prática guiada: instalar SQLAlchemy, configurar engine, criar modelos, sessão e CRUD completo.</li>
+  <li>0h20 — Noções de migração (Alembic): conceito e fluxo básico (init, revision, upgrade).</li>
+  <li>0h15 — Exercícios individuais: pequenas alterações nos modelos e consultas.</li>
+  <li>0h10 — Encerramento: discussão e checklist.</li>
+</ul>
+<p class="mb-0"><strong>Materiais:</strong> Python 3.x, SQLAlchemy, MySQL e Workbench instalados; projeto do CRUD de produtos do capítulo 13.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mb-3">
+  <h3 class="h6 fw-bold">1) O que é ORM e por que usar</h3>
+  <p>ORM (Object-Relational Mapping) é uma técnica que permite mapear classes e objetos da aplicação para tabelas e registros do banco relacional. Em vez de escrever diretamente SQL para cada operação, trabalhamos com modelos (classes) e uma camada de abstração que traduz as ações em comandos SQL.</p>
+  <p>Benefícios incluem produtividade (menos SQL repetitivo), consistência (padrões de acesso), segurança (parametrização por padrão) e manutenção (evoluir o esquema e modelos de forma centralizada). Entretanto, entender SQL continua essencial, pois o ORM gera SQL para o SGBD executar.</p>
+  <p><strong>Onde vou aplicar isso</strong>: na reimplementação do CRUD de produtos (cap. 13) usando modelos e operações de sessão do ORM.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-3">
+  <h3 class="h6 fw-bold">2) Mapeamento Objeto-Relacional (Modelos)</h3>
+  <p>O mapeamento define como uma classe corresponde a uma tabela, e como seus atributos correspondem às colunas. Em SQLAlchemy, declaramos uma classe base, a tabela (<code>__tablename__</code>) e os tipos/constraints de cada coluna.</p>
+  <p>Chaves primárias e estrangeiras também são representadas. O ORM usa metadados para criar o SQL apropriado para o SGBD. O modelo é a “fonte de verdade” da camada de dados da aplicação.</p>
+  <p><strong>Onde vou aplicar isso</strong>: ao criar a classe <code>Produto</code> e, opcionalmente, <code>Categoria</code>, com tipos, primary key e relacionamentos.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-3">
+  <h3 class="h6 fw-bold">3) Sessões e Unidade de Trabalho</h3>
+  <p>A sessão gerencia o ciclo de vida dos objetos persistidos: novos, pendentes, em memória, sujos (modificados) e removidos. O padrão “Unit of Work” agrupa operações como uma transação: ao executar <code>commit()</code>, o ORM sincroniza as mudanças com o banco, e <code>rollback()</code> desfaz alterações em caso de erro.</p>
+  <p>É boa prática criar fábricas de sessão e usar context managers para garantir fechamento e tratamento de exceções.</p>
+  <p><strong>Onde vou aplicar isso</strong>: ao construir funções <em>create/read/update/delete</em> que abrem sessão, executam a operação e fazem <code>commit()</code> ou <code>rollback()</code>.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-3">
+  <h3 class="h6 fw-bold">4) Consultas com ORM (Filters, Order, Paginação)</h3>
+  <p>ORMs oferecem APIs para consultas: filtrar (<code>filter</code>/<code>where</code>), ordenar (<code>order_by</code>), limitar e paginar resultados. Em SQLAlchemy, as consultas modernas usam a ORM Query ou o 2.0 style com <code>select()</code>.</p>
+  <p>Para casos simples, o código fica mais legível. Para relatórios complexos, pode ser vantajoso escrever SQL explícito.</p>
+  <p><strong>Onde vou aplicar isso</strong>: ao listar produtos por preço, pesquisar por nome e implementar paginação simples.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-3">
+  <h3 class="h6 fw-bold">5) Relacionamentos (One-to-Many, Many-to-Many)</h3>
+  <p>Relacionamentos mapeiam chaves estrangeiras e coleções de objetos associados. Com <code>relationship()</code> definimos a navegação entre entidades. O ORM trata carregamento lazy/eager conforme configuração, evitando consultas desnecessárias quando possível.</p>
+  <p><strong>Onde vou aplicar isso</strong>: ao ligar <code>Produto</code> a <code>Categoria</code> (1:N), para consultar produtos por categoria.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-3">
+  <h3 class="h6 fw-bold">6) Noções de Migrações (Alembic)</h3>
+  <p>Migrações versionam mudanças no esquema: criar tabelas, adicionar colunas, constraints etc. O Alembic (ecossistema SQLAlchemy) gera scripts de migração e permite subir/descer versões com <code>upgrade</code>/<code>downgrade</code>.</p>
+  <p>Mesmo conhecendo DDL, migrações padronizam evolução de banco em equipe e ambientes (dev/homolog/produção).</p>
+  <p><strong>Onde vou aplicar isso</strong>: criar o esqueleto de projeto com Alembic, gerar uma revisão inicial e compreender o fluxo.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-3">
+  <h3 class="h6 fw-bold">7) Vantagens e Limites do ORM</h3>
+  <p><strong>Vantagens:</strong> rapidez no desenvolvimento, menos repetição de SQL, integração com transações, segurança por parametrização, portabilidade entre SGBDs.</p>
+  <p><strong>Limites:</strong> curva de aprendizado, possível overhead em consultas complexas, tuning mais difícil em cenários de alta performance; em relatórios sofisticados, SQL explícito pode ser melhor.</p>
+  <p><strong>Onde vou aplicar isso</strong>: na comparação final reescrevendo uma consulta feita em SQL no cap. 13 com o ORM e analisando diferenças.</p>
+</div>
+
+<div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">8) Segurança, Injeção de SQL e Boas Práticas</h3>
+  <p>ORMs parametrizam consultas, reduzindo riscos de SQL Injection. Ainda assim, evite concatenar strings dinâmicas em filtros e use parâmetros do ORM. Valide dados de entrada e trate exceções propagando mensagens claras sem vazar detalhes sensíveis.</p>
+  <p><strong>Onde vou aplicar isso</strong>: ao implementar as funções do CRUD com blocos <code>try/except</code>, commits e rollbacks apropriados.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Reimplementando o CRUD com ORM (SQLAlchemy)</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Configurar SQLAlchemy com MySQL, criar modelos, estabelecer sessão e reescrever o CRUD de produtos com transações e consultas básicas.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-1-circle me-2" style="color:var(--cor-principal)"></i>Preparando o ambiente</h3>
+  <p>Crie/abra a pasta do projeto do CRUD (cap. 13). Instale SQLAlchemy e, se necessário, o driver do MySQL (<code>mysqlclient</code> ou <code>PyMySQL</code>). Abaixo, exemplo com PyMySQL.</p>
+  <pre class="language-bash"><code># em um terminal com o venv do projeto ativado
+pip install sqlalchemy pymysql
+# opcional (noções de migração)
+pip install alembic</code></pre>
+  <p>Garanta que o MySQL esteja ativo e que você saiba a conexão (host, porta, usuário, senha e nome do banco).</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-2-circle me-2" style="color:var(--cor-principal)"></i>Configurando o engine e a Base declarativa</h3>
+  <p>Crie um arquivo <code>db.py</code> para centralizar a conexão e a base de modelos.</p>
+  <pre class="language-python"><code># db.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+# Substitua credenciais conforme seu ambiente
+USER = "root"
+PASSWORD = "senha"
+HOST = "localhost"
+PORT = 3306
+DBNAME = "vendas"
+
+DATABASE_URL = f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?charset=utf8mb4"
+
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,           # True para ver o SQL gerado
+    pool_pre_ping=True,   # ajuda a evitar conexões 'mortas'
+)
+
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+Base = declarative_base()</code></pre>
+  <p>Esse módulo será importado pelos modelos e operações de CRUD.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-3-circle me-2" style="color:var(--cor-principal)"></i>Criando o modelo Produto e (opcional) Categoria</h3>
+  <p>Crie <code>models.py</code> com as classes mapeadas.</p>
+  <pre class="language-python"><code># models.py
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
+from sqlalchemy.orm import relationship
+from db import Base
+
+class Categoria(Base):
+    __tablename__ = "categorias"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(100), nullable=False, unique=True)
+
+    produtos = relationship("Produto", back_populates="categoria")
+
+    def __repr__(self):
+        return f"&lt;Categoria id={self.id} nome={self.nome!r}&gt;"
+
+class Produto(Base):
+    __tablename__ = "produtos"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(120), nullable=False)
+    preco = Column(Numeric(10, 2), nullable=False)
+    categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True)
+
+    categoria = relationship("Categoria", back_populates="produtos")
+
+    def __repr__(self):
+        return f"&lt;Produto id={self.id} nome={self.nome!r} preco={self.preco} cat={self.categoria_id}&gt;"</code></pre>
+  <p>Para criar as tabelas no banco a partir dos modelos, utilize:</p>
+  <pre class="language-python"><code># create_schema.py
+from db import engine, Base
+import models  # importa para registrar os modelos
+Base.metadata.create_all(bind=engine)
+print("Esquema criado/atualizado com sucesso!")</code></pre>
+  <p>Execute o script de criação uma única vez ou sempre que inserir novos modelos/colunas durante a fase de protótipo.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-4-circle me-2" style="color:var(--cor-principal)"></i>Fábrica de sessão e utilitário de contexto</h3>
+  <p>Crie um helper para usar sessão com segurança e transação.</p>
+  <pre class="language-python"><code># session_utils.py
+from contextlib import contextmanager
+from db import SessionLocal
+
+@contextmanager
+def get_session():
+    session = SessionLocal()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()</code></pre>
+  <p>Com esse padrão, cada bloco <code>with get_session()</code> garante commit/rollback e fechamento.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-5-circle me-2" style="color:var(--cor-principal)"></i>CRUD: Create, Read, Update, Delete com ORM</h3>
+  <p>Implemente operações em <code>crud.py</code> reaproveitando o padrão do cap. 13, agora com ORM.</p>
+  <pre class="language-python"><code># crud.py
+from typing import Optional, List
+from decimal import Decimal
+from models import Produto, Categoria
+from session_utils import get_session
+
+def criar_categoria(nome: str) -> Categoria:
+    with get_session() as s:
+        cat = Categoria(nome=nome)
+        s.add(cat)
+        s.flush()  # popula cat.id
+        return cat
+
+def criar_produto(nome: str, preco: Decimal, categoria_id: Optional[int] = None) -> Produto:
+    with get_session() as s:
+        prod = Produto(nome=nome, preco=preco, categoria_id=categoria_id)
+        s.add(prod)
+        s.flush()
+        return prod
+
+def obter_produto_por_id(pid: int) -> Optional[Produto]:
+    with get_session() as s:
+        return s.get(Produto, pid)
+
+def listar_produtos(nome_like: Optional[str] = None, limite: int = 20, offset: int = 0) -> List[Produto]:
+    with get_session() as s:
+        q = s.query(Produto).order_by(Produto.nome.asc())
+        if nome_like:
+            q = q.filter(Produto.nome.ilike(f"%{nome_like}%"))
+        return q.offset(offset).limit(limite).all()
+
+def atualizar_preco(pid: int, novo_preco: Decimal) -> bool:
+    with get_session() as s:
+        prod = s.get(Produto, pid)
+        if not prod:
+            return False
+        prod.preco = novo_preco
+        # commit ocorre no exit do contexto
+        return True
+
+def deletar_produto(pid: int) -> bool:
+    with get_session() as s:
+        prod = s.get(Produto, pid)
+        if not prod:
+            return False
+        s.delete(prod)
+        return True</code></pre>
+  <p>Note que usamos <code>flush()</code> para obter o <code>id</code> gerado antes do commit, quando necessário.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-6-circle me-2" style="color:var(--cor-principal)"></i>Testando rapidamente o CRUD</h3>
+  <p>Crie um script simples de teste:</p>
+  <pre class="language-python"><code># main.py
+from decimal import Decimal
+from crud import (criar_categoria, criar_produto,
+                  obter_produto_por_id, listar_produtos,
+                  atualizar_preco, deletar_produto)
+
+def demo():
+    cat = criar_categoria("Informática")
+    p = criar_produto("Teclado Mecânico", Decimal("199.90"), cat.id)
+    print("Criado:", p)
+
+    achado = obter_produto_por_id(p.id)
+    print("Lido:", achado)
+
+    lista = listar_produtos(nome_like="tec")
+    print("Listagem parcial:", lista)
+
+    ok = atualizar_preco(p.id, Decimal("179.90"))
+    print("Atualizado?", ok, obter_produto_por_id(p.id))
+
+    ok2 = deletar_produto(p.id)
+    print("Removido?", ok2, obter_produto_por_id(p.id))
+
+if __name__ == "__main__":
+    demo()</code></pre>
+  <p>Execute e verifique as saídas. No Workbench, confira os registros afetados.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-7-circle me-2" style="color:var(--cor-principal)"></i>Consultas: filtros, ordenação e paginação (ORM 2.0 style opcional)</h3>
+  <p>Exemplo usando a API <code>select()</code> (SQLAlchemy 2.x):</p>
+  <pre class="language-python"><code># queries.py
+from sqlalchemy import select
+from db import SessionLocal
+from models import Produto
+
+def listar_paginado(pagina: int = 1, tam: int = 10):
+    offset = (pagina - 1) * tam
+    with SessionLocal() as s:
+        stmt = select(Produto).order_by(Produto.preco.desc()).offset(offset).limit(tam)
+        return s.execute(stmt).scalars().all()</code></pre>
+  <p>Use a versão de consulta que seu professor/projeto adotar (Query API ou 2.0 style), mantendo consistência.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mb-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-8-circle me-2" style="color:var(--cor-principal)"></i>Noções de migração com Alembic (opcional)</h3>
+  <p>Fluxo básico (demonstração):</p>
+  <pre class="language-bash"><code># inicializar alembic (na raiz do projeto)
+alembic init migrations
+
+# editar alembic.ini para apontar DATABASE_URL
+# editar env.py para usar a Base.metadata dos seus modelos
+
+# gerar revisão baseada nos modelos atuais
+alembic revision --autogenerate -m "cria tabelas iniciais"
+
+# aplicar migração ao banco
+alembic upgrade head</code></pre>
+  <p>As revisões guardam histórico de mudanças. Em equipe, suba os scripts no repositório.</p>
+</div>
+
+<div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-9-circle me-2" style="color:var(--cor-principal)"></i>Comparando: SQL direto vs. ORM</h3>
+  <p>Consulta exemplo do cap. 13, agora via ORM. SQL direto (recordando):</p>
+  <pre class="language-sql"><code>SELECT id, nome, preco
+FROM produtos
+WHERE preco &gt;= 100
+ORDER BY preco DESC
+LIMIT 5;</code></pre>
+  <p>Equivalente com ORM (Query API):</p>
+  <pre class="language-python"><code>from db import SessionLocal
+from models import Produto
+
+with SessionLocal() as s:
+    q = (s.query(Produto)
+           .filter(Produto.preco &gt;= 100)
+           .order_by(Produto.preco.desc())
+           .limit(5))
+    resultados = q.all()
+    for r in resultados:
+        print(r.id, r.nome, r.preco)</code></pre>
+  <p>Ambas funcionam; o ORM favorece reutilização e segurança, e o SQL explícito pode ser preferido para relatórios complexos.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso de modelos, sessão e consultas ORM, estendendo o CRUD e praticando noções de migração.</p>
+        <div class="card-soft bg-white p-4 mb-3">
+  <ol class="mb-0">
+    <li>Adicione um campo novo em Produto: <code>estoque</code> (Integer, padrão 0). Ajuste o modelo e crie uma migração Alembic para incluir a coluna. Atualize o CRUD para permitir alterar estoque.</li>
+    <li>Crie novas categorias e associe produtos a elas. Implemente uma função que liste produtos de uma categoria por nome (parâmetro parcial) e preço mínimo.</li>
+    <li>Implemente paginação na listagem de produtos (tamanho de página configurável) e exiba os itens da página 2 ordenados por nome.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold mb-2">Critérios de avaliação (autoavaliação)</h3>
+  <ul class="mb-0">
+    <li>Modelos corretos e consistentes com o banco.</li>
+    <li>Operações CRUD funcionais com tratamento de exceções e transações.</li>
+    <li>Consultas com filtros e ordenação corretos; paginação implementada.</li>
+    <li>Migração criada e aplicada com sucesso (quando aplicável).</li>
+    <li>Código organizado, comentado e com mensagens claras.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Documentação oficial do SQLAlchemy: ORM, Query e 2.0 style com select().</li><li>Boas práticas de migração com Alembic: env.py, autogenerate e múltiplos ambientes.</li><li>Comparação ORM vs. SQL cru: quando optar por cada abordagem em projetos reais.</li><li>Estratégias de carregamento (lazy vs. eager) e impacto em performance.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 14</h2>
+        <ul><li>Código do projeto com modelos ORM, sessão e CRUD completo funcional.</li><li>Script de criação de esquema ou migração inicial (Alembic) aplicado.</li><li>Relato curto comparando a experiência com SQL direto e com ORM.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: CRUD com Transações</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: NoSQL e MongoDB Básico</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Programação e Banco de Dados — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual definição descreve corretamente um ORM?","alternativas":{"A":"Uma linguagem proprietária para bancos relacionais.","B":"Um SGBD específico para Python.","C":"Uma técnica/biblioteca que mapeia classes/objetos para tabelas/linhas do banco.","D":"Um driver que substitui o MySQL.","E":"Um formato de arquivo para exportar dados."},"correta":"C"},{"id":"q2","titulo":"No SQLAlchemy, o que a sessão (Session) representa principalmente?","alternativas":{"A":"Um usuário do banco de dados.","B":"Uma conexão exclusiva e permanente com o banco.","C":"Uma unidade de trabalho que rastreia objetos e coordena transações.","D":"Um script de migração do Alembic.","E":"Um backup automático do banco."},"correta":"C"},{"id":"q3","titulo":"Qual é uma vantagem comum do uso de ORM?","alternativas":{"A":"Dispensa o conhecimento de SQL para sempre.","B":"Garante desempenho superior em qualquer cenário.","C":"Reduz repetição de código SQL e facilita manutenção.","D":"Elimina a necessidade de índices no banco.","E":"Transforma qualquer banco em NoSQL."},"correta":"C"},{"id":"q4","titulo":"Em um relacionamento 1:N com SQLAlchemy, qual par costuma ser utilizado?","alternativas":{"A":"ForeignKey em ambas as tabelas e nenhuma relationship().","B":"ForeignKey no lado N e relationship() em um ou ambos os lados.","C":"Somente relationship() sem ForeignKey.","D":"Apenas chaves compostas, nunca simples.","E":"Nenhuma das alternativas."},"correta":"B"},{"id":"q5","titulo":"Qual comando do Alembic aplica a migração mais recente ao banco?","alternativas":{"A":"alembic init","B":"alembic downgrade head","C":"alembic revision --autogenerate","D":"alembic upgrade head","E":"alembic commit"},"correta":"D"},{"id":"q6","titulo":"Sobre segurança, por que ORMs ajudam a mitigar SQL Injection?","alternativas":{"A":"Porque desativam o SQL no banco.","B":"Porque forçam parametrização de consultas e evitam concatenação insegura.","C":"Porque criptografam todos os dados automaticamente.","D":"Porque só funcionam offline.","E":"Porque removem as senhas do banco."},"correta":"B"},{"id":"q7","titulo":"Ao comparar ORM e SQL direto, qual afirmação é adequada?","alternativas":{"A":"ORM sempre substitui SQL e é superior em tudo.","B":"SQL direto sempre é melhor para qualquer consulta.","C":"Ambos têm lugar: ORM para produtividade/manutenção; SQL direto para cenários específicos/complexos.","D":"Usar os dois simultaneamente corrompe dados.","E":"ORM só funciona com NoSQL."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Instalei SQLAlchemy e (opcionalmente) Alembic no meu ambiente."},{"id":"c2","texto":"Configurei o engine e a Base declarativa apontando para meu MySQL."},{"id":"c3","texto":"Criei os modelos Produto e Categoria com tipos e chaves corretas."},{"id":"c4","texto":"Gerei/criei o esquema no banco a partir dos modelos."},{"id":"c5","texto":"Implementei a fábrica de sessão e utilizei context manager com commit/rollback."},{"id":"c6","texto":"Reescrevi o CRUD de produtos usando ORM e testei cada operação."},{"id":"c7","texto":"Implementei consultas com filtros, ordenação e paginação."},{"id":"c8","texto":"Experimentei (opcional) o fluxo básico do Alembic: init, revision, upgrade."},{"id":"c9","texto":"Comparei uma consulta SQL do cap. 13 com a versão via ORM."},{"id":"c10","texto":"Documentei decisões, limitações e próximos passos."}];
+    const CHECKLIST_KEY = 'PRDB_CAP14_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

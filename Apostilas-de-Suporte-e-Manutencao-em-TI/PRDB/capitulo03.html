@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 03 — Modelagem Conceitual com DER</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo03.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRDB</span>
+        <span style="color: var(--cor-principal);">Programação e Banco de Dados</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução a Programação e Banco de Dados</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Fundamentos de Banco de Dados e SGBD</a></li>
+              <li><a class="dropdown-item active" href="capitulo03.html">Capítulo 03 — Modelagem Conceitual com DER</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Do DER ao Modelo Relacional</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Normalização (1FN, 2FN, 3FN)</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — DDL: Criação de Esquemas no MySQL</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — DML Básico: Inserção e Consulta</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Agrupamentos e Agregações</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Junções (JOINs)</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — DML Avançado e DCL Essencial</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Revisão de Programação com Foco em Dados (Python)</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Conexão Python–MySQL e Execução de SQL</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — CRUD Completo com Tratamento de Erros e Transações</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Introdução a ORM e Acesso Estruturado</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — NoSQL e MongoDB Básico</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Integração, Relatórios e Caso Introductório de IoT</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 03 — Modelagem Conceitual com Diagrama Entidade-Relacionamento (DER)</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4 horas</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Caso de Vendas Simples (clientes, produtos, pedidos e itens)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Ferramenta de diagramação (draw.io/Lucidchart/whiteboard), Python (apoio), MySQL (antevisão), MySQL Workbench (antevisão)</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Identificar entidades, atributos e relacionamentos em um domínio de problema real.</li><li>Definir regras de negócio, cardinalidades e participações adequadas no DER.</li><li>Diferenciar relacionamentos 1:1, 1:N e N:M, incluindo atributos de relacionamento quando cabíveis.</li><li>Produzir um DER legível, consistente e rastreável a partir de requisitos textuais.</li><li>Validar o DER com cenários de teste e preparar-se para a transformação ao modelo relacional.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Analisar requisitos e extrair conceitos de dados relevantes.</li><li>Modelar entidades e relacionamentos aplicando boas práticas.</li><li>Especificar cardinalidades e regras de negócio de forma precisa.</li><li>Comunicar o modelo por meio de um DER padronizado.</li><li>Preparar a transição do modelo conceitual para o relacional.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 02 — Fundamentos de Banco de Dados e SGBD</a>
+              <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 04 — Do DER ao Modelo Relacional</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 03)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Momento 1 — Abertura (15 min):</strong> Apresentação do objetivo, conexão com capítulos anteriores e o caso de vendas. Alinhar critérios de qualidade de um bom DER.</p><p><strong>Momento 2 — Teoria guiada (40 min):</strong> Entidades, atributos, chaves, relacionamentos (1:1, 1:N, N:M), cardinalidade e participação, regras de negócio, atributos em relacionamentos e entidades fracas. Exemplos práticos ligados ao caso.</p><p><strong>Momento 3 — Demonstração (20 min):</strong> Construção incremental do DER do caso de vendas usando ferramenta de diagramação (ou papel). Justificar decisões e anotar regras.</p><p><strong>Momento 4 — Prática orientada (50 min):</strong> Estudantes constroem seu próprio DER para o mesmo caso, seguindo um roteiro passo a passo, com checkpoints e validações.</p><p><strong>Momento 5 — Revisão e feedback (25 min):</strong> Validação por pares, checklist de consistência e ajustes finais. Contextualização para o Capítulo 04 (mapeamento DER → relacional).</p><p><strong>Materiais:</strong> computador, internet, draw.io/Lucidchart/whiteboard, arquivo de requisitos do caso, guia de símbolos do DER.</p><p><strong>Avaliação formativa:</strong> participação, clareza do DER, coerência das cardinalidades, rastreabilidade aos requisitos e uso correto de notação.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h5 fw-bold">1) Entidades</h3>
+  <p>Entidades representam coisas ou conceitos relevantes do domínio que desejamos armazenar e gerenciar. Podem ser pessoas, objetos, eventos ou lugares. Exemplos no caso de vendas: Cliente, Produto, Pedido. Uma entidade deve existir de forma independente no contexto do problema e possuir um conjunto de atributos que a descrevem.</p>
+  <p>Boas entidades são nomeadas no singular e refletem substantivos significativos nos requisitos. Evite criar entidades para tudo; mantenha o foco no que precisa ser persistido e consultado.</p>
+  <p><strong>Onde vou aplicar isso:</strong> no passo a passo, ao extrair substantivos do texto do problema, você listará as entidades base do seu DER.</p>
+
+  <h3 class="h5 fw-bold mt-4">2) Atributos (simples, compostos, multivalorados, derivados)</h3>
+  <p>Atributos descrevem as características de uma entidade. Atributos simples têm um único valor indivisível (ex.: cpf). Compostos podem ser decompostos (ex.: endereço → logradouro, número, cidade). Multivalorados podem ter mais de um valor para a mesma entidade (ex.: telefones). Derivados são calculados a partir de outros (ex.: idade a partir da data de nascimento).</p>
+  <p>Em DER, usamos elipses conectadas ao retângulo da entidade. Multivalorados costumam ter dupla elipse; derivados podem ser marcados com linha tracejada. Evite armazenar atributos que podem ser calculados, a menos que haja motivo de performance e controle de atualização.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao listar os campos de cada entidade e decidir se algum atributo é composto, multivalorado ou derivado.</p>
+
+  <h3 class="h5 fw-bold mt-4">3) Identificadores (chaves) e unicidade</h3>
+  <p>Todo registro de uma entidade precisa ser identificável de forma única. O identificador é chamado de chave (candidata). Exemplos: cpf para Cliente, código para Produto, número do pedido. Se não houver um identificador natural confiável, pode-se introduzir um identificador artificial (ex.: idCliente).</p>
+  <p>Escolher uma boa chave no conceito facilita a implementação no modelo relacional. A chave deve ser estável (não muda com frequência), única e conhecida no contexto.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao marcar a chave de cada entidade e justificar a escolha no dicionário de dados.</p>
+
+  <h3 class="h5 fw-bold mt-4">4) Relacionamentos (1:1, 1:N, N:M) e atributos do relacionamento</h3>
+  <p>Relacionamentos representam como entidades se associam. Em 1:1, cada instância de A relaciona-se com no máximo uma de B. Em 1:N, uma de A relaciona-se com várias de B, mas B pertence a uma de A. Em N:M, várias de A relacionam-se com várias de B.</p>
+  <p>Às vezes, o próprio relacionamento tem atributos (ex.: quantidade e preço no momento da venda para o relacionamento entre Pedido e Produto, formando Itens do Pedido). Nesses casos, é comum tratar como uma entidade associativa.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao definir as ligações entre as entidades do caso de vendas e ao decidir quando um relacionamento precisa de atributos.</p>
+
+  <h3 class="h5 fw-bold mt-4">5) Cardinalidade e participação (total/parcial)</h3>
+  <p>Cardinalidade descreve quantas instâncias podem/precisam estar associadas. Participação total (obrigatória) significa que toda instância de uma entidade participa do relacionamento; participação parcial significa que algumas podem não participar.</h3>
+  <p>Exemplo: um Pedido deve estar associado a exatamente um Cliente (participação total de Pedido em “cliente faz pedido”); já um Cliente pode ou não ter feito pedidos (participação parcial do Cliente).</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao posicionar o símbolo de cardinalidade (notação pata de corvo) e registrar se a participação é obrigatória ou opcional.</p>
+
+  <h3 class="h5 fw-bold mt-4">6) Regras de negócio e restrições</h3>
+  <p>Regras de negócio restringem o que pode acontecer nos dados e orientam as cardinalidades. Exemplos: “um pedido deve ter ao menos 1 item”, “produto inativo não pode constar em novo pedido”, “CPF é único”. Essas regras devem ser anotadas junto ao DER.</p>
+  <p>Algumas regras serão implementadas no SGBD (constraints) e outras na aplicação. No nível conceitual, registre a intenção e as justificativas.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao escrever o quadro de regras e validar o DER com cenários positivos e negativos.</p>
+
+  <h3 class="h5 fw-bold mt-4">7) Entidades fracas e dependência de existência</h3>
+  <p>Entidades fracas dependem de outra entidade para existir e não possuem chave própria completa sem referência. Exemplo clássico: Parcela de um Pedido (a identificação da parcela depende do pedido).</p>
+  <p>Em DER, representamos entidade fraca com retângulo duplo e o relacionamento identificador com losango duplo.</p>
+  <p><strong>Onde vou aplicar isso:</strong> se o seu domínio apresentar componentes que não façam sentido fora de um contexto pai, avalie se são entidades fracas.</p>
+
+  <h3 class="h5 fw-bold mt-4">8) Notação e boas práticas de legibilidade</h3>
+  <p>Use nomes claros, consistentes e no singular para entidades; verbos descritivos para relacionamentos; evite poluição visual; mantenha alinhamento e espaçamento. Inclua uma legenda e um quadro com regras e decisões.</p>
+  <p>Adotar a notação “pata de corvo” (crow’s foot) facilita a futura implementação relacional.</p>
+  <p><strong>Onde vou aplicar isso:</strong> ao desenhar o DER final e preparar a entrega com dicionário de dados e legenda.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Construindo o DER do Caso de Vendas</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Produzir um DER completo e validado para o cenário de vendas (clientes, produtos, pedidos e itens), registrando regras de negócio, cardinalidades e chaves.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-signpost-2 me-2" style="color:var(--cor-principal)"></i>Roteiro detalhado</h3>
+
+  <ol class="mt-2 mb-0">
+    <li class="mt-2">
+      <strong>Coletar requisitos (10–15 min)</strong>
+      <p>Leia o enunciado do caso de vendas e destaque substantivos (candidatos a entidades) e verbos (candidatos a relacionamentos). Exemplo resumido de requisitos:</p>
+      <pre class="language-text"><code>• A empresa cadastra clientes com nome, CPF, e e-mail.
+• Produtos possuem código, nome, preço e status (ativo/inativo).
+• Um cliente faz pedidos. Cada pedido tem data e valor total calculado.
+• Um pedido possui 1 ou mais itens, cada item referencia um produto, com quantidade e preço do momento.</code></pre>
+      <p>Resultado esperado: lista preliminar de entidades e relações.</p>
+    </li>
+
+    <li class="mt-2">
+      <strong>Definir entidades e atributos (15 min)</strong>
+      <p>Liste as entidades e seus atributos (marque a chave identificadora). Exemplo:</p>
+      <pre class="language-text"><code>Cliente (idCliente [chave], nome, cpf, email)
+Produto (idProduto [chave], nome, preco, status)
+Pedido (idPedido [chave], data)
+ItemPedido (— tratar como entidade associativa do relacionamento Pedido–Produto —)
+      </code></pre>
+      <p>Justifique chaves naturais vs. artificiais. Anote se há atributos compostos ou multivalorados (ex.: múltiplos telefones).</p>
+    </li>
+
+    <li class="mt-2">
+      <strong>Especificar relacionamentos e cardinalidades (20 min)</strong>
+      <p>Descubra o tipo de cada relacionamento e a participação:</p>
+      <pre class="language-text"><code>Cliente —(faz)— Pedido: 1 Cliente pode fazer N Pedidos; um Pedido deve pertencer a 1 Cliente.
+Pedido —(contém)— Produto: N:M por meio de Itens do Pedido.
+ItemPedido tem atributos: quantidade, preco_unitario_no_momento.</code></pre>
+      <p>Use notação pata de corvo na ferramenta de diagramação. Marque participações obrigatórias (Pedido participa de “faz” de modo total) e opcionais (Cliente em “faz”, parcial).</p>
+    </li>
+
+    <li class="mt-2">
+      <strong>Tratar relacionamento N:M com entidade associativa (15 min)</strong>
+      <p>Crie a entidade associativa ItemPedido para resolver Pedido–Produto N:M e alocar os atributos do relacionamento:</p>
+      <pre class="language-text"><code>ItemPedido (idPedido [parte da chave], idProduto [parte da chave], quantidade, preco_unitario_no_momento)</code></pre>
+      <p>No modelo conceitual, destaque que a identificação de ItemPedido depende de Pedido e Produto. Considere se ItemPedido é entidade fraca (dependência de existência).</p>
+    </li>
+
+    <li class="mt-2">
+      <strong>Registrar regras de negócio (10 min)</strong>
+      <p>Anote explicitamente as regras que conduzem o desenho:</p>
+      <pre class="language-text"><code>RN1: Pedido deve ter pelo menos 1 ItemPedido.
+RN2: Produto inativo não pode ser adicionado a novos pedidos.
+RN3: CPF do Cliente é único no cadastro.
+RN4: O valor total do Pedido é derivado: soma(quantidade * preco_unitario_no_momento) dos itens.</code></pre>
+    </li>
+
+    <li class="mt-2">
+      <strong>Montar dicionário de dados (10–15 min)</strong>
+      <p>Crie um quadro contendo breves descrições dos elementos:</p>
+      <pre class="language-text"><code>Cliente.idCliente: identificador único interno (inteiro).
+Cliente.cpf: documento único (string com máscara).
+Produto.status: enum ('ativo','inativo').
+Pedido.data: data/hora de criação do pedido.
+ItemPedido.quantidade: inteiro positivo.
+ItemPedido.preco_unitario_no_momento: valor monetário capturado na venda.</code></pre>
+    </li>
+
+    <li class="mt-2">
+      <strong>Desenhar o DER final (20–30 min)</strong>
+      <p>Utilize draw.io/Lucidchart/whiteboard. Padrões visuais:</p>
+      <ul>
+        <li>Nomes no singular e legíveis.</li>
+        <li>Chaves sublinhadas (ou marcadas conforme a ferramenta).</li>
+        <li>Notação pata de corvo para cardinalidade.</li>
+        <li>Legenda com símbolos e quadro de regras de negócio.</li>
+      </ul>
+    </li>
+
+    <li class="mt-2">
+      <strong>Validar com cenários (10–15 min)</strong>
+      <p>Crie casos de teste e verifique se o modelo permite e proíbe as situações corretas:</p>
+      <pre class="language-text"><code>Caso OK: cliente com 2 pedidos, cada pedido com 3 itens.
+Caso OK: produto inativo permanece em pedidos antigos (histórico).
+Caso ERRO: pedido sem itens (deve violar RN1).
+Caso ERRO: dois clientes com o mesmo CPF (deve violar RN3).</code></pre>
+    </li>
+
+    <li class="mt-2">
+      <strong>Antever a implementação relacional (opcional, 10 min)</strong>
+      <p>Visualize como será o mapeamento no Capítulo 04. Exemplo simplificado de DDL ilustrativo:</p>
+      <pre class="language-sql"><code>-- Antevisão (Cap. 04/06) — não executar agora
+CREATE TABLE Cliente (
+  idCliente INT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  cpf CHAR(11) UNIQUE NOT NULL,
+  email VARCHAR(120)
+);
+
+CREATE TABLE Produto (
+  idProduto INT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL,
+  status ENUM('ativo','inativo') NOT NULL
+);
+
+CREATE TABLE Pedido (
+  idPedido INT PRIMARY KEY,
+  idCliente INT NOT NULL,
+  data DATETIME NOT NULL,
+  FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente)
+);
+
+CREATE TABLE ItemPedido (
+  idPedido INT NOT NULL,
+  idProduto INT NOT NULL,
+  quantidade INT NOT NULL,
+  preco_unitario_no_momento DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (idPedido, idProduto),
+  FOREIGN KEY (idPedido) REFERENCES Pedido(idPedido),
+  FOREIGN KEY (idProduto) REFERENCES Produto(idProduto)
+);</code></pre>
+      <div class="alert alert-light border mt-3 mb-0" role="note">
+        Dica: manter coerência entre chaves, tipos e obrigatoriedade facilitará a implementação no MySQL adiante.
+      </div>
+    </li>
+  </ol>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a capacidade de ler requisitos, modelar um DER coerente e justificar decisões de modelagem.</p>
+        <div class="card-soft bg-white p-4">
+  <ol class="mb-0">
+    <li class="mb-2"><strong>Biblioteca escolar:</strong> Modele um DER com Entidades: Aluno, Livro, Empréstimo, Autor. Inclua cardinalidades e regra: "Um empréstimo deve ter data de devolução prevista".</li>
+    <li class="mb-2"><strong>Oficina mecânica:</strong> Entidades: Cliente, Veículo, OrdemServico, Serviço, Mecânico. Relacione OS–Serviço (N:M) com atributos “quantidade” e “valor_unitário_no_momento”.</li>
+    <li class="mb-2"><strong>Eventos culturais:</strong> Entidades: Evento, Ingresso, Participante, Setor. Regra: “Ingresso pertence a um setor; participante pode adquirir vários ingressos para eventos distintos”.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+  <ul class="mb-0">
+    <li>Adequação e completude das entidades e relacionamentos ao contexto.</li>
+    <li>Cardinalidades e participações corretas e bem justificadas.</li>
+    <li>Consistência das chaves e clareza do dicionário de dados.</li>
+    <li>Legibilidade do diagrama, padronização de nomes e presença de legenda/regras.</li>
+    <li>Validação com cenários positivos e negativos coerentes.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Diferenças entre DER de Chen e notação pata de corvo (crow’s foot) com exemplos.</li><li>Entidades fracas na prática: quando usar e impactos no modelo relacional.</li><li>Como documentar regras de negócio para bancos de dados e aplicações.</li><li>Boas práticas de nomenclatura em modelos conceituais e lógicos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 03</h2>
+        <ul><li>DER final do caso de vendas (arquivo ou foto nítida), com legenda e cardinalidades.</li><li>Quadro de regras de negócio e dicionário de dados resumido (uma página).</li><li>Checklist preenchido de validação e anotações de cenários de teste.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal);"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo02.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 02 — Fundamentos de Banco de Dados e SGBD</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo04.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 04 — Do DER ao Modelo Relacional</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Programação e Banco de Dados — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"No contexto de DER, o que melhor descreve uma ENTIDADE?","alternativas":{"A":"Um atributo derivado de outra tabela.","B":"Um elemento que representa objetos ou conceitos relevantes do domínio.","C":"Um relacionamento N:M entre duas tabelas.","D":"Uma chave artificial usada apenas em SGBD.","E":"Uma regra de negócio que restringe dados."},"correta":"B"},{"id":"q2","titulo":"Qual alternativa descreve corretamente um RELACIONAMENTO 1:N?","alternativas":{"A":"Cada A está ligado a exatamente um B, e cada B a exatamente um A.","B":"Cada A está ligado a muitos Bs, e cada B a muitos As.","C":"Cada A está ligado a muitos Bs, e cada B está ligado a um único A.","D":"Nem A nem B podem se relacionar entre si.","E":"É um caso de relacionamento recursivo obrigatório."},"correta":"C"},{"id":"q3","titulo":"Quando um relacionamento deve ganhar uma ENTIDADE ASSOCIATIVA (ex.: ItemPedido)?","alternativas":{"A":"Quando precisamos persistir atributos do relacionamento em si.","B":"Quando o relacionamento for 1:1.","C":"Quando não existirem chaves nas entidades originais.","D":"Quando quisermos reduzir a quantidade de entidades.","E":"Quando houver participação parcial em ambos os lados."},"correta":"A"},{"id":"q4","titulo":"Sobre CARDINALIDADE e PARTICIPAÇÃO, assinale a correta:","alternativas":{"A":"Cardinalidade trata de obrigatoriedade; participação trata de quantidade.","B":"Cardinalidade trata de quantidades possíveis; participação trata de obrigatoriedade (total/parcial).","C":"Ambas tratam apenas de chaves primárias.","D":"Apenas cardinalidade é representada no DER.","E":"Participação não se aplica a relacionamentos 1:N."},"correta":"B"},{"id":"q5","titulo":"Qual opção representa uma boa CHAVE IDENTIFICADORA?","alternativas":{"A":"Atributo que muda frequentemente a cada atualização.","B":"Atributo não único, mas popular entre usuários.","C":"Atributo único, estável e conhecido no contexto do domínio.","D":"Sempre uma chave composta de três ou mais campos.","E":"Qualquer atributo escolhido aleatoriamente."},"correta":"C"},{"id":"q6","titulo":"Qual exemplo é um ATRIBUTO DERIVADO?","alternativas":{"A":"data_nascimento do cliente.","B":"idade do cliente calculada a partir de data_nascimento.","C":"cpf do cliente.","D":"status do produto ('ativo'/'inativo').","E":"nome do produto."},"correta":"B"},{"id":"q7","titulo":"Em um sistema de vendas, qual regra de negócio faz mais sentido no nível conceitual?","alternativas":{"A":"Definir engine InnoDB na criação da tabela.","B":"Especificar o tamanho do VARCHAR para o e-mail.","C":"Um pedido deve ter pelo menos um item (obrigatório).","D":"Criar índice BTREE em cpf.","E":"Configurar collation para utf8mb4."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Listei as entidades principais e justifiquei sua relevância."},{"id":"c2","texto":"Defini atributos essenciais, identificadores e possíveis atributos derivados."},{"id":"c3","texto":"Modelei relacionamentos 1:1, 1:N e N:M conforme o caso (com entidade associativa quando necessário)."},{"id":"c4","texto":"Especifiquei claramente cardinalidades e participações (total/parcial)."},{"id":"c5","texto":"Registrei regras de negócio que influenciam o DER."},{"id":"c6","texto":"Elaborei um dicionário de dados resumido para entidades e atributos."},{"id":"c7","texto":"Validei o DER com cenários positivos e negativos."},{"id":"c8","texto":"Organizei o diagrama com boa legibilidade e legenda."}];
+    const CHECKLIST_KEY = 'prdb-cap03-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

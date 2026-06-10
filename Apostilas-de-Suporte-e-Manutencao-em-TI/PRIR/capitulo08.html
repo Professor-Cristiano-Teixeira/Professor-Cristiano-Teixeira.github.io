@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 08 — VLANs e Segmentação</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo08.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRIR</span>
+        <span style="color: var(--cor-principal);">Projeto e Implementação de Redes de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Introdução às Redes e à Internet</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Topologias, Dispositivos e Representações</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Camada Física: Cabeamento e Padrões</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Ethernet e Operação de Enlace</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Endereçamento IPv4: Conceitos e Prática</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Sub-redes IPv4 e VLSM</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — IPv6: Fundamentos e Endereços</a></li>
+              <li><a class="dropdown-item active" href="capitulo08.html">Cap. 08 — Introdução a VLANs e Segmentação Lógica</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Sistema IOS e Acesso a Dispositivos</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Configuração Básica de Switches</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — ICMP, Ping e Traceroute para Troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Rastreadores de Pacotes e Encapsulamento</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Conexões com a Internet e Redes Confiáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Tecnologias Sem Fio, Datacenters e Servidores</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — QoS, Segurança e Escalabilidade em LANs</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto Integrador: Construção de uma Pequena LAN</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 08 — Introdução a VLANs e Segmentação Lógica</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h teoria + 4h prática (laboratório/simulação)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> LAN didática segmentada por VLANs (Usuários, Administração e Visitantes)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Cisco Packet Tracer (ou GNS3), Switch L2 com IOS, PCs Windows/Linux</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Explicar o conceito de VLAN e como ela reduz domínios de broadcast.</li><li>Diferenciar portas access e trunk e relacioná-las ao padrão IEEE 802.1Q.</li><li>Planejar um esquema de VLANs com base em setores e políticas simples.</li><li>Criar, nomear e remover VLANs em um switch Cisco IOS.</li><li>Atribuir portas a VLANs e configurar troncos 802.1Q entre switches.</li><li>Validar isolamento de tráfego com testes de conectividade (ICMP) e comandos show.</li><li>Descrever, em alto nível, como ocorre o roteamento entre VLANs (inter-VLAN routing).</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>MSI03 — Identificar e representar topologias e recursos de rede; segmentação lógica.</li><li>MSI07 — Configurar equipamentos de rede seguindo boas práticas.</li><li>MSI18 — Planejar endereçamento e políticas básicas para LANs escaláveis.</li><li>Habilidades: MSI0301–MSI0305, MSI0705, MSI1810 (interpretação de diagramas, configuração e validação).</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 07 — IPv6: Fundamentos e Endereços</a>
+              <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 09 — Sistema IOS e Acesso a Dispositivos</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 08)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul class="mb-0"><li>Contextualização (15 min): problemas de broadcast e necessidade de segmentação.</li><li>Conceitos (50 min): VLAN, domínios de broadcast, IEEE 802.1Q, portas access vs trunk, planejamento e políticas.</li><li>Demonstração guiada (25 min): criação de VLANs, porta access, porta trunk.</li><li>Prática supervisionada (80–100 min): configurar VLANs no simulador, testar ICMP e show vlan.</li><li>Debrief (20 min): troubleshooting típico (porta errada, VLAN ausente, nativo divergente).</li><li>Avaliação formativa (20 min): quiz e checklist.</li></ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) O que é uma VLAN e por que usar?</h3>
+          <p>Uma VLAN (Virtual LAN) é um mecanismo de segmentação lógica dentro de um switch ou conjunto de switches. Em vez de separar a rede apenas com dispositivos físicos, criamos grupos lógicos de portas que compartilham o mesmo domínio de broadcast. Assim, o tráfego de broadcast e ARP de uma VLAN não vaza para outras VLANs.</p>
+          <p>As VLANs melhoram desempenho e segurança ao reduzir domínios de broadcast, isolar setores (ex.: Administração, Usuários, Visitantes) e simplificar políticas. Também facilitam mudanças lógicas sem recabeamento: mover um host de setor pode ser apenas alterar a VLAN da porta.</p>
+          <p><em>Onde vou aplicar isso?</em> No passo a passo, você criará VLANs para setores distintos e validará que hosts em VLANs diferentes não se comunicam diretamente sem roteamento.</p>
+          <hr>
+
+          <h3 class="h6 fw-bold">2) Domínios de broadcast e impacto na rede</h3>
+          <p>Sem VLANs, toda a LAN L2 costuma pertencer ao mesmo domínio de broadcast. Protocolos como ARP enviam frames de broadcast que são replicados para todas as portas do mesmo domínio. Em redes maiores, isso gera ruído e consome recursos dos hosts.</p>
+          <p>Com VLANs, cada VLAN define um domínio de broadcast independente. Isso reduz o volume de frames irrelevantes para a maioria dos hosts e melhora a previsibilidade do tráfego.</p>
+          <p><em>Onde vou aplicar isso?</em> Ao testar ping e arp, você perceberá que a resolução ARP ocorre apenas entre dispositivos na mesma VLAN.</p>
+          <hr>
+
+          <h3 class="h6 fw-bold">3) IEEE 802.1Q e o conceito de trunk</h3>
+          <p>O padrão IEEE 802.1Q define como os frames Ethernet são marcados (tagged) com um identificador de VLAN quando atravessam um link trunk entre switches (ou entre switch e roteador). O trunk carrega múltiplas VLANs no mesmo enlace físico, inserindo uma “tag” 802.1Q com o ID da VLAN.</p>
+          <p>Além disso, existe o conceito de VLAN nativa (geralmente VLAN 1 por padrão). Tráfego da VLAN nativa é enviado sem tag no trunk. Divergências de VLAN nativa entre os dois lados do link podem causar problemas de conectividade e segurança.</p>
+          <p><em>Onde vou aplicar isso?</em> Você configurará uma interface trunk 802.1Q entre dois switches e observará a diferença entre frames tagged e untagged.</p>
+          <hr>
+
+          <h3 class="h6 fw-bold">4) Portas access versus portas trunk</h3>
+          <p>Portas access conectam hosts finais (PCs, impressoras) e pertencem a apenas uma VLAN. Frames saindo para o host são untagged; o switch associa a porta a uma VLAN específica para o encaminhamento interno.</p>
+          <p>Portas trunk conectam switches (ou switch a roteador). Elas carregam múltiplas VLANs e, por isso, utilizam tagging 802.1Q. Um trunk pode permitir todas as VLANs ou apenas um subconjunto deliberado.</p>
+          <p><em>Onde vou aplicar isso?</em> Você definirá portas access para cada setor e criará trunks entre switches para que todas as VLANs alcancem o outro lado.</p>
+          <hr>
+
+          <h3 class="h6 fw-bold">5) Planejamento de VLANs e políticas básicas</h3>
+          <p>Antes de configurar, planeje um mapa simples: um identificador (ID), um nome descritivo e a finalidade de cada VLAN. Ex.: VLAN 10 (USUARIOS), VLAN 20 (ADM), VLAN 30 (VISITANTES). Defina quais portas do switch pertencem a cada VLAN e quais links deverão operar como trunk.</p>
+          <p>Inclua, no plano, as regras de acesso entre segmentos. Em ambientes reais, o acesso entre VLANs é mediado por roteadores/firewalls e políticas de ACL. Neste capítulo, você foca no isolamento L2 e validação com ICMP.</p>
+          <p><em>Onde vou aplicar isso?</em> Você preencherá uma tabela de VLANs e aplicará esse planejamento no simulador, atribuindo portas e testando.</p>
+          <hr>
+
+          <h3 class="h6 fw-bold">6) Inter-VLAN routing (visão geral)</h3>
+          <p>Como VLANs separam domínios de broadcast, hosts em VLANs diferentes precisam de roteamento para se comunicar. Isso é chamado de inter-VLAN routing, podendo ser feito em um roteador (router-on-a-stick) ou em um switch L3. Cada VLAN tem uma interface lógica (SVI ou subinterface) com um endereço IP que atua como gateway para os hosts daquela VLAN.</p>
+          <p>Neste capítulo, você não implementará o roteamento, apenas entenderá que, sem essa camada, hosts de VLANs distintas não trocam tráfego IP.</p>
+          <p><em>Onde vou aplicar isso?</em> Ao final, você verificará que o ping entre PCs de VLANs diferentes falha, o que está correto sem inter-VLAN routing.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Segmentação com VLANs no Switch</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Criar VLANs, atribuir portas access, configurar um trunk 802.1Q entre switches e validar o isolamento de broadcast e unicast com testes ICMP e comandos de verificação.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Pré-requisitos do laboratório</h3>
+          <ul>
+            <li>Simulador Packet Tracer (ou equipamento equivalente).</li>
+            <li>Dois switches L2 (S1 e S2) e quatro PCs (PC-A, PC-B, PC-C, PC-D).</li>
+            <li>Cabos: PCs conectados a S1 e S2; um link entre S1 e S2.</li>
+          </ul>
+          <p>Planejamento de VLANs e portas:</p>
+          <ul>
+            <li>VLAN 10 — USUARIOS: PC-A (S1 F0/1) e PC-C (S2 F0/1)</li>
+            <li>VLAN 20 — ADM: PC-B (S1 F0/2) e PC-D (S2 F0/2)</li>
+            <li>VLAN 30 — VISITANTES: (reservada para testes extras)</li>
+            <li>Trunk entre S1 F0/24 e S2 F0/24</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">1) Criar e nomear as VLANs no S1 e S2</h3>
+          <p>No modo de configuração global, crie as VLANs e defina nomes descritivos. Repita em ambos os switches.</p>
+          <pre class="language-bash"><code>enable
+configure terminal
+!
+vlan 10
+ name USUARIOS
+vlan 20
+ name ADM
+vlan 30
+ name VISITANTES
+end
+write memory</code></pre>
+          <p>Verifique no modo EXEC privilegiado:</p>
+          <pre class="language-bash"><code>show vlan brief</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">2) Configurar portas access para cada VLAN</h3>
+          <p>Associe as portas que ligam aos PCs às VLANs correspondentes. Exemplo no S1:</p>
+          <pre class="language-bash"><code>enable
+configure terminal
+interface fastEthernet 0/1
+ switchport mode access
+ switchport access vlan 10
+ description PC-A (USUARIOS)
+ spanning-tree portfast
+exit
+interface fastEthernet 0/2
+ switchport mode access
+ switchport access vlan 20
+ description PC-B (ADM)
+ spanning-tree portfast
+exit
+end
+write memory</code></pre>
+          <p>No S2 (ajuste as portas conforme seu diagrama):</p>
+          <pre class="language-bash"><code>enable
+configure terminal
+interface fastEthernet 0/1
+ switchport mode access
+ switchport access vlan 10
+ description PC-C (USUARIOS)
+ spanning-tree portfast
+exit
+interface fastEthernet 0/2
+ switchport mode access
+ switchport access vlan 20
+ description PC-D (ADM)
+ spanning-tree portfast
+exit
+end
+write memory</code></pre>
+          <p>Conferindo a associação:</p>
+          <pre class="language-bash"><code>show vlan brief
+show interfaces status</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">3) Configurar o link trunk 802.1Q entre S1 e S2</h3>
+          <p>Habilite trunk nas interfaces de uplink e permita as VLANs necessárias. Exemplo no S1 (F0/24):</p>
+          <pre class="language-bash"><code>enable
+configure terminal
+interface fastEthernet 0/24
+ description Uplink para S2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30
+ switchport trunk native vlan 1
+exit
+end
+write memory</code></pre>
+          <p>No S2 (F0/24 também deve ser trunk):</p>
+          <pre class="language-bash"><code>enable
+configure terminal
+interface fastEthernet 0/24
+ description Uplink para S1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30
+ switchport trunk native vlan 1
+exit
+end
+write memory</code></pre>
+          <p>Valide o estado do trunk:</p>
+          <pre class="language-bash"><code>show interfaces trunk
+show running-config interface fastEthernet 0/24</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">4) Endereçar os PCs e validar a conectividade dentro da mesma VLAN</h3>
+          <p>Configure IP estático em cada PC conforme sua VLAN (exemplo):</p>
+          <ul>
+            <li>VLAN 10 (USUARIOS): 192.168.10.10/24 (PC-A), 192.168.10.11/24 (PC-C)</li>
+            <li>VLAN 20 (ADM): 192.168.20.10/24 (PC-B), 192.168.20.11/24 (PC-D)</li>
+            <li>Gateway pode ser deixado em branco, já que não faremos roteamento neste capítulo.</li>
+          </ul>
+          <p>Teste ping entre PCs da mesma VLAN:</p>
+          <pre class="language-bash"><code># No PC-A
+ping 192.168.10.11
+
+# No PC-B
+ping 192.168.20.11</code></pre>
+          <p>Os pings dentro da mesma VLAN devem responder, indicando que o trunk está propagando as VLANs entre S1 e S2 e que as portas access estão corretas.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">5) Validar o isolamento entre VLANs</h3>
+          <p>Teste ping entre PCs de VLANs diferentes (por exemplo, PC-A VLAN 10 para PC-B VLAN 20):</p>
+          <pre class="language-bash"><code>ping 192.168.20.10</code></pre>
+          <p>O resultado esperado é falha. Isso demonstra o isolamento entre domínios de broadcast e a necessidade de roteamento entre VLANs (tema de visão geral neste capítulo).</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">6) Verificações e troubleshooting</h3>
+          <p>Use comandos de inspeção para confirmar estado das VLANs e do trunk:</p>
+          <pre class="language-bash"><code>show vlan brief
+show interfaces trunk
+show mac address-table dynamic
+show interfaces switchport</code></pre>
+          <p>Problemas comuns:</p>
+          <ul>
+            <li>Porta em access na VLAN errada — corrigir com switchport access vlan X.</li>
+            <li>Trunk ausente em um dos lados — alinhar mode trunk e encapsulation dot1q.</li>
+            <li>VLAN não criada em um dos switches — criar a VLAN também no outro equipamento.</li>
+            <li>Lista de VLANs permitidas no trunk não inclui a VLAN desejada — ajustar allowed vlan.</li>
+            <li>VLAN nativa divergente — alinhar a native vlan em ambos os lados.</li>
+          </ul>
+        </div>
+
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">7) Registro e documentação</h3>
+          <p>Registre o plano de VLANs, portas, comandos aplicados e resultados dos testes (ping, show vlan, show interfaces trunk). Inclua prints ou export do Packet Tracer quando possível.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a criação, atribuição e verificação de VLANs e trunks em cenários ligeiramente diferentes do passo a passo.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+          <ol class="mb-0">
+            <li>Crie uma terceira VLAN (30 VISITANTES) e mova uma porta de cada switch para essa VLAN. Coloque um PC em cada switch nessa VLAN e valide ping entre eles.</li>
+            <li>Restrinja o trunk para permitir somente as VLANs 10 e 20. Mostre que os hosts de VLAN 30 deixam de se comunicar entre switches. Depois reabra para 10,20,30 e valide novamente.</li>
+            <li>Altere a VLAN nativa do trunk para 99 (crie a VLAN 99) em ambos os lados e comprove, via show interfaces trunk, que a mudança foi efetivada.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Correta criação e nomenclatura das VLANs.</li>
+            <li>Portas access atribuídas de acordo com o planejamento.</li>
+            <li>Trunk 802.1Q configurado de forma consistente em ambos os lados.</li>
+            <li>Testes de conectividade coerentes com o isolamento entre VLANs.</li>
+            <li>Documentação clara: tabela de VLANs, portas e evidências (comandos e pings).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>IEEE 802.1Q: funcionamento do campo de tag e prioridade (PCP) no quadro Ethernet.</li><li>Boas práticas de escolha de VLAN nativa e riscos de VLAN hopping.</li><li>Router-on-a-stick versus Switch L3 para inter-VLAN routing.</li><li>Planejamento de VLANs em ambientes corporativos (nomenclatura e documentação).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 08</h2>
+        <ul><li>Tabela de VLANs (ID, nome, descrição) e mapa de portas (switch, interface, VLAN).</li><li>Capturas dos comandos show vlan brief, show interfaces trunk e resultados de ping.</li><li>Relato curto de troubleshooting: um problema encontrado (ou simulado) e a solução aplicada.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo07.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 07 — IPv6: Fundamentos e Endereços</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo09.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 09 — Sistema IOS e Acesso a Dispositivos</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projeto e Implementação de Redes de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é o principal benefício da utilização de VLANs em uma LAN?","alternativas":{"A":"Aumentar a taxa de transferência física do cabo.","B":"Reduzir domínios de broadcast e isolar tráfego por grupos lógicos.","C":"Permitir que todos os hosts se vejam sem restrições.","D":"Eliminar a necessidade de switches em rede.","E":"Substituir totalmente o roteamento IP."},"correta":"B"},{"id":"q2","titulo":"Em qual tipo de porta configuramos o transporte de múltiplas VLANs com marcação 802.1Q?","alternativas":{"A":"Access","B":"Uplink access","C":"Trunk","D":"Loopback","E":"Routed"},"correta":"C"},{"id":"q3","titulo":"Sobre portas access, assinale a correta:","alternativas":{"A":"Carregam múltiplas VLANs simultaneamente por padrão.","B":"São usadas para interligar switches entre si.","C":"Enviam frames sem tag (untagged) para o host.","D":"Exigem encapsulamento dot1q na configuração.","E":"Não podem participar de VLANs personalizadas."},"correta":"C"},{"id":"q4","titulo":"A divergência de VLAN nativa em um link trunk 802.1Q pode causar:","alternativas":{"A":"Aumento de MTU automaticamente.","B":"Alerta de duplex mismatch.","C":"Falhas de conectividade e riscos de segurança.","D":"Conversão automática de VLANs privadas.","E":"Nada; é irrelevante."},"correta":"C"},{"id":"q5","titulo":"Sem inter-VLAN routing, um PC na VLAN 10 tentando pingar um PC na VLAN 20 terá, em geral:","alternativas":{"A":"Resposta positiva, pois VLANs não afetam ICMP.","B":"Falha, pois não há roteamento entre domínios de broadcast distintos.","C":"Resposta intermitente, dependendo da MTU.","D":"Sucesso apenas se ambos tiverem o mesmo gateway.","E":"Sucesso se estiverem no mesmo switch físico."},"correta":"B"},{"id":"q6","titulo":"Qual comando exibe um resumo das VLANs e suas portas em um switch Cisco?","alternativas":{"A":"show interfaces trunk","B":"show ip interface brief","C":"show vlan brief","D":"show mac address-table","E":"show running-config vlan"},"correta":"C"},{"id":"q7","titulo":"Ao limitar o trunk com 'switchport trunk allowed vlan 10,20', o que acontece com a VLAN 30?","alternativas":{"A":"Continua passando, pois todos os IDs são permitidos por padrão.","B":"É bloqueada no trunk e não atravessa esse enlace.","C":"É convertida para VLAN nativa automaticamente.","D":"Passa somente se a porta for access.","E":"Passa sem tag obrigatoriamente."},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Expliquei, com minhas palavras, o que é uma VLAN e por que reduz domínios de broadcast."},{"id":"c2","texto":"Criei as VLANs 10, 20 e 30 em todos os switches do cenário."},{"id":"c3","texto":"Configurei as portas access corretamente para cada PC de acordo com o planejamento."},{"id":"c4","texto":"Ativei o trunk 802.1Q nos uplinks e alinhei as VLANs permitidas em ambos os lados."},{"id":"c5","texto":"Validei o estado do trunk com 'show interfaces trunk'."},{"id":"c6","texto":"Comprovei comunicação por ping entre hosts da mesma VLAN em switches diferentes."},{"id":"c7","texto":"Confirmei que não há comunicação entre VLANs distintas sem roteamento."},{"id":"c8","texto":"Corrigi ao menos um erro proposital (ex.: VLAN ausente, porta na VLAN errada)."},{"id":"c9","texto":"Documentei tabela de VLANs, mapa de portas e saídas de comandos de verificação."},{"id":"c10","texto":"Revisei o impacto da VLAN nativa e os riscos de divergência entre lados do trunk."}];
+    const CHECKLIST_KEY = 'prir_cap08_checklist_v1';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 — Ethernet e Enlace</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo04.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRIR</span>
+        <span style="color: var(--cor-principal);">Projeto e Implementação de Redes de Computadores</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Introdução às Redes e à Internet</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Topologias, Dispositivos e Representações</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Camada Física: Cabeamento e Padrões</a></li>
+              <li><a class="dropdown-item active" href="capitulo04.html">Capítulo 04 — Ethernet e Operação de Enlace</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Endereçamento IPv4: Conceitos e Prática</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Sub-redes IPv4 e VLSM</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — IPv6: Fundamentos e Endereços</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Introdução a VLANs e Segmentação Lógica</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Sistema IOS e Acesso a Dispositivos</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Configuração Básica de Switches</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — ICMP, Ping e Traceroute para Troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Rastreadores de Pacotes e Encapsulamento</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Conexões com a Internet e Redes Confiáveis</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Capítulo 14 — Tecnologias Sem Fio, Datacenters e Servidores</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — QoS, Segurança e Escalabilidade em LANs</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto Integrador: Construção de uma Pequena LAN</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 04 — Ethernet e Operação de Enlace</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h (aula teórico-prática)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> LAN didática no Cisco Packet Tracer</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> PCs, Switches Cisco (simulados), Packet Tracer, Wireshark/Inspect PDU</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Identificar os campos essenciais do quadro Ethernet e sua função na entrega de dados na LAN.</li><li>Diferenciar domínios de colisão e de broadcast, explicando CSMA/CD (histórico) e o papel do duplex.</li><li>Configurar e verificar velocidade e duplex de portas em switches, evitando e diagnosticando “duplex mismatch”.</li><li>Explicar MTU e reconhecer impactos de quadros/pacotes maiores (jumbo frames) em cenários práticos.</li><li>Simular e analisar tráfego Ethernet no Packet Tracer, observando broadcasts e comportamento de switches.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>MSI03 — Identificação e documentação de topologias e componentes de rede.</li><li>MSI07 — Configuração básica de dispositivos de rede com segurança inicial.</li><li>MSI18 — Diagnóstico inicial de problemas de conectividade em LANs.</li><li>Habilidades: MSI0301–MSI0305, MSI0705, MSI1810 (observação do tráfego, verificação de portas, análise de domínios).</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 03 — Camada Física</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 05 — IPv4: Conceitos e Prática</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 04)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0"><li><strong>Aquecimento (10 min):</strong> Revisão da camada física (cabos, padrões) e conexão com a camada de enlace.</li><li><strong>Exposição (35 min):</strong> Quadro Ethernet (campos), MAC, FCS, domínios de colisão vs. broadcast, CSMA/CD (histórico), half vs. full duplex, auto-negociação, MTU e jumbo frames.</li><li><strong>Demonstração (15 min):</strong> Packet Tracer: broadcast ARP, flood inicial, aprendizagem de MAC no switch.</li><li><strong>Laboratório Guiado (40–60 min):</strong> Topologia simples, testes de ping, inspeção de PDU, ajuste de speed/duplex, diagnóstico de “duplex mismatch”.</li><li><strong>Debrief (10 min):</strong> Discussão de resultados, erros comuns e boas práticas.</li><li><strong>Atividades extras (para casa):</strong> Exercícios de observação de broadcast, Tabela MAC e variação de MTU com ping estendido.</li></ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">1) Quadro Ethernet: campos essenciais</h3>
+  <p>O quadro Ethernet é a unidade de dados na camada de enlace em redes LAN. Seus campos principais incluem: Endereço MAC de Destino, Endereço MAC de Origem, Tipo/Length (que indica o protocolo da camada superior, como IPv4/IPv6, ou o tamanho), Dados (payload) e o FCS (Frame Check Sequence), utilizado para detectar erros de transmissão.</p>
+  <p>Os endereços MAC são identificadores de 48 bits atribuídos às interfaces de rede. O switch utiliza esses endereços para encaminhar quadros dentro do domínio de camada 2. Já o FCS é calculado pelo transmissor e verificado pelo receptor para garantir integridade do quadro.</p>
+  <p><em>Onde vou aplicar isso:</em> Ao inspecionar PDUs no Packet Tracer e entender por que um quadro é entregue a determinada porta do switch. Também ao diagnosticar erros de camada 2 (por exemplo, quadros descartados por FCS incorreto).</p>
+
+  <h3 class="h6 fw-bold mt-4">2) Domínios de colisão e de broadcast</h3>
+  <p>Um <strong>domínio de colisão</strong> é a região da rede onde quadros podem colidir quando há compartilhamento do meio (como em hubs antigos). Switches modernos isolam domínios de colisão por porta, reduzindo colisões. Um <strong>domínio de broadcast</strong> é a área onde mensagens de broadcast (como ARP) são propagadas; por padrão, um switch não separa domínios de broadcast (isso é feito com VLANs ou roteadores).</p>
+  <p>Entender a diferença é crucial para dimensionar redes e prever o impacto de tráfego de broadcast. Em redes maiores, segmentação lógica (VLANs) reduz o alcance dos broadcasts, melhorando desempenho e segurança.</p>
+  <p><em>Onde vou aplicar isso:</em> Ao observar, no Packet Tracer, que um broadcast ARP chega a todos os hosts da mesma VLAN, e ao testar isolamento posteriormente com VLANs.</p>
+
+  <h3 class="h6 fw-bold mt-4">3) CSMA/CD (histórico), half e full duplex</h3>
+  <p>CSMA/CD foi o método de acesso ao meio usado em Ethernet com hubs e half duplex: os dispositivos “escutam” o meio, transmitem se estiver livre e, em caso de colisão, recuam e tentam novamente. Com o uso predominante de switches e <strong>full duplex</strong>, as colisões foram praticamente eliminadas.</p>
+  <p>Em <strong>half duplex</strong>, transmissão e recepção não ocorrem simultaneamente; em <strong>full duplex</strong>, sim. O <strong>duplex mismatch</strong> ocorre quando uma ponta está em full e a outra em half, gerando performance ruim e muitos erros. A auto-negociação de velocidade/duplex ajuda a evitar isso.</p>
+  <p><em>Onde vou aplicar isso:</em> Ao configurar e verificar speed/duplex das interfaces do switch e ao diagnosticar sintomas de mismatch (perda de pacotes, latência alta, erros de interface).</p>
+
+  <h3 class="h6 fw-bold mt-4">4) Aprendizagem de endereços MAC em switches</h3>
+  <p>Switches mantêm uma tabela de endereços MAC (CAM) mapeando MACs às portas onde foram vistos pela última vez. Ao receber um quadro de origem desconhecida, o switch aprende o MAC de origem e o associa à porta. Para destinos desconhecidos, o switch faz <em>flood</em> (envia pela maioria das portas) até aprender.</p>
+  <p>Esse comportamento explica o broadcast inicial e também por que a primeira comunicação entre dois hosts pode gerar mais tráfego que as subsequentes, quando a tabela já está populada.</p>
+  <p><em>Onde vou aplicar isso:</em> Ao usar a ferramenta “Inspect PDU” e a tabela MAC no Packet Tracer, observando o aprendizado e o encaminhamento específico por porta.</p>
+
+  <h3 class="h6 fw-bold mt-4">5) MTU e jumbo frames (introdução)</h3>
+  <p><strong>MTU</strong> é o tamanho máximo de um <em>payload</em> de camada de rede (ex.: IP) que pode ser transportado em um quadro sem fragmentação. Em Ethernet padrão, a MTU comum é 1500 bytes. <strong>Jumbo frames</strong> permitem quadros maiores (ex.: ~9000 bytes), úteis em redes de datacenter e armazenamento, desde que todos os dispositivos do caminho suportem.</p>
+  <p>Se a MTU for excedida e a fragmentação não for permitida (DF setado), os pacotes falham, gerando mensagens ICMP “fragmentation needed”. Em ambientes acadêmicos e no Packet Tracer, simulamos o efeito com pings com tamanho ajustado.</p>
+  <p><em>Onde vou aplicar isso:</em> Ao testar pings com tamanhos diferentes (-l no Windows, -s no Linux) e observar sucesso/fracasso para entender limites de MTU.</p>
+
+  <h3 class="h6 fw-bold mt-4">6) Boas práticas de operação em enlace</h3>
+  <p>Padronize speed/duplex (auto-negociação na maioria dos cenários), use cabos e categorias adequadas, mantenha documentação de portas e descrições, e monitore erros de interface (CRC, late collisions, input/output errors). Essas práticas reduzem tempo de diagnóstico e melhoram confiabilidade.</p>
+  <p><em>Onde vou aplicar isso:</em> No checklist do laboratório e ao interpretar saídas de comandos show nas interfaces do switch.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Laboratório: Observando o Enlace Ethernet no Packet Tracer</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Construir uma pequena LAN no Packet Tracer, observar broadcasts e aprendizagem de MAC, ajustar velocidade/duplex, diagnosticar um “duplex mismatch” e experimentar limites de MTU via ping estendido.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-1-circle me-1"></i>Preparação da topologia</h3>
+  <ol class="mb-0">
+    <li>Abra o Cisco Packet Tracer e crie um novo projeto.</li>
+    <li>Arraste 1 switch (ex.: 2960) e 3 PCs (PC0, PC1, PC2) para a área de trabalho.</li>
+    <li>Conecte:
+      <ul>
+        <li>PC0 à FastEthernet0/1 do switch</li>
+        <li>PC1 à FastEthernet0/2 do switch</li>
+        <li>PC2 à FastEthernet0/3 do switch</li>
+      </ul>
+      Utilize cabos cobre direto (copper straight-through).
+    </li>
+  </ol>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-2-circle me-1"></i>Endereçamento básico dos hosts</h3>
+  <p>Configure todos os PCs na mesma rede IPv4 para facilitar os testes.</p>
+  <ul>
+    <li>PC0: 192.168.10.10/24, Gateway: 192.168.10.1</li>
+    <li>PC1: 192.168.10.11/24, Gateway: 192.168.10.1</li>
+    <li>PC2: 192.168.10.12/24, Gateway: 192.168.10.1 (mesmo sem gateway real, manteremos o padrão)</li>
+  </ul>
+  <p>No Packet Tracer: clique no PC > Desktop > IP Configuration e preencha os campos.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-3-circle me-1"></i>Observando broadcast ARP e aprendizagem de MAC</h3>
+  <ol>
+    <li>No PC0, abra o Desktop > Command Prompt e limpe o ARP (opcional).</li>
+    <li>Envie ping de PC0 para PC1.</li>
+    <li>Use “Simulation Mode” e adicione os filtros ICMP e ARP.</li>
+    <li>Execute o ping e avance os eventos. Observe:
+      <ul>
+        <li>ARP broadcast alcançando todas as portas do switch na VLAN padrão.</li>
+        <li>Switch aprendendo MACs e depois encaminhando unicast de forma específica.</li>
+      </ul>
+    </li>
+  </ol>
+  <p><strong>Conceito aplicado:</strong> Domínio de broadcast e tabela CAM do switch.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-4-circle me-1"></i>Ajuste de velocidade/duplex e verificação</h3>
+  <p>No Packet Tracer, selecione o switch e configure manualmente uma porta para testar.</p>
+  <p class="mb-1"><strong>Exemplo (Cisco IOS simulado):</strong></p>
+  <pre class="language-bash"><code>enable
+configure terminal
+interface fastEthernet0/1
+ description PC0 - teste de duplex
+ speed 100
+ duplex full
+ end
+show interfaces fastEthernet0/1 status
+show interfaces fastEthernet0/1</code></pre>
+  <p>Repita para Fa0/2 ou Fa0/3 se desejar. Em ambientes reais, prefira auto-negociação quando possível para evitar incompatibilidades.</p>
+  <p><strong>Conceito aplicado:</strong> Half vs. Full duplex; verificação de erros e estado de porta.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-5-circle me-1"></i>Simulando um “duplex mismatch”</h3>
+  <ol>
+    <li>Defina no switch a porta Fa0/2 (PC1) como <code>duplex half</code> e <code>speed 100</code>.</li>
+    <li>Deixe o PC1 com auto-negociação (o padrão no PT), que tenderá a operar em full duplex.</li>
+    <li>Faça ping entre PC0 e PC1 em modo contínuo e observe perdas intermitentes e aumento de latência.</li>
+    <li>Verifique a interface no switch:
+      <pre class="language-bash"><code>show interfaces fastEthernet0/2
+! Observe contadores de input errors, collisions, CRC.</code></pre>
+    </li>
+    <li>Corrija o mismatch ajustando para <code>duplex full</code> em ambas as pontas ou habilitando auto-negociação.</li>
+  </ol>
+  <p><strong>Conceito aplicado:</strong> Impacto prático de configurações inconsistentes de duplex.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-6-circle me-1"></i>Testando MTU com ping estendido (simulação conceitual)</h3>
+  <p>No Packet Tracer/hosts simulados, nem todos os parâmetros existem, mas vale o exercício conceitual. Em sistemas reais:</p>
+  <p class="mb-1"><strong>Windows (PowerShell ou CMD):</strong></p>
+  <pre class="language-bash"><code>ping 192.168.10.11 -l 1472 -f
+:: -l define o tamanho do payload ICMP; -f impede fragmentação
+:: 1472 bytes + cabeçalhos (IP+ICMP) ≈ MTU 1500
+ping 192.168.10.11 -l 8972 -f
+:: Se a rede não aceitar jumbo, haverá falha/ICMP "fragmentation needed"</code></pre>
+  <p class="mb-1"><strong>Linux/macOS:</strong></p>
+  <pre class="language-bash"><code>ping -M do -s 1472 192.168.10.11
+ping -M do -s 8972 192.168.10.11</code></pre>
+  <p><strong>Conceito aplicado:</strong> Relação entre MTU e sucesso/fracasso de pacotes maiores.</p>
+</div>
+
+<div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold"><i class="bi bi-7-circle me-1"></i>Checklist de validação</h3>
+  <ul class="mb-0">
+    <li>Todos os PCs se comunicam (ping OK) com duplex consistente.</li>
+    <li>Broadcast ARP observado e entendido.</li>
+    <li>Interfaces sem contadores elevados de erro após correção de duplex.</li>
+    <li>Experimento conceitual de MTU compreendido.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a compreensão de operação Ethernet, domínios, duplex e MTU por meio de variações de topologia e testes.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol class="mb-0">
+    <li><strong>Varie a topologia:</strong> Adicione um segundo switch e conecte PC2 nele. Observe se o broadcast ARP continua alcançando todos os hosts na VLAN padrão.</li>
+    <li><strong>Experimento de aprendizagem de MAC:</strong> Gere tráfego unicast entre PC0↔PC2 e abra a tabela MAC do(s) switch(es) para verificar entradas dinâmicas e aging.</li>
+    <li><strong>Estresse de duplex:</strong> Ajuste temporariamente Fa0/3 em half duplex e compare latência/erros antes e depois da correção. Registre evidências (prints do “Simulation Mode”).</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (sugestão)</h3>
+  <ul class="mb-0">
+    <li>Corretude técnica (configurações adequadas de portas e endereços).</li>
+    <li>Clareza da documentação (prints, descrição de testes, resultados e conclusões).</li>
+    <li>Diagnóstico fundamentado (identificação de sintomas e causa de duplex mismatch).</li>
+    <li>Reflexão sobre MTU e impacto no tráfego.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>IEEE 802.3: Evolução do padrão Ethernet e principais emendas.</li><li>Auto-negociação (IEEE 802.3u): Como velocidade e duplex são acordados entre dispositivos.</li><li>Comparativo entre CSMA/CD e comutação full duplex moderna.</li><li>Jumbo frames em datacenters: benefícios, riscos e requisitos.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 04</h2>
+        <ul><li>Arquivo do Packet Tracer com a topologia funcional e anotações nas portas (descrições).</li><li>Relatório breve contendo: observações de broadcast/ARP, prints da tabela MAC, evidências do teste de duplex (antes/depois) e reflexão sobre MTU.</li><li>Checklist de validação preenchido (neste capítulo).</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 03 — Camada Física</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Capítulo 05 — IPv4: Conceitos e Prática</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projeto e Implementação de Redes de Computadores — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual opção lista CORRETAMENTE campos essenciais de um quadro Ethernet?","alternativas":{"A":"MAC origem, MAC destino, Tipo/Length, Dados, FCS","B":"IP origem, IP destino, TTL, Dados, FCS","C":"Porta TCP origem, Porta TCP destino, Dados, CRC","D":"VLAN ID, IP origem, Tipo/Length, Dados, FCS","E":"SSID, Canal, Criptografia, Dados, FCS"},"correta":"A"},{"id":"q2","titulo":"O que é um domínio de broadcast em uma LAN com switches sem VLANs configuradas?","alternativas":{"A":"Conjunto de portas onde colisões podem ocorrer","B":"Conjunto de portas que compartilham a mesma alimentação elétrica","C":"Conjunto de dispositivos que recebem quadros com endereço MAC desconhecido","D":"Conjunto de dispositivos que recebem quadros com endereço de destino de broadcast","E":"Conjunto de dispositivos que compartilham o mesmo gateway padrão"},"correta":"D"},{"id":"q3","titulo":"Por que o CSMA/CD é considerado histórico em muitas LANs atuais?","alternativas":{"A":"Porque o IPv6 substituiu o CSMA/CD","B":"Porque switches operando em full duplex eliminam colisões","C":"Porque roteadores absorvem todos os broadcasts","D":"Porque a camada física não usa mais cabos de cobre","E":"Porque o Wi‑Fi não utiliza CSMA/CD"},"correta":"B"},{"id":"q4","titulo":"O que é 'duplex mismatch' e qual sintoma comum?","alternativas":{"A":"Velocidades diferentes com full duplex nas duas pontas; throughput máximo","B":"Uma ponta em half e outra em full duplex; erros/baixa performance","C":"Ambas as pontas em half duplex; indisponibilidade total","D":"Ambas as pontas em full duplex; colisões frequentes","E":"Auto‑negociação ativa; perda de link físico"},"correta":"B"},{"id":"q5","titulo":"Sobre MTU (1500) e jumbo frames, assinale a CORRETA:","alternativas":{"A":"MTU é o tamanho máximo do quadro Ethernet, incluindo preâmbulo","B":"Jumbo frames funcionam mesmo se só um dispositivo do caminho suportar","C":"Pings com DF e tamanho acima da MTU podem falhar por necessidade de fragmentação","D":"MTU só se aplica a UDP, não a ICMP","E":"Jumbo frames são obrigatórios para redes com switches"},"correta":"C"},{"id":"q6","titulo":"Quando um switch recebe um quadro para um MAC de destino desconhecido, ele:","alternativas":{"A":"Descarta o quadro imediatamente","B":"Encaminha apenas para a porta de uplink","C":"Envia um broadcast ARP para aprender o MAC","D":"Encaminha por todas as portas (exceto a de origem)","E":"Encaminha para o roteador por padrão"},"correta":"D"},{"id":"q7","titulo":"Qual comando ajuda a identificar erros de camada 2 em uma interface de switch Cisco?","alternativas":{"A":"show ip interface brief","B":"show vlan brief","C":"show interfaces fastEthernet0/1","D":"show running-config","E":"show cdp neighbors"},"correta":"C"},{"id":"q8","titulo":"Qual afirmação descreve corretamente a aprendizagem de MAC em switches?","alternativas":{"A":"O switch aprende o MAC de destino ao encaminhar o quadro","B":"O switch aprende o MAC de origem quando recebe o quadro","C":"O switch só aprende MACs estáticos configurados manualmente","D":"O switch aprende MACs consultando o roteador","E":"O switch não armazena nenhum MAC; sempre faz flood"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Montei a topologia com 1 switch e 3 PCs conectados corretamente."},{"id":"c2","texto":"Configurei endereços IPv4 na mesma rede em todos os PCs."},{"id":"c3","texto":"Observei o broadcast ARP e o aprendizado de MAC no Simulation Mode."},{"id":"c4","texto":"Ajustei speed/duplex e verifiquei o status das interfaces no switch."},{"id":"c5","texto":"Reproduzi um duplex mismatch e coletei evidências (erros/latência)."},{"id":"c6","texto":"Realizei o experimento conceitual de MTU com ping estendido (ou compreendi sua mecânica)."},{"id":"c7","texto":"Documentei resultados, prints e conclusões no relatório do capítulo."}];
+    const CHECKLIST_KEY = 'prir_cap04_chk';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

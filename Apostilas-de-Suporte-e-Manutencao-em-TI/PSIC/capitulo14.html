@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 14 — Suporte técnico e troubleshooting de soluções IoT</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo14.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PSIC</span>
+        <span style="color: var(--cor-principal);">Projetos e Suporte à Internet das Coisas</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Versionamento e documentação</a></li>
+              <li><a class="dropdown-item active" href="capitulo14.html">Cap. 14 — Suporte e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Projeto guiado</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto final e manutenção</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 14 — Suporte técnico e troubleshooting de soluções IoT</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4–6 horas</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Monitoramento ambiental com ESP8266/ESP32, telemetria via MQTT/HTTP e dashboard local</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> ESP8266/ESP32, Arduino IDE/MicroPython, Wi‑Fi, MQTT (HiveMQ broker de testes), HTTP local, MQTT Explorer, logs seriais, Wokwi/Tinkercad</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Aplicar um roteiro sistemático de diagnóstico para falhas de conectividade, sensores e serviços.</li><li>Coletar, ler e interpretar logs do dispositivo, broker MQTT e serviço HTTP.</li><li>Utilizar ferramentas de teste (serial monitor, clientes MQTT, sniffers básicos) para isolar causas.</li><li>Documentar incidentes com reprodução, causa raiz, correção e prevenção.</li><li>Executar procedimentos de escalonamento e registro em um modelo de ticket.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Diagnóstico estruturado em camadas (dispositivo, rede, protocolo, aplicação).</li><li>Leitura de logs, interpretação de códigos de erro e métricas.</li><li>Uso de ferramentas: console serial, ping, clientes MQTT/HTTP.</li><li>Comunicação técnica: abrir e atualizar tickets, registrar evidências.</li><li>Boas práticas de segurança e não regressão durante correções.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 13</a>
+              <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 15</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 14)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ol class="mb-0">
+  <li><strong>Contextualização (15 min)</strong>: Por que troubleshooting em IoT é diferente? Camadas e pontos de falha típicos.</li>
+  <li><strong>Teoria guiada (40 min)</strong>: Logs em dispositivo/broker/servidor; códigos e métricas; ferramentas de teste.</li>
+  <li><strong>Demo (25 min)</strong>: Reproduzir falhas de Wi‑Fi, broker indisponível e sensor desconectado em simulação.</li>
+  <li><strong>Laboratório prático (90–120 min)</strong>: Executar roteiro de diagnóstico em 3 cenários, coletar logs e corrigir.</li>
+  <li><strong>Documentação e ticket (20–30 min)</strong>: Preencher relatório de incidente e checklist de verificação.</li>
+  <li><strong>Encerramento (10 min)</strong>: Boas práticas de prevenção e testes de não regressão.</li>
+</ol></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">1) Visão em camadas do troubleshooting IoT</h3>
+  <p>Em IoT, falhas podem ocorrer em múltiplas camadas: dispositivo (firmware, GPIO, energia), rede (Wi‑Fi, DHCP, DNS), protocolo (MQTT/HTTP), aplicação/servidor (API, banco de dados) e observabilidade (logs/metricas). Um diagnóstico eficaz progride das camadas físicas e de conectividade para as camadas de aplicação, sempre testando hipóteses com evidências.</p>
+  <p>“Onde vou aplicar isso”: no passo a passo você seguirá um roteiro que valida cada camada com testes específicos (LEDs de status, ping, assinatura MQTT, requisição HTTP e verificação de logs).</p>
+
+  <h3 class="h6 fw-bold mt-4">2) Logs e métricas que importam</h3>
+  <p><strong>No dispositivo</strong>: mensagens no serial (baud rate adequado), códigos de erro de conexão, RSSI, IP obtido, tempos de reconexão, exceções (stack trace). <strong>No broker MQTT</strong>: eventos de conexão/desconexão, LWT (Last Will and Testament), tópicos retidos, QoS, erros de autenticação. <strong>No servidor HTTP</strong>: códigos de status (2xx/4xx/5xx), latência, timeouts, payloads inválidos.</p>
+  <p>“Onde vou aplicar isso”: você coletará trechos de log para justificar a causa raiz e anexará ao ticket de incidente.</p>
+
+  <h3 class="h6 fw-bold mt-4">3) Ferramentas essenciais</h3>
+  <p><strong>Console serial</strong> (Arduino IDE/Monitor ou screen), <strong>clientes MQTT</strong> (MQTT Explorer/Studio), <strong>curl</strong> e <strong>Postman</strong> para HTTP, <strong>ping</strong> e verificação de portas. Sniffers simples podem ajudar, mas priorizaremos clientes e logs por serem suficientes no nível técnico médio.</p>
+  <p>“Onde vou aplicar isso”: usaremos MQTT Explorer para checar tópicos e curl para testar endpoints locais enquanto o dispositivo está desconectado.</p>
+
+  <h3 class="h6 fw-bold mt-4">4) Padrão de incidentes: registro e escalonamento</h3>
+  <p>Todo incidente deve ter: identificação do dispositivo (deviceId, firmware), ambiente (SSID, broker/endpoint), <em>passos para reproduzir</em>, <em>comportamento observado</em>, <em>comportamento esperado</em>, <em>logs/prints</em>, <em>análise</em>, <em>causa raiz</em>, <em>correção</em>, <em>prevenção</em> e <em>testes de não regressão</em>. Escalone quando ultrapassar o SLA ou exigir acesso/admin que você não possui.</p>
+  <p>“Onde vou aplicar isso”: você preencherá um modelo de ticket com os dados do seu cenário e anexará evidências.</p>
+
+  <h3 class="h6 fw-bold mt-4">5) Estratégias de correção segura</h3>
+  <p>Implemente correções de forma incremental e com rollback possível. Em firmware, mantenha versões e anote mudanças em CHANGELOG. Em configuração, separe segredos (sem hardcode) e valide antes de aplicar. Testes de fumaça e de não regressão evitam que uma correção quebre outra parte.</p>
+  <p>“Onde vou aplicar isso”: após corrigir, você executará um mini roteiro de validação para assegurar que telemetria e comandos continuam funcionais.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Roteiro prático de diagnóstico em 3 cenários</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Diagnosticar e corrigir falhas de: (A) Wi‑Fi indisponível ou credencial incorreta; (B) Broker MQTT indisponível; (C) Sensor desconectado/defeituoso. Coletar evidências, registrar incidente e validar não regressão.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">Preparação (ambiente e material)</h3>
+  <ul>
+    <li>Placa ESP8266/ESP32 com exemplo de telemetria (ou simulação Wokwi/Tinkercad).</li>
+    <li>Arduino IDE ou Thonny; cliente MQTT (MQTT Explorer/Studio); acesso à rede Wi‑Fi.</li>
+    <li>Broker de testes (ex.: mqtt.eclipseprojects.io ou broker público da HiveMQ) e/ou broker local.</li>
+  </ul>
+  <p class="mb-1"><strong>Modelo mínimo de firmware (Arduino C++) com logs úteis</strong></p>
+  <pre class="language-clike"><code>#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+
+const char* ssid = "SUA_REDE";
+const char* pass = "SENHA_REDE";
+const char* broker = "broker.hivemq.com";
+const int   port = 1883;
+const char* pubTopic = "psic/demo/telemetria";
+WiFiClient espClient;
+PubSubClient client(espClient);
+unsigned long lastPub = 0;
+
+void logMsg(const char* level, const char* msg){
+  Serial.printf("[%lu][%s] %s\n", millis(), level, msg);
+}
+
+void setupWiFi(){
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, pass);
+  logMsg("INFO","Conectando ao Wi‑Fi...");
+  unsigned long t0 = millis();
+  while(WiFi.status() != WL_CONNECTED &amp;&amp; millis() - t0 &lt; 15000){
+    delay(500);
+    Serial.print(".");
+  }
+  if(WiFi.status() == WL_CONNECTED){
+    Serial.println();
+    Serial.printf("[OK] IP: %s | RSSI: %d dBm\n", WiFi.localIP().toString().c_str(), WiFi.RSSI());
+  } else {
+    logMsg("ERRO","Falha ao conectar no Wi‑Fi (timeout)");
+  }
+}
+
+void setupMQTT(){
+  client.setServer(broker, port);
+  logMsg("INFO", "Conectando ao broker MQTT...");
+  if(client.connect("psicDevice123")){
+    logMsg("OK", "MQTT conectado");
+  } else {
+    Serial.printf("[ERRO] MQTT rc=%d (veja documentação do PubSubClient)\n", client.state());
+  }
+}
+
+void setup(){
+  Serial.begin(115200);
+  delay(800);
+  logMsg("INFO","Boot iniciado");
+  setupWiFi();
+  setupMQTT();
+}
+
+void loop(){
+  if(WiFi.status() != WL_CONNECTED){
+    setupWiFi();
+  }
+  if(!client.connected()){
+    setupMQTT();
+  }
+  client.loop();
+
+  if(millis() - lastPub &gt; 5000 &amp;&amp; client.connected()){
+    lastPub = millis();
+    char payload[64];
+    float temp = 25.0 + (millis() % 1000) / 100.0;
+    snprintf(payload, sizeof(payload), "{\"deviceId\":\"psicDevice123\",\"temp\":%.2f}", temp);
+    if(client.publish(pubTopic, payload)){
+      logMsg("OK","Telemetria publicada");
+    } else {
+      logMsg("ERRO","Falha ao publicar");
+    }
+  }
+}</code></pre>
+
+  <div class="alert alert-light border mt-3">
+    Dica: No Wokwi, configure o SSID/senha no projeto. Em hardware real, valide drivers e porta serial. Mantenha o monitor serial em 115200 baud.
+  </div>
+
+  <hr class="my-4">
+
+  <h3 class="h6 fw-bold">Cenário A — Sem Wi‑Fi ou credenciais erradas</h3>
+  <ol>
+    <li><strong>Reproduza a falha</strong>: troque a senha do Wi‑Fi no firmware para uma senha incorreta; faça upload e abra o monitor serial.</li>
+    <li><strong>Coleta de evidências</strong>:
+      <pre class="language-plaintext"><code>[1234][INFO] Boot iniciado
+[1240][INFO] Conectando ao Wi‑Fi...
+.......... 
+[ERRO] Falha ao conectar no Wi‑Fi (timeout)</code></pre>
+    </li>
+    <li><strong>Teste de camada de rede no PC</strong> (para descartar problemas da rede local):
+      <pre class="language-bash"><code># Verificar conectividade local e Internet
+ping -c 4 192.168.0.1      # gateway
+ping -c 4 8.8.8.8          # IP público
+ping -c 4 google.com       # DNS + conectividade</code></pre>
+    </li>
+    <li><strong>Correção</strong>: ajuste SSID/senha; opcional: implemente reconexão com backoff e indicação por LED.</li>
+    <li><strong>Validação</strong>: verifique IP e RSSI no serial e confirme publicação MQTT adiante.
+      <pre class="language-plaintext"><code>[OK] IP: 192.168.0.23 | RSSI: -63 dBm</code></pre>
+    </li>
+  </ol>
+
+  <hr class="my-4">
+
+  <h3 class="h6 fw-bold">Cenário B — Broker MQTT indisponível</h3>
+  <ol>
+    <li><strong>Reproduza a falha</strong>: altere o host do broker para um domínio inválido ou porta errada.</li>
+    <li><strong>Coleta de evidências</strong>:
+      <pre class="language-plaintext"><code>[INFO] Conectando ao broker MQTT...
+[ERRO] MQTT rc=-2 (tempo esgotado / não alcançável)</code></pre>
+    </li>
+    <li><strong>Teste independente com cliente MQTT</strong>:
+      <pre class="language-bash"><code># Usando MQTT Explorer/Studio: tente conectar no broker configurado
+# Alternativa com mosquitto_sub (se disponível localmente):
+mosquitto_sub -h broker.hivemq.com -t "psic/demo/telemetria" -v</code></pre>
+      <p class="mb-0">Se o cliente conectar mas o dispositivo não, o problema está no dispositivo/rede do dispositivo. Se nenhum conecta, o broker/porta está indisponível.</p>
+    </li>
+    <li><strong>Correção</strong>: definir broker e porta corretos, confirmar DNS e saída na porta 1883/TCP.</li>
+    <li><strong>Validação</strong>: publicar/assinar tópico e observar no cliente MQTT.
+      <pre class="language-plaintext"><code>[OK] MQTT conectado
+[OK] Telemetria publicada</code></pre>
+    </li>
+  </ol>
+
+  <hr class="my-4">
+
+  <h3 class="h6 fw-bold">Cenário C — Sensor desconectado/defeituoso</h3>
+  <ol>
+    <li><strong>Reproduza</strong>: desconecte o fio de dados do sensor ou altere o pino no código para um pino errado.</li>
+    <li><strong>Coleta de evidências</strong>: registre leituras inválidas, exceções ou valores NaN.
+      <pre class="language-plaintext"><code>[WARN] Sensor sem resposta (timeout)
+[ERRO] Leitura inválida: NaN</code></pre>
+    </li>
+    <li><strong>Teste de camada de hardware</strong>:
+      <ul>
+        <li>Conferir alimentação (3.3V/5V) e GND comuns.</li>
+        <li>Revisar pinagem e resistor de pull‑up se necessário (ex.: DHT/OneWire/I2C).</li>
+      </ul>
+    </li>
+    <li><strong>Correção</strong>: religar cabos corretamente, checar datasheet, aplicar debounce/tempo adequado entre leituras.</li>
+    <li><strong>Validação</strong>: observar valores plausíveis e telemetria saudável.
+      <pre class="language-json"><code>{"deviceId":"psicDevice123","temp":26.31}</code></pre>
+    </li>
+  </ol>
+
+  <hr class="my-4">
+
+  <h3 class="h6 fw-bold">Modelo de ticket de incidente (preencha e salve no repositório)</h3>
+  <pre class="language-markdown"><code># Ticket: INCIDENT-YYYYMMDD-SEQ
+## Dispositivo
+- deviceId: 
+- Firmware/versão: 
+- Rede/SSID: 
+- Broker/Endpoint: 
+
+## Passos para reproduzir
+1. 
+2. 
+
+## Observado vs Esperado
+- Observado: 
+- Esperado: 
+
+## Evidências (logs/prints)
+```
+cole aqui os trechos de log relevantes
+```
+
+## Análise e causa raiz
+- Hipóteses testadas:
+- Causa identificada:
+
+## Correção aplicada
+- Mudanças:
+- Commit/versão:
+
+## Prevenção e não regressão
+- Testes executados:
+- Ações preventivas:
+</code></pre>
+
+  <h3 class="h6 fw-bold mt-4">Teste rápido de API HTTP local (quando aplicável)</h3>
+  <pre class="language-bash"><code># Enviar amostra de telemetria para API local
+curl -i -X POST http://localhost:3000/telemetria \
+  -H "Content-Type: application/json" \
+  -d '{"deviceId":"psicDevice123","temp":25.9,"ts":1699999999}'</code></pre>
+
+  <div class="alert alert-light border mt-3">
+    Onde vou aplicar isto: os exemplos de logs, comandos e ticket serão usados para justificar sua análise e comprovar a correção em cada cenário.
+  </div>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o diagnóstico estruturado criando evidências, corrigindo e prevenindo regressões em mini‑incidentes reais/simulados.</p>
+        <div class="card-soft bg-white p-4">
+  <ol class="mb-0">
+    <li><strong>Laboratório de falhas encadeadas</strong>: Provoque sequência de erros (Wi‑Fi ok, MQTT off-line, sensor ausente). Colete logs, abra 1 ticket consolidando as três causas com linha do tempo e correções incrementais.</li>
+    <li><strong>Relatório comparativo MQTT vs HTTP</strong>: Desconecte o broker e migre temporariamente a telemetria para um endpoint HTTP local. Documente prós/limitações e registre os testes de não regressão ao retornar ao MQTT.</li>
+    <li><strong>Checklist de saúde do dispositivo</strong>: Crie e execute um checklist de 10 itens (RSSI mínimo, reconexão em X s, taxa de erro de publicação &lt; 2%, etc.) no seu protótipo atual, salvando resultados e ações corretivas.</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+  <ul class="mb-0">
+    <li>Evidências objetivas (logs, prints) e rastreabilidade (commits/versões).</li>
+    <li>Clareza do ticket: reprodução, análise, causa raiz, correção e prevenção.</li>
+    <li>Qualidade técnica dos testes (cobertura das camadas / não regressão).</li>
+    <li>Boas práticas: não expor credenciais, organização do material no repositório.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Como interpretar códigos de retorno do PubSubClient (Arduino) e causas comuns de rc=-2, -4, etc.</li><li>Estratégias de reconexão Wi‑Fi/MQTT com backoff exponencial e LWT bem configurado.</li><li>Boas práticas de logging em firmware: níveis, timestamps e redução de ruído.</li><li>Comparativo de ferramentas: MQTT Explorer vs MQTTX vs mosquitto_pub/sub.</li><li>Fluxos de incidentes em times de suporte: SLA, prioridade, comunicação e escalonamento.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 14</h2>
+        <ul><li>Três conjuntos de evidências (logs/prints) dos cenários A, B e C.</li><li>Um ticket de incidente completo contendo reprodução, análise, causa raiz, correção e prevenção.</li><li>Firmware corrigido e validado, com mensagem de commit clara e versão anotada.</li><li>Checklist de saúde do dispositivo preenchido com resultados e ações.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 13</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 15</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projetos e Suporte à Internet das Coisas — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual é a ordem mais eficaz de verificação ao iniciar um troubleshooting em IoT?","alternativas":{"A":"Aplicação → Protocolo → Rede → Dispositivo","B":"Rede → Dispositivo → Protocolo → Aplicação","C":"Dispositivo → Rede → Protocolo → Aplicação","D":"Protocolo → Aplicação → Rede → Dispositivo","E":"Aplicação → Rede → Protocolo → Dispositivo"},"correta":"C"},{"id":"q2","titulo":"Ao ver rc=-2 ao conectar no broker com PubSubClient, qual é a interpretação mais provável?","alternativas":{"A":"Credenciais inválidas (senha errada)","B":"Timeout/host não alcançável","C":"QoS não suportado","D":"Assinatura em tópico inexistente","E":"Payload JSON malformado"},"correta":"B"},{"id":"q3","titulo":"Qual evidência melhor comprova a causa raiz em uma falha de Wi‑Fi por senha incorreta?","alternativas":{"A":"Gráfico do dashboard sem dados","B":"Print do MQTT Explorer desconectado","C":"Trecho do log serial mostrando tentativas e timeout de Wi‑Fi","D":"Código de status HTTP 500 no servidor","E":"Arquivo README do projeto"},"correta":"C"},{"id":"q4","titulo":"Em um incidente com sensor desconectado, qual ação preventiva é mais adequada?","alternativas":{"A":"Aumentar tamanho do payload MQTT","B":"Trocar o broker para porta 8883","C":"Adicionar checagem de erro e tempo mínimo entre leituras","D":"Remover logs para economizar memória","E":"Desabilitar reconexão automática"},"correta":"C"},{"id":"q5","titulo":"Para diferenciar problema no broker de problema na rede do dispositivo, qual teste é mais útil?","alternativas":{"A":"Executar curl em um endpoint HTTP qualquer","B":"Reiniciar o roteador Wi‑Fi","C":"Conectar ao broker usando um cliente MQTT no PC","D":"Verificar o README","E":"Aumentar o intervalo de publicação do dispositivo"},"correta":"C"},{"id":"q6","titulo":"Quais itens não podem faltar em um ticket de incidente bem preenchido?","alternativas":{"A":"Somente o código corrigido","B":"Apenas o comportamento esperado","C":"Reprodução, evidências (logs), causa raiz, correção e prevenção","D":"Captura de tela do desktop","E":"Preço do hardware"},"correta":"C"},{"id":"q7","titulo":"Depois de corrigir um problema, o que caracteriza um teste de não regressão?","alternativas":{"A":"Repetir somente o caso corrigido","B":"Testar funcionalidades relacionadas para garantir que continuam funcionando","C":"Limpar todos os logs e retestar","D":"Mudar a versão do SDK","E":"Desligar o dispositivo por 10 minutos"},"correta":"B"},{"id":"q8","titulo":"Qual métrica no log do dispositivo ajuda a avaliar qualidade de sinal Wi‑Fi?","alternativas":{"A":"QoS","B":"RSSI (dBm)","C":"Códigos 2xx","D":"TTL do ping","E":"RC do MQTT"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Configurei o monitor serial e verifiquei baud, IP e RSSI do dispositivo."},{"id":"c2","texto":"Testei conectividade de rede no PC (gateway, DNS, internet) para isolar camadas."},{"id":"c3","texto":"Validei credenciais Wi‑Fi corretas e observei reconexão com backoff."},{"id":"c4","texto":"Testei o broker com um cliente MQTT independente para confirmar disponibilidade."},{"id":"c5","texto":"Coletei logs claros do dispositivo e dos clientes (MQTT/HTTP) com timestamps."},{"id":"c6","texto":"Identifiquei e registrei a causa raiz de cada cenário (Wi‑Fi, broker, sensor)."},{"id":"c7","texto":"Implementei correções minimamente invasivas com possibilidade de rollback."},{"id":"c8","texto":"Executei testes de não regressão (telemetria e comandos continuam funcionais)."},{"id":"c9","texto":"Preenchi o ticket de incidente com reprodução, evidências, correção e prevenção."},{"id":"c10","texto":"Organizei evidências e commits no repositório, sem expor credenciais."}];
+    const CHECKLIST_KEY = 'PSIC_CAP14_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

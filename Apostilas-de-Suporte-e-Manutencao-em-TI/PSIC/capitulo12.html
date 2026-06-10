@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 12 — Segurança em IoT</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo12.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PSIC</span>
+        <span style="color: var(--cor-principal);">Projetos e Suporte à Internet das Coisas</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">01 — Introdução à IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">02 — Revisão de programação</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">03 — Eletrônica aplicada</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">04 — Plataformas e IDEs</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">05 — GPIO e PWM</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">06 — Modularização</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">07 — Wi‑Fi e redes</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">08 — MQTT</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">09 — HTTP e WebSocket</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">10 — Bancos de dados</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">11 — Dashboards</a></li>
+              <li><a class="dropdown-item active" href="capitulo12.html">12 — Segurança em IoT</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">13 — Versionamento e docs</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">14 — Suporte e troubleshooting</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">15 — Projeto guiado</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">16 — Projeto final e manutenção</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 12 — Segurança em IoT: credenciais, criptografia e OTA segura</h1>
+          <p class="mb-2"><strong>Carga:</strong> 6–8 horas (teoria 2–3h, prática 4–5h)</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Telemetria segura com MQTT/HTTP, segregação de segredos e atualização OTA com verificação</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> ESP8266/ESP32, Arduino IDE/MicroPython, MQTT com TLS (HiveMQ Cloud) e HTTP/HTTPS local, Git</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Aplicar gestão de credenciais separando segredos do código e protegendo arquivos sensíveis.</li><li>Configurar e testar conexões TLS/HTTPS em clientes MQTT/HTTP no dispositivo.</li><li>Implementar hardening básico de firmware (princípio do menor privilégio, logs mínimos, watchdog).</li><li>Realizar uma atualização OTA com verificação de integridade (checksum) e estratégia de rollback.</li><li>Documentar decisões de segurança e evidências de teste (prints/logs).</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Configurar criptografia de transporte (TLS/HTTPS) em serviços IoT.</li><li>Manusear credenciais com segurança, evitando exposição em repositórios.</li><li>Aplicar hardening e práticas seguras em firmware e serviços.</li><li>Executar OTA com validação e procedimentos de rollback.</li><li>Registrar e comunicar evidências técnicas de segurança.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 11 — Visualização e dashboards</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 13 — Versionamento e documentação</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 12)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>1) Aquecimento (20–30 min):</strong> Revisão rápida de riscos em IoT (exposição de senhas, man-in-the-middle, dispositivos sem atualização). Apresentação dos objetivos e artefatos esperados.</p><p><strong>2) Teoria (60–90 min):</strong> Gestão de segredos, princípio do menor privilégio, TLS/HTTPS (conceitos de certificados e CA), hardening básico, OTA e rollback.</p><p><strong>3) Laboratório guiado (120–150 min):</strong> Separar credenciais; configurar MQTT com TLS (HiveMQ Cloud ou broker com TLS); testar HTTPS; implementar OTA com verificação e simular rollback; registrar evidências.</p><p><strong>4) Consolidação (20–30 min):</strong> Checklist de segurança, registro de lições aprendidas e vínculo com Projeto Integrador do bimestre.</p><p><strong>Avaliação formativa:</strong> funcionamento da conexão segura, qualidade do manuseio de segredos, evidências de testes e documentação curta (README-segurança).</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="vstack gap-4">
+          <div>
+            <h3 class="h5 fw-bold">Gestão de segredos e princípio do menor privilégio</h3>
+            <p>Segredos são credenciais, tokens, chaves e certificados que não devem vazar para o repositório. Em IoT, expor SSID/senha, usuário/senha MQTT ou tokens de API pode comprometer toda a solução. Use arquivos separados do código, protegidos por .gitignore ou variáveis de ambiente, e carregue-os em tempo de execução.</p>
+            <p>O princípio do menor privilégio dita que cada componente deve ter apenas os acessos estritamente necessários. Ex.: um cliente MQTT que apenas publica telemetria não deve ter permissões de criar tópicos arbitrários ou administrar o broker.</p>
+            <p>Automatize a rotação de segredos quando possível e padronize nomenclatura e local de armazenamento. Em produção, considere cofres de segredos; para o curso, arquivos locais com proteção e simulações são suficientes.</p>
+            <p><em>Onde vou aplicar isso:</em> na etapa 1 do Passo a Passo (separar credenciais) e na configuração dos clientes MQTT/HTTP com usuários de baixa permissão.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">TLS/HTTPS e cadeia de confiança</h3>
+            <p>TLS protege a comunicação contra interceptação e alteração. Em MQTT sobre TLS (porta típica 8883) e em HTTPS, o cliente valida o certificado do servidor por meio de uma cadeia com uma Autoridade Certificadora (CA). Em dispositivos com recursos limitados, pode-se gravar o certificado da CA ou usar um fingerprint (SHA‑1/SHA‑256) do certificado do servidor.</p>
+            <p>Certificados têm validade e precisam ser atualizados. O handshake adiciona custo de CPU/tempo, por isso é importante avaliar o impacto no consumo energético e latência.</p>
+            <p><em>Onde vou aplicar isso:</em> nas etapas 2 e 3 do Passo a Passo (MQTT com TLS e teste de HTTPS com verificação do certificado).</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">Hardening básico do dispositivo</h3>
+            <p>Hardening é o processo de reduzir a superfície de ataque: remover credenciais e strings sensíveis, desativar logs verbosos em produção, validar dados de entrada, aplicar watchdog, tratar reconexões com limites e backoff, e isolar funcionalidades em módulos com controle de acesso simples.</p>
+            <p>Evite comandos de debug remotos sem autenticação, implemente limites para tentativas de OTA e defina padrões seguros (ex.: TLS habilitado por padrão, tópicos com namespaces de dispositivo).</p>
+            <p><em>Onde vou aplicar isso:</em> na etapa 4 (ajustes de watchdog/logs) e durante toda a configuração do cliente.</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">OTA segura e rollback</h3>
+            <p>OTA (Over‑The‑Air) permite atualizar firmware remotamente. Uma OTA segura inclui: origem confiável (servidor HTTPS), verificação de integridade (checksum/assinatura) e mecanismo de rollback (voltar para a versão anterior se algo falhar). Em ambientes de ensino, um checksum SHA‑256 e um servidor local HTTPS já são um avanço significativo.</p>
+            <p>Guarde metadados da versão atual e da disponível. Faça o download em partição/arquivo temporário, valide, aplique e reinicie. Se o dispositivo não reportar “boot OK” em um tempo limite, reverte para a anterior.</p>
+            <p><em>Onde vou aplicar isso:</em> na etapa 5 do Passo a Passo (OTA com checksum e simulação de rollback).</p>
+          </div>
+
+          <div>
+            <h3 class="h5 fw-bold">Documentação e evidências de segurança</h3>
+            <p>Segurança exige rastreabilidade: registre quais segredos existem e onde são carregados, qual CA/certificado é usado, parâmetros de TLS, como ativar/desativar logs de debug e o roteiro de OTA/rollback. Inclua capturas de tela do cliente MQTT/HTTPS e trechos de logs que comprovem a conexão segura.</p>
+            <p><em>Onde vou aplicar isso:</em> na etapa 6 (README-segurança e evidências) e nos entregáveis do capítulo.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Endurecendo seu projeto IoT com TLS e OTA segura</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Separar credenciais do código, habilitar TLS no MQTT/HTTP, aplicar hardening básico no firmware e realizar uma atualização OTA com verificação e rollback.</p>
+
+<br>
+
+        <div class="vstack gap-4">
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold"><i class="bi bi-shield-lock me-2" style="color:var(--cor-principal)"></i>1) Separar credenciais do código (menor privilégio)</h3>
+            <p>Crie um arquivo de configuração local (.env ou config_secrets.json) e adicione ao .gitignore. Use usuários com permissões mínimas no broker e na API.</p>
+            <p class="mb-1"><strong>.gitignore (trecho)</strong></p>
+            <pre class="language-ini"><code># credenciais locais (não versionar)
+.env
+config_secrets.json
+certs/
+*.pem
+*.key</code></pre>
+            <p class="mb-1"><strong>Arquivo de segredos (ex.: config_secrets.json)</strong></p>
+            <pre class="language-json"><code>{
+  "wifi": { "ssid": "SEU_SSID", "pass": "SUA_SENHA" },
+  "mqtt": {
+    "host": "xxxxxxxx.s2.eu.hivemq.cloud",
+    "port": 8883,
+    "user": "iot-aluno-pub",
+    "pass": "senha_mqtt_pub",
+    "topicPub": "turmaX/dev123/telemetria",
+    "topicSub": "turmaX/dev123/cmd/#"
+  },
+  "https": {
+    "baseUrl": "https://localhost:8443/api",
+    "caCertPath": "certs/ca.crt"
+  },
+  "ota": {
+    "manifestUrl": "https://localhost:8443/firmware/manifest.json"
+  }
+}</code></pre>
+            <p><em>Dica:</em> no ambiente Arduino, carregue esse JSON via SPIFFS/LittleFS; no MicroPython, carregue com open() e json.load().</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold"><i class="bi bi-cloud-lock me-2" style="color:var(--cor-principal)"></i>2) MQTT com TLS (ESP8266/ESP32)</h3>
+            <p>Utilize cliente MQTT compatível com TLS. Você pode validar via CA (arquivo PEM) ou por fingerprint. Exemplo em Arduino (ESP8266WiFi + WiFiClientSecure + PubSubClient) usando CA.</p>
+            <p class="mb-1"><strong>Arduino (C++) — MQTT com TLS</strong></p>
+            <pre class="language-cpp"><code>#include &lt;Arduino.h&gt;
+#include &lt;ESP8266WiFi.h&gt;           // use WiFi.h no ESP32
+#include &lt;WiFiClientSecure.h&gt;
+#include &lt;PubSubClient.h&gt;
+#include &lt;ArduinoJson.h&gt;
+#include &lt;FS.h&gt;                     // LittleFS no ESP8266, SPIFFS no ESP32
+
+WiFiClientSecure net;
+PubSubClient mqtt(net);
+
+struct Secrets {
+  String ssid, pass, host, user, mpass, topicPub, topicSub, caPath;
+  int port;
+} S;
+
+bool loadSecrets(){
+  if(!SPIFFS.begin()) return false;
+  File f = SPIFFS.open("/config_secrets.json", "r");
+  if(!f) return false;
+  StaticJsonDocument&lt;1024&gt; doc;
+  DeserializationError err = deserializeJson(doc, f);
+  f.close();
+  if(err) return false;
+  S.ssid     = doc["wifi"]["ssid"].as&lt;String&gt;();
+  S.pass     = doc["wifi"]["pass"].as&lt;String&gt;();
+  S.host     = doc["mqtt"]["host"].as&lt;String&gt;();
+  S.user     = doc["mqtt"]["user"].as&lt;String&gt;();
+  S.mpass    = doc["mqtt"]["pass"].as&lt;String&gt;();
+  S.topicPub = doc["mqtt"]["topicPub"].as&lt;String&gt;();
+  S.topicSub = doc["mqtt"]["topicSub"].as&lt;String&gt;();
+  S.port     = doc["mqtt"]["port"].as&lt;int&gt;();
+  S.caPath   = doc["https"]["caCertPath"].as&lt;String&gt;(); // reuso do path
+  return true;
+}
+
+bool loadCA(){
+  File c = SPIFFS.open("/certs/ca.crt", "r");
+  if(!c) return false;
+  String pem = c.readString();
+  c.close();
+  net.setTrustAnchors(new X509List(pem.c_str()));
+  return true;
+}
+
+void connectWiFi(){
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(S.ssid.c_str(), S.pass.c_str());
+  int retries = 0;
+  while(WiFi.status() != WL_CONNECTED &amp;&amp; retries &lt; 20){
+    delay(500);
+    retries++;
+  }
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int len){
+  // trate comandos recebidos com validação
+}
+
+bool connectMQTT(){
+  mqtt.setServer(S.host.c_str(), S.port);
+  mqtt.setCallback(mqttCallback);
+  int retries = 0;
+  while(!mqtt.connected() &amp;&amp; retries &lt; 5){
+    if(mqtt.connect("dev123", S.user.c_str(), S.mpass.c_str())){
+      mqtt.subscribe(S.topicSub.c_str());
+      return true;
+    }
+    delay(1000);
+    retries++;
+  }
+  return mqtt.connected();
+}
+
+void setup(){
+  Serial.begin(115200);
+  loadSecrets();
+  connectWiFi();
+  net.setTimeout(15000);
+  if(!loadCA()){
+    Serial.println("Falha ao carregar CA");
+  }
+  if(connectMQTT()){
+    Serial.println("MQTT TLS conectado");
+    mqtt.publish(S.topicPub.c_str(), "{\"boot\":\"ok\"}");
+  } else {
+    Serial.println("Falha ao conectar MQTT TLS");
+  }
+}
+
+void loop(){
+  if(mqtt.connected()){
+    mqtt.loop();
+  } else {
+    connectMQTT();
+  }
+  delay(10);
+}</code></pre>
+            <p><em>Valide:</em> no broker (ex.: HiveMQ Cloud) crie usuário com permissões apenas para publicar/assinar os tópicos do dispositivo.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold"><i class="bi bi-lock me-2" style="color:var(--cor-principal)"></i>3) Teste de HTTPS com verificação de certificado (MicroPython)</h3>
+            <p>Faça uma requisição HTTPS validando o servidor. Em MicroPython no ESP32/ESP8266, use ussl e urequests. Para validação robusta, compare o fingerprint SHA‑256 do certificado ou use uma CA se disponível.</p>
+            <p class="mb-1"><strong>MicroPython — GET com fingerprint</strong></p>
+            <pre class="language-python"><code>import network, time, urequests, ussl, ubinascii, ujson
+
+def wifi_connect(ssid, passwd):
+  sta = network.WLAN(network.STA_IF)
+  sta.active(True)
+  sta.connect(ssid, passwd)
+  for _ in range(20):
+    if sta.isconnected():
+      return True
+    time.sleep(0.5)
+  return False
+
+def cert_fingerprint_ok(sock, expected_fpr_hex):
+  # Em MicroPython puro, nem sempre é simples extrair o cert.
+  # Como alternativa educacional, compare SHA-256 do host:port conhecido
+  # ou valide via backend. Aqui, faremos "pinning" por domínio (simplificado).
+  return True  # Ajuste conforme suporte da sua build/placa
+
+cfg = ujson.load(open('config_secrets.json'))
+assert wifi_connect(cfg['wifi']['ssid'], cfg['wifi']['pass'])
+
+url = cfg['https']['baseUrl'] + '/status'
+resp = urequests.get(url)  # Em builds com validação, use ca cert quando suportado
+print('HTTPS status:', resp.status_code)
+print('Body:', resp.text)
+resp.close()</code></pre>
+            <p><em>Observação:</em> o suporte à validação de cert em MicroPython varia por placa/build. Em produção, use CA confiável e/ou fingerprint. Para o curso, foque em compreender o fluxo e os riscos.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold"><i class="bi bi-gear-wide-connected me-2" style="color:var(--cor-principal)"></i>4) Hardening rápido: logs, watchdog e reconexão</h3>
+            <p>Reduza logs em produção, ative um watchdog e implemente reconexão com backoff para Wi‑Fi/MQTT. Exemplo de backoff exponencial simples:</p>
+            <pre class="language-cpp"><code>unsigned long backoff = 500; // ms
+const unsigned long MAX_BACKOFF = 8000;
+
+bool safeReconnectMQTT(){
+  while(!mqtt.connected()){
+    if(mqtt.connect("dev123", S.user.c_str(), S.mpass.c_str())){
+      mqtt.subscribe(S.topicSub.c_str());
+      backoff = 500;
+      return true;
+    }
+    delay(backoff);
+    backoff = min(backoff * 2, MAX_BACKOFF);
+  }
+  return true;
+}</code></pre>
+            <p>Nos artefatos do projeto, documente como alternar entre “DEBUG” e “INFO” por meio de uma flag em config (sem recompilar).</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold"><i class="bi bi-arrow-repeat me-2" style="color:var(--cor-principal)"></i>5) OTA segura com checksum e rollback (simulado)</h3>
+            <p>Monte um servidor local com HTTPS (autoassinado para uso didático) para servir o manifesto e binário do firmware. Use checksum SHA‑256 para validar o download. Em caso de falha, reter a versão anterior.</p>
+            <p class="mb-1"><strong>Manifesto OTA (manifest.json)</strong></p>
+            <pre class="language-json"><code>{
+  "version": "1.2.0",
+  "firmwareUrl": "https://localhost:8443/firmware/app-1.2.0.bin",
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb924...truncado..."
+}</code></pre>
+            <p class="mb-1"><strong>Servidor local (Node.js) com HTTPS autoassinado</strong></p>
+            <pre class="language-js"><code>import fs from 'fs';
+import https from 'https';
+import express from 'express';
+
+const app = express();
+app.use(express.static('public')); // public/firmware e manifest.json
+
+https.createServer({
+  key: fs.readFileSync('certs/server.key'),
+  cert: fs.readFileSync('certs/server.crt')
+}, app).listen(8443, () =&gt; console.log('HTTPS em 8443'));</code></pre>
+            <p class="mb-1"><strong>Arduino (conceito) — baixar e verificar</strong></p>
+            <pre class="language-cpp"><code>#include &lt;ESP8266HTTPClient.h&gt;
+#include &lt;Hash.h&gt; // para SHA-256 no ESP8266 (ou use libs equivalentes no ESP32)
+
+bool httpGetToFile(const String&amp; url, const char* outPath){
+  WiFiClientSecure client;
+  client.setInsecure(); // em produção: use CA; aqui, aula
+  HTTPClient http;
+  if(!http.begin(client, url)) return false;
+  int code = http.GET();
+  if(code != 200) { http.end(); return false; }
+  File f = SPIFFS.open(outPath, "w");
+  if(!f){ http.end(); return false; }
+  WiFiClient* stream = http.getStreamPtr();
+  uint8_t buff[128];
+  size_t len = http.getSize();
+  while(http.connected() &amp;&amp; (len &gt; 0 || len == -1)){
+    size_t size = stream-&gt;available();
+    if(size){
+      int c = stream-&gt;readBytes(buff, ((size &gt; sizeof(buff)) ? sizeof(buff) : size));
+      f.write(buff, c);
+      if(len &gt; 0) len -= c;
+    } else delay(1);
+  }
+  f.close();
+  http.end();
+  return true;
+}
+
+String sha256File(const char* path){
+  File f = SPIFFS.open(path, "r");
+  if(!f) return String();
+  SHA256 sha;
+  sha.begin();
+  while(f.available()){
+    uint8_t b = f.read();
+    sha.write(&amp;b, 1);
+  }
+  uint8_t out[32];
+  sha.end(out);
+  f.close();
+  String hex;
+  for(int i=0;i&lt;32;i++){ char buf[3]; sprintf(buf, "%02x", out[i]); hex += buf; }
+  return hex;
+}</code></pre>
+            <p><em>Fluxo:</em> baixe o manifesto, compare versão; baixe o binário; calcule SHA‑256; se bate, aplique Update.begin()/Update.writeStream() e reinicie. Se falhar, mantenha a versão anterior. Teste falhas simulando um SHA incorreto.</p>
+          </div>
+
+          <div class="card-soft bg-white p-4">
+            <h3 class="h6 fw-bold"><i class="bi bi-journal-check me-2" style="color:var(--cor-principal)"></i>6) Evidências e documentação</h3>
+            <p>Salve prints do cliente MQTT mostrando conexão TLS, logs do dispositivo indicando “MQTT TLS conectado”, resposta HTTPS com status 200 e roteiro da OTA (manifesto, checksum e resultado). Produza um README-segurança com: gestão de segredos, TLS configurado, hardening aplicado, procedimento de OTA/rollback e limitações conhecidas.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a aplicação de TLS/HTTPS, gestão de segredos e OTA com validação, gerando evidências e documentação.</p>
+        <div class="vstack gap-2">
+          <div class="card-soft bg-white p-3">
+            <strong>Atividade 1:</strong> Criar um usuário adicional no broker com apenas permissão de publicação em um tópico “turmaX/devXYZ/telemetria” e testar a publicação via dispositivo e via cliente MQTT (Explorer/Studio). Compare as permissões e registre comportamento quando assina tópicos fora do escopo.
+          </div>
+          <div class="card-soft bg-white p-3">
+            <strong>Atividade 2:</strong> Configurar o servidor HTTPS local com certificado autoassinado diferente e validar o impacto da troca de certificado sobre o cliente. Atualize a CA/fingerprint do dispositivo e comprove a recuperação.
+          </div>
+          <div class="card-soft bg-white p-3">
+            <strong>Atividade 3:</strong> Simular uma OTA corrompida (checksum divergente) e confirmar que o dispositivo não aplica a atualização e permanece funcional. Documente o teste e o rollback.
+          </div>
+        </div>
+        <div class="card-soft bg-white p-4 mt-3">
+          <h3 class="h6 fw-bold">Critérios de avaliação (rubrica resumida)</h3>
+          <ul class="mb-0">
+            <li>Gestão de segredos: nenhum segredo em repositório; .gitignore correto; carregamento dinâmico válido.</li>
+            <li>Conexões seguras: MQTT com TLS e HTTPS funcional; evidências de verificação/CA/fingerprint.</li>
+            <li>Hardening: logs adequados, reconexão robusta, princípio do menor privilégio aplicado.</li>
+            <li>OTA segura: validação de integridade, atualização aplicada, teste de falha/rollback documentado.</li>
+            <li>Documentação: README-segurança claro, prints/logs e limitações apontadas.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Conceitos de PKI e cadeia de certificação: como funcionam CAs raiz, intermediárias e certificados de servidor.</li><li>MQTT com TLS mútuo (mTLS): quando e como usar certificados de cliente em IoT.</li><li>Estratégias de OTA em ESP32 (duas partições OTA) versus ESP8266 (SPIFFS e Update).</li><li>Boas práticas de rotação de credenciais e segredo por dispositivo (device-bound secrets).</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 12</h2>
+        <ul><li>Repositório com .gitignore adequado e arquivo de segredos fora do versionamento.</li><li>Firmware/dispositivo conectando a MQTT com TLS e realizando ao menos uma requisição HTTPS.</li><li>Registro de evidências: prints do cliente MQTT/HTTPS e logs do dispositivo.</li><li>Procedimento de OTA com verificação (manifesto, checksum) e teste de falha/rollback documentado.</li><li>README-segurança descrevendo decisões, passos de configuração e limitações.</li><li>Projeto Integrador (Bimestre 2 — Entrega incremental 2/2): incorporar segurança mínima no protótipo (TLS onde possível, segredos separados, plano de OTA/rollback descrito) e anexar evidências ao relatório do projeto.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color:var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo11.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: 11 — Visualização e dashboards</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: 13 — Versionamento e documentação</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Projetos e Suporte à Internet das Coisas — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Qual prática representa corretamente o princípio do menor privilégio em IoT?","alternativas":{"A":"Usar um único usuário admin para todos os dispositivos.","B":"Conceder somente as permissões necessárias por função/dispositivo.","C":"Armazenar senhas no código para facilitar manutenção.","D":"Permitir escrita em todos os tópicos MQTT para evitar erros.","E":"Desativar autenticação no broker em redes confiáveis."},"correta":"B"},{"id":"q2","titulo":"Ao habilitar MQTT sobre TLS, qual opção descreve corretamente a validação?","alternativas":{"A":"TLS só criptografa, não valida o servidor.","B":"É necessário validar o certificado do servidor via CA ou fingerprint.","C":"Basta usar a porta 8883; o restante é opcional.","D":"No ESP, TLS não é suportado.","E":"TLS só funciona se o broker estiver na mesma rede local."},"correta":"B"},{"id":"q3","titulo":"Qual é o objetivo de um mecanismo de rollback em OTA?","alternativas":{"A":"Acelerar o download do firmware.","B":"Reduzir consumo de memória durante atualização.","C":"Reverter para versão anterior se a nova falhar.","D":"Apagar logs antigos para liberar espaço.","E":"Ativar logs de debug automaticamente."},"correta":"C"},{"id":"q4","titulo":"O que NÃO é uma boa prática de gestão de segredos?","alternativas":{"A":"Adicionar arquivos de credenciais ao .gitignore.","B":"Carregar segredos em tempo de execução a partir de arquivo local protegido.","C":"Comitar usuários e senhas no repositório privado para facilitar o acesso.","D":"Usar usuários distintos para publicar e assinar quando fizer sentido.","E":"Rotacionar senhas periodicamente."},"correta":"C"},{"id":"q5","titulo":"Em hardening de firmware, qual medida é adequada?","alternativas":{"A":"Habilitar prints de debug detalhados em produção.","B":"Aceitar qualquer certificado TLS para evitar falhas.","C":"Implementar reconexão com backoff e watchdog.","D":"Executar comandos remotos sem autenticação para agilizar suporte.","E":"Ignorar validação de entradas para reduzir latência."},"correta":"C"},{"id":"q6","titulo":"Qual item deve constar em um README de segurança do projeto?","alternativas":{"A":"A senha do Wi‑Fi para testes.","B":"Procedimento de OTA/rollback e como validar integridade.","C":"Links para redes sociais da equipe.","D":"Capturas de tela do chat da equipe.","E":"Lista de todos os usuários do broker com suas senhas."},"correta":"B"},{"id":"q7","titulo":"Sobre HTTPS no dispositivo, qual afirmação é mais correta no contexto do curso?","alternativas":{"A":"HTTPS é opcional e não traz benefícios reais.","B":"Sempre desative a validação de certificado para simplificar.","C":"O suporte à validação pode variar por placa/build; use CA ou fingerprint quando possível.","D":"HTTPS nunca funciona em ESP32/ESP8266.","E":"HTTPS dispensa autenticação no servidor."},"correta":"C"},{"id":"q8","titulo":"Qual é a consequência mais comum de expor segredos no repositório?","alternativas":{"A":"Melhoria de desempenho.","B":"Bloqueio automático de OTA.","C":"Comprometimento de dispositivos/serviços por terceiros.","D":"Aumento de alcance do Wi‑Fi.","E":"Redução do consumo de energia."},"correta":"C"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Criei arquivo de segredos e configurei .gitignore corretamente."},{"id":"c2","texto":"Configurei usuário de menor privilégio no broker/API."},{"id":"c3","texto":"Consegui conectar ao MQTT com TLS e evidenciei nos logs/prints."},{"id":"c4","texto":"Realizei uma requisição HTTPS e compreendi a validação de certificado."},{"id":"c5","texto":"Implementei reconexão com backoff e ajustei o nível de logs."},{"id":"c6","texto":"Implementei fluxo de OTA com manifesto e checksum."},{"id":"c7","texto":"Testei falha de OTA e confirmei manutenção/rollback seguro."},{"id":"c8","texto":"Produzi README-segurança com decisões e evidências."}];
+    const CHECKLIST_KEY = 'psic-cap12-checklist';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

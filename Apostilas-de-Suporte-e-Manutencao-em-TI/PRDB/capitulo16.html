@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 16 — Integração, Relatórios e Caso Introductório de IoT</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo16.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">PRDB</span>
+        <span style="color: var(--cor-principal);">Programação e Banco de Dados</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Introdução a Programação e Banco de Dados</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Fundamentos de Banco de Dados e SGBD</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Modelagem Conceitual com DER</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Cap. 04 — Do DER ao Modelo Relacional</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Normalização (1FN, 2FN, 3FN)</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — DDL: Criação de Esquemas no MySQL</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — DML Básico: Inserção e Consulta</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Agrupamentos e Agregações</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Junções (JOINs)</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — DML Avançado e DCL Essencial</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Revisão de Programação com Foco em Dados (Python)</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Conexão Python–MySQL e Execução de SQL</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — CRUD Completo com Tratamento de Erros e Transações</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Introdução a ORM e Acesso Estruturado</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — NoSQL e MongoDB Básico</a></li>
+              <li><a class="dropdown-item active" href="capitulo16.html">Cap. 16 — Integração, Relatórios e Caso Introductório de IoT</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 16 — Integração, Relatórios e Caso Introductório de IoT</h1>
+          <p class="mb-2"><strong>Carga:</strong> —</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Ingestão de leituras IoT simuladas com relatórios híbridos (MySQL + MongoDB)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Python, MySQL, MySQL Workbench, MongoDB, MongoDB Compass</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2">
+            <li>Integrar MySQL (relacional) e MongoDB (documentos) em um mesmo fluxo de aplicação.</li>
+            <li>Implementar ingestão de dados simulados de sensores (IoT) com persistência e consultas.</li>
+            <li>Gerar relatórios consolidados combinando agregações SQL e MQL/lookup.</li>
+            <li>Aplicar boas práticas de transações, tratamento de erros e segurança básica (parametrização).</li>
+            <li>Documentar o pipeline de dados de ponta a ponta e publicar resultados.</li>
+          </ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small">
+              <li>Modelar e integrar diferentes fontes e modelos de dados.</li>
+              <li>Programar rotinas de ETL/ELT simples com Python.</li>
+              <li>Elaborar consultas e relatórios com métricas e agrupamentos.</li>
+              <li>Testar, depurar e registrar erros (logging) no pipeline.</li>
+              <li>Comunicar resultados técnicos por meio de documentação clara.</li>
+            </ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 15 — NoSQL e MongoDB Básico</a>
+              <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Sumário</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 16)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+          <p><strong>Contexto:</strong> Encerramento com integração entre MySQL e MongoDB para ingestão de dados simulados de IoT e geração de relatórios consolidados.</p>
+          <ol class="mb-0">
+            <li><strong>Arranque (15 min):</strong> Visão geral do pipeline híbrido (relacional + NoSQL) e objetivos de entrega.</li>
+            <li><strong>Teoria guiada (35–45 min):</strong> Quando usar cada SGBD; padrões de integração; estratégias de relatório; noções de lookups no MongoDB e joins no MySQL.</li>
+            <li><strong>Prática dirigida (90–120 min):</strong> Criar esquema relacional para cadastro de dispositivos e leituras agregadas; configurar coleção de eventos de sensores em MongoDB; escrever scripts de ingestão; gerar relatórios.</li>
+            <li><strong>Validação (30 min):</strong> Testes com dados simulados, análise de logs, checagem de consistência entre as bases.</li>
+            <li><strong>Fechamento (20 min):</strong> Exportar relatório final (CSV/JSON) e checklist de documentação do projeto integrador.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Integração híbrida: quando usar MySQL e quando usar MongoDB</h3>
+          <p>MySQL organiza dados estruturados com esquema definido e garante integridade por chaves, constraints e transações. É ideal para cadastros, referências e relatórios tabulares consistentes. MongoDB armazena documentos flexíveis em JSON/BSON, ótimo para eventos, logs e dados semiestruturados que podem variar de formato. Em cenários IoT, costuma-se manter o cadastro de dispositivos, usuários e regras no relacional; enquanto leituras de sensores (eventos volumosos e variáveis) ficam em uma coleção de documentos.</p>
+          <p>Onde vou aplicar isso: no passo a passo, vamos criar tabelas de dispositivos e um histórico consolidado no MySQL, enquanto as leituras brutas de sensores irão para uma coleção no MongoDB.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Padrões de integração e sincronização de dados</h3>
+          <p>Três padrões simples: (1) Dual-Write: a aplicação grava nos dois bancos na mesma operação (exige cuidado com transações e idempotência); (2) ETL/ELT periódico: importar/exportar em lotes, agregando leituras para relatórios; (3) Consulta federada: combinar resultados em memória na aplicação, consultando MySQL e MongoDB separadamente e unindo os dados.</p>
+          <p>Onde vou aplicar isso: no passo a passo faremos um dual-write simplificado (cadastrar dispositivo no MySQL e coleção de referência no MongoDB) e consultas federadas no Python para compor relatórios.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">Relatórios consolidados: SQL (joins/aggregations) e MQL (pipelines/lookup)</h3>
+          <p>No MySQL, usamos GROUP BY, funções de agregação e JOINs para relacionar tabelas e produzir métricas por dispositivo, por período ou por status. No MongoDB, pipelines de agregação permitem filtrar, projetar, agrupar e calcular estatísticas de eventos. O estágio $lookup realiza junções entre coleções, útil para enriquecer leituras com metadados.</p>
+          <p>Onde vou aplicar isso: vamos gerar métricas de média, mínimo e máximo de temperatura por dispositivo e por dia, usando SQL no MySQL e um pipeline de agregação no MongoDB, além de combinar resultados no Python.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-3">
+          <h3 class="h6 fw-bold">IoT introdutório: modelagem e ingestão de leituras</h3>
+          <p>Um pipeline básico de IoT inclui: cadastro de dispositivos, coleta de leituras (timestamp, sensor, valor, unidade), persistência, validação e geração de insights. Para ambiente acadêmico, simulamos leituras com geradores pseudoaleatórios. É essencial incluir timestamps padronizados (ISO 8601) e unidades (°C, %, etc.).</p>
+          <p>Onde vou aplicar isso: implementaremos um simulador em Python que gera leituras temporizadas, validará dados e gravará nos SGBDs, com logs de execução e tratamento de exceções.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Confiabilidade: transações, tratamento de erros e idempotência</h3>
+          <p>Ao escrever em múltiplos destinos, falhas parciais podem ocorrer. Utilize transações no MySQL para manter consistência e, quando possível, operações atômicas no MongoDB. Registre tentativas e resultados com logging. Em reprocessamentos, garanta idempotência usando chaves únicas ou verificações antes da inserção.</p>
+          <p>Onde vou aplicar isso: no passo a passo usaremos parâmetros seguros nas queries, verificações de existência de dispositivo e logs. Mostraremos uma estratégia simples para reprocessar um lote sem duplicar dados.</p>
+        </div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Integração MySQL + MongoDB com Relatórios de IoT</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Construir um pipeline simples: cadastro de dispositivos (MySQL), coleção de leituras (MongoDB), simulador de ingestão (Python), consultas e relatórios consolidados (SQL + MQL) e exportação.</p>
+<br>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">1) Preparação do ambiente</h3>
+          <ol>
+            <li>Abrir MySQL Workbench e criar um schema de trabalho.</li>
+            <li>Abrir MongoDB Compass e criar database/collection para leituras.</li>
+            <li>Criar um ambiente de projeto no Thonny (pasta cap16_iot/).</li>
+          </ol>
+          <pre class="language-sql"><code>-- MySQL: criar schema
+CREATE DATABASE IF NOT EXISTS iot_prdb
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_0900_ai_ci;
+USE iot_prdb;</code></pre>
+          <pre class="language-bash"><code># Em terminal (opcional, se necessário instalar pacotes)
+python -m pip install mysql-connector-python pymongo python-dotenv</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">2) Modelo relacional (MySQL)</h3>
+          <p>Crie tabelas para cadastro de dispositivos e uma tabela opcional para agregados diários.</p>
+          <pre class="language-sql"><code>USE iot_prdb;
+
+CREATE TABLE IF NOT EXISTS dispositivos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uid VARCHAR(64) NOT NULL UNIQUE,
+  nome VARCHAR(100) NOT NULL,
+  localidade VARCHAR(100),
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS agregados_diarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  dispositivo_uid VARCHAR(64) NOT NULL,
+  data DATE NOT NULL,
+  temp_min DECIMAL(5,2),
+  temp_max DECIMAL(5,2),
+  temp_avg DECIMAL(5,2),
+  leituras INT DEFAULT 0,
+  UNIQUE KEY uk_dispositivo_data (dispositivo_uid, data),
+  FOREIGN KEY (dispositivo_uid) REFERENCES dispositivos(uid)
+);</code></pre>
+          <p>Boas práticas: chaves únicas para evitar duplicidade em agregações; tipos numéricos adequados.</p>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">3) Modelo documental (MongoDB)</h3>
+          <p>No MongoDB, crie um database iot_prdb e a coleção leituras. Cada documento representa uma leitura de sensor.</p>
+          <pre class="language-js"><code>// Exemplo de documento (Compass > Insert Document)
+{
+  "dispositivo_uid": "dev-001",
+  "sensor": "temp",
+  "valor": 23.8,
+  "unidade": "C",
+  "ts": ISODate("2025-01-01T12:00:00Z"),
+  "meta": { "fonte": "simulador", "versao": "1.0" }
+}</code></pre>
+          <p>Crie índices úteis:</p>
+          <pre class="language-js"><code>// No Compass (Indexes) ou via shell
+db.leituras.createIndex({ dispositivo_uid: 1, ts: -1 });
+db.leituras.createIndex({ sensor: 1 });</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">4) Configuração de conexão (Python)</h3>
+          <p>Armazene credenciais em .env e leia com segurança.</p>
+          <pre class="language-bash"><code># arquivo: .env (exemplo didático)
+MYSQL_HOST=localhost
+MYSQL_DB=iot_prdb
+MYSQL_USER=root
+MYSQL_PASS=senha_segura
+
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=iot_prdb</code></pre>
+          <pre class="language-python"><code># arquivo: config.py
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+MYSQL_CONF = {
+    "host": os.getenv("MYSQL_HOST", "localhost"),
+    "database": os.getenv("MYSQL_DB", "iot_prdb"),
+    "user": os.getenv("MYSQL_USER", "root"),
+    "password": os.getenv("MYSQL_PASS", "")
+}
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_DB = os.getenv("MONGO_DB", "iot_prdb")</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">5) Utilitários de banco (Python)</h3>
+          <pre class="language-python"><code># arquivo: db_utils.py
+import mysql.connector
+from mysql.connector import Error
+from pymongo import MongoClient
+from config import MYSQL_CONF, MONGO_URI, MONGO_DB
+
+def get_mysql_conn():
+    return mysql.connector.connect(**MYSQL_CONF)
+
+def get_mongo_col():
+    cli = MongoClient(MONGO_URI)
+    return cli[MONGO_DB]["leituras"]
+
+def ensure_dispositivo(uid, nome="Dispositivo", localidade=None):
+    """Idempotente: cria se não existir."""
+    conn = get_mysql_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT uid FROM dispositivos WHERE uid=%s", (uid,))
+        if not cur.fetchone():
+            cur.execute(
+                "INSERT INTO dispositivos (uid, nome, localidade) VALUES (%s, %s, %s)",
+                (uid, nome, localidade)
+            )
+            conn.commit()
+        cur.close()
+    except Error as e:
+        print("[ERRO MYSQL]", e)
+        conn.rollback()
+        raise
+    finally:
+        conn.close()</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">6) Simulador de leituras (Python)</h3>
+          <p>Gera leituras com timestamps e grava no MongoDB. O cadastro do dispositivo é garantido no MySQL.</p>
+          <pre class="language-python"><code># arquivo: simulador.py
+import random, time, datetime as dt
+from db_utils import get_mongo_col, ensure_dispositivo
+
+def gerar_leitura(uid: str):
+    return {
+        "dispositivo_uid": uid,
+        "sensor": "temp",
+        "valor": round(random.uniform(18.0, 30.0), 2),
+        "unidade": "C",
+        "ts": dt.datetime.utcnow(),
+        "meta": {"fonte": "simulador", "versao": "1.0"}
+    }
+
+def rodar_simulacao(uid="dev-001", n=20, intervalo=0.3):
+    ensure_dispositivo(uid, nome="Sensor Temp Lab", localidade="Sala 1")
+    col = get_mongo_col()
+    inseridos = 0
+    for _ in range(n):
+        doc = gerar_leitura(uid)
+        col.insert_one(doc)
+        inseridos += 1
+        print(f"Inserido: {doc['valor']}C @ {doc['ts'].isoformat()} uid={uid}")
+        time.sleep(intervalo)
+    print(f"Total inserido no MongoDB: {inseridos}")
+
+if __name__ == "__main__":
+    rodar_simulacao()</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">7) Agregações e relatórios — MongoDB</h3>
+          <p>Calcular métricas por dia e dispositivo no lado do MongoDB:</p>
+          <pre class="language-python"><code># arquivo: relatorios_mongo.py
+from pymongo import MongoClient
+from config import MONGO_URI, MONGO_DB
+
+def agregados_por_dia(uid="dev-001"):
+    cli = MongoClient(MONGO_URI)
+    col = cli[MONGO_DB]["leituras"]
+    pipe = [
+        {"$match": {"dispositivo_uid": uid, "sensor": "temp"}},
+        {"$group": {
+            "_id": {"dia": {"$dateToString": {"format": "%Y-%m-%d", "date": "$ts"}}},
+            "temp_min": {"$min": "$valor"},
+            "temp_max": {"$max": "$valor"},
+            "temp_avg": {"$avg": "$valor"},
+            "leituras": {"$sum": 1}
+        }},
+        {"$project": {
+            "_id": 0, "data": "$_id.dia",
+            "temp_min": 1, "temp_max": 1,
+            "temp_avg": {"$round": ["$temp_avg", 2]},
+            "leituras": 1
+        }},
+        {"$sort": {"data": 1}}
+    ]
+    return list(col.aggregate(pipe))
+
+if __name__ == "__main__":
+    for row in agregados_por_dia():
+        print(row)</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">8) Persistência dos agregados no MySQL</h3>
+          <p>Sincronize as métricas diárias calculadas no MongoDB para a tabela agregados_diarios no MySQL (idempotente por uid+data).</p>
+          <pre class="language-python"><code># arquivo: sync_agregados.py
+import datetime as dt
+from mysql.connector import Error
+from db_utils import get_mysql_conn
+from relatorios_mongo import agregados_por_dia
+
+def upsert_agregado(uid: str, data: str, temp_min, temp_max, temp_avg, leituras):
+    conn = get_mysql_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO agregados_diarios (dispositivo_uid, data, temp_min, temp_max, temp_avg, leituras)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+              temp_min=VALUES(temp_min), temp_max=VALUES(temp_max),
+              temp_avg=VALUES(temp_avg), leituras=VALUES(leituras)
+        """, (uid, data, temp_min, temp_max, temp_avg, leituras))
+        conn.commit()
+        cur.close()
+    except Error as e:
+        print("[ERRO MYSQL]", e)
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+def sincronizar(uid="dev-001"):
+    for row in agregados_por_dia(uid):
+        upsert_agregado(uid, row["data"], row["temp_min"], row["temp_max"], row["temp_avg"], row["leituras"])
+
+if __name__ == "__main__":
+    sincronizar()</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">9) Relatórios SQL finais (MySQL)</h3>
+          <p>Gere relatórios tabulares a partir dos agregados persistidos.</p>
+          <pre class="language-sql"><code>-- Média de temperatura por dispositivo nos últimos 7 dias
+SELECT dispositivo_uid,
+       ROUND(AVG(temp_avg), 2) AS media_semana,
+       SUM(leituras) AS total_leituras
+FROM agregados_diarios
+WHERE data &gt;= (CURRENT_DATE - INTERVAL 7 DAY)
+GROUP BY dispositivo_uid
+ORDER BY media_semana DESC;
+
+-- Top dispositivos por variação (max - min) no período
+SELECT dispositivo_uid,
+       ROUND(AVG(temp_max - temp_min), 2) AS variacao_media
+FROM agregados_diarios
+GROUP BY dispositivo_uid
+ORDER BY variacao_media DESC
+LIMIT 5;</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4 mb-4">
+          <h3 class="h6 fw-bold">10) Exportação de resultados (Python)</h3>
+          <p>Exporte CSV/JSON consolidando o que foi calculado no MySQL.</p>
+          <pre class="language-python"><code># arquivo: exportar.py
+import csv, json
+from db_utils import get_mysql_conn
+
+def consulta_agregados():
+    conn = get_mysql_conn()
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT dispositivo_uid, data, temp_min, temp_max, temp_avg, leituras
+            FROM agregados_diarios
+            ORDER BY dispositivo_uid, data
+        """)
+        rows = cur.fetchall()
+        cur.close()
+        return rows
+    finally:
+        conn.close()
+
+def exportar_csv_json(rows, base="relatorio_agregados"):
+    with open(base + ".csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys())
+        w.writeheader()
+        w.writerows(rows)
+    with open(base + ".json", "w", encoding="utf-8") as f:
+        json.dump(rows, f, ensure_ascii=False, indent=2)
+    print("Exportado:", base + ".csv", "e", base + ".json")
+
+if __name__ == "__main__":
+    dados = consulta_agregados()
+    if dados:
+        exportar_csv_json(dados)
+    else:
+        print("Sem dados para exportar.")</code></pre>
+        </div>
+
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">11) Testes e validação</h3>
+          <ul>
+            <li>Execute simulador.py para gerar leituras.</li>
+            <li>Rode relatorios_mongo.py e depois sync_agregados.py.</li>
+            <li>Conferir consultas SQL no Workbench.</li>
+            <li>Exportar com exportar.py e validar arquivos.</li>
+            <li>Caso erro, revisar logs, conexões e credenciais (.env).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a integração híbrida, ampliar o simulador e aprimorar relatórios.</p>
+        <div class="card-soft bg-white p-4 mb-3">
+          <ol class="mb-0">
+            <li>Estender o simulador para dois sensores no mesmo dispositivo (temp e umidade), incluindo unidade e faixa plausível.</li>
+            <li>Criar um relatório de “alertas” no MongoDB quando temperatura ultrapassar 28°C, listando timestamp e valor.</li>
+            <li>Adicionar ao MySQL uma visão (VIEW) que combine agregados das últimas 24h com total de leituras do período.</li>
+          </ol>
+        </div>
+        <div class="card-soft bg-white p-4">
+          <h3 class="h6 fw-bold">Critérios de avaliação</h3>
+          <ul class="mb-0">
+            <li>Corretude e funcionamento ponta a ponta (simulação, persistência, relatórios, exportação).</li>
+            <li>Organização do projeto e qualidade do código (legibilidade, parametrização, tratamento de erros).</li>
+            <li>Uso adequado de SQL/MQL e justificativa técnica das escolhas.</li>
+            <li>Documentação clara (README com instruções de execução e exemplos de saída).</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul>
+          <li>Padrões de ingestão em IoT: time-series, janelas de tempo e downsampling.</li>
+          <li>Comparação entre $lookup (MongoDB) e JOINs (SQL) para enriquecimento de dados.</li>
+          <li>Boas práticas de índices para consultas temporais em MongoDB e MySQL.</li>
+          <li>Estratégias de idempotência e retry em pipelines de dados.</li>
+          <li>Ferramentas de dashboards para dados (Metabase, Grafana) conectando MySQL/MongoDB.</li>
+        </ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 16</h2>
+        <ul>
+          <li>Código-fonte do simulador, sincronização e exportação, com README detalhado.</li>
+          <li>Dump/export dos bancos (script SQL do MySQL e export JSON do MongoDB) com amostras.</li>
+          <li>Relatório final em CSV e JSON contendo agregados por dia e dispositivo.</li>
+          <li>Documentação do pipeline (diagrama simples e passos de execução).</li>
+          <li>Projeto Integrador — Entrega final: solução integrada (MySQL + MongoDB) com relatório consolidado e documentação técnica.</li>
+        </ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Capítulo 15 — NoSQL e MongoDB Básico</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Sumário</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Programação e Banco de Dados — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [
+      {
+        "id": "q1",
+        "titulo": "Em um cenário IoT híbrido, qual é uma divisão adequada entre MySQL e MongoDB?",
+        "alternativas": {
+          "A": "Manter leituras brutas em MySQL e cadastros em MongoDB.",
+          "B": "Armazenar tudo no MongoDB e apenas relatar no MySQL.",
+          "C": "Cadastros e relacionamentos no MySQL; leituras de sensores (eventos) no MongoDB.",
+          "D": "Usar apenas MySQL, pois suporta qualquer carga.",
+          "E": "Usar apenas MongoDB, pois não precisa de esquema."
+        },
+        "correta": "C"
+      },
+      {
+        "id": "q2",
+        "titulo": "Qual prática reduz duplicidade ao sincronizar agregados diários para o MySQL?",
+        "alternativas": {
+          "A": "Desativar chaves primárias.",
+          "B": "Usar uma UNIQUE KEY em (dispositivo_uid, data) e UPSERT (ON DUPLICATE KEY).",
+          "C": "Executar o INSERT duas vezes para confirmar.",
+          "D": "Salvar somente em memória.",
+          "E": "Evitar índices."
+        },
+        "correta": "B"
+      },
+      {
+        "id": "q3",
+        "titulo": "No MongoDB, qual estágio do pipeline agrega e calcula métricas por grupo?",
+        "alternativas": {
+          "A": "$project",
+          "B": "$match",
+          "C": "$lookup",
+          "D": "$group",
+          "E": "$limit"
+        },
+        "correta": "D"
+      },
+      {
+        "id": "q4",
+        "titulo": "Qual é a principal vantagem de parametrizar consultas no MySQL pelo Python?",
+        "alternativas": {
+          "A": "Aumentar o tempo de execução.",
+          "B": "Permitir SQL Injection controlado.",
+          "C": "Melhorar segurança evitando SQL Injection e lidar com tipos corretamente.",
+          "D": "Dispensar transações.",
+          "E": "Desativar logs."
+        },
+        "correta": "C"
+      },
+      {
+        "id": "q5",
+        "titulo": "Em integração híbrida, 'dual-write' significa:",
+        "alternativas": {
+          "A": "Gravar no MySQL e apagar do MongoDB.",
+          "B": "Escrever simultaneamente nos dois bancos na mesma operação da aplicação.",
+          "C": "Usar trigger no MySQL para escrever no MongoDB.",
+          "D": "Agendar ETL semanal.",
+          "E": "Desabilitar consistência."
+        },
+        "correta": "B"
+      },
+      {
+        "id": "q6",
+        "titulo": "Qual consulta SQL obtém a média e total de leituras por dispositivo nos últimos 7 dias, a partir da tabela agregados_diarios?",
+        "alternativas": {
+          "A": "SELECT * FROM agregados_diarios;",
+          "B": "SELECT dispositivo_uid, AVG(leituras) FROM agregados_diarios;",
+          "C": "SELECT dispositivo_uid, ROUND(AVG(temp_avg),2), SUM(leituras) FROM agregados_diarios WHERE data >= (CURRENT_DATE - INTERVAL 7 DAY) GROUP BY dispositivo_uid;",
+          "D": "SELECT dispositivo_uid FROM dispositivos;",
+          "E": "DELETE FROM agregados_diarios WHERE data < CURRENT_DATE;"
+        },
+        "correta": "C"
+      },
+      {
+        "id": "q7",
+        "titulo": "Qual é um benefício de usar timestamps padronizados (ISO 8601/UTC) nas leituras?",
+        "alternativas": {
+          "A": "Evitar a necessidade de índices.",
+          "B": "Facilitar comparações temporais e agregações consistentes entre sistemas.",
+          "C": "Acelerar INSERTs no MySQL.",
+          "D": "Reduzir tamanhos de documentos.",
+          "E": "Impedir falhas de conexão."
+        },
+        "correta": "B"
+      },
+      {
+        "id": "q8",
+        "titulo": "Qual índice é adequado para consultas por dispositivo e tempo no MongoDB?",
+        "alternativas": {
+          "A": "{ sensor: 1, unidade: 1 }",
+          "B": "{ uid: 1 }",
+          "C": "{ dispositivo_uid: 1, ts: -1 }",
+          "D": "{ valor: 1 }",
+          "E": "{ _id: -1 }"
+        },
+        "correta": "C"
+      }
+    ];
+    const CHECKLIST_DATA = [
+      {"id": "c1", "texto": "Criei o schema iot_prdb e as tabelas dispositivos e agregados_diarios no MySQL."},
+      {"id": "c2", "texto": "Configurei o database iot_prdb e a coleção leituras no MongoDB, com índices úteis."},
+      {"id": "c3", "texto": "Implementei o simulador de leituras com timestamps e unidades corretas."},
+      {"id": "c4", "texto": "Parametrizei consultas e tratei erros/transações no MySQL."},
+      {"id": "c5", "texto": "Gerei agregações no MongoDB e sincronizei para o MySQL de forma idempotente."},
+      {"id": "c6", "texto": "Executei relatórios SQL e validei os resultados com amostras reais."},
+      {"id": "c7", "texto": "Exportei relatório final (CSV/JSON) e organizei a documentação (README)."},
+      {"id": "c8", "texto": "Revisei o código, estrutura do projeto e justifiquei escolhas técnicas."}
+    ];
+    const CHECKLIST_KEY = 'PRDB_CAP16_CHECKLIST';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>
