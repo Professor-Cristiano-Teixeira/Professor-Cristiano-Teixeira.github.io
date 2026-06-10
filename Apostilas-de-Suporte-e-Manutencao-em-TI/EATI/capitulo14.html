@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 14 — Sensores e atuadores</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo14.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">EATI</span>
+        <span style="color: var(--cor-principal);">Eletrônica Aplicada à Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Capítulo 01 — Apresentação e segurança</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Capítulo 02 — Matéria, carga e materiais</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Capítulo 03 — Grandezas e instrumentos</a></li>
+              <li><a class="dropdown-item" href="capitulo04.html">Capítulo 04 — Lei de Ohm e resistores</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Capítulo 05 — Leis de Kirchhoff</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Capítulo 06 — Resistores e capacitores</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Capítulo 07 — Diodos e LEDs</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Capítulo 08 — Transistores como chave</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Capítulo 09 — Fundamentos de lógica digital</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Capítulo 10 — Álgebra Booleana</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Capítulo 11 — Simulação e prototipagem</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Capítulo 12 — Sistemas embarcados e Arduino</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Capítulo 13 — Programação básica em Arduino</a></li>
+              <li><a class="dropdown-item active" href="capitulo14.html">Capítulo 14 — Sensores e atuadores</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Capítulo 15 — Integração lógica com automação</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Capítulo 16 — Projeto integrador</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 14 — Sensores e atuadores: leitura e acionamento</h1>
+          <p class="mb-2"><strong>Carga:</strong> Não especificado</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Controle de intensidade de LED conforme luminosidade (LDR) e acionamento de atuadores (buzzer/servo)</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Arduino Uno, IDE Arduino, Protoboard, LDR/NTC/chave fim de curso, LED/LED RGB, buzzer, micro servo</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Realizar leituras analógicas usando o ADC do Arduino e interpretar valores com mapeamento e calibração.</li><li>Aplicar PWM para controlar brilho de LED e velocidade/posição de atuadores.</li><li>Integrar sensores (LDR/NTC/chave) e atuadores (LED RGB, buzzer, micro servo) em circuitos seguros.</li><li>Documentar esquemas, códigos e resultados com gráficos no Serial Plotter.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Habilidade de instrumentação: montagem em protoboard, medições e validação.</li><li>Programação embarcada básica orientada a sensores e atuadores.</li><li>Raciocínio lógico para conversão de grandezas e tomada de decisão.</li><li>Segurança elétrica e organização do ambiente de trabalho.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 13 — Programação básica</a>
+              <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 15 — Integração lógica</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 14)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><p><strong>Objetivo geral do encontro:</strong> Integrar sensores analógicos/digitais ao Arduino e acionar atuadores por meio de PWM e bibliotecas apropriadas, registrando e analisando dados.</p><p><strong>Materiais:</strong> Arduino Uno + cabo USB; protoboard; jumpers; LDR e resistor de 10 kΩ (divisor de tensão), NTC (opcional), chave fim de curso; LED/LED RGB + resistores (220–330 Ω); buzzer passivo; micro servo 9g; computador com IDE Arduino; multímetro.</p><p><strong>Estrutura sugerida (90–120 min):</strong></p><ol><li>Revisão rápida: pinos analógicos, PWM (~), Serial Monitor/Plotter (10 min)</li><li>Teoria aplicada: ADC, mapeamento, PWM, proteção de pinos e limites (15–20 min)</li><li>Prática guiada: LDR → PWM de LED com plotagem serial (40–50 min)</li><li>Extensões: LED RGB, buzzer, micro servo (20–30 min)</li><li>Encerramento: checklist, coleta de evidências e tarefas (10 min)</li></ol><p><strong>Segurança e boas práticas:</strong> Limitar correntes em pinos do Arduino (≤ 20 mA por pino), usar resistores em LEDs, alimentar servo preferencialmente por 5 V com GND comum e evitar sobrecarga do 5 V do USB; manter bancada organizada e anotar alterações.</p><p><strong>Avaliação formativa:</strong> Funcionamento do circuito, clareza do código e comentários, registros no Serial Plotter/Monitor e organização da bancada.</p></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">1) Leitura analógica (ADC) e mapeamento</h3>
+  <p>O Arduino Uno possui um conversor analógico-digital (ADC) de 10 bits nos pinos A0–A5. Isso significa que uma tensão de 0 a aproximadamente 5 V (referência padrão) é convertida em um valor inteiro de 0 a 1023. Em sensores como LDR (dependente de luz) e NTC (dependente de temperatura), montamos um divisor de tensão para transformar variações de resistência em variações de tensão lidas pelo ADC.</p>
+  <p>A função analogRead(pin) retorna esse valor bruto. Para tornar o dado útil, usamos mapeamento e/ou normalização. O mapeamento linear converte o intervalo 0–1023 em outro, por exemplo 0–255 (8 bits) para controlar PWM. Em alguns casos, é necessário calibrar: registrar leituras mínima e máxima no ambiente de uso e ajustar o mapa para esse intervalo real.</p>
+  <p>Onde vou aplicar isso: você usará analogRead(A0) para ler a tensão do divisor com LDR e mapear o valor para controlar o brilho de um LED, além de plotar os dados para análise.</p>
+
+  <h3 class="h6 fw-bold mt-4">2) PWM (Modulação por Largura de Pulso)</h3>
+  <p>O PWM é uma técnica para simular uma tensão média variando a largura do pulso em alta frequência. No Arduino Uno, os pinos com símbolo ~ suportam analogWrite(pin, duty) com duty entre 0 e 255. Com PWM é possível atenuar o brilho de LEDs e controlar velocidade de motores ou posição (em servos, usa-se uma biblioteca que gera pulsos específicos).</p>
+  <p>Embora chamado analogWrite, o pino alterna entre 0 V e 5 V rapidamente; o valor médio percebido pelo atuador depende do duty cycle. Em LEDs, um duty maior resulta em mais brilho; em buzzers, frequências e ciclos modulam som; em servos, a biblioteca Servo ajusta pulsos para ângulos.</p>
+  <p>Onde vou aplicar isso: você utilizará analogWrite para controlar o brilho de um LED conforme a leitura do LDR e testará a suavização para evitar flicker.</p>
+
+  <h3 class="h6 fw-bold mt-4">3) Sensores abordados (LDR, NTC, chave fim de curso)</h3>
+  <p>LDR: sua resistência diminui com mais luz. Em um divisor de tensão com um resistor fixo, obtém-se uma tensão proporcional à luminosidade. NTC: resistência diminui com aumento de temperatura, também formando um divisor de tensão para leitura analógica. Chave fim de curso: sensor digital simples que abre/fecha um contato, lido em pinos digitais com pull-up/pull-down para níveis estáveis.</p>
+  <p>Boas práticas: usar resistores de pull-up/pull-down adequados, proteger entradas contra ruído com fio curto e, se necessário, filtragem por software (média móvel). Em sensores analógicos, considerar a constante de tempo do circuito e a frequência de leitura para obter dados estáveis.</p>
+  <p>Onde vou aplicar isso: você montará um divisor com LDR e poderá expandir para NTC; também testará uma chave como acionador para ligar/desligar o controle de brilho.</p>
+
+  <h3 class="h6 fw-bold mt-4">4) Atuadores (LED/LED RGB, buzzer, micro servo)</h3>
+  <p>LED/LED RGB: sempre utilizar resistor limitador (220–330 Ω) por canal para proteger o pino e o LED. LED RGB comum pode ser cátodo comum (GND) ou ânodo comum (5 V). Para controlar cores, modulam-se independentemente os canais R, G e B via PWM.</p>
+  <p>Buzzer passivo: produz som quando excitado por um sinal PWM ou por pulsos em uma frequência audível (ex.: tone(pin, freq)). Buzzer ativo já tem oscilador interno e toca ao receber nível alto, não necessitando PWM.</p>
+  <p>Micro servo 9g: recebe pulsos de cerca de 1–2 ms a cada ~20 ms. A biblioteca Servo abstrai esse detalhe, permitindo escrever ângulos (0–180). Alimentar servos pode exigir corrente acima do que um pino fornece; usar 5 V da placa com cautela e GND comum. Para maior corrente, uma fonte externa regulada (5 V) é preferível.</p>
+  <p>Onde vou aplicar isso: você controlará o brilho de um LED via PWM, poderá gerar um alerta sonoro com buzzer quando a luz estiver baixa e movimentar um servo conforme a leitura analógica.</p>
+
+  <h3 class="h6 fw-bold mt-4">5) Serial Monitor e Serial Plotter</h3>
+  <p>O Serial Monitor exibe valores numéricos e mensagens, útil para depurar. O Serial Plotter permite visualizar gráficos usando linhas por coluna de valores enviados em sequência. Isso ajuda a identificar faixas de leitura, ruído e resposta do sistema ao ambiente.</p>
+  <p>Onde vou aplicar isso: você registrará leituras do LDR, o valor mapeado de PWM e, opcionalmente, valores filtrados para gerar gráficos no Plotter e melhorar a calibração.</p>
+
+  <h3 class="h6 fw-bold mt-4">6) Segurança e limites elétricos</h3>
+  <p>Os pinos do Arduino fornecem corrente limitada (típ. até 20 mA por pino, com limites totais por porta e placa). Nunca ligue LED diretamente sem resistor. Em atuadores mais exigentes (relés, motores), use transistores e diodo de flyback (visto em capítulos anteriores). Em servos, atenção à corrente e à fonte.</p>
+  <p>Onde vou aplicar isso: você dimensionará resistores para LEDs e evitará sobrecorrente, manterá GND comum entre sensores/atuadores e Arduino e validará com multímetro quando necessário.</p>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Integração de LDR e PWM de LED com extensões</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Montar um divisor de tensão com LDR, ler o valor analógico no Arduino, mapear para 0–255 e controlar o brilho de um LED via PWM. Em seguida, registrar os dados no Serial Plotter e expandir para LED RGB, buzzer e micro servo.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold"><i class="bi bi-tools me-2" style="color:var(--cor-principal)"></i>Parte 1 — Montagem do circuito (LDR + LED)</h3>
+  <ol class="mt-2">
+    <li>Monte o divisor de tensão:
+      <ul>
+        <li>Conecte o LDR entre 5 V e o nó de leitura (A0).</li>
+        <li>Conecte um resistor de 10 kΩ entre o nó de leitura (A0) e GND.</li>
+        <li>Dica: inverter as posições (LDR para 5 V ou para GND) altera o sentido da curva; escolha a que deixar a leitura maior com mais luz.</li>
+      </ul>
+    </li>
+    <li>Monte o LED:
+      <ul>
+        <li>Conecte o anodo do LED ao pino PWM 9 via um resistor de 220–330 Ω.</li>
+        <li>Conecte o catodo do LED ao GND.</li>
+      </ul>
+    </li>
+    <li>Cheque as conexões de GND comum e firmeza dos jumpers. Organize a protoboard para evitar curtos.</li>
+  </ol>
+
+  <h3 class="h6 fw-bold mt-4"><i class="bi bi-code-slash me-2" style="color:var(--cor-principal)"></i>Parte 2 — Leitura analógica e mapeamento para PWM</h3>
+  <p>Carregue o sketch abaixo. Ele lê A0, mapeia de 0–1023 para 0–255 e aplica em PWM no pino 9. Também imprime valores para o Plotter.</p>
+  <pre class="language-cpp"><code>#include &lt;Arduino.h&gt;
+
+const int PIN_LDR = A0;
+const int PIN_LED = 9; // pino PWM (~)
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(PIN_LED, OUTPUT);
+  // Opcional: pequena estabilização
+  delay(200);
+}
+
+void loop() {
+  int leitura = analogRead(PIN_LDR);       // 0..1023
+  // Calibração simples: ajuste min/max se necessário
+  int minL = 0;   // substitua pelos menores valores observados
+  int maxL = 1023; // substitua pelos maiores valores observados
+  leitura = constrain(leitura, minL, maxL);
+
+  int pwm = map(leitura, minL, maxL, 0, 255); // mapeia p/ PWM
+  analogWrite(PIN_LED, pwm);
+
+  // Serial Plotter: envie em colunas
+  // Formato: leitura pwm
+  Serial.print(leitura);
+  Serial.print(" ");
+  Serial.println(pwm);
+
+  delay(20); // ~50 Hz de amostragem
+}</code></pre>
+
+  <div class="alert alert-light border mt-3" role="note">
+    Abra Ferramentas &gt; Plotter Serial com 9600 baud. Cubra e descubra o LDR para ver a resposta em tempo real. Ajuste minL e maxL conforme leituras reais do ambiente para melhorar a sensibilidade.
+  </div>
+
+  <h3 class="h6 fw-bold mt-4"><i class="bi bi-bar-chart-line me-2" style="color:var(--cor-principal)"></i>Parte 3 — Suavização (opcional) para reduzir ruído</h3>
+  <p>Para reduzir flutuações, use média móvel simples sobre N amostras.</p>
+  <pre class="language-cpp"><code>#include &lt;Arduino.h&gt;
+
+const int PIN_LDR = A0;
+const int PIN_LED = 9;
+const int N = 10; // janela da média
+
+int buffer[N];
+int idx = 0;
+long soma = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(PIN_LED, OUTPUT);
+  for (int i = 0; i &lt; N; i++) { buffer[i] = 0; }
+}
+
+void loop() {
+  int leitura = analogRead(PIN_LDR);
+  soma -= buffer[idx];
+  buffer[idx] = leitura;
+  soma += leitura;
+  idx = (idx + 1) % N;
+  int media = soma / N;
+
+  int pwm = map(media, 0, 1023, 0, 255);
+  analogWrite(PIN_LED, pwm);
+
+  Serial.print(leitura);
+  Serial.print(" ");
+  Serial.println(media);
+
+  delay(20);
+}</code></pre>
+
+  <h3 class="h6 fw-bold mt-4"><i class="bi bi-palette me-2" style="color:var(--cor-principal)"></i>Parte 4 — Extensão: LED RGB com PWM</h3>
+  <p>Conecte os canais R, G, B aos pinos PWM (ex.: 9, 10, 11) via resistores. Para cátodo comum, o comum vai ao GND; para ânodo comum, o comum vai a 5 V e a lógica se inverte (use 255 - valor).</p>
+  <pre class="language-cpp"><code>#include &lt;Arduino.h&gt;
+
+const int PIN_LDR = A0;
+const int R_PIN = 9;
+const int G_PIN = 10;
+const int B_PIN = 11;
+// defina true se o RGB for ânodo comum
+const bool ANODO_COMUM = false;
+
+int corrige(int v) { return ANODO_COMUM ? (255 - v) : v; }
+
+void setup(){
+  Serial.begin(9600);
+  pinMode(R_PIN, OUTPUT);
+  pinMode(G_PIN, OUTPUT);
+  pinMode(B_PIN, OUTPUT);
+}
+
+void loop(){
+  int leitura = analogRead(PIN_LDR);
+  int v = map(leitura, 0, 1023, 0, 255);
+  // Exemplo: altera cor conforme brilho
+  int r = v;
+  int g = 255 - v;
+  int b = (v &gt; 127) ? (2*(v - 127)) : 0; // componente azul quando mais claro
+
+  analogWrite(R_PIN, corrige(r));
+  analogWrite(G_PIN, corrige(g));
+  analogWrite(B_PIN, corrige(b));
+
+  Serial.print(leitura);
+  Serial.print(" ");
+  Serial.println(v);
+  delay(20);
+}</code></pre>
+
+  <h3 class="h6 fw-bold mt-4"><i class="bi bi-volume-up me-2" style="color:var(--cor-principal)"></i>Parte 5 — Extensão: Buzzer com alerta</h3>
+  <p>Use um buzzer passivo no pino 8 e GND. Gere um tom quando a luz cair abaixo de um limite.</p>
+  <pre class="language-cpp"><code>#include &lt;Arduino.h&gt;
+
+const int PIN_LDR = A0;
+const int PIN_BUZZ = 8;
+
+void setup(){
+  Serial.begin(9600);
+  pinMode(PIN_BUZZ, OUTPUT);
+}
+
+void loop(){
+  int leitura = analogRead(PIN_LDR);
+  int limiar = 300; // ajuste após observar o ambiente
+
+  if(leitura &lt; limiar){
+    tone(PIN_BUZZ, 1000); // 1 kHz
+  } else {
+    noTone(PIN_BUZZ);
+  }
+
+  Serial.println(leitura);
+  delay(50);
+}</code></pre>
+
+  <h3 class="h6 fw-bold mt-4"><i class="bi bi-compass me-2" style="color:var(--cor-principal)"></i>Parte 6 — Extensão: Micro servo conforme luminosidade</h3>
+  <p>Conecte o servo: fio de sinal em um pino (ex.: 6), Vcc no 5 V e GND no GND (considere fonte externa se necessário; sempre GND comum). Use a biblioteca Servo.</p>
+  <pre class="language-cpp"><code>#include &lt;Arduino.h&gt;
+#include &lt;Servo.h&gt;
+
+const int PIN_LDR = A0;
+const int PIN_SERVO = 6;
+
+Servo servo;
+
+void setup(){
+  Serial.begin(9600);
+  servo.attach(PIN_SERVO);
+}
+
+void loop(){
+  int leitura = analogRead(PIN_LDR);
+  int ang = map(leitura, 0, 1023, 0, 180);
+  ang = constrain(ang, 0, 180);
+  servo.write(ang);
+
+  Serial.print(leitura);
+  Serial.print(" ");
+  Serial.println(ang);
+  delay(30);
+}</code></pre>
+
+  <div class="alert alert-warning mt-3" role="alert">
+    Atenção: não sobrecarregue o 5 V do Arduino com muitos atuadores. Se usar fonte externa para o servo, conecte os GNDs em comum. Evite correntes acima de 20 mA por pino e use resistores em todos os LEDs.
+  </div>
+
+  <h3 class="h6 fw-bold mt-4"><i class="bi bi-journal-check me-2" style="color:var(--cor-principal)"></i>Parte 7 — Registro e relatório</h3>
+  <ul>
+    <li>Capture gráficos do Serial Plotter mostrando: leitura bruta, média (se aplicável) e valor mapeado.</li>
+    <li>Inclua fotos da montagem e esquemas simples (divisor de tensão, conexões do LED/servo/buzzer).</li>
+    <li>Descreva ajustes de calibração e justificativas de limiares utilizados.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar a leitura de sensores, mapeamento e acionamento de atuadores com variações e pequenos desafios.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol>
+    <li>Lampada noturna automática: quando o LDR indicar baixa luminosidade, aumente gradualmente o brilho de um LED até um nível de conforto. Use histerese para evitar liga/desliga rápido próximo ao limiar.</li>
+    <li>Termoalarme com NTC: substitua o LDR por um NTC em divisor de tensão. Quando a temperatura subir acima de um valor, ative o buzzer com tom variável conforme a temperatura.</li>
+    <li>Indicador de luz com servo: mova o ponteiro (servo) para representar a intensidade luminosa. Calibre ângulos para cobrir todo o curso do servo de forma suave (com média móvel).</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (sugestão)</h3>
+  <ul class="mb-0">
+    <li>Funcionamento: leituras estáveis, resposta coerente do atuador e ausência de falhas elétricas.</li>
+    <li>Código: clareza, comentários, organização e uso correto de funções/bibliotecas.</li>
+    <li>Documentação: fotos, esquema, descrição de calibração, capturas do Serial Plotter.</li>
+    <li>Segurança e organização: uso de resistores, limites de corrente, bancada organizada.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Leitura avançada de ADC: referências de tensão internas e técnicas de oversampling no Arduino.</li><li>Características de LDR e NTC: curvas R×Luz e R×Temperatura, linearização por software.</li><li>Diferença entre buzzer ativo e passivo e uso da função tone() vs. PWM.</li><li>Servos: torque, corrente de pico, alimentação adequada e librarias alternativas.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 14</h2>
+        <ul><li>Código-fonte do projeto principal (LDR → PWM de LED) e das extensões implementadas.</li><li>Fotos da montagem e esquema do divisor de tensão e conexões dos atuadores.</li><li>Capturas do Serial Plotter com leituras e valores mapeados, incluindo descrição de calibração.</li><li>Relatório breve (1–2 páginas) com observações, problemas encontrados e soluções.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em Enviar Resposta. Depois, você pode clicar em Ver Gabarito para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo13.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 13 — Programação básica</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo15.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 15 — Integração lógica</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Eletrônica Aplicada à Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"O que representa o valor retornado por analogRead(A0) no Arduino Uno?","alternativas":{"A":"Uma leitura de 0 a 255 proporcional à tensão no pino","B":"Uma leitura de 0 a 1023 proporcional à tensão no pino","C":"A corrente que entra no pino em miliampères","D":"A frequência do PWM configurado no pino","E":"O tempo em microssegundos desde o último loop"},"correta":"B"},{"id":"q2","titulo":"Para controlar o brilho de um LED com Arduino Uno, geralmente utilizamos:","alternativas":{"A":"analogRead em um pino digital qualquer","B":"analogWrite em qualquer pino analógico","C":"analogWrite em um pino com suporte a PWM (~)","D":"tone em um pino analógico","E":"digitalWrite em pino analógico"},"correta":"C"},{"id":"q3","titulo":"Ao montar um LED no Arduino, qual prática é indispensável para segurança do circuito e do pino?","alternativas":{"A":"Ligar o LED diretamente ao 5 V sem restrição","B":"Usar um resistor limitador de corrente em série com o LED","C":"Conectar o LED somente ao GND","D":"Evitar o uso de PWM","E":"Sempre colocar um diodo Zener em paralelo ao LED"},"correta":"B"},{"id":"q4","titulo":"Sobre LDR em divisor de tensão, assinale a alternativa correta:","alternativas":{"A":"A resistência do LDR aumenta com mais luz","B":"O LDR deve ser sempre conectado entre A0 e GND sem resistor","C":"A resistência do LDR diminui quando a luz aumenta","D":"O LDR fornece diretamente uma saída digital","E":"LDR não funciona em 5 V"},"correta":"C"},{"id":"q5","titulo":"Qual a finalidade de aplicar média móvel (filtro) nas leituras de um sensor analógico?","alternativas":{"A":"Aumentar a corrente no pino","B":"Reduzir ruído e flutuações na leitura","C":"Diminuir a resolução do ADC","D":"Elevar a tensão de alimentação do sensor","E":"Gerar PWM automaticamente"},"correta":"B"},{"id":"q6","titulo":"Servos são controlados por:","alternativas":{"A":"Corrente contínua variada diretamente no pino","B":"Sinal analógico DC estável no pino","C":"Sinais de pulso com largura específica, tipicamente a cada ~20 ms","D":"Sinais de áudio gerados por tone()","E":"Exclusivamente por comunicação I2C"},"correta":"C"},{"id":"q7","titulo":"Ao usar um LED RGB de ânodo comum, para obter menor brilho é necessário:","alternativas":{"A":"Aumentar o valor de PWM diretamente (0 = mais brilho)","B":"Inverter a lógica do PWM (usar 255 - valor)","C":"Conectar o ânodo ao GND","D":"Usar somente pinos analógicos","E":"Dispensar resistores em cada canal"},"correta":"B"},{"id":"q8","titulo":"Qual cuidado é essencial ao alimentar um micro servo a partir do Arduino?","alternativas":{"A":"Ligar o servo diretamente ao pino digital para alimentação","B":"Desconsiderar o GND comum","C":"Verificar a corrente disponível e, se necessário, usar fonte externa com GND comum","D":"Conectar o servo ao pino AREF","E":"Sempre usar 12 V no servo"},"correta":"C"},{"id":"q9","titulo":"No Serial Plotter, para visualizar duas curvas (ex.: leitura e média), você deve:","alternativas":{"A":"Enviar dados em JSON","B":"Enviar valores na mesma linha separados por espaço","C":"Enviar cada valor em linhas alternadas","D":"Usar apenas Serial.write(byte)","E":"Sempre usar 115200 baud"},"correta":"B"},{"id":"q10","titulo":"Qual afirmação descreve corretamente o analogWrite no Arduino Uno?","alternativas":{"A":"Define uma tensão analógica contínua no pino","B":"Gera um sinal PWM cuja média representa um valor analógico","C":"Lê um valor do ADC e escreve no pino","D":"Configura o pino como entrada analógica","E":"Só funciona em pinos analógicos A0–A5"},"correta":"B"}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Montei corretamente o divisor de tensão com LDR (A0, resistor de 10 kΩ e GND)."},{"id":"c2","texto":"Conectei o LED com resistor (220–330 Ω) em um pino PWM e GND."},{"id":"c3","texto":"Carreguei o sketch de leitura analógica e PWM e visualizei dados no Serial Plotter."},{"id":"c4","texto":"Ajustei min/max e/ou apliquei média móvel para estabilizar leituras."},{"id":"c5","texto":"Registrei fotos da montagem, esquema e gráficos para o relatório."},{"id":"c6","texto":"Implementei ao menos uma extensão (LED RGB, buzzer ou servo) com segurança."},{"id":"c7","texto":"Respeitei os limites de corrente dos pinos e utilizei GND comum adequadamente."}];
+    const CHECKLIST_KEY = 'chk_eati_cap14';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>

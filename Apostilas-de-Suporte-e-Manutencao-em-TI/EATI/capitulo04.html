@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Capítulo 04 — Lei de Ohm e Resistores</title>
+
+  <!-- Bootstrap 5 + Icons (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Prism.js for code highlighting (dark like VSCode) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" crossorigin="anonymous">
+
+  <!-- Estilos do projeto (CSS compartilhado com index) -->
+  <link rel="stylesheet" href="estilo.css" />
+</head>
+<body>
+
+  <!-- arquivo: capitulo04.html -->
+  <!--<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>-->
+
+  <nav class="navbar navbar-expand-lg navbar-pw sticky-top" aria-label="Navegação principal">
+    <div class="container">
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2 text-decoration-none" href="index.html">
+        <span class="brand-chip" aria-hidden="true">EATI</span>
+        <span style="color: var(--cor-principal);">Eletrônica Aplicada à Tecnologia da Informação</span>
+      </a>
+      <button class="navbar-toggler nav-btn" type="button" data-bs-toggle="collapse" data-bs-target="#pwNavbar" aria-controls="pwNavbar" aria-expanded="false" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <div class="collapse navbar-collapse" id="pwNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+          <li class="nav-item"><a class="nav-btn" href="index.html#sumario"><i class="bi bi-list-check"></i>Sumário</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-book"></i>Capítulos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="capitulo01.html">Cap. 01 — Segurança e organização</a></li>
+              <li><a class="dropdown-item" href="capitulo02.html">Cap. 02 — Matéria, carga e materiais</a></li>
+              <li><a class="dropdown-item" href="capitulo03.html">Cap. 03 — Grandezas e instrumentos</a></li>
+              <li><a class="dropdown-item active" href="capitulo04.html">Cap. 04 — Lei de Ohm e resistores</a></li>
+              <li><a class="dropdown-item" href="capitulo05.html">Cap. 05 — Leis de Kirchhoff</a></li>
+              <li><a class="dropdown-item" href="capitulo06.html">Cap. 06 — Resistores e capacitores</a></li>
+              <li><a class="dropdown-item" href="capitulo07.html">Cap. 07 — Diodos e LEDs</a></li>
+              <li><a class="dropdown-item" href="capitulo08.html">Cap. 08 — Transistores como chave</a></li>
+              <li><a class="dropdown-item" href="capitulo09.html">Cap. 09 — Lógica digital</a></li>
+              <li><a class="dropdown-item" href="capitulo10.html">Cap. 10 — Álgebra Booleana</a></li>
+              <li><a class="dropdown-item" href="capitulo11.html">Cap. 11 — Simulação e prototipagem</a></li>
+              <li><a class="dropdown-item" href="capitulo12.html">Cap. 12 — Arduino: fundamentos</a></li>
+              <li><a class="dropdown-item" href="capitulo13.html">Cap. 13 — Programação no Arduino</a></li>
+              <li><a class="dropdown-item" href="capitulo14.html">Cap. 14 — Sensores e atuadores</a></li>
+              <li><a class="dropdown-item" href="capitulo15.html">Cap. 15 — Integração lógica</a></li>
+              <li><a class="dropdown-item" href="capitulo16.html">Cap. 16 — Projeto integrador</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-btn" href="#questionario"><i class="bi bi-ui-checks"></i>Questionário</a></li>
+          <li class="nav-item"><a class="nav-btn" href="#checklist"><i class="bi bi-check2-square"></i>Checklist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header class="chapter-hero py-5">
+    <div class="container" id="conteudo">
+      <div class="row g-4 align-items-center">
+        <div class="col-12 col-lg-9">
+          <h1 class="display-6 fw-bold">Capítulo 04 — Lei de Ohm, Série/Paralelo e Divisores</h1>
+          <p class="mb-2"><strong>Carga:</strong> 4h</p>
+          <p class="mb-2"><strong>Projeto-base:</strong> Dimensionamento e montagem de circuito LED com divisor de tensão</p>
+          <p class="mb-2"><strong>Stack fixa:</strong> Multímetro, protoboard, fonte 5–12 V, resistores, LED(s), jumpers</p>
+          <p class="mb-0"><strong>Resultados de aprendizagem deste capítulo:</strong></p>
+          <ul class="mt-2"><li>Aplicar a Lei de Ohm para calcular tensão, corrente, resistência e potência em circuitos DC simples.</li><li>Identificar e analisar associações de resistores em série e paralelo.</li><li>Projetar divisores de tensão e corrente e selecionar resistores adequados considerando potência e tolerância.</li><li>Montar e medir circuitos em protoboard, comparando resultados teóricos e práticos com segurança.</li></ul>
+        </div>
+        <div class="col-12 col-lg-3">
+          <div class="card-soft bg-white p-4">
+            <p class="mb-2"><strong>Competências e Habilidades</strong></p>
+            <ul class="mb-0 small"><li>Calcular grandezas elétricas com base em modelos simples (Lei de Ohm e potência).</li><li>Selecionar componentes adequados (valor e potência do resistor) a partir de requisitos.</li><li>Realizar medições seguras com multímetro e interpretar discrepâncias.</li><li>Documentar cálculos, esquemas e resultados de testes.</li></ul>
+            <div class="d-grid gap-2 mt-3">
+              <a class="btn btn-pw" href="#passo-a-passo"><i class="bi bi-signpost-2 me-1"></i>Ir para Passo a Passo</a>
+              <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 03 — Grandezas e instrumentos</a>
+              <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 05 — Leis de Kirchhoff</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+
+      <section class="mb-5">
+        <h2 class="h4 fw-bold">Plano de Aula (Capítulo 04)</h2>
+        <div class="card-soft bg-white p-4 mt-3"><ul>
+<li>Aquecimento (10 min): revisão breve de V, I, R, W e uso do multímetro (cap. 03).</li>
+<li>Exposição dialogada (35 min): Lei de Ohm (V=R·I) e potência (P=V·I), série/paralelo, divisores de tensão/corrente, seleção de resistores (valor e potência).</li>
+<li>Exemplos resolvidos (15 min): cálculo de resistor para LED; cálculo de equivalente série/paralelo; projeto de divisor para sensor.</li>
+<li>Prática guiada (60–70 min): dimensionar e montar um circuito LED com resistor limitador; medir V e I; projetar e testar um divisor de tensão; comparar teoria vs. prática.</li>
+<li>Registro e discussão (15 min): documentar medições, analisar discrepâncias, checklist de segurança e organização.</li>
+<li>Tarefa/desafio (tempo extra): atividades derivadas propostas ao final.</li>
+</ul></div>
+      </section>
+
+      <section class="mb-5" id="teoria">
+        <h2 class="h4 fw-bold">Parte Teórica (explicação do conteúdo)</h2>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Lei de Ohm: relação entre tensão, corrente e resistência</h3>
+  <p>A Lei de Ohm estabelece que a tensão (V) em um resistor é proporcional à corrente (I) que o atravessa e à sua resistência (R): V = R · I. Essa relação permite calcular qualquer uma das três grandezas conhecendo as outras duas. Em unidades SI: V em volts (V), I em ampères (A) e R em ohms (Ω).</p>
+  <p>Rearranjos úteis: I = V/R e R = V/I. Em circuitos reais, a Lei de Ohm é aplicada segmento a segmento (por componente) para prever quedas de tensão e correntes.</p>
+  <p>Onde vou aplicar isso: no passo a passo, você usará V=R·I para dimensionar o resistor do LED e para verificar correntes em série/paralelo.</p>
+
+  <h3 class="h6 fw-bold mt-4">Potência elétrica: P = V·I = I²·R = V²/R</h3>
+  <p>A potência (P) indica a taxa de energia dissipada/consumida. Em resistores, ela aparece como calor. As fórmulas P = V·I, P = I²·R e P = V²/R são equivalentes, escolhidas conforme as grandezas conhecidas.</p>
+  <p>Cada resistor possui uma potência nominal (ex.: 1/4 W = 0,25 W). É essencial garantir que a potência dissipada fique abaixo desse limite com margem de segurança (ex.: usar até 50–60% do nominal para confiabilidade).</p>
+  <p>Onde vou aplicar isso: no passo a passo, você verificará se o resistor limitador do LED não excede sua potência nominal.</p>
+
+  <h3 class="h6 fw-bold mt-4">Resistores em série</h3>
+  <p>Em série, a corrente é a mesma por todos os resistores; as tensões se somam. A resistência equivalente é a soma: Req = R1 + R2 + ... + Rn. O divisor de tensão é uma aplicação direta de série: a tensão se distribui proporcionalmente aos valores das resistências.</p>
+  <p>Exemplo rápido: R1=1 kΩ e R2=2 kΩ em série. Req=3 kΩ. Com uma fonte de 9 V, a corrente I=9/3000=3 mA. Queda em R1: V1=I·R1=3 mA·1 kΩ=3 V; em R2: 6 V.</p>
+  <p>Onde vou aplicar isso: projetar um divisor de tensão para reduzir 9 V para ~3 V em um ponto específico.</p>
+
+  <h3 class="h6 fw-bold mt-4">Resistores em paralelo</h3>
+  <p>Em paralelo, a tensão é a mesma nos ramos; as correntes se somam. A equivalente segue 1/Req = 1/R1 + 1/R2 + ... + 1/Rn. Duas resistências iguais em paralelo resultam na metade do valor. O conceito viabiliza divisores de corrente e ajuste fino de valores R.</p>
+  <p>Exemplo rápido: R1=1 kΩ e R2=1 kΩ em paralelo resultam em Req=500 Ω. A mesma tensão aplicada gera corrente total maior devido à menor resistência equivalente.</p>
+  <p>Onde vou aplicar isso: criar combinações para obter resistências não disponíveis e entender partilha de correntes.</p>
+
+  <h3 class="h6 fw-bold mt-4">Divisores de tensão e corrente</h3>
+  <p>Divisor de tensão: dois resistores em série entre Vcc e GND com o ponto médio como saída. A tensão no ponto médio (sobre R2) vale Vout = Vin · (R2/(R1+R2)). Atenção ao efeito de carga: se conectar um dispositivo com baixa resistência, o valor efetivo de R2 muda (paralelo), alterando Vout.</p>
+  <p>Divisor de corrente: dois resistores em paralelo com uma corrente total I que se divide conforme condutâncias. A corrente em cada ramo segue I1 = Itotal · (R2/(R1+R2)) e I2 = Itotal · (R1/(R1+R2)).</p>
+  <p>Onde vou aplicar isso: construir um divisor de tensão para um LED e testar efeito de carga (multímetro ou resistor adicional).</p>
+
+  <h3 class="h6 fw-bold mt-4">Seleção de resistores: valor, tolerância e potência</h3>
+  <p>Valor nominal: definido pela aplicação. Use séries padronizadas (E12/E24). Tolerância (ex.: ±5%) define a variação esperada; para divisores mais precisos, prefira 1% (E96). A potência nominal deve superar a dissipação calculada com margem.</p>
+  <p>Exemplo: dissipação em um resistor de 470 Ω com 5 V: P=V²/R=25/470≈0,053 W. Um resistor de 1/4 W é adequado. Se a dissipação esperada fosse 0,2 W, considerar 1/2 W.</p>
+  <p>Onde vou aplicar isso: escolher o resistor limitador do LED e os resistores do divisor de tensão com segurança e confiabilidade.</p>
+
+  <div class="alert alert-light border mt-3 mb-0" role="note">
+    Dica: Sempre compare cálculos teóricos com medições e registre diferenças. Verifique ligações, tolerâncias e queda direta do LED (tipicamente 1,8–2,2 V vermelho; ~3,0–3,3 V azul/branco).
+  </div>
+</div>
+      </section>
+
+      <section class="mb-5" id="passo-a-passo">
+        <h2 class="h4 fw-bold">Passo a Passo — Dimensionamento de LED e Divisor de Tensão</h2>
+        <p class="mb-0"><strong>Objetivo desta etapa:</strong></p>
+        <p class="mb-0">Projetar e montar um circuito com LED usando a Lei de Ohm para limitar a corrente, e construir um divisor de tensão. Medir V e I, verificar dissipação e efeito de carga.</p>
+
+<br>
+
+        <div class="card-soft bg-white p-4">
+  <h3 class="h6 fw-bold">1) Materiais e segurança</h3>
+  <ul>
+    <li>Fonte DC (ex.: 5 V ou 9 V), protoboard e jumpers.</li>
+    <li>LED (vermelho ou outro), resistores variados (220 Ω, 330 Ω, 470 Ω, 1 kΩ, 2,2 kΩ, 10 kΩ).</li>
+    <li>Multímetro (medição de V e I), preferencialmente leads com pontas protegidas.</li>
+    <li>EPIs e organização: bancada limpa, sem objetos metálicos soltos; seguir normas do laboratório.</li>
+  </ul>
+
+  <h3 class="h6 fw-bold mt-3">2) Dimensionar resistor para LED (Lei de Ohm)</h3>
+  <p>Objetivo: limitar a corrente do LED a 10–20 mA. Suponha fonte de 9 V, LED vermelho com queda direta Vf ≈ 2,0 V e corrente alvo I = 15 mA.</p>
+  <ol>
+    <li>Calcule a tensão no resistor: Vr = Vfonte − Vf = 9 V − 2 V = 7 V.</li>
+    <li>Resistência necessária: R = Vr / I = 7 V / 0,015 A ≈ 466,7 Ω → escolha o valor comercial mais próximo acima: 470 Ω.</li>
+    <li>Potência no resistor: P = I²·R = (0,015)²·470 ≈ 0,106 W. Use resistor de 1/4 W (0,25 W) para boa margem.</li>
+  </ol>
+  <pre class="language-python"><code># cálculo de resistor para LED
+Vfonte = 9.0
+Vf_led = 2.0
+I_alvo = 0.015  # 15 mA
+Vr = Vfonte - Vf_led
+R = Vr / I_alvo
+P = (I_alvo ** 2) * R
+print(f"R recomendado ≈ {R:.1f} Ω, P ≈ {P:.3f} W")</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">3) Montagem do LED com resistor</h3>
+  <ol>
+    <li>Identifique o anodo (perna longa) e o catodo (perna curta/chanfro) do LED.</li>
+    <li>Em protoboard: conecte o anodo do LED à fonte (+9 V) através do resistor de 470 Ω. Conecte o catodo ao GND.</li>
+    <li>Verifique a polaridade antes de energizar. Ligue a fonte.</li>
+  </ol>
+  <div class="alert alert-warning" role="alert">
+    Medição de corrente: para medir I em série, o multímetro deve ser inserido em série com o LED+resistor. Nunca em paralelo da fonte (risco de curto).
+  </div>
+
+  <h3 class="h6 fw-bold mt-3">4) Medições com multímetro</h3>
+  <ol>
+    <li>Meça a tensão no LED (Vf). Registre o valor observado (pode variar 1,8–2,2 V).</li>
+    <li>Meça a tensão no resistor (queda Vr). Compare com a teórica (~7 V).</li>
+    <li>Meça a corrente no circuito (I). Compare com 15 mA estimados.</li>
+  </ol>
+  <pre class="language-text"><code>Registro sugerido:
+Vfonte = _____ V
+V_LED medido = _____ V
+V_res medido = _____ V
+I medida = _____ mA
+Observações (cor do LED, brilho, aquecimento): ___________</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">5) Divisor de tensão (série)</h3>
+  <p>Objetivo: obter ~3 V a partir de 9 V usando dois resistores. Escolha R1 e R2 para Vout = Vin · (R2/(R1+R2)). Ex.: R1=2,2 kΩ e R2=1 kΩ.</p>
+  <ol>
+    <li>Calcule Vout: 9 V · (1,0 kΩ / 3,2 kΩ) ≈ 2,81 V.</li>
+    <li>Monte R1 (de Vin ao nó de saída) e R2 (do nó de saída ao GND) em série.</li>
+    <li>Meça Vout em relação ao GND. Compare com o cálculo.</li>
+  </ol>
+  <pre class="language-js"><code>// cálculo rápido em JavaScript
+const Vin = 9.0;
+const R1 = 2200; // ohms
+const R2 = 1000; // ohms
+const Vout = Vin * (R2/(R1+R2));
+console.log(`Vout ≈ ${Vout.toFixed(2)} V`);</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">6) Efeito de carga no divisor</h3>
+  <ol>
+    <li>Adicione um resistor de carga Rc em paralelo com R2 (ex.: 10 kΩ).</li>
+    <li>O equivalente do ramo inferior é R2||Rc = (R2·Rc)/(R2+Rc). Recalcule Vout com R2eq.</li>
+    <li>Meça novamente Vout. Note a redução por causa da carga.</li>
+  </ol>
+  <pre class="language-python"><code># efeito de carga no divisor
+Vin = 9.0
+R1 = 2200.0
+R2 = 1000.0
+Rc = 10000.0
+import math
+R2eq = (R2*Rc)/(R2+Rc)
+Vout_sem_carga = Vin*(R2/(R1+R2))
+Vout_com_carga = Vin*(R2eq/(R1+R2eq))
+print(f"Sem carga: {Vout_sem_carga:.2f} V | Com carga (R2||Rc): {Vout_com_carga:.2f} V (R2eq={R2eq:.0f} Ω)")</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">7) Paralelo para ajuste de valor</h3>
+  <p>Se não houver o valor exato de resistor, use paralelo para ajustar um valor equivalente. Ex.: para aproximar 470 Ω usando 1 kΩ em paralelo com 820 Ω.</p>
+  <pre class="language-python"><code># ajuste por paralelo
+def rpar(*vals):
+    return 1.0/sum(1.0/v for v in vals)
+print(rpar(1000, 820))  # ohms</code></pre>
+
+  <h3 class="h6 fw-bold mt-3">8) Verificação de potência</h3>
+  <ol>
+    <li>Calcule a potência no resistor do LED: P = I²·R.</li>
+    <li>Garanta margem: Pcalculada ≤ 0,6 × Pnominal preferencialmente.</li>
+    <li>Se exceder, aumente o valor do resistor ou a potência nominal do componente.</li>
+  </ol>
+
+  <h3 class="h6 fw-bold mt-3">9) Documentação</h3>
+  <ul>
+    <li>Inclua esquema simples, lista de componentes, cálculos e medições.</li>
+    <li>Registre fotos da montagem e observações sobre discrepâncias.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="atividades">
+        <h2 class="h4 fw-bold">Atividades Práticas para o(a) aluno(a) (desenvolver por conta própria)</h2>
+        <p class="mb-0"><strong>Objetivo:</strong> Consolidar o uso da Lei de Ohm, série/paralelo e divisores em pequenos desafios.</p>
+        <div class="card-soft bg-white p-4 mt-3">
+  <ol>
+    <li>Semáforo de LEDs (somente hardware): dimensione resistores para três LEDs (R, Y, G) alimentados por 9 V, visando 10 mA cada. Monte e meça as correntes individuais.</li>
+    <li>Divisor de referência: projete um divisor para gerar ~2,5 V a partir de 5 V com erro ≤5% mesmo com carga de 100 kΩ. Justifique a escolha dos valores.</li>
+    <li>Resistência equivalente: obtenha ~1 kΩ usando apenas resistores de 2,2 kΩ e 4,7 kΩ combinados em série/paralelo. Meça e compare com o alvo (erro relativo).</li>
+  </ol>
+</div>
+        <div class="card-soft bg-white p-4 mt-3">
+  <h3 class="h6 fw-bold">Critérios de avaliação (formativa)</h3>
+  <ul>
+    <li>Correção dos cálculos (Lei de Ohm, divisores, potência).</li>
+    <li>Organização e segurança na montagem e medições.</li>
+    <li>Documentação clara: esquemas, fotos, tabelas de medições e análise de discrepâncias.</li>
+    <li>Justificativa técnica das escolhas de valores e potência dos resistores.</li>
+  </ul>
+</div>
+      </section>
+
+      <section class="mb-5" id="pesquisas">
+        <h2 class="h4 fw-bold">Pesquisas complementares (sugestões)</h2>
+        <ul><li>Leitura de códigos de cores de resistores e uso de tolerâncias (±1%, ±5%).</li><li>Efeito de temperatura na resistência (coeficiente TCR).</li><li>Divisores ativos vs. passivos: quando um seguidor de emissor/op-amp é necessário.</li><li>Uso de potenciômetros como divisores ajustáveis.</li></ul>
+      </section>
+
+      <section class="mb-5" id="entregaveis">
+        <h2 class="h4 fw-bold">Entregáveis ao final do Capítulo 04</h2>
+        <ul><li>Relatório curto com: cálculos de dimensionamento do LED, fotos, medições de V e I, e verificação de potência.</li><li>Esquema e medições do divisor de tensão (com e sem carga), incluindo análise do efeito de carga.</li><li>Tabela de resistências equivalentes obtidas em paralelo/série e comparação com valores-alvo.</li></ul>
+      </section>
+
+      <section class="mb-5" id="questionario">
+        <h2 class="h4 fw-bold">Questionário (com gabarito)</h2>
+        <p class="text-muted mb-3">Selecione uma alternativa em cada questão e clique em <strong>Enviar Resposta</strong>. Depois, você pode clicar em <strong>Ver Gabarito</strong> para conferir a alternativa correta.</p>
+        <div class="vstack gap-3" id="quizContainer"></div>
+      </section>
+
+      <section id="checklist" class="mb-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="h4 fw-bold mb-0"><i class="bi bi-check2-square me-2" style="color: var(--cor-principal)"></i>Checklist do aluno (interativo)</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="resetChecklist()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reiniciar</button>
+            <button class="btn btn-sm btn-pw" type="button" onclick="markAllChecklist(true)"><i class="bi bi-check-all me-1"></i>Marcar tudo</button>
+          </div>
+        </div>
+        <p class="text-muted mt-2 mb-3">O progresso fica salvo neste navegador.</p>
+        <div class="card-soft bg-white p-4">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>Progresso</span>
+              <span id="chkProgressText">0%</span>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Progresso do checklist" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" id="chkProgressBar" style="width: 0%; background: var(--cor-principal);"></div>
+            </div>
+          </div>
+          <div class="vstack gap-2" id="checklistItems"></div>
+        </div>
+      </section>
+
+      <!-- Navegação final (única) -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <a class="btn btn-outline-danger" href="capitulo03.html"><i class="bi bi-arrow-left-circle me-1"></i>Voltar: Cap. 03 — Grandezas e instrumentos</a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger" href="index.html"><i class="bi bi-house-door me-1"></i>Index</a>
+          <a class="btn btn-pw" href="#conteudo" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="bi bi-arrow-up me-1"></i>Topo</a>
+          <a class="btn btn-outline-danger" href="capitulo05.html"><i class="bi bi-arrow-right-circle me-1"></i>Próximo: Cap. 05 — Leis de Kirchhoff</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé (somente licença) -->
+  <footer class="py-4 border-top">
+    <div class="container">
+      <div class="small" style="color: var(--cor-neutra);">
+        Licença Creative Commons — <strong>CC0 1.0 Universal</strong> &nbsp; Eletrônica Aplicada à Tecnologia da Informação — Curso Técnico
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    const QUIZ_DATA = [{"id":"q1","titulo":"Em um resistor de 330 Ω com 5 V aplicados, qual é a corrente aproximada?","correta":"B","alternativas":{"A":"5 mA","B":"15 mA","C":"33 mA","D":"50 mA","E":"66 mA"}},{"id":"q2","titulo":"Dois resistores de 1 kΩ em série têm resistência equivalente de:","correta":"D","alternativas":{"A":"250 Ω","B":"500 Ω","C":"1 kΩ","D":"2 kΩ","E":"4 kΩ"}},{"id":"q3","titulo":"Em paralelo, dois resistores de 2 kΩ e 2 kΩ resultam em:","correta":"C","alternativas":{"A":"4 kΩ","B":"2 kΩ","C":"1 kΩ","D":"500 Ω","E":"Não é possível calcular"}},{"id":"q4","titulo":"Um divisor com R1=2 kΩ (ao Vin) e R2=2 kΩ (ao GND) com Vin=10 V fornece Vout igual a:","correta":"E","alternativas":{"A":"2 V","B":"3 V","C":"4 V","D":"9 V","E":"5 V"}},{"id":"q5","titulo":"Você dimensionou um resistor que dissipa 0,18 W. Qual potência nominal é mais adequada?","correta":"D","alternativas":{"A":"1/8 W","B":"1/6 W","C":"1/5 W","D":"1/2 W","E":"1/16 W"}},{"id":"q6","titulo":"Para um LED com Vf=2,0 V a 20 mA e fonte de 5 V, o resistor limitador mais próximo é:","correta":"A","alternativas":{"A":"150 Ω","B":"100 Ω","C":"220 Ω","D":"330 Ω","E":"470 Ω"}},{"id":"q7","titulo":"Qual afirmação é verdadeira sobre série e paralelo?","correta":"B","alternativas":{"A":"Em série, as tensões são iguais em todos os resistores.","B":"Em paralelo, a tensão é igual em todos os ramos.","C":"Em paralelo, a corrente é igual em todos os ramos.","D":"Em série, as correntes se somam.","E":"Nenhuma é verdadeira."}},{"id":"q8","titulo":"Qual expressão calcula a tensão de saída de um divisor ideal?","correta":"C","alternativas":{"A":"Vout = Vin · (R1/(R1+R2))","B":"Vout = Vin · (R1·R2)","C":"Vout = Vin · (R2/(R1+R2))","D":"Vout = Vin · (R1−R2)","E":"Vout = Vin · (R2−R1)"}},{"id":"q9","titulo":"A potência em um resistor também pode ser escrita como:","correta":"A","alternativas":{"A":"P=I²·R","B":"P=I/R","C":"P=V·R","D":"P=V/I","E":"P=R/V"}},{"id":"q10","titulo":"Sobre efeito de carga em divisores, assinale a correta:","correta":"E","alternativas":{"A":"Conectar carga em paralelo com R2 aumenta Vout.","B":"Carga infinita (aberto) zera Vout.","C":"Conectar carga em paralelo com R1 não altera Vout.","D":"Conectar carga em paralelo com R2 não altera Vout.","E":"Conectar carga em paralelo com R2 tende a reduzir Vout."}}];
+    const CHECKLIST_DATA = [{"id":"c1","texto":"Revisitei grandezas básicas (V, I, R, P) e configurações do multímetro."},{"id":"c2","texto":"Apliquei a Lei de Ohm para dimensionar o resistor do LED."},{"id":"c3","texto":"Verifiquei a potência dissipada e comparei com a potência nominal do resistor."},{"id":"c4","texto":"Montei o circuito LED+resistor e medi tensões e correntes com segurança."},{"id":"c5","texto":"Projetei e testei um divisor de tensão (com e sem carga), comparando teoria e prática."},{"id":"c6","texto":"Experimentei combinações série/paralelo para obter resistências equivalentes."},{"id":"c7","texto":"Registrei cálculos, medições, fotos e análise de discrepâncias no relatório."}];
+    const CHECKLIST_KEY = 'EATI_CAP04_CHECKLIST_V1';
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      if(!container) return;
+      container.innerHTML = '';
+      (QUIZ_DATA || []).forEach((q, idx) => {
+        const total = (QUIZ_DATA || []).length || 1;
+        const card = document.createElement('div');
+        card.className = 'quiz-card bg-white p-4';
+        card.setAttribute('data-qid', q.id);
+        card.setAttribute('data-correct', q.correta);
+
+        const header = document.createElement('div');
+        header.className = 'd-flex align-items-start justify-content-between gap-3 flex-wrap';
+        header.innerHTML = `
+          <h3 class="h6 fw-bold mb-2">${idx+1}. ${q.titulo}</h3>
+          <span class="badge badge-outline-red">Questão ${idx+1}/${total}</span>
+        `;
+
+        const options = document.createElement('div');
+        options.className = 'mt-2';
+        ['A','B','C','D','E'].forEach(letter => {
+          const optId = `${q.id}${letter}`;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'form-check';
+          wrapper.innerHTML = `
+            <input class="form-check-input" type="radio" name="${q.id}" id="${optId}" value="${letter}">
+            <label class="form-check-label" for="${optId}">${q.alternativas?.[letter] || ''}</label>
+          `;
+          options.appendChild(wrapper);
+        });
+
+        const buttons = document.createElement('div');
+        buttons.className = 'd-flex flex-wrap gap-2 mt-3';
+        buttons.innerHTML = `
+          <button class="btn btn-pw" type="button" onclick="submitAnswer('${q.id}')">Enviar Resposta</button>
+          <button class="btn btn-outline-danger" type="button" onclick="showKey('${q.id}')" disabled id="btnKey-${q.id}">Ver Gabarito</button>
+        `;
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback mt-3';
+        feedback.id = `feedback-${q.id}`;
+        feedback.setAttribute('aria-live','polite');
+
+        card.appendChild(header);
+        card.appendChild(options);
+        card.appendChild(buttons);
+        card.appendChild(feedback);
+        container.appendChild(card);
+      });
+    }
+
+    function submitAnswer(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const selected = document.querySelector(`input[name="${qid}"]:checked`);
+      const feedback = document.getElementById(`feedback-${qid}`);
+      const btnKey = document.getElementById(`btnKey-${qid}`);
+
+      if(!selected){
+        feedback.innerHTML = `<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-1"></i>Selecione uma alternativa antes de enviar.</div>`;
+        return;
+      }
+
+      const ok = selected.value === correct;
+      feedback.innerHTML = ok
+        ? `<div class="alert alert-success mb-0" role="alert"><i class="bi bi-check-circle me-1"></i>Correto!</div>`
+        : `<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-x-circle me-1"></i>Incorreto. Tente rever o conteúdo e/ou veja o gabarito.</div>`;
+
+      if(btnKey) btnKey.disabled = false;
+    }
+
+    function showKey(qid){
+      const card = document.querySelector(`[data-qid="${qid}"]`);
+      const correct = card?.getAttribute('data-correct');
+      const feedback = document.getElementById(`feedback-${qid}`);
+
+      document.querySelectorAll(`input[name="${qid}"]`).forEach(inp => {
+        const lbl = document.querySelector(`label[for="${inp.id}"]`);
+        if(!lbl) return;
+        lbl.classList.remove('fw-bold', 'text-success');
+        if(inp.value === correct){
+          lbl.classList.add('fw-bold', 'text-success');
+        }
+      });
+
+      feedback.innerHTML = `<div class="alert alert-info mb-0" role="alert"><i class="bi bi-info-circle me-1"></i>Gabarito: alternativa <strong>${correct}</strong>.</div>`;
+    }
+
+    function renderChecklist(){
+      const container = document.getElementById('checklistItems');
+      if(!container) return;
+      container.innerHTML = '';
+      (CHECKLIST_DATA || []).forEach(item => {
+        const label = document.createElement('label');
+        label.className = 'checklist-item d-flex gap-2 align-items-start';
+        label.innerHTML = `
+          <input class="form-check-input mt-1" type="checkbox" data-chk="${item.id}">
+          <span>${item.texto}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function loadChecklist(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(CHECKLIST_KEY) || '{}');
+        document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+          const id = chk.getAttribute('data-chk');
+          chk.checked = !!saved[id];
+        });
+      }catch(e){}
+      updateChecklistProgress();
+    }
+
+    function saveChecklist(){
+      const state = {};
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => {
+        state[chk.getAttribute('data-chk')] = chk.checked;
+      });
+      localStorage.setItem(CHECKLIST_KEY, JSON.stringify(state));
+    }
+
+    function updateChecklistProgress(){
+      const items = Array.from(document.querySelectorAll('#checklistItems input[type="checkbox"]'));
+      const total = items.length || 1;
+      const done = items.filter(x => x.checked).length;
+      const pct = Math.round((done/total)*100);
+      const bar = document.getElementById('chkProgressBar');
+      const text = document.getElementById('chkProgressText');
+      if(bar){ bar.style.width = pct + '%'; bar.setAttribute('aria-valuenow', pct); }
+      if(text) text.textContent = pct + '%';
+    }
+
+    function resetChecklist(){
+      localStorage.removeItem(CHECKLIST_KEY);
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = false);
+      updateChecklistProgress();
+    }
+
+    function markAllChecklist(value){
+      document.querySelectorAll('#checklistItems input[type="checkbox"]').forEach(chk => chk.checked = !!value);
+      saveChecklist();
+      updateChecklistProgress();
+    }
+
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('#checklistItems input[type="checkbox"]')){
+        saveChecklist();
+        updateChecklistProgress();
+      }
+    });
+
+    renderQuiz();
+    renderChecklist();
+    loadChecklist();
+  </script>
+</body>
+</html>
